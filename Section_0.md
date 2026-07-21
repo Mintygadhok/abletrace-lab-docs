@@ -224,6 +224,8 @@ NEXT LABEL     Next description. No heavy ==== banner rules, no
 
 7.6 ⚠ If a queue item was closed: delete its line and stamp STATUS on its entry. The queue only shrinks except by deliberate addition.
 
+7.7 ⚠ **CLEAN AS YOU GO — the anti-rot rule.** At the CLOSE of every session, Claude reviews the sections touched that session and FLAGS anything that has become redundant, superseded, stale, or duplicated — a closed bug still described as open, two entries saying the same thing, a note whose "revisit trigger" has passed. Claude PROPOSES the cleanup (names the item, says why it's dead, shows the whole replacement); MINTY APPROVES before anything is cut. ⚠ CONSERVATIVE BY DEFAULT: when unsure whether something is still load-bearing, KEEP IT and ask — 0.1 ("if it is not written down it is LOST") and JT19 ("some things are deliberately wrong, do not fix") both outrank tidiness. The goal is to prevent slow accretion (what rotted the old docs), NOT to aggressively prune. Small, steady, approved cleanups beat a painful periodic overhaul. (Minty's call, S76 — keep cleaning an ongoing discipline.)
+
 ---
 
 ## 8. STANDING TRAPS — the shell and the tools
