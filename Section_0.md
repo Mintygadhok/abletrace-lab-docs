@@ -254,8 +254,10 @@ NEXT LABEL     Next description. No heavy ==== banner rules, no
 ```
 0   RULES        how we work. Rarely changes. ⚠ PASTE / LOAD FIRST.
 1   NOW          current state + the ranked queue. Rewritten WHOLE every
-                 session. ~1 page. ⚠ PASTE SECOND. ⚠ MANUAL — Claude
-                 reproduces it, Minty holds it. NEVER in the repo. [was G-NOW]
+                 session. ~1 page. ⚠ PASTE SECOND (or pull from repo).
+                 ⚠ MANUAL DISCIPLINE STILL APPLIES — Claude reproduces it
+                 whole each session; it now LIVES IN THE REPO as
+                 Section_1.md (changed S76). [was G-NOW]
 2   WHY          the business logic. The permanent rules of how the
                  business works. Should outlive the code. [was B]
 3   THE SYSTEM   everything that is built. Two halves:
@@ -348,8 +350,9 @@ The docs live in a GitHub repository Claude reads DIRECTLY. No deploy process; r
 Repo    Mintygadhok/abletrace-lab-docs   (PUBLIC — see the decision below)
 Web     https://github.com/Mintygadhok/abletrace-lab-docs
 Raw     https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/<file>
-Files   section-0.md · section-2.md · section-3a.md · section-3b.md ·
-        section-4.md · section-5.md   (section-1 NOT in repo; H NOT in repo)
+Files   Section_0.md · Section_1.md · Section_2.md · Section_3A.md ·
+        Section_3B.md · Section_4.md · Section_5.md
+        (⚠ Section 1 now IN repo, changed S76; H NEVER in repo)
 ```
 
 **⚠ PUBLIC, NOT PRIVATE — the decision (S76, revises the S73 "private" call).**
@@ -357,9 +360,11 @@ The original S73 decision was PRIVATE, reasoning: the docs name live infrastruct
 
 **⚠ WHAT THIS FIXES:** previously Claude saw ONLY WHAT WAS PASTED — so a gap in the source was invisible to Claude, and unrecorded gaps had already cost real sessions. A repo Claude reads directly kills that failure mode.
 
-**⚠ TWO EXCEPTIONS, PERMANENT:**
-- Section 1 (NOW) — stays MANUAL. Claude reproduces it whole every session; Minty holds it. NEVER in the repo.
-- Section H (SECRETS) — never in chat, never in the repo. Minty only. Under Option B, the scrubbed infra identifiers live here too.
+**⚠ SECTION 1 (NOW) — IN THE REPO, BUT KEEPS ITS DISCIPLINE (changed S76).**
+Originally NOW was kept OUT of the repo and held by Minty, so that rewriting it whole was a deliberate manual act each session. S76 moved it INTO the repo (as Section_1.md) because the repo actually REDUCES the staleness risk the old rule feared: git timestamps show when it was last updated, and there is no loose copy to paste stale by accident. ⚠ THE DISCIPLINE IS UNCHANGED — NOW is still REWRITTEN WHOLE every session per rule 7.1/7.2; living in the repo is a convenience (one-line standing paste, markdown easier to edit than docx, Claude always sees current state), NOT a licence to let it drift. A stale NOW is still THE #1 failure mode. (Minty's call, S76.)
+
+**⚠ SECTION H (SECRETS) — THE ONE PERMANENT REPO EXCEPTION.**
+Never in chat, never in the repo. Minty only. Under Option B, the scrubbed infra identifiers (RDS endpoint, instance ids, SG ids, IAM user names, bucket name) live here too.
 
 ### 9D. WHAT THE DESIGN SECTION (4 / LOOK) HOLDS — AND WHAT IT DOESN'T.
 
