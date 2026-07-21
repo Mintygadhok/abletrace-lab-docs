@@ -7,18 +7,52 @@
 
 ---
 
-## ⚠ S76 — NOT YET FOLDED IN (staleness banner — read first, then rewrite this section whole)
+## ▶ RESUME HERE — S77 START (Claude reads this FIRST, before anything)
 
-This file is the **S74** NOW, carried through S75 and now S76. The following has happened SINCE and is not yet reflected in the HEADS / queue below. **Rewrite this section whole at session close to absorb it.** (Recorded here, not silently merged — per rule 7.3, Claude does not renumber or re-rank; Minty does that at open.)
+```
+DOCS REPO IS LIVE — this is the standing paste now.
+  Repo      Mintygadhok/abletrace-lab-docs   (public)
+  Raw base  https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/refs/heads/main/
+  Minty     pastes the raw base + says "pull the docs" (or pastes files).
+  Claude    fetches Section_0 + Section_1 + Section_2 = the standing three.
+            Others (Section_3A/3B/4/5) fetched by name when the work needs them.
+  ⚠ CACHE   the raw URL LAGS SEVERAL MINUTES behind a fresh commit. Minty's
+            GitHub WEB VIEW is immediate truth; Claude's raw fetch confirms
+            once the cache clears. Do NOT conclude "it didn't commit" from a
+            stale fetch — wait, or trust the web view. (Learned the hard way S76.)
 
-- **S75:** SO Create verified live (SO-0008), `/Add-SO`. (Captured in the handoff block below.)
-- **S76 (this session):**
-  - **SO walk CLOSED** — SO Details/Edit walked (`/Edit-SO`), 3A.4 complete. Now recorded in **Section 3A.4** (new tab in the modules workbook).
-  - **Food Safety walked** — Procedures (list/create/details) + HACCP (list + 3-stage create). Now recorded in **Section 3A.7**.
-  - **NEW P-ITEM P27** — DO-create popup Qty(Kg) flashes "NaN" while typing Shipping Units; should render blank. Display-guard gap, Defect-2 family, 3A.5 row 11. (Append at bottom of queue; Minty re-ranks.)
-  - **DOCS REPO STOOD UP** — `Mintygadhok/abletrace-lab-docs` (public, Option B). Section 0 (with new rule 7.7 Clean-As-You-Go + Section-1-in-repo change), Section 2, and this Section 1 now live in the repo. This is P1 progressing.
-  - **Dangling pointer to fix:** Section 2's "TO BE VERIFIED item 8" says the ship_qty fork fix ("Fix A") lives here as a P-item — but no distinct Fix-A P-item is in the queue below. Either add it or soften Section 2's wording.
-  - **P8 wording corrected** in understanding: it's a diagnosis/workflow trap (prod checkout ≠ served build), not an app bug.
+WHAT IS DONE (S76) — repo build in progress (this is P1):
+  ✓ Section_0  rules + new 7.7 (clean-as-you-go) + Section-1-now-in-repo change
+  ✓ Section_1  this file (now a repo file, keeps its rewrite-whole discipline)
+  ✓ Section_2  core logic / the "bible" — standalone, stable Logic IDs intact
+  ✓ SO walk CLOSED → recorded as a tab in the Section 3 workbook (3A.4)
+  ✓ Food Safety walked → recorded as a tab in the Section 3 workbook (3A.7)
+  (3A.4 + 3A.7 are XLSX TABS, not yet markdown — they convert in the fold below.)
+
+▶▶ THE NEXT JOB — THE BIG ONE. OPEN FRESH. ITS OWN SESSION. ◀◀
+   FOLD SECTION 3 (the Excel workbook) + SECTION K TOGETHER, renumber, relink.
+   METHOD, IN ORDER — do not skip step 2:
+     1. Minty hands Claude: the Section 3 workbook + Section K (as text).
+     2. Claude produces a MAPPING FIRST — every K fact → its destination:
+          K1 (per-action DB movement) → the DATABASE column of the matching
+            3A row (action + its DB footprint together, one home).
+          K2 (edit-risk register)     → Section 5 traps.
+        Claude SHOWS THE MAP. Writes/merges NOTHING until Minty approves.
+     3. Minty approves or corrects the map.
+     4. Claude builds merged Section_3A.md (+ Section_3B.md), each row relinked
+        UP to Section 2's Logic IDs (→ §2 Logic X) and BACK to Section 1's
+        queue. One-way bridge: 3 points to 2, 2 never lists its uses.
+     5. K RETIRES (no standalone K section). Then finish the repo: 3B, 4, 5.
+   ⚠ This is the MOST CROSS-LINKED section in the whole project — everything
+     points at it. The map-approval (step 3) is the guardrail for the entire
+     fold. DO NOT RUSH IT. Do it rested, with a working (un-lagged) verify loop.
+
+TWO SMALL CLEANUPS TO FOLD IN when the queue is next rewritten:
+  - P27 (below) is new S76 — Minty re-ranks it into position.
+  - Section 2's "TO BE VERIFIED item 8" points at a "Fix A" P-item that is NOT
+    distinctly in the queue below. Either add Fix A as a P-item or soften §2's
+    wording. (Dangling pointer, recorded so it's not lost.)
+```
 
 ---
 
