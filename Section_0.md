@@ -54,6 +54,8 @@ But EVERY response that asks Minty to DO something must end with:
 
 ### 0.2a READABLE FORMAT — the standing style for every note Claude hands over.
 
+
+
 Minty reads fastest in a MONOSPACE, TWO-COLUMN layout: a short label on the LEFT, its description flowing on the RIGHT, inside a plain box. Fixed-width font so the columns line up. Like this:
 
 ```
@@ -71,31 +73,51 @@ NEXT LABEL     Next description. No heavy ==== banner rules, no
 - Exception: a copy-paste command block is given exactly as typed, nothing added.
 
 (Minty's call, S75 — this is the format that reads easiest for him.)
+
+---
+
+### 0.2b HANDING OVER A DOCUMENT — how Claude delivers text Minty must paste into the repo.
+
+⚠ EARNED S77. Section 1 was handed over twice and the CODE FENCES WERE STRIPPED BOTH TIMES — the monospace blocks arrived as ragged plain text, breaking 0.2a's alignment. Root cause: **copying from the rendered chat view copies the OUTPUT, not the SOURCE.** The backticks have already been consumed to *draw* the grey box, so they are invisible and uncopyable. ⚠ A THIRD failure then mangled 0.2a itself when 0.2b was pasted in as chat text — the rule broke while being written. That is the proof.
+
+**THE RULE — for any document Minty must paste into the repo or a doc file:**
+
+```
 DEFAULT        Claude WRITES THE FILE and presents it for download.
                Never hand over a long document as chat text and hope the
                paste survives. A file cannot lose its fences.
 
-WHY            Chat text loses: ``` fences, **bold** markers, list
-               numbering, and column alignment. A file preserves all of it
+WHY            Chat text loses: code fences, bold markers, list numbering,
+               and column alignment. A file preserves all of it
                byte-for-byte.
 
-CLAUDE VERIFIES BEFORE HANDING OVER — never assume the write was clean:
-  - count the fence lines (must be EVEN — every block opened and closed)
-  - count the items (P-items, entries, rows) against the source
-  - print one sample block and confirm the columns still line up
-  Report the counts to Minty with the file. A silent handover is not done.
+VERIFY FIRST   Claude checks BEFORE handing over — never assume the write
+               was clean:
+                 - count the fence lines (must be EVEN: every block
+                   opened and closed)
+                 - count the items (P-items, entries, rows) against source
+                 - print one sample block, confirm columns still line up
+               Report the counts to Minty with the file. A silent
+               handover is not done.
 
-SMALL SNIPPETS Chat text is fine for a few lines (a command to paste, one
-               entry, a short block). The file rule is for WHOLE SECTIONS
-               and anything with monospace blocks.
+SMALL SNIPPET  Chat text is fine for a few lines (a command to paste, one
+               entry, a short block). The FILE rule is for WHOLE SECTIONS
+               and anything containing a monospace block.
 
 IF CHAT TEXT   Minty uses the COPY BUTTON on Claude's message — never a
-IS UNAVOIDABLE mouse-drag selection. The button grabs the markdown source;
-               dragging grabs the rendered output.
+IS UNAVOIDABLE mouse-drag selection. The button grabs the markdown
+               source; dragging grabs the rendered output.
 
-⚠ MINTY CHECKS AFTER PASTING: open the rendered file. Monospace blocks
-  must appear as GREY BOXES with aligned columns. Plain running text =
-  the fences were lost = paste it again from the file.
+⚠ NESTING      A rule that CONTAINS a code block cannot be handed over
+               inside another code block — the inner fence closes the
+               outer one and the rest collapses into plain text. Hand
+               such a rule over AS A FILE. Always.
+
+⚠ MINTY CHECKS Open the rendered file after pasting. Monospace blocks must
+AFTER PASTING  appear as GREY BOXES with aligned columns. Plain running
+               text = fences lost = paste again from the file.
+```
+
 ---
 
 ## 0.3 WHAT CLAUDE ASKS FOR — Claude's job, not Minty's
