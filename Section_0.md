@@ -71,7 +71,31 @@ NEXT LABEL     Next description. No heavy ==== banner rules, no
 - Exception: a copy-paste command block is given exactly as typed, nothing added.
 
 (Minty's call, S75 — this is the format that reads easiest for him.)
+DEFAULT        Claude WRITES THE FILE and presents it for download.
+               Never hand over a long document as chat text and hope the
+               paste survives. A file cannot lose its fences.
 
+WHY            Chat text loses: ``` fences, **bold** markers, list
+               numbering, and column alignment. A file preserves all of it
+               byte-for-byte.
+
+CLAUDE VERIFIES BEFORE HANDING OVER — never assume the write was clean:
+  - count the fence lines (must be EVEN — every block opened and closed)
+  - count the items (P-items, entries, rows) against the source
+  - print one sample block and confirm the columns still line up
+  Report the counts to Minty with the file. A silent handover is not done.
+
+SMALL SNIPPETS Chat text is fine for a few lines (a command to paste, one
+               entry, a short block). The file rule is for WHOLE SECTIONS
+               and anything with monospace blocks.
+
+IF CHAT TEXT   Minty uses the COPY BUTTON on Claude's message — never a
+IS UNAVOIDABLE mouse-drag selection. The button grabs the markdown source;
+               dragging grabs the rendered output.
+
+⚠ MINTY CHECKS AFTER PASTING: open the rendered file. Monospace blocks
+  must appear as GREY BOXES with aligned columns. Plain running text =
+  the fences were lost = paste it again from the file.
 ---
 
 ## 0.3 WHAT CLAUDE ASKS FOR — Claude's job, not Minty's
