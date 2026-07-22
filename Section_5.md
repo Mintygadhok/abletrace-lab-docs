@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J84 — ⚠ the next one is J85, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Last restructured: S72, Jul 16 2026. Last appended: S79, Jul 22 2026.
+number. Highest is J85 — ⚠ the next one is J86, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Last restructured: S72, Jul 16 2026. Last appended: S79, Jul 22 2026.
 ══════════════════════════════════════════════════════════════════════
 
 TRAPS
@@ -1648,6 +1648,67 @@ J84  THE TWO BOXES RUN DIFFERENT OPERATING SYSTEMS — AND THE MIRROR CHECK
 
      STATUS: fact settled, cause closed as unrecoverable, 3B.2 / 3B.3 /
      3B.5 corrected, P21 re-scoped, P34 raised.
+========
+
+J85  "THE DEAD BLOCK" IN editPackslips IS NOT DEAD — IT IS LIVE CODE THAT
+     THROWS, AND THE THROW IS LOAD-BEARING. (S79, dev, read-only.)
+
+     §2's to-verify item 5 had recorded PackingSlips.js:333-334 as a dead
+     block with the instruction "do NOT repair". ⚠ THE INSTRUCTION WAS
+     RIGHT AND THE REASON WAS WRONG — which is worse than being wrong
+     twice, because the right instruction made nobody look again.
+
+     WHAT IS ACTUALLY THERE. In `editPackslips` (fn ~line 245), inside
+     `if (DOs && DOs.length)` at ~325:
+
+       for (let i = 0; i < DOs.length; i++) {
+         const formulation = await Formulations.find({id: DOs[i].formula_id});
+         updatedInventory = formulation.inventory - elem.qty_shipped;
+         await Formulations.update({...}).set({inventory: updatedInventory});
+       }
+       const createPackingSlipDOs = await PackingSlipDOs.createEach(DOs)...
+
+     ⚠ `elem` IS OUT OF SCOPE. It belonged to a `ps.forEach(elem => ...)`
+     callback that closed ~15 lines earlier. An undeclared identifier
+     throws ReferenceError, so the loop dies on iteration one — and
+     `createPackingSlipDOs`, which sits AFTER it in the same branch,
+     never runs. Editing a packing slip to ADD a dispatch order cannot
+     succeed.
+
+     ⚠⚠ THE THROW IS THE ONLY THING PREVENTING THREE WORSE BUGS:
+       1. `Formulations.find()` returns an ARRAY. `formulation.inventory`
+          is undefined. `undefined - n` is NaN. This would WRITE NaN
+          into the inventory column.
+       2. `elem.qty_shipped` does not vary with `i`. Every DO in the loop
+          would subtract the same figure.
+       3. It writes `formulations.inventory` — the old Kg line — for
+          stock that ALREADY left SOH at DO CREATION (§2 Core #2). A
+          second subtraction on a bucket that already moved.
+     ⚠ SO A ONE-LINE "FIX" OF THE SCOPE CONVERTS A LOUD FAILURE INTO
+     SILENT INVENTORY CORRUPTION ON A LIVE CLIENT. → P35.
+
+     ⚠ WHY IT SURVIVED: the normal flow creates a packing slip WITH its
+     DOs in one go, through a different function (the `req.body.DOs`
+     parse at line 97). Adding a DO to an EXISTING slip is an unusual
+     action, so the branch is rarely entered. ⚠ WHETHER THE EDIT SCREEN
+     EVER SENDS A NON-EMPTY DOs ARRAY IS STILL UNVERIFIED — one grep of
+     the frontend settles "does break" vs "would break if used". Open
+     in P35; do not assume either way.
+
+     ⚠ THE TRANSFERABLE LESSON: "dead code, do not touch" is a claim
+     about REACHABILITY, and reachability is checkable. This entry was
+     believed for sessions because the instruction it carried happened
+     to be correct. A right answer for a wrong reason still hides the
+     truth. (Same family as J83 and J84: a result that could not have
+     revealed the problem, read as though it had.)
+
+     ALSO CLOSED THIS PASS (§2 to-verify): item 4 — the packing proc
+     DOES return whd_flag + pack_level, Logic F is safe. Item 3 — the
+     start-production write is MLOManagement.js:154.
+     ⚠ STILL OPEN: item 1 (nestedPop populate arrays in Formulations.js
+     at 609, 632, 1063 — the S55 two-collection rule was not inspected).
+
+     STATUS: §2 items 3, 4, 5 rewritten. P35 raised. Item 1 still open.
 ========
 ──────────────────────────────────────────────────────────────────────
 END SECTION J
