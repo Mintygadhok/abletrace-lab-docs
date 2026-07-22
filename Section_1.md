@@ -62,38 +62,21 @@ WHAT S78 DID — do not re-derive:
 ⚠ CARRY INTO THE BUILD — corrections already made, do not re-open:
   • "Fix A" does not exist and never did (J81). ⚠ AT 3B BUILD TIME, grep the
     WHOLE repo for "Fix A" — any surviving pointer is dead.
-  • The allergen snapshot does not exist (J80 + J82). ⚠ §2 still asserts it
-    in TWO places — see the Section 2 fix list below.
+  • The allergen snapshot does not exist (J80 + J82). ✅ §2 CORRECTED S79 —
+    Edit integrity, GR7, and TO-BE-VERIFIED item 8 all rewritten. Closed.
   • Release does not explode intermediates (J80). Trace does. Different
     operations.
+WHAT S79 HAS DONE SO FAR:
+  ✓ §2 CORRECTED — three struck claims rewritten + CLEANUP PILE t2/t3 line
+    un-inverted. Section 2 is now clean.
+  ✓ J13 vs J80 GATE RESOLVED against dev. J13 right. J80's display finding was
+    an artifact of a 1:1 weight ratio. P2 re-scoped: campaign, not a fix.
+  ✓ P31 / P32 / P33 raised.
+  ⚠ 3B NOT STARTED — still this session's declared job.
 ```
 
 ---
 
-## ⚠ SECTION 2 STILL CARRIES THREE STRUCK CLAIMS — fix on next touch
-
-```
-These survived the S78 fold because 3A and 5 were the session's targets.
-They are FALSE AS WRITTEN and are being read as settled domain law.
-
-§2 Dated Domain Rules, "Edit integrity (S59)"
-    reads: "As-made record is immutable (MO stores an allergen snapshot
-    at production)." → FALSE. J80 + J82. Reword: allergens re-derive LIVE
-    from the current recipe, through to past and produced lots. That is
-    Minty's ruling and it is CORRECT — but it must not be described as a
-    snapshot.
-
-§2 GR7 schema map
-    reads: "mlomanagement.allergens = longtext JSON snapshot."
-    ⚠ The column exists. Whether it HOLDS anything is UNTESTED (J82).
-    Do NOT reword to "unused" — reword only after someone SELECTs it.
-
-§2 TO BE VERIFIED, item 8
-    still states the fork ship_qty bug as "a REAL OPEN BUG" with "Fix =
-    Fix A". → FALSE. J81. Rewrite to "CLOSED S77 (J81) — never a bug."
-```
-
----
 
 ## HEADS — ⚠ verify against the boxes before working (Section 0, rule 1.2)
 
@@ -191,13 +174,46 @@ hold a stored value nobody reads? One SELECT settles it. → P29.
 - (c) FOLD SECTION A into 3B and retire it — **THIS IS S79**. A duplicates the deploy/boxes/health/infra facts. Map every A fact to its new home and SHOW THE MAP BEFORE WRITING. Known-false list is in the resume block above.
 - ⚠ STATUS: Sections 0, 1, 2, 3A, 5 are converted and live in the repo. Remaining: 3B, 4, 6.
 
-**P2  UNITS FIXES — ACT ON THE S73 WALK.** ⚠ MINTY-SET, S73. Priority order:
-1. R5 DISPLAY SWITCH (DEFECT 2, the big one, LIVE on every product screen): read inventory_units / received_units directly instead of Kg÷wgt. Sites: admin-formulation:878; traceability getWduUnits; Trace_ProductHeaderView _su fields; Stock Info popup.
-2. MO-CREATE round-trip (DEFECT 1): store the entered units, or carry batches at full precision. add-mlo.ts:204-205. ⚠ SEEN LIVE S78: MO-0007 plan reads 50.004#.
-3. CLEANUP: DO/MR/intermediate-release subtract stored units instead of Kg×lot-ratio (remove R2-via-LogicI fragility). Add a units column to rejectmaterialandproduct (MR record is Kg-only). DELETE dead PS block PackingSlips:333-334 (do NOT repair).
+**P2  UNITS FIXES — ACT ON THE S73 WALK.** ⚠ MINTY-SET, S73. ⚠ RE-SCOPED S79 — SEE BELOW: THIS IS A CAMPAIGN, NOT A FIX.
+
+⚠ **GATE RESOLVED S79 — J13 WAS RIGHT, J80 WAS WRONG ON DISPLAY.** Verified against dev by
+reading the view and grepping the frontend. Do NOT re-derive:
+  • Trace_ProductHeaderView is Kg-anchored THROUGHOUT. Every _su field is
+    `<Kg> / wgt_kgs_per_unit`. Neither inventory_units nor received_units appears
+    anywhere in the view. That is R2/R3 by §2's own alarm test.
+  • The Products list (admin-formulation.component.ts:878) divides SEPARATELY and
+    divides the OLD Kg column: `element.inventory / packing?.wgt_kgs_per_unit`.
+  • ⚠ WHY J80 LOOKED CLEAN: its test used 10# at 1 Kg/unit. 10 / 1 = 10. A ratio of
+    exactly 1 hides a division. The numbers agreed because the arithmetic was a
+    no-op — not because anything read the units line.
+  • ⚠ SCALE: ~30+ division sites across the app, not the 4 previously listed. Many
+    wear the form `(qty / batch) * (batch / wgt)` — algebraically a plain division,
+    just disguised. Grep `wgt_kgs_per_unit` and read every hit for a `/`.
+  • ⚠ THE TARGET PATTERN ALREADY EXISTS: PopUps/stock-info.component.ts:188 reads
+    inventory_units and MULTIPLIES to derive Kg. That is R1, correct, and it is the
+    model for every other site. Its sibling formulation-edit-stock-info.ts:269 does
+    the OLD thing — two popups showing the same figure, one right, one wrong.
+
+⚠ **NOT FRONTEND-ONLY.** The view must be rewritten too (§2 "Populate vs proc" — a
+native view means the column goes in the SELECT). Two inputs have NO units column to
+read: rejectmaterialandproduct.qty_rejected is Kg-only, and dispatchorders.qty_to_ship
+is Kg (though qty_shipped and packing_units ARE units — the DO/PS/shipped buckets may
+be recoverable without a schema change; Misc Release is not).
+
+▶ NEXT ACTION IS AN INVENTORY, NOT A FIX. Before any code: list every division site
+with its file, line, and the stored units column that should replace it. Sites with no
+source column get flagged for the schema change. THEN rank the work.
+
+Original sub-items, still valid, now sequenced behind the inventory:
+1. R5 DISPLAY SWITCH — the campaign above.
+2. MO-CREATE round-trip (DEFECT 1): store the entered units, or carry batches at
+   full precision. add-mlo.ts:204-205. ⚠ SEEN LIVE S78: MO-0007 plan reads 50.004#.
+3. CLEANUP: DO/MR/intermediate-release subtract stored units instead of Kg×lot-ratio
+   (removes R2-via-LogicI fragility). Add a units column to rejectmaterialandproduct.
+   DELETE dead PS block PackingSlips:333-334 (do NOT repair).
 4. R6: retire formulations.inventory (old Kg line) once display no longer reads it.
-- ⚠ **FIRST, RESOLVE J13 vs J80 — IT SIZES THIS WHOLE ITEM.** J13 says the Products list SOH is a Kg-derived view that will "legitimately disagree" with inventory_units. J80 says it did NOT disagree — every unit move tracked exactly. S78's screenshots agree with J80 (10# / 10 Kg, no float garbage). ⚠ ONE OF THEM IS WRONG. If the display already reads the units line, R5 is much smaller than planned. Read what that column actually reads BEFORE planning.
-- ⚠ Touches live-client display. Dev-first, verify-in-DB, promote. [3A.5 · §2 GR5 · J13 · J80]
+
+⚠ Touches live-client display. Dev-first, verify-in-DB, promote. [3A.5 · §2 GR5 · J13 · J80]
 
 **P3  CONFIRM THE PRE-8.4 FINAL SNAPSHOT EXISTS (minutes).** abletrace-lab-prod-old1 is deleted. Was to be deleted WITH a final snapshot — the only frozen record of the 8.0 DB. ⚠ UNVERIFIED. RDS → Snapshots.
 
