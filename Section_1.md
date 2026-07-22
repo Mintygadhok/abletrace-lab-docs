@@ -1,82 +1,79 @@
 # SECTION 1 — NOW
 
 > Rewritten WHOLE every session. ~1 page. The DRIVER, not a log.
-> ⚠ THE TEST: if a line does NOT change session to session, it does not belong here — it belongs in the stable sections (2 / 3 / 3B).
+> ⚠ THE TEST — BOTH DIRECTIONS. If a line does NOT change session to session, it does not belong here (it belongs in 0 / 2 / 3A / 3B / 4). And if a STABLE section needs editing every session, that content belongs HERE. One fact, one home, decided by how often it changes.
 > Paste order (or repo-pull order): Section 0 → Section 1 (this) → Section 2. Others on demand.
 > ⚠ THE #1 DISCIPLINE: keep HISTORY out of NOW. When a story is told, it goes to Section 6. Evidence goes to Section 5. Only the live driving state stays here.
 
 ---
 
-## ▶ RESUME HERE — S79 START (Claude reads this FIRST, before anything)
+## ▶ RESUME HERE — S80 START (Claude reads this FIRST, before anything)
 
 ```
-LAST SESSION   S78 (closed clean — the fold's biggest piece landed)
-THIS SESSION   S79 — BUILD SECTION 3B. Then finish the repo (4, 6).
+LAST SESSION   S79 — a long one, run across TWO PARALLEL THREADS.
+               Both are recorded below. Neither thread saw the other
+               while running; this block is the reconciliation.
+THIS SESSION   S80 — SECTION 4 (design) is the last repo gap. Then the
+               fold is COMPLETE and normal work resumes.
 
 DOCS REPO IS LIVE — this is the standing paste.
   Repo      Mintygadhok/abletrace-lab-docs   (public)
   Raw base  https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/refs/heads/main/
-  Minty     pastes the raw base + says "pull the docs" (+ the S79 opener).
+  Minty     pastes the raw base + says "pull the docs" (+ the opener).
   Claude    fetches Section_0 + Section_1 + Section_2 = the standing three.
-            Others (3A/3B/4/5) fetched by name when the work needs them.
+            Others (3A/3B/4/5/6) fetched by name when the work needs them.
   ⚠ CACHE   the raw URL LAGS SEVERAL MINUTES behind a fresh commit. Minty's
             GitHub WEB VIEW is immediate truth. Do NOT conclude "it didn't
             commit" from a stale fetch. (Learned S76.)
 
-WHAT S78 DID — do not re-derive:
-  ✓ BUILT Section_3A.md — all 8 modules. 3A.4/3A.5/3A.7 carry full walked
-    content; 3A.1/3A.2/3A.3/3A.6/3A.8 are SKELETON STUBS holding verified
-    K1 database facts, with FRONT END / BACK END stamped NOT YET WALKED.
-    Decision taken: A-lite (stub the missing tabs, invent nothing).
-  ✓ SECTION K RETIRED. All 33 K1 actions + 13 K2 rows mapped and folded.
-    K1 action 27 (Material Return) was nearly lost — caught by a coverage
-    check, landed as 3A.5 row 11b.
-  ✓ REBUILT Section_5.md whole — J82 appended; J9b, J10, J17 replaced;
-    JT7 corrected. Verified by count: 20 JT / 14 JR / 75 J, zero lost.
-  ✓ CLOSED the allergen conflict by live test → J82. See below.
-  ✓ Ownership settled: CLIENT ADMIN owns Procedures + HACCP. Super Admin
-    only SEEDS an initial template set. 3A.8 owns the sync mechanism,
-    3A.7 owns the library.
-  ✓ No app code touched. Boxes unchanged.
+WHAT S79 DID — BOTH THREADS. Do not re-derive any of it.
 
-▶▶ THE NEXT JOB — SECTION 3B. THIS IS S79. ◀◀
-   3B is ARCHITECTURE & INFRASTRUCTURE — what the app RUNS ON, as opposed
-   to 3A which is what it DOES. Eleven blocks, listed in Section 0 rule 9B.
-   ⚠ ITS FACTS ARE CURRENTLY SCATTERED across: this file's INFRASTRUCTURE
-   block, Section 5's JR checklist (JR12/JR13/JR14 especially), and OLD
-   SECTION A — which P1(c) retires and which contains KNOWN-FALSE facts.
-   METHOD, same as S78 — it worked:
-     1. Minty hands Claude SECTION A as a file.
-     2. Claude produces a MAPPING FIRST — every A fact → its 3B destination,
-        flagging every known-false one. SHOWS THE MAP. Writes nothing.
-     3. Minty approves or corrects.
-     4. Claude builds Section_3B.md. A RETIRES (→ P22).
-   ⚠ KNOWN FALSE IN A TODAY — do not carry these forward:
-     Ubuntu 24.04 → really 26.04 · RDS `abletrace` → that is the ARCHIVE,
-     live is abletracelab_live · on-box build → DEAD, the box cannot build
-     · "two environments" → there are THREE · duplicate SESSION 0 and S66
-     blocks · "CURRENT POSITION (S42 close)" → 37 sessions stale.
-   ⚠ P28 LANDS HERE: the S77 dev-DB-access trap + temp-cnf recipe currently
-     live only in this NOW block. They belong in 3B.3.
+  THREAD A — INFRASTRUCTURE + HISTORY
+  ✓ BUILT Section_3B.md — eleven blocks, everything the app runs on.
+    ⚠ METHOD CHANGED MID-BUILD AND IT MATTERS: old Section A was found
+    TWO-HEADED — its S42-stamped top half contradicted its own appends
+    on NINE load-bearing facts, and carried an S61 "correction" that was
+    itself the error (t2.small; both boxes are t3.small). SO A'S TOP HALF
+    WAS NOT COPIED FORWARD. 3B.2/3B.3/3B.4 were rebuilt from Section 1's
+    S72 console-verified facts. A contributed only its S53-onward appends.
+    ⚠ Roughly HALF of A was never infrastructure — routed to §2 / 3A / §4.
+    The ROUTING RECORD at the foot of 3B says where each piece went.
+  ✓ BUILT Section_6.md from old Section C.
+  ✓ P31 raised (prod SSL has no contact email).
 
-⚠ CARRY INTO THE BUILD — corrections already made, do not re-open:
-  • "Fix A" does not exist and never did (J81). ⚠ AT 3B BUILD TIME, grep the
-    WHOLE repo for "Fix A" — any surviving pointer is dead.
-  • The allergen snapshot does not exist (J80 + J82). ✅ §2 CORRECTED S79 —
-    Edit integrity, GR7, and TO-BE-VERIFIED item 8 all rewritten. Closed.
-  • Release does not explode intermediates (J80). Trace does. Different
-    operations.
-WHAT S79 HAS DONE SO FAR:
-  ✓ §2 CORRECTED — three struck claims rewritten + CLEANUP PILE t2/t3 line
-    un-inverted. Section 2 is now clean.
-  ✓ J13 vs J80 GATE RESOLVED against dev. J13 right. J80's display finding was
-    an artifact of a 1:1 weight ratio. P2 re-scoped: campaign, not a fix.
-  ✓ P31 / P32 / P33 raised.
-  ⚠ 3B NOT STARTED — still this session's declared job.
+  THREAD B — CORRECTIONS + THE UNITS GATE
+  ✓ §2's THREE STRUCK CLAIMS CORRECTED — Edit integrity (S59), GR7
+    mlomanagement, TO-BE-VERIFIED item 8. Plus the CLEANUP PILE's
+    t2/t3 line, which was inverted. Section 2 is now clean.
+  ✓ §2 GR5 RE-SCOPED — R5 was stamped "IN PROGRESS (the priority fix)".
+    It is NOT STARTED and is ~30+ sites, not the 3 it listed.
+  ✓ J13 vs J80 GATE RESOLVED against dev → J83. JT21 added.
+  ✓ P2 RE-SCOPED WHOLE — from "the priority fix" to a campaign.
+  ✓ P32 + P33 raised.
+
+  ✓ NO APP CODE TOUCHED IN EITHER THREAD. All reads. Boxes unchanged.
+
+▶▶ THE NEXT JOB — SECTION 4. THIS IS S80. ◀◀
+   The last repo gap. Sections 0, 1, 2, 3A, 3B, 5, 6 are all converted
+   and live. Only 4 remains, and it has incoming material waiting:
+     · A23's design system (font, palette, tiles, rail) — routed out of
+       Section A by 3B's routing record, now homeless until 4 absorbs it
+     · P14's design half (HACCP Excel blue, Procedures PDF all-black,
+       neither Mintek-branded, client name prominent on a HACCP plan)
+     · P33's cert-status colour rule (red/amber/green, state-driven)
+   ⚠ Rule 9D governs what 4 may hold: visual and interaction language
+     ONLY. A DB change or a queue item that touches a screen does NOT
+     belong in 4. Move it on sight.
+
+⚠ CARRY FORWARD — settled, do not re-open:
+  • "Fix A" does not exist and never did (J81). ⚠ Grep the repo for
+    "Fix A" when next in it — any surviving pointer is dead.
+  • The allergen snapshot does not exist (J80 + J82). ✅ §2 corrected S79.
+  • Release does not explode intermediates (J80). Trace does.
+  • J80's DISPLAY finding is withdrawn; its STOCK-HOP findings stand (J83).
 ```
 
 ---
-
 
 ## HEADS — ⚠ verify against the boxes before working (Section 0, rule 1.2)
 
@@ -84,6 +81,8 @@ WHAT S79 HAS DONE SO FAR:
 Frontend  53db203d — DEV + PROD in sync
 Backend   d3104ea  — DEV + PROD in sync
 Trees clean. Health 200 both boxes. PROD IS HEALTHY.
+⚠ VERIFIED LIVE ON DEV AT S79 OPEN. Prod carried from S77.
+
 (Prod's frontend CHECKOUT reads 9bce0238 — the S66 lag trap. The
  SERVED bundle is 53db203d. Cosmetic. → P8)
 
@@ -91,74 +90,21 @@ ROLLBACK POINTS:
   www-html.bak-prod-53db203d4ef4
   www-html.bak-dev-53db203d4ef4
 
-⚠ NO APP CODE TOUCHED IN S73, S75, S76, S77 OR S78 — all walk /
+⚠ NO APP CODE TOUCHED IN S73, S75, S76, S77, S78 OR S79 — all walk /
 documentation / verification sessions. Boxes have been at these HEADs
 since S71.
-⚠ S78 DID NOT RUN THE HEALTH CHECK — documentation-only session, agreed
-at open. Run it at S79 open before any work.
 ```
 
-## INFRASTRUCTURE — verified in the AWS console S72, unchanged since. ⚠ TRUST THIS BLOCK (Section 3B is being built to hold it permanently; S79).
+## DEV FIXTURE RESIDUE — ⚠ note before reusing company 464 as a baseline
 
 ```
-EC2 (new account 208073623096, ca-central-1b):
-  abletrace-lab-prod  i-0b54ae374250348e0  t3.small  Running
-  abletrace-lab-dev   i-098e2cc59844d9ef3  t3.small  Running
-  ⚠ BOTH t3.small (2 GB) — box genuinely cannot build Angular; CI is
-    correct. The old "t2.small confirmed" claim was FALSE.
+1. Ginger Powder MAT-5 carries Eggs        (S78, not reverted)
+2. MAT-6 missing its Sesame allergen       (S73 → P24)
+3. FO-0005 forked to two versions + srf rows 1042/1043  (S77)
 
-RDS (new account, TWO SEPARATE INSTANCES):
-  abletrace-lab-prod          db.t3.micro   Available
-  abletrace-lab-dev-s62-dev   db.t3.micro   Available  (shrunk S72)
-  ⚠ Dev is a TRUE TWIN of prod on both boxes. Endpoint unchanged.
-  ⚠ LIVE DB NAME = abletracelab_live. A bare `mysql` on prod lands in the
-    dormant ARCHIVE. Name it explicitly, always.
-
-⚠ DEV SSH ACCESS (S73 — learned the hard way, do not re-derive):
-  Dev SG inbound SSH/22 = 162.156.123.117/32 (Minty's stable HOME IPv4).
-  ALWAYS connect with `ssh -4` — the Mac drifts onto IPv6, and plain
-  `curl ifconfig.me` reports a PHANTOM address; only `curl -4 ifconfig.me`
-  gives the real SSH source. If dev SSH times out: run `curl -4 ifconfig.me`,
-  put THAT /32 on the SSH rule, connect with -4. Prod SSH is more permissive
-  so prod still connects — that difference is the tell it's a dev-SG issue.
-  → P23 (add an IPv6 rule so this stops recurring).
-
-⚠ DEV DB ACCESS (S77 — cost 3 retries, not yet in a stable section):
-  Dev has NO ~/.my.cnf; build a temp cnf from .env, chmod 600, rm after.
-  ⚠ dotenv PRINTS A BANNER TO STDOUT ("◇ injected env…"). NEVER capture a
-  node -e output into a shell variable — the banner lands in the variable
-  and corrupts it. Hardcode `abletracelab_live`, or silence with 2>/dev/null.
-  → P28 (move into 3B.3 when built — that is S79's job).
-
-THE SIZING EVIDENCE (old account 350466202408 — 2 live clients, 2 yrs):
-  t3.small app box + db.t3.micro DB carried two real clients for two
-  years. PROD SIZING IS FINE — do not upsize.
-```
-
-## LAST VERIFICATION (S78) — ALLERGENS: NO SNAPSHOT. CONFIRMED TWICE.
-
-```
-The claim that blocked the fold, settled by live test (J82) — and it had
-ALREADY been settled by J80 in S73. The strike simply never reached the
-other three documents asserting it.
-
-  BASELINE  test260720 (FO-0007), built clean: no allergen. One material,
-            Ginger Powder MAT-5, also no allergen. MO-0012 (lot
-            Pdt-260721-2) produced and received, 10# = 10#. Allergens EMPTY.
-  ACTION    added Eggs to MAT-5. Nothing else.
-  AFTER     ⚠ the SAME completed MO-0012 now reads Allergens "Eggs".
-
-VERDICT: allergens re-derive LIVE. No as-made snapshot exists.
-⚠ BLAST RADIUS: one material edit rewrote the allergen on ALL SEVEN
-products in the company sharing that ingredient, and on their existing
-lots. Company-wide, immediate.
-⚠ STILL UNTESTED (J80's caveat, still open): does mlomanagement.allergens
-hold a stored value nobody reads? One SELECT settles it. → P29.
-
-⚠ DEV FIXTURE RESIDUE — THREE ITEMS NOW. Note before reusing co464:
-  1. Ginger Powder MAT-5 carries Eggs        (S78, not reverted)
-  2. MAT-6 missing its Sesame allergen       (S73 → P24)
-  3. FO-0005 forked to two versions + srf rows 1042/1043  (S77)
+⚠ ALSO: 464's test products run at 1 Kg per shipping unit. That ratio
+  makes a division INVISIBLE and is what produced J80's false display
+  finding. Do NOT verify any units↔Kg path on a 1:1 fixture. (JT21 · J83)
 ```
 
 ---
@@ -168,54 +114,33 @@ hold a stored value nobody reads? One SELECT settles it. → P29.
 > ⚠ ONE FLAT LIST. NEW ITEMS APPEND AT THE BOTTOM with the next free number (rule 7.3). Minty re-ranks at open; Claude never renumbers.
 > ⚠ Each line points at its Section-5 entry. EVIDENCE lives there, not here.
 
-**P1  DOCUMENTATION CONVERGENCE — THE FOLD.** ⚠ MINTY-SET, S73. Three linked jobs.
-- (a) ✅ **DONE S78.** Section 3 + Section K folded into Section_3A.md. K RETIRED.
-- (b) REVIEW SECTION 4 (design). ⚠ MINTY-SET. The A23 design pointer lands here in the fold — confirm 4 is current and the incoming design material has a clean home. ⚠ Also absorbs P14's design half.
-- (c) FOLD SECTION A into 3B and retire it — **THIS IS S79**. A duplicates the deploy/boxes/health/infra facts. Map every A fact to its new home and SHOW THE MAP BEFORE WRITING. Known-false list is in the resume block above.
-- ⚠ STATUS: Sections 0, 1, 2, 3A, 5 are converted and live in the repo. Remaining: 3B, 4, 6.
+**P1  DOCUMENTATION CONVERGENCE — THE FOLD.** ⚠ MINTY-SET, S73. Nearly done.
+- (a) ✅ **DONE S78.** Section 3 + Section K → Section_3A.md. K RETIRED.
+- (b) **SECTION 4 (design) — THIS IS S80.** The last gap. Incoming material listed in the resume block above. ⚠ Absorbs P14's design half.
+- (c) ✅ **DONE S79.** Section A → Section_3B.md. ⚠ A itself not yet deleted → P22.
+- ⚠ STATUS: 0, 1, 2, 3A, 3B, 5, 6 converted and live in the repo. Remaining: 4.
 
-**P2  UNITS FIXES — ACT ON THE S73 WALK.** ⚠ MINTY-SET, S73. ⚠ RE-SCOPED S79 — SEE BELOW: THIS IS A CAMPAIGN, NOT A FIX.
+**P2  UNITS FIXES — ACT ON THE S73 WALK.** ⚠ MINTY-SET, S73. ⚠ RE-SCOPED S79 — THIS IS A CAMPAIGN, NOT A FIX.
 
-⚠ **GATE RESOLVED S79 — J13 WAS RIGHT, J80 WAS WRONG ON DISPLAY.** Verified against dev by
-reading the view and grepping the frontend. Do NOT re-derive:
-  • Trace_ProductHeaderView is Kg-anchored THROUGHOUT. Every _su field is
-    `<Kg> / wgt_kgs_per_unit`. Neither inventory_units nor received_units appears
-    anywhere in the view. That is R2/R3 by §2's own alarm test.
-  • The Products list (admin-formulation.component.ts:878) divides SEPARATELY and
-    divides the OLD Kg column: `element.inventory / packing?.wgt_kgs_per_unit`.
-  • ⚠ WHY J80 LOOKED CLEAN: its test used 10# at 1 Kg/unit. 10 / 1 = 10. A ratio of
-    exactly 1 hides a division. The numbers agreed because the arithmetic was a
-    no-op — not because anything read the units line.
-  • ⚠ SCALE: ~30+ division sites across the app, not the 4 previously listed. Many
-    wear the form `(qty / batch) * (batch / wgt)` — algebraically a plain division,
-    just disguised. Grep `wgt_kgs_per_unit` and read every hit for a `/`.
-  • ⚠ THE TARGET PATTERN ALREADY EXISTS: PopUps/stock-info.component.ts:188 reads
-    inventory_units and MULTIPLIES to derive Kg. That is R1, correct, and it is the
-    model for every other site. Its sibling formulation-edit-stock-info.ts:269 does
-    the OLD thing — two popups showing the same figure, one right, one wrong.
+⚠ **GATE RESOLVED S79 — J13 WAS RIGHT, J80 WAS WRONG ON DISPLAY.** Verified against dev by reading the view and grepping the frontend. Full evidence in J83. Do NOT re-derive:
+  • Trace_ProductHeaderView is Kg-anchored THROUGHOUT. Every `_su` field is `<Kg> / wgt_kgs_per_unit`. Neither inventory_units nor received_units appears in the view at all.
+  • The Products list (admin-formulation.component.ts:878) divides SEPARATELY, and divides the OLD Kg column: `element.inventory / packing?.wgt_kgs_per_unit`.
+  • ⚠ SCALE: ~30+ division sites, not the 3 GR5 listed. Many disguise it as `(qty / batch) * (batch / wgt)` — algebraically identical.
+  • ⚠ THE CORRECT PATTERN ALREADY EXISTS: PopUps/stock-info.component.ts:188 reads inventory_units and MULTIPLIES. That is R1. Copy it. Its sibling formulation-edit-stock-info.component.ts:269 still divides — two popups, same figure, one right one wrong.
 
-⚠ **NOT FRONTEND-ONLY.** The view must be rewritten too (§2 "Populate vs proc" — a
-native view means the column goes in the SELECT). Two inputs have NO units column to
-read: rejectmaterialandproduct.qty_rejected is Kg-only, and dispatchorders.qty_to_ship
-is Kg (though qty_shipped and packing_units ARE units — the DO/PS/shipped buckets may
-be recoverable without a schema change; Misc Release is not).
+⚠ **NOT FRONTEND-ONLY.** The view must be rewritten too (§2 "Populate vs proc"). Two inputs have NO units column to read: `rejectmaterialandproduct.qty_rejected` is Kg-only, and `dispatchorders.qty_to_ship` is Kg — though `qty_shipped` and `packing_units` ARE units, so the DO/PS/shipped buckets may be recoverable without a schema change. Misc Release is not.
 
-▶ NEXT ACTION IS AN INVENTORY, NOT A FIX. Before any code: list every division site
-with its file, line, and the stored units column that should replace it. Sites with no
-source column get flagged for the schema change. THEN rank the work.
+▶ NEXT ACTION IS AN INVENTORY, NOT A FIX. List every division site with its file, line, and the stored units column that should replace it. Sites with no source column get flagged for the schema change. THEN rank the work.
 
-Original sub-items, still valid, now sequenced behind the inventory:
+Sub-items, still valid, sequenced behind the inventory:
 1. R5 DISPLAY SWITCH — the campaign above.
-2. MO-CREATE round-trip (DEFECT 1): store the entered units, or carry batches at
-   full precision. add-mlo.ts:204-205. ⚠ SEEN LIVE S78: MO-0007 plan reads 50.004#.
-3. CLEANUP: DO/MR/intermediate-release subtract stored units instead of Kg×lot-ratio
-   (removes R2-via-LogicI fragility). Add a units column to rejectmaterialandproduct.
-   DELETE dead PS block PackingSlips:333-334 (do NOT repair).
+2. MO-CREATE round-trip (DEFECT 1): store the entered units, or carry batches at full precision. add-mlo.ts:204-205. ⚠ SEEN LIVE S78: MO-0007 plan reads 50.004#.
+3. CLEANUP: DO/MR/intermediate-release subtract stored units instead of Kg×lot-ratio (removes R2-via-LogicI fragility). Add a units column to rejectmaterialandproduct. DELETE dead PS block PackingSlips:333-334 (do NOT repair).
 4. R6: retire formulations.inventory (old Kg line) once display no longer reads it.
 
-⚠ Touches live-client display. Dev-first, verify-in-DB, promote. [3A.5 · §2 GR5 · J13 · J80]
+⚠ Touches live-client display. Dev-first, verify-in-DB, promote. [3A.5 · §2 GR5 · J13 · J83]
 
-**P3  CONFIRM THE PRE-8.4 FINAL SNAPSHOT EXISTS (minutes).** abletrace-lab-prod-old1 is deleted. Was to be deleted WITH a final snapshot — the only frozen record of the 8.0 DB. ⚠ UNVERIFIED. RDS → Snapshots.
+**P3  CONFIRM THE PRE-8.4 FINAL SNAPSHOT EXISTS (minutes).** abletrace-lab-prod-old1 is deleted. It was to be deleted WITH a final snapshot — the only frozen record of the 8.0 DB. ⚠ UNVERIFIED. RDS → Snapshots. [3B.3]
 
 **P4  FILE-SIZE GATE + ALERT SWEEP (pays back every session).** Browser-side file-size check with a proper message; fold into the alert→toaster conversion. ~448 alerts across ~110 files; 5 done. Every error reads "[object Object]" — a tax on every diagnosis. Fix the top ~10 error paths first. [J79, J29·JT18]
 
@@ -225,25 +150,25 @@ Original sub-items, still valid, now sequenced behind the inventory:
 
 **P7  PACKING-SLIP REDESIGN (major, linked to P6).** Slimmed 8-field customer row + unique-PO barcode. Absorbs the 3 remaining "Customer SO No"→"PO No". ⚠ ALSO FIXES: attaching a shipping doc to an UNSHIPPED slip silently loses it. ▶ DOMAIN CALL: should docs attach BEFORE dispatch? Minty's instinct: yes. [J74, J75, J16]
 
-**P8  PROD FRONTEND CHECKOUT LAGS THE SERVED BUILD (minutes).** A git pull tidies it; does not affect what serves. ⚠ Reading a file from prod's checkout shows code that is NOT LIVE (caused a stale read S70). A diagnosis trap, not an app bug. [S66 trap]
+**P8  PROD FRONTEND CHECKOUT LAGS THE SERVED BUILD (minutes).** A git pull tidies it; does not affect what serves. ⚠ Reading a file from prod's checkout shows code that is NOT LIVE (caused a stale read S70). A diagnosis trap, not an app bug. [3B.4]
 
 **P9  FEATURE A — FOOD SAFETY TOGGLE: declare the model attribute.** DB column exists; code half does not. ⚠ Without it the toggle write silently does nothing. One line; unblocks Feature A. [J47·JT2]
 
-**P10  MASTER-RECORD FIELD UNLOCKS.** ⚠ RULE SET S73. Name / Storage Temp / Shelf Life / My Code edit IN PLACE. Only material/composition change forks a version. Material AND Formulation edit. Also fixes My Code showing literal "null". ⚠ Shelf Life already editable — CONFIRM IT SAVES.
+**P10  MASTER-RECORD FIELD UNLOCKS.** ⚠ RULE SET S73. Name / Storage Temp / Shelf Life / My Code edit IN PLACE. Only material/composition change forks a version. Material AND Formulation edit. Also fixes My Code showing literal "null". ⚠ Shelf Life already editable — CONFIRM IT SAVES. [§2 Master edit map]
 
 **P11  RECEIVE PRODUCT CAN BE SAVED WITH NO MATERIAL RELEASED.** Button disabled but screen reachable by URL and saves. ⚠ A disabled button is not a control. Needs a backend guard. Logged S50. [J24]
 
-**P12  SWEEP MAC ~/Downloads (minutes).** 11+ old build artifacts back to S61. ⚠ The promote script deploys whatever zip you name — a stale-zip promote is a real risk.
+**P12  SWEEP MAC ~/Downloads (minutes).** 11+ old build artifacts back to S61. ⚠ promote.sh deploys whatever zip you name — a stale-zip promote is a real risk. [3B.4]
 
-**P13  FINISH GLUTENULL ONBOARDING.** Rename "Oats"→"Oats Gluten Free", add an "Oats" material, re-import the 4 failed products (importer dedups by title, re-import safe).
+**P13  FINISH GLUTENULL ONBOARDING.** Rename "Oats"→"Oats Gluten Free", add an "Oats" material, re-import the 4 failed products (importer dedups by title, re-import safe). [§2 Logic C]
 
-**P14  REVIEW THE S53 FOOD-SAFETY DOWNLOAD BLOCKS — WHERE DO THEY BELONG?** Three blocks parked (Procedures/Documents PDF, HACCP Excel, branding rule). ⚠ MIXED — some file mechanics, some DESIGN/DOMAIN (HACCP Excel keeps blue, Procedures PDF all-black, neither Mintek-branded; the prominent name on a HACCP plan is the CLIENT). ▶ MINTY SPLITS: design → Section 4; mechanics → 3A.7/Section 5. Parked, not lost. [J36, J37]
+**P14  REVIEW THE S53 FOOD-SAFETY DOWNLOAD BLOCKS — WHERE DO THEY BELONG?** Three blocks parked (Procedures/Documents PDF, HACCP Excel, branding rule). ⚠ MIXED — some file mechanics, some DESIGN/DOMAIN. ▶ MINTY SPLITS: design → Section 4 (with P1b); mechanics → 3A.7 / Section 5. Parked, not lost. [J36, J37]
 
 **P15  PARAMETERIZE WhC_GetMoProductReceivingDetails_SP.** Last string-interpolated proc call. id is app-controlled + numeric, risk LOW. Do it when the security pass next touches procs. [J78]
 
-**P16  BACK UP /home/ubuntu OFF THE BOX.** ⚠ THE STANDING RISK. Every rebuild file lives on the un-backed-up prod box; the Drive copy is not verified current. Also at risk: deploy-frontend.sh, promote.sh, dev nginx vhost. [JR14 · JT20]
+**P16  BACK UP /home/ubuntu OFF THE BOX.** ⚠ THE STANDING RISK. Every rebuild file lives on the un-backed-up prod box; the Drive copy is not verified current. Also at risk: deploy-frontend.sh, promote.sh, both nginx vhosts. [JR14 · JT20 · 3B.9]
 
-**P17  DEACTIVATE THE TWO OLD-ACCOUNT IAM KEYS.** Still valid, still in git history. ⚠ Sequenced AFTER the app.abletrace.ca domain switch, per Minty. [J1, J34]
+**P17  DEACTIVATE THE TWO OLD-ACCOUNT IAM KEYS.** Still valid, still in git history. ⚠ Sequenced AFTER the app.abletrace.ca domain switch, per Minty. [J1, J34 · 3B.10]
 
 **P18  HACCP EDIT-CASCADE REWORK.** ⚠ FOOD-SAFETY-CRITICAL. OWN SESSION. Safe: edit rows in place, append at end. NOT SAFE: insert mid-sequence; change hazard type on a saved row — either can silently duplicate/drop rows across the three stages. ⚠ DO NOT BUNDLE. [J4 · JT3 · 3A.7]
 
@@ -251,29 +176,28 @@ Original sub-items, still valid, now sequenced behind the inventory:
 
 **P20  DELETE THE OLD SECTION J (housekeeping).** Pre-S72 J still sits below the rebuilt one. ⚠ Search it for anything the rebuild missed BEFORE deleting. Until gone, the REBUILT J (Section 5) is the true one; do not append to the old.
 
-**P21  THE OS RESTART — PENDING SINCE S35.** Both boxes "System restart required" (confirmed still showing at S77 login), now Ubuntu 26.04 kernel. ⚠ Its own clean step: verify pm2 resurrects on 26.04 (pm2 save / pm2 startup) BEFORE relying on it, then reboot standalone. ⚠ Do DEV FIRST — true twin now, real rehearsal for prod.
+**P21  THE OS RESTART — PENDING SINCE S35.** Both boxes "System restart required", still showing at S79 login. Now on the Ubuntu 26.04 kernel. ⚠ Its own clean step: verify pm2 resurrects (pm2 save / pm2 startup) BEFORE relying on it, then reboot standalone. ⚠ DO DEV FIRST — true twin, real rehearsal. [3B.2]
 
-**P22  DELETE THE OLD SECTION A after P1(c) folds it (housekeeping).** ⚠ Only after the map is read and approved. A is deleted, not edited.
+**P22  DELETE THE OLD SECTION A (housekeeping).** ⚠ P1(c) is done — A is folded and its routing record is at the foot of 3B. A is now a duplicate with known-false content. Delete it, do not edit it. ⚠ Read 3B's ROUTING RECORD once before deleting, to confirm nothing was missed.
 
-**P23  ADD AN IPv6 RULE TO DEV SSH (minutes).** ⚠ Mac drifts onto IPv6; dev SG only allows one IPv4 /32, so SSH times out unpredictably. Add the Mac's IPv6 /128 (or accept `ssh -4` as the standing workaround). Stops the recurring lockout.
+**P23  ADD AN IPv6 RULE TO DEV SSH (minutes).** ⚠ Mac drifts onto IPv6; dev SG allows one IPv4 /32, so SSH times out unpredictably. Add the Mac's IPv6 /128, or accept `ssh -4` as the standing workaround. [3B.2]
 
-**P24  RESTORE MAT-6 SESAME ALLERGEN ON DEV (minutes).** ⚠ Removed during S73 testing, not restored. Dev fixture hygiene — do before reusing company 464 as a baseline. ⚠ NOW ONE OF THREE residue items; see the S78 verification block above.
+**P24  RESTORE MAT-6 SESAME ALLERGEN ON DEV (minutes).** ⚠ Removed during S73 testing, not restored. Dev fixture hygiene — do before reusing company 464 as a baseline. One of three residue items; see the block above.
 
-**P27  DO-CREATE POPUP: Qty(Kg) shows "NaN" while typing Shipping Units.** ⚠ S76. On /Edit-SO → Create Dispatch Order popup: a partial number (e.g. ".") in Shipping Units makes derived Qty(Kg) show "NaN". Clears when valid. Should render BLANK. Display-guard gap, same family as Defect 2 / P30. Transient only; no stored-data impact. [3A.5 row 8 · 3A.4]
+**P27  DO-CREATE POPUP: Qty(Kg) SHOWS "NaN" WHILE TYPING SHIPPING UNITS.** ⚠ S76. On /Edit-SO → Create Dispatch Order: a partial number (e.g. ".") makes derived Qty(Kg) show "NaN". Clears when valid. Should render BLANK. Display-guard gap, same family as Defect 2 / P30. Transient only; no stored-data impact. [3A.5 row 8 · 3A.4]
 
-**P28  MOVE THE S77 DEV-DB-ACCESS TRAP INTO A STABLE SECTION.** ⚠ The dotenv-banner-corrupts-a-shell-variable trap + the temp-cnf recipe currently live only in this NOW block. They belong in 3B.3. ⚠ DO IT AS PART OF S79's 3B BUILD.
+**P29  ALLERGEN RECORD IS MUTABLE ON SHIPPED LOTS — DOMAIN DECISION FIRST.** ⚠ FOOD-SAFETY. Editing a material's allergen rewrites the allergen shown on already-completed, already-shipped lots — company-wide, immediately, with no audit trail of what the record said at ship time. Live re-derivation is CORRECT per Minty (a mis-declaration must be correctable on past data). ⚠ THE RISK IS THE REVERSE DIRECTION: an allergen genuinely present in a shipped lot can be REMOVED by a later edit. ▶ DOMAIN CALL BEFORE ANY CODE: does a shipped lot need an immutable as-declared record alongside the live rollup? ⚠ ALSO OPEN, one query: does mlomanagement.allergens hold a stored value nobody reads, or nothing at all? Answer before rewording §2 GR7. [J82 · J80]
 
-**P29  ALLERGEN RECORD IS MUTABLE ON SHIPPED LOTS — DOMAIN DECISION FIRST.** ⚠ FOOD-SAFETY. ⚠ NEW S78. Editing a material's allergen rewrites the allergen shown on already-completed, already-shipped production lots — company-wide, immediately, with no audit trail of what the record said at ship time. Live re-derivation is CORRECT per Minty (a mis-declaration must be correctable on past data). ⚠ THE RISK IS THE REVERSE DIRECTION: an allergen genuinely present in a shipped lot can be REMOVED from its record by a later edit. ▶ DOMAIN CALL BEFORE ANY CODE: does a shipped lot need an immutable as-declared record alongside the live rollup? ⚠ ALSO OPEN, one query: does mlomanagement.allergens hold a stored value that is never read ("built and orphaned"), or nothing at all ("not built")? Answer that before rewording §2 GR7. [J82 · J80]
+**P30  ADD-FORMULATION INTERMEDIATE SUMMARY SHOWS Kg-ONLY DURING ADD (minutes).** Display flips to #(Kg) after save; DB is correct throughout. Frontend-only. ⚠ Parked for "Route 5", never picked up — 30 sessions untracked. Same display-guard family as Defect 2 and P27; batch it with the R5 display switch rather than fixing alone. [J17]
 
-**P30  ADD-FORMULATION INTERMEDIATE SUMMARY SHOWS Kg-ONLY DURING ADD (minutes).** ⚠ NEW S78 (the action; the defect was logged S48). Display flips to #(Kg) after save; DB is correct throughout. Frontend-only. ⚠ Parked for "Route 5", never picked up — 30 sessions untracked. Same display-guard family as Defect 2 and P27; batch it with the R5 display switch rather than fixing alone. [J17]
+**P31  PROD SSL CERTIFICATE HAS NO EMAIL REGISTERED — NO EXPIRY WARNING (minutes).** ⚠ Confirmed via `sudo certbot show_account` → "Email contact: none". ⚠ SO PROD GETS NO RENEWAL-FAILURE WARNING. Auto-renew is scheduled, but a silent failure's first symptom is a browser security warning on a LIVE CLIENT SITE. Dev was deliberately given info@abletrace.ca. FIX: `sudo certbot update_account -m info@abletrace.ca --agree-tos`, then confirm with `show_account`. ⚠ Account metadata only — does not touch or reissue the cert. [3B.6]
 
-**P31  PROD SSL CERTIFICATE HAS NO EMAIL REGISTERED — NO EXPIRY WARNING (minutes).** ⚠ NEW S79. Prod's Let's Encrypt cert was issued with NO contact email; confirmed via `sudo certbot show_account` → "Email contact: none". ⚠ SO PROD GETS NO RENEWAL-FAILURE WARNING. Auto-renew is scheduled, but if it ever fails silently the first symptom is a browser security warning on a LIVE CLIENT SITE. Dev was deliberately given info@abletrace.ca for exactly this reason — prod is the one that matters and is the one without it. FIX: register a contact email on prod's certbot account (`sudo certbot update_account -m info@abletrace.ca --agree-tos`), then confirm with `show_account`. ⚠ Does not touch the cert itself or reissue anything — account metadata only. [3B.6]
+**P32  RDS DATABASES ARE PUBLICLY ACCESSIBLE — REVIEW WHETHER THEY NEED TO BE.** ⚠ Surfaced S64, was in nobody's queue. Both instances carry public endpoints, so the databases are reachable from the internet rather than only from the app boxes. ⚠ NOT WIDE OPEN — a password and an SG rule sit in front — but it is a larger front door than the architecture needs, on a food-safety system holding a real client's data. ▶ REVIEW: can prod RDS be private-only with EC2 reaching it over the VPC? ⚠ Check what breaks first — the Mac connects directly today for admin queries; that is what would stop working. Not urgent. [3B.3]
 
+**P33  CERT-STATUS INDICATOR SHOWS RED REGARDLESS OF STATE (functional, not cosmetic).** ⚠ Logged in the design section at S36, never actioned — 43 sessions. Colour should be STATE-DRIVEN: red = no certificate · amber = expired · green = in-date. Currently hardcoded red, so it reads red for every state including in-date. ⚠ WHY THIS IS NOT COSMETIC: a permanently-red indicator either trains operators to ignore it, or hides a genuine expiry. Do it app-wide, once. ⚠ Its colour rule lands in Section 4 with P1(b). [§4 status colours]
 
-**P32  RDS DATABASES ARE PUBLICLY ACCESSIBLE — REVIEW WHETHER THEY NEED TO BE.** ⚠ NEW S79 (surfaced S64, was in nobody's queue — it had been sitting in the DESIGN section since). Both RDS instances carry public endpoints, so the databases are reachable from the internet rather than only from the app boxes. ⚠ NOT WIDE OPEN — a password and a security-group rule sit in front — but it is a larger front door than the architecture needs, on a food-safety system holding a real client's data. ▶ REVIEW: can prod RDS be set to private-only with the EC2 box reaching it over the VPC? Check what breaks first (⚠ the Mac connects directly today for admin queries — that is the thing that would stop working). Not urgent, not a fire; it should simply be tracked somewhere real. [3B.3]
+> ⚠ NUMBERING NOTE: the queue jumps P24 → P27, and P25/P26 are gone for good. P26 was "Fix A" — a fix for a bug that never existed (J81). P25 has no surviving record. ⚠ P28 CLOSED S79: the dev-DB-access trap now lives permanently in 3B.3.
 
-**P33  CERT-STATUS INDICATOR SHOWS RED REGARDLESS OF STATE (functional, not cosmetic).** ⚠ NEW S79 (the defect was logged in the design section at S36 and never actioned — 43 sessions). The status colour should be STATE-DRIVEN: red = no certificate · amber = expired · green = in-date. It is currently hardcoded red, so it displays red for every state including in-date. ⚠ WHY THIS IS NOT COSMETIC: a permanently-red indicator on a food-safety system either trains operators to ignore it, or hides a genuine expiry. Do it app-wide, once. [§4 status colours]
-> ⚠ Note: the queue jumps P24 → P27. P25/P26 were assigned in S75 (not carried into this file). Minty reconciles the numbering at re-rank.
 ---
 
 ## BANKED, AWAITING DEPLOYMENT
@@ -281,5 +205,5 @@ Original sub-items, still valid, now sequenced behind the inventory:
 ```
 Corrected v2 PDFs (Misc Release + Traceability label fixes).
 ```
-**END SECTION 1**
 
+**END SECTION 1**
