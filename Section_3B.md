@@ -59,10 +59,28 @@ DEV ELASTIC IP    16.55.10.205    (eipalloc-0c1a1db8451091427)
 ⚠ Two other EIPs in the account (15.223.243.179, 16.54.131.69) are
   RDS-MANAGED — not releasable, not associable. Leave them. [J63]
 
-OS         Ubuntu 26.04 "resolute", kernel 7.0.0-1004-aws.  [A-append S61]
-           ⚠ NOT 24.04 — that was A1's stale value. The OS moved during
-           the S56 upgrade window.
-NODE       v18.20.8 on the box; CI pins Node 18 to match.
+⚠⚠ OS — THE TWO BOXES ARE NOT ON THE SAME OPERATING SYSTEM.
+   Verified S79 from /etc/os-release on both, not from a banner.
+
+   PROD   Ubuntu 26.04 LTS "resolute"    kernel 7.0.0-1004-aws
+   DEV    Ubuntu 24.04.4 LTS "noble"     kernel 6.17.0-1017-aws
+
+   ⚠ TWO MAJOR RELEASES APART. This is not drift that was spotted and
+     left — it was never known. Both prior records were half-right:
+     A1's "24.04" described DEV, the "correction" to 26.04 described
+     PROD, and the record collapsed two machines into one fact.
+   ⚠ WHY IT WAS NEVER CAUGHT: the S63 mirror check PASSED. It compares
+     the application stack and does not look at the host. See 3B.5.
+   ⚠ CAUSE UNKNOWN AND NOT RECOVERABLE. S62 (dev stand-up) records no
+     AMI or OS choice; prod's apt history only reaches 2026-05-29;
+     /var/log/dist-upgrade exists but is EMPTY (created 16 Apr), which
+     leans against a release upgrade having run.
+     ⚠ DO NOT WRITE A CAUSE INTO THIS BLOCK LATER WITHOUT EVIDENCE.
+     An invented cause is how the t2/t3 and ship_qty phantoms started.
+   ⚠ CONSEQUENCE: rebooting dev does NOT rehearse rebooting prod. → P21
+
+NODE       v18.20.8 on BOTH boxes. ⚠ VERIFIED S79, `node -v`, both.
+           CI pins Node 18 to match.
 
 ⚠ "SYSTEM RESTART REQUIRED" — PENDING SINCE S35, STILL SHOWING.
   Do NOT reboot casually and do NOT reboot mid-work. It is its own
@@ -133,7 +151,12 @@ TWO SEPARATE RDS INSTANCES, both db.t3.micro, both Available:
   abletrace-lab-prod           the live database
   abletrace-lab-dev-s62-dev    dev's own (shrunk S72)
 
-⚠ DEV IS A TRUE TWIN OF PROD on both box and database.
+⚠ DEV IS A TWIN OF PROD AT THE APPLICATION LAYER ONLY — code, schema,
+  Node version, MySQL version, PM2 topology. ⚠ IT IS NOT A HOST TWIN:
+  the two boxes run DIFFERENT OPERATING SYSTEMS (prod 26.04, dev 24.04
+  — see 3B.2). Anything that depends on the KERNEL, systemd, or the
+  distro's packaging — a reboot, a service-resurrect, an apt behaviour
+  — is NOT rehearsed by doing it on dev first.
 ⚠ THEY ARE SEPARATE INSTANCES. The same fixture (company 464) has
   DIFFERENT ROW IDS on each. NEVER compare ids across boxes.
 
@@ -333,8 +356,11 @@ CURRENT ROLLBACK POINTS:
 
 ## 3B.5 HEALTH CHECK — every session open (rule 1.1)
 
+⚠ **THE S79 LESSON: THIS CHECK HAD A BLIND SPOT FOR 17 SESSIONS.** The S63 mirror check passed and was recorded as proving dev/prod parity. It compares the application stack and never looks at the host — which is why nobody knew the two boxes were on different operating systems until S79. A check that passes tells you only what it tests. (J84.)
+
+### THE SESSION CHECK — both boxes, every open
+
 ```
-ON BOTH BOXES:
   1  git -C ~/abletrace-lab-frontend rev-parse --short HEAD
   2  git -C ~/abletrace-lab-backend  rev-parse --short HEAD
   3  git status                     → expect clean trees
@@ -348,12 +374,29 @@ ON BOTH BOXES:
   unrecorded commit turned out to be the cause of the client's bug four
   hours later. J77.)
 ⚠ NOTE THE ROLLBACK POINTS BEFORE TOUCHING ANYTHING.
-
 ⚠ PROD'S FRONTEND CHECKOUT WILL READ STALE (see 3B.4). Judge prod's
   frontend by the SERVED bundle, not the checkout.
 ```
 
----
+### ⚠ THE HOST CHECK — NOT every session. Before anything that touches the MACHINE.
+
+```
+Run this before a reboot, an OS patch, a pm2/systemd change, or any
+work where "test it on dev first" is the safety argument.
+
+  cat /etc/os-release | head -4      ⚠ the FILE, not the login banner
+  uname -r
+  node -v
+  systemctl is-enabled pm2-ubuntu 2>/dev/null || echo "pm2 startup NOT enabled"
+
+⚠ RUN IT ON BOTH BOXES AND COMPARE. As of S79 they DIFFER:
+  prod 26.04 / kernel 7.0.0 · dev 24.04 / kernel 6.17.0.
+⚠ THE LOGIN BANNER CAN BE STALE — read /etc/os-release. (Same family
+  as JT17: a rendered screen is not the file.)
+⚠ IF THE HOSTS DIFFER, DEV IS NOT A REHEARSAL. Say so out loud before
+  proceeding, and decide on that basis — do not let "dev worked" stand
+  as evidence for prod.
+```
 
 ## 3B.6 DOMAINS · DNS · SSL
 

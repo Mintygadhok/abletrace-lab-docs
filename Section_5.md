@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J83 — ⚠ the next one is J84, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Last restructured: S72, Jul 16 2026. Last appended: S79, Jul 22 2026.
+number. Highest is J84 — ⚠ the next one is J85, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Last restructured: S72, Jul 16 2026. Last appended: S79, Jul 22 2026.
 ══════════════════════════════════════════════════════════════════════
 
 TRAPS
@@ -1601,6 +1601,53 @@ J83  J13 vs J80 RECONCILED — J13 RIGHT ON DISPLAY, J80 WRONG. (S79, dev, read-
      as the S71 missing-dot artifact. NOTHING TO FIX.
 
      STATUS: gate closed. P2 re-scoped in Section 1 from a fix to a campaign.
+========
+
+J84  THE TWO BOXES RUN DIFFERENT OPERATING SYSTEMS — AND THE MIRROR CHECK
+     PASSED ANYWAY. (S79, both boxes, read-only.)
+
+     FACT, verified from /etc/os-release on each box — not from a banner:
+       PROD   Ubuntu 26.04 LTS "resolute"   kernel 7.0.0-1004-aws
+       DEV    Ubuntu 24.04.4 LTS "noble"    kernel 6.17.0-1017-aws
+       NODE   v18.20.8 on both (this part genuinely does match)
+
+     ⚠ THE RECORD HAD COLLAPSED TWO MACHINES INTO ONE FACT. Old A1 said
+     "24.04". A later note "corrected" it to 26.04. BOTH WERE RIGHT —
+     about different boxes. The correction was not wrong, it was
+     answering a different question than the one being asked. Same
+     shape as the t2/t3 inversion, one layer subtler.
+
+     ⚠⚠ THE PART WORTH KEEPING IS NOT THE OS. IT IS THAT A CHECK PASSED.
+     S63 ran a dev/prod mirror check, it PASSED, and it was recorded as
+     confirming parity. It compares repos, HEADs, schema, PM2 and health
+     — the application stack — and never looks at the host. So the
+     divergence was not missed through carelessness; it was OUTSIDE WHAT
+     THE CHECK LOOKED AT, and the passing result was then read as
+     "everything matches". ⚠ A GREEN CHECK IS ONLY EVIDENCE ABOUT WHAT
+     IT TESTS. Same failure family as J83's 1:1 fixture: a result that
+     could not have revealed the problem, read as though it had.
+     → 3B.5 now carries a separate HOST CHECK for exactly this.
+
+     ⚠ CAUSE: UNKNOWN, AND NOT RECOVERABLE. Do not invent one.
+       · S62 (dev stand-up) records the box, the RDS and the safety
+         guard — but no AMI and no OS version.
+       · Prod's apt history only reaches 2026-05-29; older logs rotated.
+       · /var/log/dist-upgrade EXISTS but is EMPTY, created 16 Apr —
+         which leans AGAINST a release upgrade having been run, but
+         does not prove it.
+       Most likely dev was simply built later from an older AMI. ⚠ THAT
+       IS A GUESS AND IS RECORDED AS ONE. If a future session finds
+       evidence, replace this paragraph whole; do not soften it.
+
+     CONSEQUENCE: dev is a twin of the APPLICATION, not of the HOST.
+     Anything kernel-, systemd- or packaging-dependent is not rehearsed
+     by doing it on dev. P21 (the reboot) re-scoped accordingly.
+
+     ALSO FOUND, same pass: unattended-upgrades is active on PROD and
+     was documented nowhere. → P34.
+
+     STATUS: fact settled, cause closed as unrecoverable, 3B.2 / 3B.3 /
+     3B.5 corrected, P21 re-scoped, P34 raised.
 ========
 ──────────────────────────────────────────────────────────────────────
 END SECTION J

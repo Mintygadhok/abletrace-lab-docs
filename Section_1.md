@@ -13,8 +13,9 @@
 LAST SESSION   S79 — a long one, run across TWO PARALLEL THREADS.
                Both are recorded below. Neither thread saw the other
                while running; this block is the reconciliation.
-THIS SESSION   S80 — SECTION 4 (design) is the last repo gap. Then the
-               fold is COMPLETE and normal work resumes.
+THIS SESSION   S80 — ⚠ THE FOLD IS COMPLETE. All eight sections are
+               built and in the repo. NORMAL WORK RESUMES: re-rank the
+               queue, then pick up P-items.
 
 DOCS REPO IS LIVE — this is the standing paste.
   Repo      Mintygadhok/abletrace-lab-docs   (public)
@@ -176,7 +177,7 @@ Sub-items, still valid, sequenced behind the inventory:
 
 **P20  DELETE THE OLD SECTION J (housekeeping).** Pre-S72 J still sits below the rebuilt one. ⚠ Search it for anything the rebuild missed BEFORE deleting. Until gone, the REBUILT J (Section 5) is the true one; do not append to the old.
 
-**P21  THE OS RESTART — PENDING SINCE S35.** Both boxes "System restart required", still showing at S79 login. Now on the Ubuntu 26.04 kernel. ⚠ Its own clean step: verify pm2 resurrects (pm2 save / pm2 startup) BEFORE relying on it, then reboot standalone. ⚠ DO DEV FIRST — true twin, real rehearsal. [3B.2]
+**P21  THE OS RESTART — PENDING SINCE S35. ⚠ RE-SCOPED S79, THE REHEARSAL NO LONGER WORKS.** Both boxes still show "System restart required", confirmed at S79 login. ⚠ **THE OLD PLAN WAS: reboot dev first as a true-twin rehearsal, then prod. THAT PREMISE IS DEAD** — the boxes run different operating systems (prod 26.04 "resolute" / kernel 7.0.0; dev 24.04.4 "noble" / kernel 6.17.0, verified S79). A clean dev reboot proves nothing about prod. ⚠ THE ACTUAL RISK IS UNCHANGED AND IS ON PROD: if pm2 does not resurrect after reboot, the live client's site is down until someone notices. ▶ SO THE WORK IS NOW: (1) confirm `pm2 save` has been run and `pm2 startup` is enabled ON PROD SPECIFICALLY — `systemctl is-enabled pm2-ubuntu` — since that, not the rehearsal, is what actually makes the reboot safe; (2) reboot prod as its own standalone step with the rollback path ready and nothing else in flight; (3) reboot dev separately whenever, it carries no client. ⚠ Dev can still be rebooted first for practice with the PROCEDURE, but do not treat its success as evidence. [3B.2 · 3B.5]
 
 **P22  DELETE THE OLD SECTION A (housekeeping).** ⚠ P1(c) is done — A is folded and its routing record is at the foot of 3B. A is now a duplicate with known-false content. Delete it, do not edit it. ⚠ Read 3B's ROUTING RECORD once before deleting, to confirm nothing was missed.
 
@@ -195,6 +196,9 @@ Sub-items, still valid, sequenced behind the inventory:
 **P32  RDS DATABASES ARE PUBLICLY ACCESSIBLE — REVIEW WHETHER THEY NEED TO BE.** ⚠ Surfaced S64, was in nobody's queue. Both instances carry public endpoints, so the databases are reachable from the internet rather than only from the app boxes. ⚠ NOT WIDE OPEN — a password and an SG rule sit in front — but it is a larger front door than the architecture needs, on a food-safety system holding a real client's data. ▶ REVIEW: can prod RDS be private-only with EC2 reaching it over the VPC? ⚠ Check what breaks first — the Mac connects directly today for admin queries; that is what would stop working. Not urgent. [3B.3]
 
 **P33  CERT-STATUS INDICATOR SHOWS RED REGARDLESS OF STATE (functional, not cosmetic).** ⚠ Logged in the design section at S36, never actioned — 43 sessions. Colour should be STATE-DRIVEN: red = no certificate · amber = expired · green = in-date. Currently hardcoded red, so it reads red for every state including in-date. ⚠ WHY THIS IS NOT COSMETIC: a permanently-red indicator either trains operators to ignore it, or hides a genuine expiry. Do it app-wide, once. ⚠ Its colour rule lands in Section 4 with P1(b). [§4 status colours]
+
+
+**P34  PROD INSTALLS ITS OWN UPDATES, UNATTENDED AND UNDOCUMENTED.** ⚠ NEW S79. `unattended-upgrades` is active on the live client box — prod's apt history shows it running on 2026-07-01 and again 2026-07-22, with no human involved. ⚠ THIS IS AN UBUNTU DEFAULT, NOT A MISCONFIGURATION — it normally installs security patches only, not major releases. But it means PROD CHANGES WITHOUT A DECISION, and that was recorded nowhere. ▶ REVIEW, NOT A FIX: (a) confirm what it is scoped to (`/etc/apt/apt.conf.d/50unattended-upgrades`); (b) decide whether a food-safety system's live box should self-patch silently, or whether patching should be a named step like every other change; (c) if it stays on, document it in 3B.2 so the next unexplained change on prod is not a mystery. ⚠ Do NOT disable it casually — turning it off means security patches stop arriving, which is a worse default. [3B.2 · J84]
 
 > ⚠ NUMBERING NOTE: the queue jumps P24 → P27, and P25/P26 are gone for good. P26 was "Fix A" — a fix for a bug that never existed (J81). P25 has no surviving record. ⚠ P28 CLOSED S79: the dev-DB-access trap now lives permanently in 3B.3.
 

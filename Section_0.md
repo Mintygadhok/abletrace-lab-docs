@@ -293,7 +293,7 @@ AFTER PASTING  appear as GREY BOXES with aligned columns. Plain running
 
 ## 9. THE STRUCTURE — where every fact lives. ⚠ AGREED S73.
 
-⚠ **STATUS (S79): THE FOLD IS ESSENTIALLY COMPLETE.** Sections 0 · 1 · 2 · 3A · 3B · 5 · 6 are built and live in the repo. ⚠ ONLY SECTION 4 REMAINS (from old I) — that is P1(b). Retired and folded: G (S72) · B (S73) · K (S78) · A and C (S79). ⚠ TWO OLD FILES STILL PHYSICALLY EXIST AND MUST BE DELETED, NOT EDITED: old Section A (→ P22) and the pre-S72 Section J (→ P20). Section H is separate and permanent. When Section 4 lands, this status note is deleted and rule 9 simply describes what is.
+⚠ **STATUS (S79): THE FOLD IS COMPLETE.** All of 0 · 1 · 2 · 3A · 3B · 4 · 5 · 6 are built and live in the repo. Retired and folded: G (S72) · B (S73) · K (S78) · A, C and I (S79). ⚠ TWO OLD FILES STILL PHYSICALLY EXIST AND MUST BE DELETED, NOT EDITED: old Section A (→ P22) and the pre-S72 Section J (→ P20). Section H is separate and permanent. ⚠ THE STRUCTURE IS NOW WHAT RULE 9 DESCRIBES — there is no transitional state left to explain.
 
 ⚠ ANYTHING NEW GOES IN ONE PLACE. Two homes for one fact is how drift starts — it is what J and G both had (fixed S72), what B had (fixed S73), and what A had (fixed S79, and it had gone TWO-HEADED by then — see 9E).
 
@@ -395,8 +395,7 @@ Repo    Mintygadhok/abletrace-lab-docs   (PUBLIC — see the decision below)
 Web     https://github.com/Mintygadhok/abletrace-lab-docs
 Raw     https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/<file>
 Files   Section_0.md · Section_1.md · Section_2.md · Section_3A.md ·
-        Section_3B.md · Section_5.md · Section_6.md
-        (Section_4.md still to come — P1b)
+        Section_3B.md · Section_4.md · Section_5.md · Section_6.md
         (⚠ Section 1 now IN repo, changed S76; H NEVER in repo)
 ```
 
