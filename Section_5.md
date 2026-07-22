@@ -1,17 +1,14 @@
 ══════════════════════════════════════════════════════════════════════
 ══════════════════════════════════════════════════════════════════════
-SECTION J — PATCHWORK LOG
+SECTION 5 — PATCHWORK LOG
 Deliberate deviations, DB-only changes not in git, and standing traps.
 Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
-⚠ J holds KNOWLEDGE, not work. Pending work lives in G-NOW.
+⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J82 — ⚠ the next one is J83, regardless of how many
-entries exist (there are original gaps at J8, J30–J31, J54–J59).
-Last restructured: S72, Jul 16 2026. Last appended: S78, Jul 21 2026.
+number. Highest is J83 — ⚠ the next one is J84, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Last restructured: S72, Jul 16 2026. Last appended: S79, Jul 22 2026.
 ══════════════════════════════════════════════════════════════════════
 
-══════════════════════════════════════════════════════════════════════
 TRAPS
 ──────────────────────────────────────────────────────────────────────
 JT — STANDING TRAPS. READ THIS BLOCK EVERY SESSION.
