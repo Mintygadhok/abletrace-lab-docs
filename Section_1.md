@@ -251,6 +251,8 @@ hold a stored value nobody reads? One SELECT settles it. → P29.
 
 **P30  ADD-FORMULATION INTERMEDIATE SUMMARY SHOWS Kg-ONLY DURING ADD (minutes).** ⚠ NEW S78 (the action; the defect was logged S48). Display flips to #(Kg) after save; DB is correct throughout. Frontend-only. ⚠ Parked for "Route 5", never picked up — 30 sessions untracked. Same display-guard family as Defect 2 and P27; batch it with the R5 display switch rather than fixing alone. [J17]
 
+**P31  PROD SSL CERTIFICATE HAS NO EMAIL REGISTERED — NO EXPIRY WARNING (minutes).** ⚠ NEW S79. Prod's Let's Encrypt cert was issued with NO contact email; confirmed via `sudo certbot show_account` → "Email contact: none". ⚠ SO PROD GETS NO RENEWAL-FAILURE WARNING. Auto-renew is scheduled, but if it ever fails silently the first symptom is a browser security warning on a LIVE CLIENT SITE. Dev was deliberately given info@abletrace.ca for exactly this reason — prod is the one that matters and is the one without it. FIX: register a contact email on prod's certbot account (`sudo certbot update_account -m info@abletrace.ca --agree-tos`), then confirm with `show_account`. ⚠ Does not touch the cert itself or reissue anything — account metadata only. [3B.6]
+
 > ⚠ Note: the queue jumps P24 → P27. P25/P26 were assigned in S75 (not carried into this file). Minty reconciles the numbering at re-rank.
 
 ---
@@ -260,8 +262,5 @@ hold a stored value nobody reads? One SELECT settles it. → P29.
 ```
 Corrected v2 PDFs (Misc Release + Traceability label fixes).
 ```
-
----
-
 **END SECTION 1**
 
