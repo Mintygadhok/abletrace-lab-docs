@@ -146,6 +146,13 @@ JT20. FILENAMES IN THIS LOG ARE THE REBUILD PATH — AND ONE IS WRONG.
      other file. The S43-end Section G recorded it with a dot; G was wrong.
      Trust the box, not the doc.
      ⚠ /home/ubuntu is NOT backed up off-instance. See J-S72a.
+     
+JT21. ⚠ NEVER VERIFY A CONVERSION PATH WITH A 1:1 FIXTURE. A weight ratio
+      of exactly 1 makes a division invisible — 10 / 1 = 10 reconciles
+      perfectly whether the code divides or reads the stored value. Pick a
+      product whose wgt_kgs_per_unit is NOT 1, and ideally not round.
+      (S79 — a 1:1 test in S78 produced a confident wrong conclusion that
+      became a documented finding. J83.)
 ──────────────────────────────────────────────────────────────────────
 REBUILD
 
