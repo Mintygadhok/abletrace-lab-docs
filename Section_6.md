@@ -689,9 +689,13 @@ Same result as J80, opposite direction, different product. → J82.
 
 Section 5 was also rebuilt whole, verified by count: 20 traps, 14 rebuild items, 75 entries, zero lost.
 
-### S79 — INFRASTRUCTURE AND HISTORY (Jul 21, 2026)
+---
 
-Section 3B was built — eleven blocks covering everything the app runs on. Section 6 (this document) was built from old Section C.
+### S79 — TWO THREADS, AND THE HOUSE FINALLY GOT ITS SHAPE (Jul 21–22, 2026)
+
+The longest documentation session of the run, and the only one worked across TWO PARALLEL THREADS. ⚠ NEITHER THREAD SAW THE OTHER WHILE RUNNING. Both were internally consistent; neither was complete. That is worth recording as its own small lesson — it is the accumulation failure arriving through a new door, and it was caught only because the two records were read side by side at close.
+
+**THREAD A — INFRASTRUCTURE AND HISTORY.** Section 3B was built — eleven blocks covering everything the app runs on. Section 6 (this document) was built from old Section C.
 
 ```
 ⚠ THE METHOD CHANGED MID-SESSION, AND THE CHANGE MATTERS. The plan was
@@ -719,6 +723,58 @@ Section 3B was built — eleven blocks covering everything the app runs on. Sect
   → P31.
 ```
 
+**THREAD B — THE CORRECTIONS, AND A GATE THAT CHANGED A PRIORITY.** Section 2 still carried three claims that had been struck elsewhere and never chased into it — the allergen snapshot in two places, and the fork ship_qty bug still written up as a REAL OPEN BUG with a fix named. All three were corrected. So was the CLEANUP PILE's t2/t3 line, which was inverted: it listed the TRUE fact as the stale one.
+
+```
+⚠ THAT IS THE FOURTH TIME IN A WEEK a strike failed to reach every copy.
+  The rule earned in S78 — a strike that does not chase every copy is
+  not a strike — had to be applied again two sessions later, to the
+  same claim.
+```
+
+**Then the J13/J80 gate**, which had been blocking the ranking of P2, the biggest item on the queue. J13 said the Products-list stock figure was Kg-derived and would legitimately disagree with the stored units column. J80 said it did NOT disagree. Both could not be true, and the answer sized the work.
+
+```
+IT WAS SETTLED BY LOOKING, NOT BY READING — two reads on dev:
+
+  THE VIEW    SHOW CREATE VIEW Trace_ProductHeaderView. Every single
+              _su field is <Kg column> / wgt_kgs_per_unit. Neither
+              inventory_units nor received_units appears in it at all.
+  THE CODE    grep across src/app — ~30+ division sites. The Products
+              list divides SEPARATELY, and divides the OLD Kg column.
+
+⚠ SO J13 WAS RIGHT AND J80 WAS WRONG — on display. J80's stock-hop
+  findings stand; only its display half is withdrawn. → J83.
+
+⚠⚠ AND HERE IS WHY J80 GOT IT WRONG, WHICH IS THE PART WORTH KEEPING:
+   ITS TEST USED 10 UNITS AT 1 Kg PER UNIT. 10 ÷ 1 = 10. A WEIGHT RATIO
+   OF EXACTLY 1 MAKES A DIVISION INVISIBLE. The numbers reconciled
+   perfectly — not because anything read the stored units, but because
+   the arithmetic was a NO-OP. A correct-looking result from a fixture
+   that could not have failed. → JT21.
+```
+
+⚠ **THE CONSEQUENCE WAS A RE-SCOPE, NOT A FIX.** P2's display switch had been recorded for sessions as "the priority fix" and GR5 had it stamped IN PROGRESS with three named sites. It is NOT STARTED, it is roughly thirty sites, and it is not frontend-only — the database view has to be rewritten too, and two of its inputs have no units column to read at all. The next action on P2 is now an INVENTORY of every division site, not a fix. ⚠ Nothing was coded. Sizing the work correctly WAS the work.
+
+One site was found already doing it right — a stock popup that reads the stored units and multiplies to derive Kg. Its sibling popup, showing the same figure, still divides. Two screens, same number, one correct.
+
+**AND THE STRUCTURE WAS FINALLY SETTLED.** The session closed on a decision that had been implicit since S73 and was never written as a rule: which sections move, and which do not.
+
+```
+⚠ SECTION 1 WAS ITSELF BREAKING ITS OWN RULE. Its header says a line
+  that does not change session to session does not belong in it — and
+  it was carrying an INFRASTRUCTURE block of EC2 ids, RDS names and SSH
+  recipes that had not changed in seven sessions, and which 3B now held.
+  Deleted. Section 1 lost ~40% of its length and not one fact.
+
+⚠ AND THE MISSING HALF OF THE RULE WAS WRITTEN: if a STABLE section
+  needs editing every session, that content belongs in Section 1.
+  ⚠ NO STABLE SECTION GETS A "RECENT UPDATES" TAIL — that is exactly
+  how Section A became two-headed. → rule 9E.
+```
+
+The routine cost is now stated plainly: rewrite Section 1, append to Section 5 if something was learned. Everything else is touched only when the system changes or a fact is found wrong.
+
 ---
 
 ## ⚠ THE PATTERN ACROSS 79 SESSIONS
@@ -727,10 +783,10 @@ Section 3B was built — eleven blocks covering everything the app runs on. Sect
 Written down because it is the thing this section exists to show, and
 it is not visible from any single entry.
 
-THREE TIMES THIS WEEK — J80, J81, J82 — a claim was found to be false
-that had been stamped "confirmed" and copied into three or four
-documents. In every case the original reading was wrong, nobody
-re-checked it, and the copies outlived the strike.
+FOUR TIMES THIS WEEK — J80, J81, J82, J83 — a claim was found to be
+false that had been stamped "confirmed" and copied into three or four
+documents. In every case the original was never re-checked, and the
+copies outlived the strike.
 
 THE SAME SHAPE APPEARS EARLIER:
   S13   every fix having zero effect for weeks, because one config
@@ -748,6 +804,15 @@ THE SAME SHAPE APPEARS EARLIER:
   S76   the raw URL served stale content for hours; Claude repeatedly
         misread THE STATE OF THE RECORD and concluded work had not
         landed when it had
+  S79   ⚠ THE QUIETEST INSTANCE, AND THE EASIEST TO REPEAT. J80's
+        display finding was tested on a fixture where one shipping
+        unit weighed exactly one kilogram. Every number reconciled.
+        The test could not have failed — a division by 1 returns its
+        input, so a broken path and a correct path give the same
+        answer. It was recorded as verified and copied forward, and
+        it sat on top of the biggest item in the queue for six
+        sessions. ⚠ NOT A MISREADING THIS TIME. A TEST THAT LOOKED
+        LIKE EVIDENCE AND WAS NOT. (J83 · JT21)
 
 ⚠ THE COMMON FACTOR IS NEVER A BAD DECISION. It is a confident claim
   that was never tested by looking, and a record that grew by
