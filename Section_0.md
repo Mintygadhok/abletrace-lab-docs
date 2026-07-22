@@ -3,7 +3,7 @@
 > ⚠ **PASTE / LOAD FIRST every session, before NOW.** Rarely changes.
 > ⚠ DO NOT fold into any other section. It is a separate section and must stay one — merging it back is what rotted G in the first place.
 > Every rule here was earned by a real failure. The session it bit is named.
-> Last revised: S73 (repo/access notes updated S76).
+> > Last revised: S79 (rule 9E added; rule 9 status + 9C file list updated).
 
 ---
 
@@ -293,17 +293,15 @@ AFTER PASTING  appear as GREY BOXES with aligned columns. Plain running
 
 ## 9. THE STRUCTURE — where every fact lives. ⚠ AGREED S73.
 
-⚠ **STATUS:** THIS IS THE TARGET SHAPE. THE FOLD IS IN PROGRESS (Section 1, P1). Until it is done, the OLD sections still physically exist: A · B · G-NOW · G-REF · I · J · K · C · H. This block says where each fact is GOING. When the fold completes, this note is deleted and rule 9 simply describes what is.
+⚠ **STATUS (S79): THE FOLD IS ESSENTIALLY COMPLETE.** Sections 0 · 1 · 2 · 3A · 3B · 5 · 6 are built and live in the repo. ⚠ ONLY SECTION 4 REMAINS (from old I) — that is P1(b). Retired and folded: G (S72) · B (S73) · K (S78) · A and C (S79). ⚠ TWO OLD FILES STILL PHYSICALLY EXIST AND MUST BE DELETED, NOT EDITED: old Section A (→ P22) and the pre-S72 Section J (→ P20). Section H is separate and permanent. When Section 4 lands, this status note is deleted and rule 9 simply describes what is.
 
-⚠ ANYTHING NEW GOES IN ONE PLACE. Two homes for one fact is how drift starts — it is what J and G both had (fixed S72), what B had (fixed S73), and what A and G-REF have RIGHT NOW (P1).
+⚠ ANYTHING NEW GOES IN ONE PLACE. Two homes for one fact is how drift starts — it is what J and G both had (fixed S72), what B had (fixed S73), and what A had (fixed S79, and it had gone TWO-HEADED by then — see 9E).
 
 ```
 0   RULES        how we work. Rarely changes. ⚠ PASTE / LOAD FIRST.
 1   NOW          current state + the ranked queue. Rewritten WHOLE every
                  session. ~1 page. ⚠ PASTE SECOND (or pull from repo).
-                 ⚠ MANUAL DISCIPLINE STILL APPLIES — Claude reproduces it
-                 whole each session; it now LIVES IN THE REPO as
-                 Section_1.md (changed S76). [was G-NOW]
+                 ⚠ THE ONLY DYNAMIC SECTION — see 9E. [was G-NOW]
 2   WHY          the business logic. The permanent rules of how the
                  business works. Should outlive the code. [was B]
 3   THE SYSTEM   everything that is built. Two halves:
@@ -388,7 +386,7 @@ H   SECRETS      ⚠ PRIVATE. Never in chat. Never in the repo. Pointers
 3B.11  WHEN IT BREAKS    Triage. Symptom → likely cause → where to look.
 ```
 
-### 9C. THE ENDPOINT — WHERE THE DOCS LIVE  ⚠ UPDATED S76
+### 9C. THE ENDPOINT — WHERE THE DOCS LIVE  ⚠ UPDATED S79
 
 The docs live in a GitHub repository Claude reads DIRECTLY. No deploy process; readable at any time.
 
@@ -397,7 +395,8 @@ Repo    Mintygadhok/abletrace-lab-docs   (PUBLIC — see the decision below)
 Web     https://github.com/Mintygadhok/abletrace-lab-docs
 Raw     https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/<file>
 Files   Section_0.md · Section_1.md · Section_2.md · Section_3A.md ·
-        Section_3B.md · Section_4.md · Section_5.md
+        Section_3B.md · Section_5.md · Section_6.md
+        (Section_4.md still to come — P1b)
         (⚠ Section 1 now IN repo, changed S76; H NEVER in repo)
 ```
 
@@ -419,6 +418,42 @@ Section 4 (LOOK) is visual + interaction language ONLY: palette, typography, til
 - A WORK QUEUE ITEM (a label to rename, a fix to make) → belongs in NOW (1) as a pending item. Design records that it was surfaced; the queue owns the action. (S67 label backlog.)
 
 RULE: if an entry in 4 describes an ACTION TO TAKE or a STORED-DATA change rather than how something LOOKS or BEHAVES, it is in the wrong section. Move it; leave a one-line pointer.
+
+### 9E. THE BOTH-DIRECTIONS TEST — ⚠ THE ANTI-ROT RULE. AGREED S79.
+
+Rule 9 says where each fact lives. This says how to TELL — and it runs BOTH WAYS. Section 1's header states the first half; this states both, permanently, where a session rewrite cannot lose it.
+
+```
+EVERY FACT HAS ONE HOME, DECIDED BY HOW OFTEN IT CHANGES:
+
+  changes EVERY SESSION      → Section 1. Rewritten whole.
+  changes when WE LEARN      → Section 5. Appended, never edited above.
+  changes when THE SYSTEM    → 0 / 2 / 3A / 3B / 4. Edited rarely,
+    ITSELF changes             by named WHOLE ITEM (rule 7.1).
+```
+
+⚠ **THE FORWARD TEST** (already in Section 1's header): if a line does NOT change session to session, it does not belong in Section 1.
+
+⚠ **THE REVERSE TEST** (this is the new half): IF A STABLE SECTION NEEDS EDITING EVERY SESSION, THE CONTENT IS IN THE WRONG SECTION. Move it to Section 1. ⚠ DO NOT GIVE A STABLE SECTION A "RECENT UPDATES" TAIL.
+
+⚠ **WHY THE REVERSE TEST EXISTS — IT IS THE A COLLAPSE, STATED AS A RULE.** Section A grew a tail of appends for ~30 sessions. The tail eventually contradicted the head on NINE load-bearing facts, and by S79 nobody could tell which half was authoritative. G rotted the same way (fixed S72). ⚠ A DYNAMIC TAIL ON A STABLE SECTION IS HOW A DOCUMENT BECOMES TWO-HEADED. There is no safe small version of it.
+
+⚠ **WHAT S79 ACTUALLY MOVED, as the worked example:** Section 1 was carrying an INFRASTRUCTURE block — EC2 instance ids, RDS names, SSH recipes, sizing evidence. None of it had changed in seven sessions. It was static content living in the volatile file, and it was duplicated into 3B the moment 3B was built. It was deleted from Section 1, which lost ~40% of its length without losing a fact.
+
+⚠ **THE COROLLARY:** in a normal session, sections 0 / 2 / 3A / 3B / 4 are touched ZERO TIMES. If one of them is being edited, either the system really changed, or a fact was found WRONG — and both are worth saying out loud at session close, not doing quietly. (Rule 7.7 is the mechanism; this is the reason.)
+
+⚠ **THE ROUTINE COST, STATED PLAINLY** — so drift is noticeable:
+
+```
+EVERY SESSION   rewrite Section 1 (resume · heads · queue)
+                append to Section 5 if something was learned
+                → that is the WHOLE routine cost
+
+SOMETIMES       edit a stable section, by whole named item, when the
+                system changed or a fact was found wrong
+
+NEVER           give 2 / 3A / 3B / 4 a "latest updates" tail
+```
 
 ---
 
