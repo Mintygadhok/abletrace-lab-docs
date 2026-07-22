@@ -148,12 +148,20 @@ completed (S51)  often still reads 3). "Not finished" filters must test
                  close_status, not just status ≠ 4.
 
 Edit integrity   Composition/identity changes FORK a new version; quantity/
-(S59)            planning changes update in place. As-made record is immutable
-                 (MO stores an allergen snapshot at production). Can't fork
-                 while an open MO or stock exists. Fork: new → status 1, old →
-                 2, version++. Soft-deactivate, never hard-delete. MR = write-
-                 off (leaves system); Return = back to store, MO-linked.
-                 (All verified live in the 3A.5 formulation walk.)
+(S59)            planning changes update in place. ⚠ THE AS-MADE RECORD IS
+                 NOT IMMUTABLE — allergens RE-DERIVE LIVE from the current
+                 recipe, through to completed and shipped lots (J80, J82).
+                 There is no as-made snapshot. Live re-derivation is CORRECT
+                 per Minty (a mis-declaration must be correctable on past
+                 data); the open risk is the reverse — an allergen genuinely
+                 present in a shipped lot can be REMOVED by a later edit,
+                 with no audit trail. Domain call open → P29.
+                 Can't fork while an open MO or stock exists. Fork: new →
+                 status 1, old → 2, version++. Soft-deactivate, never hard-
+                 delete. MR = write-off (leaves system); Return = back to
+                 store, MO-linked.
+                 (Fork/MR/Return verified live in the 3A.5 formulation walk.
+                 The immutability claim was NOT — it was false, S78.)
 
 batch_qty in     A planning change, no fork. Fractional batches are correct.
 place (S61)
@@ -228,7 +236,10 @@ receiveproducts    qty = UNITS · recieved_qty = Kg (note the spelling) ·
                    received_at = datetime (S65).
 mlomanagement      qty = planned UNITS · received_qty = Kg · received_units =
                    UNITS · close_status = 1 when closed (NOT mlc_status) ·
-                   allergens = longtext JSON snapshot.
+                   allergens = longtext. ⚠ COLUMN EXISTS; WHETHER IT HOLDS
+                   ANYTHING IS UNTESTED. Do NOT call it a snapshot (J80/J82
+                   proved allergens re-derive live) and do NOT call it unused
+                   until someone SELECTs it. → P29.
 formulations       inventory = Kg SOH · inventory_units = units SOH · batch_qty =
                    UNITS (S41) · food_safety_enabled on company (default 0).
 dispatchorders     qty_to_ship = Kg · qty_shipped = UNITS · packing_units =
@@ -328,22 +339,19 @@ The 3A.5 STOCK table is the spine, done. These areas still need the same screen-
 5. **PS-create dead block** PackingSlips.js:333-334 + createPS/editPackslips line numbers — never confirmed against code. Verify on box → chart back-end.
 6. **A9 / A15 frontend file-maps** — look duplicated (two lists of the same files from different sessions). Do NOT merge or prune until verified against live code → then chart / rules as appropriate.
 7. **Back-end LINE NUMBERS across all chart rows** — written from session notes, not read from live code. File + function are solid; line numbers are grep-to-confirm at the moment of use (they shift each commit).
-8. **RESOLVED (was to-verify) — ship_qty on fork. CLOSED by J9b.** The version-fork WRITES ship_qty=0 for intermediates (carries qty in Kg, drops ship_qty). DB-confirmed S45: FO-0007 ship=10 → FO-0007-2 ship=0. The chart was right; Section K was wrong (its "clean" claim was the pure-ADD path, not the fork — now corrected in K v4). This is a REAL OPEN BUG, no longer a question. Fix = "Fix A" (fork handler copies ship_qty forward + one-time heal of 0# rows). The ACTION now lives in Section 1 (NOW) as a P-item; this line is just the record that it's settled and where the fix is tracked.
+8. **CLOSED S77 (J81) — NEVER A BUG.** The "ship_qty dropped on fork" defect does not exist and never did. The earlier J9b reading was wrong; it was replaced in S78's Section 5 rebuild. ⚠ "Fix A" is a DEAD NAME — no such fix was ever needed, and any surviving pointer to it is dead. Grep the whole repo for "Fix A" at 3B build time (S79). This line is the record that the question is settled, not that it is open.
 
 ---
 
 ## CLEANUP PILE (confirm each, then delete — kept actionable, not prose)
 
 ```
-STALE     A1 stale lines: "Ubuntu 24.04" (really 26.04) · "t3.small" (really
-          t2.small) · "abletrace" as live DB (really abletracelab_live). Confirm
-          against box, then delete. Also "Current position S42" refs (32 sessions
-          old); B's on-box build recipe (superseded by CI — keep the discipline
-          lines, drop the build mechanics).
-          ⚠ S76 NOTE: Section 0 already records both boxes are t3.small (t2.small
-          was the FALSE claim, struck S73). So the STALE line above is itself
-          out of date on that one point — the boxes ARE t3.small. Reconcile when
-          this pile is cleared.
+STALE     A1 stale lines: "Ubuntu 24.04" (really 26.04) · "t2.small" (really
+          t3.small — the t2 claim was FALSE, struck S73) · "abletrace" as live
+          DB (really abletracelab_live). Confirm against box, then delete.
+          Also "Current position S42" refs (37 sessions old); B's on-box build
+          recipe (superseded by CI — keep the discipline lines, drop the build
+          mechanics).
 DEAD      A12 on-box build recipe (box can't build) · A13 "two environments"
           (really three + old app) · duplicate SESSION 0 block in A · duplicate
           S66 dev-environment block in A · duplicate S57 driver/auth block in B.
