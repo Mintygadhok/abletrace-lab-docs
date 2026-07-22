@@ -120,6 +120,39 @@ AFTER PASTING  appear as GREY BOXES with aligned columns. Plain running
 
 ---
 
+### 0.2c DOC EDITS ARE PATCHES, NOT PASTES — ⚠ SUPERSEDES 0.2b FOR REPO SECTIONS. EARNED S79.
+
+⚠ **THE PROBLEM 0.2b DID NOT SOLVE.** 0.2b fixed fence-stripping by handing documents over as files. But Minty was still editing in the GitHub WEB interface — select, delete, paste, by hand, per item. In S79 alone that produced a wrong-sized deletion, an instruction wrapper pasted in as content, a block landing outside its fence, and several rounds of "is this right?" that could only be answered by pasting the whole file back. ⚠ THE COST WAS NOT ACCURACY, IT WAS THAT MEANINGFUL WORK BECAME IMPOSSIBLE — the editing overhead consumed the session. (Minty's call, S79: "it is practically going to be impossible for us to do any meaningful work this way.")
+
+**THE DOCS REPO IS CLONED TO THE MAC AND EDITED LIKE CODE.**
+
+```
+WHERE          ~/abletrace-lab-docs   (git clone of the docs repo)
+
+THE LOOP       1  Minty:  cd ~/abletrace-lab-docs && git pull
+               2  Claude: writes an assert-anchored patch, hands it over
+                          as a FILE (0.2b still governs the handover)
+               3  Minty:  cp ~/Downloads/patch.py /tmp/patch.py
+                          python3 /tmp/patch.py
+               4  Minty:  git diff --stat   then   git diff
+               5  Minty:  git add <named files> && git commit && git push
+
+⚠ THAT IS THE WHOLE LOOP. No selecting, no scrolling, no fences to lose,
+  and the file never passes through a rendered chat view.
+```
+
+⚠ **CLAUDE ASSERTS EVERY ANCHOR AND WRITES NOTHING UNLESS ALL PASS.** All-or-nothing, validated up front, one report line per anchor. A partial patch on a document fails SILENTLY — the file still reads fine, it is just wrong. This is stricter than the code equivalent (rule 4.2) for exactly that reason: a broken build announces itself, a broken document does not.
+
+⚠ **MINTY PULLS BEFORE PATCHING.** `git pull` first, always. A patch built against a stale clone can apply cleanly and still be wrong. ⚠ This is the new form of the S76 cache trap — the failure moved, it did not go away.
+
+⚠ **THE DIFF IS THE VERIFICATION, AND IT IS NOT OPTIONAL.** `git diff --stat` to see the shape, `git diff` to read the change, BEFORE committing. ⚠ `git checkout -- .` throws everything away and loses nothing. That undo is the safety net the web editor never had, and it is why this loop is safer than pasting, not just faster.
+
+⚠ **0.2b STILL GOVERNS EVERYTHING NOT IN THE REPO** — a one-off note, a handover document, anything Minty reads rather than commits. For repo sections, patches supersede it. ⚠ The patch script ITSELF is handed over under 0.2b, as a file.
+
+⚠ **DO NOT EDIT REPO SECTIONS IN THE GITHUB WEB INTERFACE ANY MORE.** Not because it is forbidden, but because it silently desynchronises the local clone, and the next patch will then be built against a file that no longer matches. If a web edit ever does happen, say so, and `git pull` before the next patch.
+
+---
+
 ## 0.3 WHAT CLAUDE ASKS FOR — Claude's job, not Minty's
 
 ⚠ MINTY MUST NEVER HAVE TO GUESS WHAT CLAUDE NEEDS. Claude asks.
