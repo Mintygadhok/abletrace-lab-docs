@@ -118,10 +118,26 @@ The anchor was told ten ways across G/A/B. The Section 3A.5 table is now the aut
 ```
 GR5   Fix B roll-up tracker — the only place the fix is R-status.
       R1 receive · R2 release · R3 MR · R4 ship .... DONE
-      R5 display switch .... IN PROGRESS (the priority fix)
-         C: product list + trace, switch = Trace_ProductHeaderView
-         D: trace MO/Completed Qty (received_units in the view)
-         E: shipped cumulative — multi-ship NOT stress-tested (gap)
+      R5 display switch .... NOT STARTED. ⚠ FAR LARGER THAN THIS ENTRY
+         EVER RECORDED — measured S79 against dev. It is not a switch, it
+         is a campaign of ~30+ sites. The old C/D/E list below was a
+         fraction of it and is kept only as the starting thread.
+         ⚠ THE VIEW ITSELF IS Kg-ANCHORED: every _su field in
+           Trace_ProductHeaderView is <Kg> / wgt_kgs_per_unit. Neither
+           inventory_units nor received_units appears in it at all.
+         ⚠ THE PRODUCTS LIST DIVIDES SEPARATELY, and divides the OLD Kg
+           column (admin-formulation.component.ts:878).
+         ⚠ MANY SITES DISGUISE THE DIVISION as (qty / batch) * (batch /
+           wgt) — algebraically identical. Grep wgt_kgs_per_unit and read
+           every hit for a `/`.
+         ⚠ THE CORRECT PATTERN ALREADY EXISTS in one place:
+           PopUps/stock-info.component.ts:188 reads inventory_units and
+           MULTIPLIES to derive Kg. That is R1. Copy it.
+         Old thread (incomplete, kept for orientation):
+           C: product list + trace, switch = Trace_ProductHeaderView
+           D: trace MO/Completed Qty (received_units in the view)
+           E: shipped cumulative — multi-ship NOT stress-tested (gap)
+         Scope + method now tracked in Section 1 as P2.
       R6 retire old Kg line .... TO DO (not until the chain is whole)
 
 Logic I  Kg → unit conversion formula (the table points here):
