@@ -253,8 +253,11 @@ hold a stored value nobody reads? One SELECT settles it. → P29.
 
 **P31  PROD SSL CERTIFICATE HAS NO EMAIL REGISTERED — NO EXPIRY WARNING (minutes).** ⚠ NEW S79. Prod's Let's Encrypt cert was issued with NO contact email; confirmed via `sudo certbot show_account` → "Email contact: none". ⚠ SO PROD GETS NO RENEWAL-FAILURE WARNING. Auto-renew is scheduled, but if it ever fails silently the first symptom is a browser security warning on a LIVE CLIENT SITE. Dev was deliberately given info@abletrace.ca for exactly this reason — prod is the one that matters and is the one without it. FIX: register a contact email on prod's certbot account (`sudo certbot update_account -m info@abletrace.ca --agree-tos`), then confirm with `show_account`. ⚠ Does not touch the cert itself or reissue anything — account metadata only. [3B.6]
 
-> ⚠ Note: the queue jumps P24 → P27. P25/P26 were assigned in S75 (not carried into this file). Minty reconciles the numbering at re-rank.
 
+**P32  RDS DATABASES ARE PUBLICLY ACCESSIBLE — REVIEW WHETHER THEY NEED TO BE.** ⚠ NEW S79 (surfaced S64, was in nobody's queue — it had been sitting in the DESIGN section since). Both RDS instances carry public endpoints, so the databases are reachable from the internet rather than only from the app boxes. ⚠ NOT WIDE OPEN — a password and a security-group rule sit in front — but it is a larger front door than the architecture needs, on a food-safety system holding a real client's data. ▶ REVIEW: can prod RDS be set to private-only with the EC2 box reaching it over the VPC? Check what breaks first (⚠ the Mac connects directly today for admin queries — that is the thing that would stop working). Not urgent, not a fire; it should simply be tracked somewhere real. [3B.3]
+
+**P33  CERT-STATUS INDICATOR SHOWS RED REGARDLESS OF STATE (functional, not cosmetic).** ⚠ NEW S79 (the defect was logged in the design section at S36 and never actioned — 43 sessions). The status colour should be STATE-DRIVEN: red = no certificate · amber = expired · green = in-date. It is currently hardcoded red, so it displays red for every state including in-date. ⚠ WHY THIS IS NOT COSMETIC: a permanently-red indicator on a food-safety system either trains operators to ignore it, or hides a genuine expiry. Do it app-wide, once. [§4 status colours]
+> ⚠ Note: the queue jumps P24 → P27. P25/P26 were assigned in S75 (not carried into this file). Minty reconciles the numbering at re-rank.
 ---
 
 ## BANKED, AWAITING DEPLOYMENT
