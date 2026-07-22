@@ -1558,7 +1558,46 @@ BLAST RADIUS: none to prod — all reads plus one dev-only material edit on comp
   464. No app code touched, no prod data, no schema change.
 ========
 
+J83  J13 vs J80 RECONCILED — J13 RIGHT ON DISPLAY, J80 WRONG. (S79, dev, read-only.)
 
+     THE CONFLICT: J13 said the Products-list SOH is Kg-derived and would
+     "legitimately disagree" with inventory_units. J80 said it did NOT
+     disagree — every unit move tracked exactly. Both could not be true.
+
+     SETTLED BY LOOKING (rule 0.1a), two reads on dev:
+       1. SHOW CREATE VIEW Trace_ProductHeaderView — every _su field is
+          <Kg column> / wgt_kgs_per_unit. inventory_units and received_units
+          appear NOWHERE in the view.
+       2. grep wgt_kgs_per_unit across src/app — ~30+ sites divide. The
+          Products list (admin-formulation.component.ts:878) divides the OLD
+          Kg column: element.inventory / packing?.wgt_kgs_per_unit.
+
+     ⚠ WHY J80's EVIDENCE LOOKED CLEAN — THE TRAP WORTH REMEMBERING:
+     the test used 10# at 1 Kg per unit. 10 / 1 = 10. A weight ratio of
+     exactly 1 makes a division invisible. The numbers reconciled because
+     the arithmetic was a NO-OP, not because anything read the units line.
+     ⚠ NEVER VERIFY A UNIT-CONVERSION PATH WITH A 1:1 FIXTURE. Use a
+     product whose wgt_kgs_per_unit is not 1 (and ideally not round).
+
+     ⚠ WHICH HALF OF J80 SURVIVES: its STOCK-HOP findings stand — the
+     anchor is clean at receive/DO/PS/ship/MR/intermediate, verified
+     separately. Only its DISPLAY finding is withdrawn. Do not read this
+     entry as discrediting J80 generally.
+
+     ⚠ ONE SITE IS ALREADY CORRECT: PopUps/stock-info.component.ts:188
+     reads inventory_units and MULTIPLIES. Its sibling
+     formulation-edit-stock-info.component.ts:269 still divides the old Kg
+     column — two popups, same figure, one right one wrong.
+
+     ALSO CONFIRMED THIS SESSION (rule 4.3 in action): three suspected
+     missing-operator defects in edit-packslips.component.ts:267/322 and
+     formulation-edit-stock-info.component.ts:269 were GREP ARTIFACTS. The
+     files are clean — cat -A showed the `/` present. The chat/grep render
+     had dropped forward slashes inside long template literals. Same family
+     as the S71 missing-dot artifact. NOTHING TO FIX.
+
+     STATUS: gate closed. P2 re-scoped in Section 1 from a fix to a campaign.
+========
 ──────────────────────────────────────────────────────────────────────
 END SECTION J
 ────────────────────────────────────────────────────────────
