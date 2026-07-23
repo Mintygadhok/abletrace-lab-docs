@@ -26,6 +26,17 @@ The three routes R1  units → Kg          correct (read units, derive Kg)
                  R3  units → Kg → units  wrong (float garbage)
                  Alarm: any "÷ weight" producing a unit figure = R2/R3 = fail.
 
+                 ⚠ "ACROBATICS" — MINTY'S TERM, ADOPTED S80. Any
+                 Kg→units or units→Kg→units conversion, i.e. R2 or R3.
+                 The alarm is any "÷ wgt_kgs_per_unit" producing a unit
+                 figure. R1 (read the stored units, multiply to get Kg)
+                 is NOT acrobatics — it is the correct route.
+                 ⚠ THE DISGUISED FORM COUNTS: (qty / batch) × (batch /
+                 wgt) is algebraically the same divide (J83). And a
+                 Math.round() around an acrobatic HIDES it rather than
+                 fixing it — it will still be wrong on a fractional
+                 shipping unit, which is permitted by design (J88).
+
 Where it stands  Anchor is CLEAN at every real stock hop (receive, DO, PS,
                  ship, MR, intermediate), verified live S75. Two defects:
                  • Defect 1 (MO create) — plan round-trips through batches

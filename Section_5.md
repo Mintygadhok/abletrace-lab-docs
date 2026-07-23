@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J85 — ⚠ the next one is J86, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Last restructured: S72, Jul 16 2026. Last appended: S79, Jul 22 2026.
+number. Highest is J88 — ⚠ the next one is J89, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Last restructured: S72, Jul 16 2026. Last appended: S80, Jul 23 2026.
 ══════════════════════════════════════════════════════════════════════
 
 TRAPS
@@ -150,6 +150,20 @@ JT21. ⚠ NEVER VERIFY A CONVERSION PATH WITH A 1:1 FIXTURE. A weight ratio
       product whose wgt_kgs_per_unit is NOT 1, and ideally not round.
       (S79 — a 1:1 test in S78 produced a confident wrong conclusion that
       became a documented finding. J83.)
+
+JT22. "DEAD CODE — DO NOT TOUCH" IS A CLAIM ABOUT REACHABILITY, AND
+      REACHABILITY IS CHECKABLE.  [J85, J86, J87]
+      §2 recorded PackingSlips.js:333-334 as a dead block for sessions.
+      S79 found it was LIVE CODE THAT THROWS; S80 found the throw is
+      unreachable only because the frontend button that reaches it is
+      COMMENTED OUT — and that the redesign restores that button.
+      ⚠ A right instruction for a wrong reason stops anyone looking again.
+      Before trusting "dead", trace the caller chain to a rendered
+      template, and check whether planned work makes it live.
+      ⚠ COROLLARY: a dead component sitting beside a live one (add-dispatch
+      vs add-dispatch-v2, S80) is the same trap in a different shape —
+      edits there are invisible no-ops (JT9). Delete dead code, don't
+      leave it as a decoy.
 ──────────────────────────────────────────────────────────────────────
 REBUILD
 
@@ -1711,5 +1725,213 @@ J85  "THE DEAD BLOCK" IN editPackslips IS NOT DEAD — IT IS LIVE CODE THAT
      STATUS: §2 items 3, 4, 5 rewritten. P35 raised. Item 1 still open.
 ========
 ──────────────────────────────────────────────────────────────────────
+J86  P35 IS UNREACHABLE — "WOULD BREAK", NOT "DOES BREAK". AND THE
+     REDESIGN IS WHAT MAKES IT REACHABLE. (S80, dev, read-only.)
+
+     J85 left one question open: does the edit-packing-slip screen
+     ever send a non-empty `req.body.DOs`? ⚠ SETTLED BY READING THE
+     WHOLE FILE, not a grep — the answer is NO.
+
+     THE CHAIN, edit-packslips.component.ts:
+       save():506   dispatchData = packForm.get('shipmentList').value.map(...)
+       save():541   formData.append('DOs', JSON.stringify(dispatchData))
+       → req.body.DOs comes ONLY from shipmentList.
+       shipmentList is populated ONLY by addItem() (line 348).
+       addItem()'s ONLY caller is in the template at
+       edit-packslips.component.html:198-200 — ⚠ AND IT IS
+       COMMENTED OUT. The "Add Dispatch order +" button does not
+       exist on the rendered page.
+       doList() (462) would fill a shipment row, but its trigger
+       `(click)="doList(i)"` at html:124 sits INSIDE the
+       shipmentList *ngFor — reachable only from a row that can
+       never be created.
+
+     SO on every real save, shipmentList is [], dispatchData is [],
+     DOs posts as "[]", and `if (DOs && DOs.length)` is false. The
+     throwing block is never entered. Severity drops: it is NOT a
+     live client bug.
+
+     ⚠⚠ THE FINDING THAT MATTERS. P7 wants add-a-DO-to-an-existing-
+     slip BACK — Minty's S80 design has the operator saving a slip,
+     staying on it, and moving more DOs in. THAT IS EXACTLY THE
+     COMMENTED-OUT MECHANISM. Restoring it re-enables the branch,
+     and J85's three bugs (Formulations.find() returns an ARRAY so
+     .inventory is undefined → NaN write · the loop subtracts the
+     same qty_shipped for every DO regardless of `i` · it writes
+     formulations.inventory, the old Kg line, for stock that ALREADY
+     left SOH at DO CREATION per §2 Core #2) wake up with it.
+
+     ⚠ THEREFORE THE SEQUENCING ANSWER IS "SAME LINES, NOT JUST SAME
+     FILE." The S80 opener asked exactly this. Bundle the defect fix
+     with the redesign. Fixing it separately means writing a correct
+     backend for a frontend path that is still commented out —
+     untestable end to end, and a regression pair (rule 5.2) that
+     cannot be exercised.
+
+     ALSO NOTED, same read:
+     · The "Ship" button (html:312) calls save() — shipping IS
+       saving the packing slip. 3A.5 row 10's "sets the flag only"
+       is true TODAY ONLY BECAUSE DOs is always empty. The same
+       button would carry DO writes if the feature returned.
+     · removeoldItem() (596) already pushes a DO into `deletedDOs`,
+       and save() (518) posts it as `deletedDos`. So a
+       remove-ONE-DO frontend mechanism EXISTS — but its backend
+       branch sits in the same defective function and was NOT read.
+       ⚠ Whether it returns the quantity to the DO the way
+       deletePs() does is UNKNOWN. Read before relying on it.
+
+     STATUS: P35 reachability closed. Sequencing decided. The fix
+     itself is still to do, inside P7.
+========
+
+
+J87  THE PACKING-SLIP SELECTION LOGIC ALREADY EXISTS — P7 IS AN
+     EXTENSION, NOT A BUILD. (S80, dev, read-only.)
+
+     Minty's S80 design (recorded in full in Section 1, P7) turned
+     out to be most of the way built already. Read
+     PopUps/do-list/do-list.component.{ts,html} (184 + 63 lines)
+     and create-packslips.component.ts (371 lines) whole.
+
+     WHAT ALREADY EXISTS — ⚠ DO NOT REBUILD:
+       · ADDRESS FILTER. do-list.component.ts:69 — picking a DO
+         filters the list to that DO's customer_shipping_address.
+         Same logic again at :120 and :139. This IS Minty's
+         "the list filters down after the first pick".
+       · ALREADY-USED DOs SPLICED OUT. :125-131 and :144-150 remove
+         DOs already on the slip, so one cannot be added twice.
+       · SEARCH IS LOT-CODE ONLY. filterPredicate at :75 and
+         :155-159 matches ONLY on
+         DO_recProduct_id[0].recProduct_id[0].mlc_id.lotCode.
+         ⚠ THE SEARCH BOX IS ALREADY A LOT-CODE BOX. A scanner
+         typing into it (html:5, id="do-list-search") already
+         narrows the list to that lot. The scan half is close.
+       · MULTI-SELECT. getSelectedDo (:57) toggles `selected` and
+         rebuilds selectedItem; save() closes with the whole array.
+       · MULTI-DO ON THE SHEET. create-packslips doList afterClosed
+         (:225) loops the returned array and pushes one form row per
+         DO. So "move several DOs at once" ALREADY WORKS on create.
+       · THE POPUP IS ALREADY THE ENTRY. create-packslips ngOnInit
+         :81 opens it immediately; you never see an empty sheet.
+         And afterClosed :215 navigates BACK if nothing was picked.
+       · RE-OPEN ON EMPTY. removeItem :156 re-opens the popup when
+         the last row is removed.
+
+     WHAT IS MISSING — ⚠ THIS IS THE ACTUAL WORK:
+       1. LOT IS NOT IN THE FILTER. The filter groups by address
+          only. So today, picking one DO shows every DO for that
+          address ACROSS ALL LOTS — the exact confusion Minty's lot
+          rule exists to prevent.
+       2. CUSTOMER IS NOT IN THE FILTER. ⚠ LATENT BUG: two
+          different customers can share a shipping address (a
+          shared 3PL or distribution centre). Nothing checks
+          customer_id. Minty's rule is customer AND address; the
+          code is address only.
+       3. NO AUTO-SELECT. Picking a DO FILTERS the list but does
+          not TICK its siblings. Every one is still ticked by hand.
+       4. NO LOT→DO ENTRY POINT. Nothing starts from a lot code, so
+          there is nowhere for the scan (or the ambiguity popup) to
+          attach.
+
+     ⚠ A BUG IN getSelectedDo THAT WILL BITE THE AUTO-SELECT:
+     line 58 clears selectedItem and rebuilds it from getDoList —
+     but getDoList was already narrowed by a previous filter, so
+     ticks on rows since filtered out are silently dropped.
+     Harmless today with one-at-a-time manual ticking. NOT harmless
+     once selection becomes programmatic. Fix it in the same pass.
+
+     ⚠ ARCHITECTURE NOTE FOR THE BUILD: the shared function must
+     take a LOT CODE, not a row. The click handler pulls the lot off
+     the row it was given; the scan handler passes the scanned
+     string straight in. Two thin callers, one function — that is
+     what makes scan and click provably identical instead of
+     accidentally similar. (Minty's own point, S80.)
+
+     ⚠ ALSO FOUND: PopUps/add-dispatch (v1) IS DEAD CODE. Declared
+     in edit-sales-order.module.ts:20 but never opened; the only
+     matDialog.open is AddDispatchV2Component
+     (edit-sales-order.component.ts:191), and module line 35 shows
+     v1 already commented out of a second list. A dead component
+     sitting beside a live one is a JT9 trap. → P36.
+
+     STATUS: design captured in P7, code addresses recorded here.
+     Ready to build once MO-Release Global Select has been read (P6).
+========
+
+
+J88  qty_shipped IS UNITS AND IS CLEAN — BUT THE ROUTE IS AN
+     ACROBATIC, AND FRACTIONAL UNITS MAKE IT WRONG IN PRINCIPLE.
+     ⚠ ALSO: A CONFIDENT CLAUDE CLAIM DISPROVEN BY ONE QUERY.
+     (S80, dev DB read.)
+
+     THE WORRY: create-packslips.component.ts:246 builds the units
+     figure as
+       (qty_to_ship / batch_qty) * (batch_qty / wgt_kgs_per_unit)
+     — algebraically just qty_to_ship ÷ wgt. That is R2 (Kg→units),
+     Minty's "acrobatics", and the disguised form J83 warns about.
+     save():293 then splits that display string and posts it as
+     shipped_qty, which createPS (PackingSlips.js) ADDS to
+     dispatchorders.qty_shipped — a column documented as UNITS.
+     ⚠ Meanwhile response.packing_units — the STORED units figure —
+     is sitting on the same object, used at :247 and otherwise
+     ignored.
+
+     ⚠ CLAUDE PREDICTED VISIBLE FLOAT GARBAGE AT 1.39 Kg/unit
+     (58.38 ÷ 1.39 = 41.99999…). THE DATA SAID NO.
+
+     THE QUERY (dev, company 464, dispatchorders joined to
+     formulations + fopackaging): on every row where a packing slip
+     exists, qty_shipped == packing_units EXACTLY.
+       DO-0010   1.39 Kg  → shipped 1, units 1  @1.39 ✓
+       DO-0007   9.73 Kg  → shipped 7, units 7  @1.39 ✓
+       DO-0002   100 Kg   → shipped 5, units 5  @20   ✓
+     No 41.99999 anywhere. The Math.round at :246 lands the division
+     on the same integer the stored column already held.
+     ⚠ THE FIXTURE WAS CHOSEN TO EXPOSE THIS (1.39 Kg/unit, not
+     1:1, per JT21) AND IT STILL CAME BACK CLEAN. The claim was
+     wrong. Recorded because a confident wrong answer that goes
+     unrecorded becomes next session's foundation (0.1a).
+
+     ⚠⚠ BUT THE ROUTE IS STILL WRONG, AND FOR A BETTER REASON THAN
+     FRAGILITY. MINTY CONFIRMED S80: FRACTIONAL SHIPPING UNITS ARE
+     PERMITTED BY DESIGN. Evidence in the same query — DO-0008 and
+     DO-0009 both carry packing_units = 0.5 (10 Kg of a 20 Kg/unit
+     product). That is CORRECT, not a defect. ⚠ DO NOT add an
+     integer guard at DO entry.
+     → THEREFORE Math.round at :246 is WRONG IN PRINCIPLE, not
+     merely fragile: a 0.5-unit DO would round to 0 or 1 on the
+     packing slip and SILENTLY SHIP A DIFFERENT QUANTITY THAN THE
+     DO AUTHORISES. It has not bitten only because no fractional DO
+     has yet reached a packing slip (both 0.5 rows show
+     qty_shipped 0). ⚠ SAME SHAPE AS J74: safe by accident of the
+     data, not by code.
+
+     ⚠ THE TWO SCREENS DISAGREE ON WHAT shipped_qty MEANS:
+       create-packslips:293  posts the divided-then-rounded UNIT count
+       edit-packslips:507    posts shipping_order_units × wt_per_unit
+                             — which is Kg, not units
+     Same field name, same column, two different quantities
+     depending on which screen wrote it. ⚠ The edit path is
+     currently unreachable for DOs (J86), so only the create value
+     has ever been stored — which is why the column is clean today.
+     Both must be settled together in P7.
+
+     ▶ THE FIX IS ONE CHANGE AND IT SOLVES ALL OF IT: read the
+     stored packing_units instead of rounding a division. Removes
+     the acrobatic, handles fractions correctly, and makes the two
+     screens agree.
+
+     ✓ ALSO CONFIRMED THIS PASS — createPS (PackingSlips.js) writes
+     dispatchorders.qty_shipped and soproducts.quanity_shipped_to_date
+     and does NOT touch formulations.inventory or inventory_units.
+     Stock does not move at PS creation. Minty's stated rule, §2
+     Core #2 and 3A.5 row 9 all agree, now verified in code.
+     qty_shipped accumulates (existing + incoming), so a DO can
+     legitimately receive quantity more than once.
+
+     STATUS: column verified clean. The route is a P2 site living
+     inside the P7 files → fix inside P7. Fractional-units rule
+     locked into Section 1 carry-forward.
+========
 END SECTION J
 ────────────────────────────────────────────────────────────
