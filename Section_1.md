@@ -7,15 +7,14 @@
 
 ---
 
-## ▶ RESUME HERE — S81 START (Claude reads this FIRST, before anything)
+## ▶ RESUME HERE — S82 START (Claude reads this FIRST, before anything)
 
 ```
-LAST SESSION   S80 — the DO → PACKING SLIP WALK. Read-only on the
-               app; one DO created on dev and one on prod (see
-               RESIDUE below). NO APP CODE TOUCHED.
-
-THIS SESSION   S81 — finish the reads, then BUILD P7. The domain
-               call is MADE and the design is settled (see P7).
+LAST SESSION   S81 — P7 BUILD BEGUN. Slices 1 and 2 written,
+               committed, and slice 2 deployed + verified on dev.
+               FIRST APP CODE SHIPPED SINCE S71.
+THIS SESSION   S82 — SLICE 3 then SLICE 4. Everything needed is
+               below. Do NOT re-derive any of it.
 
 DOCS REPO IS LIVE — this is the standing paste.
   Repo      Mintygadhok/abletrace-lab-docs   (public)
@@ -25,30 +24,15 @@ DOCS REPO IS LIVE — this is the standing paste.
             Others (3A/3B/4/5/6) fetched by name when the work needs them.
   ⚠ CACHE   the raw URL LAGS SEVERAL MINUTES behind a fresh commit. Minty's
             GitHub WEB VIEW is immediate truth. Do NOT conclude "it didn't
-            commit" from a stale fetch. (Learned S76.)
+            commit" from a stale fetch. (Learned S76. Bit again S81 — four
+            turns lost. If a fetch looks stale, ask Minty to PASTE the
+            section rather than re-fetching; re-fetching returns the same
+            cached copy.)
 
-WHAT S80 DID — do not re-derive any of it.
-
-  ✓ 3A.4 WALKED for real: /Edit-SO → Create DO popup → /Dispatch-orders
-    → Create Packing Slip → DO-select popup → /Create-Packslips.
-    Fixture test1.39 / FO-0004 at 1.39 Kg per BS Pouch — deliberately
-    NOT 1:1, per JT21.
-  ✓ P35 SETTLED — UNREACHABLE. → J86.
-  ✓ THE P7 DOMAIN CALL IS MADE. Ten fields, listed in P7 below.
-  ✓ THE SEQUENCING DECISION IS MADE: bundle, do not split. → P7.
-  ✓ THE EXISTING SELECTION LOGIC FOUND AND READ (do-list.component).
-    P7 is an EXTENSION of it, not a new build. → J87.
-  ✓ qty_shipped VERIFIED UNITS-CLEAN against dev DB → J88.
-  ✓ "ACROBATICS" adopted as standing vocabulary → §2 Core #1.
-  ✓ add-dispatch (v1) found DEAD → P36.
-
-▶▶ THE NEXT JOB — S81. P7 IS NOW THE TOP PRIORITY (Minty, S80). ◀◀
-   1  READ MO-RELEASE GLOBAL SELECT (P6 says do this BEFORE designing;
-      it is still unread). /Release-mat-details +
-      MaterialsProductsReleased.js
-   2  READ editPackslips + InActivatePs whole (PackingSlips.js:180-431).
-      Settles the remove-one-DO question and the cancel/return path.
-   3  THEN build P7.
+▶▶ THE NEXT JOB — S82. P7 SLICE 3, THEN SLICE 4. ◀◀
+   Both are fully specified in the P7 block below, with file paths,
+   line numbers and the exact change. START WRITING THE PATCH — the
+   reading is done.
 
 ⚠ CARRY FORWARD — settled, do not re-open:
   • "Fix A" does not exist and never did (J81).
@@ -57,6 +41,9 @@ WHAT S80 DID — do not re-derive any of it.
   • J80's DISPLAY finding is withdrawn; its STOCK-HOP findings stand (J83).
   • Fractional shipping units are PERMITTED BY DESIGN (Minty, S80).
     packing_units = 0.5 is CORRECT. Do not add an integer guard. → J88.
+  • A DO coming off a packing slip ALWAYS returns its quantity and becomes
+    available again — whether one DO or all of them (Minty, S81). Cancel-
+    whole-slip already does this correctly; remove-one does not. → J92.
 ```
 
 ---
@@ -64,22 +51,74 @@ WHAT S80 DID — do not re-derive any of it.
 ## HEADS — ⚠ verify against the boxes before working (Section 0, rule 1.2)
 
 ```
-Frontend  53db203d — DEV + PROD in sync
-Backend   d3104ea  — DEV + PROD in sync
-Trees clean. Health 200 both boxes. PM2 online both (abletrace-dev /
-abletrace-backend). PROD IS HEALTHY.
-⚠ VERIFIED LIVE ON BOTH BOXES AT S80 OPEN.
+Frontend  DEV  0f4c0344   ⚠ AHEAD OF PROD — S81 slice 2
+          PROD 53db203d   unchanged
+Backend   DEV  ff5d183    ⚠ AHEAD OF PROD — S81 slice 1
+          PROD d3104ea    unchanged
+
+⚠ THE DIVERGENCE IS DELIBERATE AND EXPECTED. S81 shipped P7 slices 1
+  and 2 to DEV ONLY. Nothing was promoted to prod. Do NOT "reconcile"
+  by promoting — P7 is mid-build and slice 1 is dormant until slice 4.
+
+Trees clean both boxes at S81 close. Health 200 both. PM2 online both
+(abletrace-dev / abletrace-backend). PROD IS HEALTHY.
 
 (Prod's frontend CHECKOUT reads 9bce0238 — the S66 lag trap. The
  SERVED bundle is 53db203d. Cosmetic. → P8)
 
 ROLLBACK POINTS:
-  www-html.bak-prod-53db203d4ef4
-  www-html.bak-dev-53db203d4ef4
+  DEV frontend   www-html.bak-dev-0f4c0344a4d1     (S81, current)
+  PROD frontend  www-html.bak-prod-53db203d4ef4
+  DEV backend    /home/ubuntu/PackingSlips.js.bak-S81
+  DEV frontend   /home/ubuntu/do-list.component.ts.bak-S81
+```
 
-⚠ NO APP CODE TOUCHED IN S73, S75, S76, S77, S78, S79 OR S80 — all
-walk / documentation / verification sessions. Boxes have been at these
-HEADs since S71.
+## ⚠ CI HAS CHANGED — PUSH NOW AUTO-BUILDS DEV (corrected S81)
+
+```
+The old record described a manual workflow_dispatch with a prod|dev
+target input. THAT IS STALE. The workflow was changed ~S79/S80:
+  PUSH to main  → automatically builds DEV. No manual trigger.
+  PROD          → still a deliberate manual dispatch.
+So: git push, then just WATCH the Actions tab. Do not press Build
+Frontend manually — that starts a redundant second run.
+Build time observed: 6-10 minutes.
+```
+
+## THE FRONTEND DEPLOY LOOP — exact commands (S81-verified)
+
+```
+1  [DEV]  edit + commit + push
+2  WEB    github.com/Mintygadhok/abletrace-lab-frontend/actions
+          wait for green (6-10 min)
+3  WEB    open the run, download the artifact
+          ⚠ CONFIRM the filename starts dist-dev- (rule 5.3)
+4  [MAC]  ~/promote.sh ~/Downloads/<artifact.zip> dev
+5  BROWSER  Cmd+Q ENTIRELY. Not a hard reload. Lazy popup chunks
+          survive everything else (J66).
+
+⚠ promote.sh lives on the MAC, not on a box. Usage:
+    ./promote.sh <artifact.zip> <dev|prod>
+⚠ ssh/scp always from the MAC:
+    ssh -4 -i ~/.ssh/abletrace-lab-key.pem ubuntu@16.55.10.205
+    (the -4 is the S73 IPv6 workaround → P23)
+```
+
+## ⚠ DEV HAS NO ~/.my.cnf — THE DB QUERY RECIPE (J43)
+
+```
+A bare `mysql` on dev hits a nonexistent local socket. Build a temp cnf
+from .env. This block is one paste and self-cleans:
+
+python3 - <<'EOF'
+import re
+src = open('/home/ubuntu/abletrace-lab-backend/.env').read()
+m = re.search(r'DATABASE_URL=mysql://([^:]+):([^@]+)@([^:/]+)', src)
+open('/tmp/q.cnf','w').write("[client]\nuser=%s\npassword=%s\nhost=%s\n" % (m.group(1), m.group(2), m.group(3)))
+EOF
+chmod 600 /tmp/q.cnf
+mysql --defaults-file=/tmp/q.cnf abletracelab_live -e "<QUERY>"
+rm -f /tmp/q.cnf
 ```
 
 ## DEV FIXTURE RESIDUE — ⚠ note before reusing company 464 as a baseline
@@ -88,31 +127,26 @@ HEADs since S71.
 1. Ginger Powder MAT-5 carries Eggs        (S78, not reverted)
 2. MAT-6 missing its Sesame allergen       (S73 → P24)
 3. FO-0005 forked to two versions + srf rows 1042/1043  (S77)
-4. DO-0010 + PS-0005 created on SO-0009 (test1.39/FO-0004)  (S80)
+4. DO-0010 + PS-0005 on SO-0009 (test1.39/FO-0004)  (S80)
+5. S81 ADDED: SO-0011 · DO-0011 · PS-0006 (CANCELLED, status_id 2).
+   DO-0011 is live and unallocated — a ready-made fixture for the
+   slice 3 units test. FO-0004 SOH 41# (56.99 Kg).
 
-⚠ ALSO: 464's testpdt260703 runs at 20 Kg per shipping unit and some
-  test products run at 1 Kg per unit. A 1:1 ratio makes a division
-  INVISIBLE and is what produced J80's false display finding. Do NOT
-  verify any units↔Kg path on a 1:1 fixture. USE test1.39 / FO-0004
-  (1.39 Kg per BS Pouch) — S80 proved it exposes the arithmetic.
-  (JT21 · J83)
+⚠ THE GOOD FIXTURE FOR ANY UNITS WORK: test1.39 / FO-0004, 1.39 Kg per
+  BS Pouch. NOT 1:1, so a division cannot hide (JT21). Use it.
+⚠ FRACTIONAL FIXTURES: DO-0008 and DO-0009 both carry packing_units
+  0.5 with qty_shipped 0. These are THE test rows for slice 3 — a
+  0.5-unit DO has never reached a packing slip, which is the only
+  reason the Math.round bug has not bitten.
 ```
 
-## ⚠ PROD RESIDUE — S80
+## ⚠ PROD RESIDUE — S80, STILL OPEN
 
 ```
-DO-0006 was created on PROD (trace.mintekfoodsafety.com) against
-SO-0004, customer "Jade 3", product testpdt260703 / FO-0001-4,
-1# (20 Kg), lot Pdt-260701-1.
-⚠ CREATED IN ERROR — the walk was meant to be on dev. Caught and the
-  walk moved to dev immediately; nothing further was done on prod.
-⚠ The fixture is the 464 sandbox family, so it is almost certainly
-  sandbox data — but the company_id was NEVER CONFIRMED. One query
-  settles it:
-    SELECT id, internalCode, company_id FROM somanagement
-    WHERE internalCode='SO-0004';
-  → tracked as P37. Recorded here so a future session does not meet
-  an unexplained prod DO row and mistake it for client data.
+DO-0006 created on PROD in error during the S80 walk (SO-0004,
+customer "Jade 3", testpdt260703 / FO-0001-4, 1# (20 Kg), lot
+Pdt-260701-1). Almost certainly sandbox company 464 but NEVER
+CONFIRMED. One query settles it → P37.
 ```
 
 ---
@@ -120,191 +154,205 @@ SO-0004, customer "Jade 3", product testpdt260703 / FO-0001-4,
 ## PENDING WORK — everything outstanding, in priority order
 
 > ⚠ ONE FLAT LIST. NEW ITEMS APPEND AT THE BOTTOM with the next free number (rule 7.3). Minty re-ranks at open; Claude never renumbers.
-> ⚠⚠ **P7 TAKES PRECEDENCE OVER EVERYTHING ELSE IN THIS LIST.** Minty's call, S80. The DO → packing-slip redesign is the active job: it is designed, the domain call is made, and the code addresses are recorded (J86 · J87 · J88). ⚠ P7 KEEPS ITS NUMBER — **the list is ordered by PRIORITY, and a P-number is a permanent ID, not a position**, exactly as J-numbers are. Do NOT renumber the queue to put it first; Section 5 entries point at these numbers.
-> ⚠ THE FULL RE-RANK IS STILL OUTSTANDING. Only ONE decision has been made (P7 to the front). The queue has not had a full pass since S73 and several items changed shape in S79 and S80. ▶ Minty's, one pass, at session open.
-> ⚠ Each line points at its Section-5 entry. EVIDENCE lives there, not here.
+> ⚠⚠ **P7 REMAINS THE ACTIVE JOB.** Slices 1 and 2 are DONE. Slices 3 and 4 are next and are fully specified below.
+> ⚠ THE FULL RE-RANK IS STILL OUTSTANDING — no full pass since S73. ▶ Minty's, one pass, at session open.
 
-**P1  DOCUMENTATION CONVERGENCE — THE FOLD.** ⚠ MINTY-SET, S73.
-- ✅ **DONE.** All eight sections (0, 1, 2, 3A, 3B, 4, 5, 6) converted and live in the repo. Section 4 was built S79/S80.
-- ⚠ REMAINING: delete the two dead physical files → P20 (old Section J) and P22 (old Section A).
+**P7  PACKING-SLIP REDESIGN — ⚠ IN BUILD. SLICES 1-2 DONE, 3-4 NEXT.**
 
-**P2  UNITS FIXES — ACT ON THE S73 WALK.** ⚠ MINTY-SET, S73. ⚠ A CAMPAIGN, NOT A FIX (re-scoped S79).
+```
+SLICE 1  ✅ DONE S81 — backend, commit ff5d183 (dev only)
+         Deleted the throwing inventory loop in editPackslips
+         (PackingSlips.js ~line 330). Rewrote the deletedDos branch
+         (~line 340) to return qty_shipped + quanity_shipped_to_date
+         per DO, reading the STORED PackingSlipDOs.shipped_qty.
+         ⚠ DORMANT AND UNTESTED — the buttons that reach it do not
+         exist yet. Slice 4 makes it live. Test it THEN.
 
-⚠ **GATE RESOLVED S79 — J13 WAS RIGHT, J80 WAS WRONG ON DISPLAY.** Full evidence in J83. Do NOT re-derive:
+SLICE 2  ✅ DONE S81 — frontend, commit 0f4c0344, deployed to dev
+         do-list.component.ts. Added doLotCode / doMatchKey /
+         doFilterKey helpers. getSelectedDo now auto-selects every
+         DO matching lot+customer+address; list filters on
+         customer+address.
+         VERIFIED LIVE: ticking DO-0004 auto-ticked DO-0005 and
+         DO-0006 (same lot/customer/address, DIFFERENT SO — correct);
+         DO-0008 stayed unticked (different lot). List 6 rows → 4.
+         ⚠ THE CUSTOMER HALF IS UNPROVEN. No dev fixture has two
+         different customers sharing one address, so address alone
+         would have produced the same result. Not a defect — an
+         evidence gap. → J93.
+
+▶ SLICE 3 — THE UNITS FIX. START HERE IN S82.
+   THE CHANGE: read the STORED packing_units instead of dividing.
+   FILE 1  create-packslips.component.ts:246
+           builds units as (qty_to_ship / batch_qty) * (batch_qty /
+           wgt_kgs_per_unit) wrapped in Math.round — algebraically
+           just qty_to_ship ÷ wgt. That is R2 acrobatics (§2 Core #1).
+           ⚠ response.packing_units — the STORED figure — is ALREADY
+           on the same object and used at :247. Read it, delete the
+           division.
+   FILE 2  edit-packslips.component.ts:245, 248, 267, 322 — same
+           family. ⚠ AND :506-507 posts shipped_qty as
+           shipping_order_units × wt_per_unit, which is Kg, not units.
+           The two screens disagree about what the field means (J88).
+           Settle both to the stored unit count.
+   ⚠ WHY IT MATTERS: Math.round makes it correct TODAY only because
+     no fractional DO has reached a slip. A 0.5-unit DO would round
+     to 0 or 1 and SHIP A DIFFERENT QUANTITY THAN THE DO AUTHORISES.
+   TEST: put DO-0008 or DO-0009 (packing_units 0.5) on a packing slip.
+     Before the fix it rounds. After, the slip must carry 0.5.
+     Verify in the DB, not the toast (JT12).
+
+▶ SLICE 4 — THE SHEET AND THE BUTTONS. Makes slice 1 live.
+   1  RE-ENABLE the add-DO button:
+      edit-packslips.component.html:198-200 — currently COMMENTED
+      OUT. It is the only caller of addItem() (ts:348), which is the
+      only thing that populates shipmentList, which is the only
+      source of req.body.DOs. (J86)
+   2  ⚠ ADD A SAVE BUTTON. FOUND S81: /Edit-Packslips has only SHIP
+      and CANCEL. No Save. So removeoldItem() fills deletedDOs but
+      the ONLY way to post it is Ship — which also sets
+      shipped_flag: true, terminally (J16). Remove-one-DO is
+      therefore unusable today, not merely broken. → J92.
+      A commit path that does NOT ship is required.
+   3  THE ROW — ten fields, replacing the stacked form:
+      MO Number · Internal DO Number · Customer PO No · Product ·
+      Product External Code · Pdt Lot Code · Best Before ·
+      Order Qty (Units) · Shipped Units (#) · Shipped Qty
+      DROPPED: Product Internal Code · System SO No
+      TO HEADER: Customer · Delivery Address
+      ⚠ MO and DO numbers KEPT DELIBERATELY — the handles an
+      operator needs when a customer phones.
+      ⚠ Multi-DO already works (create-packslips :225 loops the
+      array). This is PRESENTATION ONLY.
+   4  PO BARCODE tabs — one per distinct SO-External across the
+      moved DOs, each with a scannable barcode. ⚠ Into the PRINTED
+      DOCUMENT, not the Zebra.
+   5  ON SAVE: stay on the slip, show the PS number, allow more DOs
+      to be moved in. Do NOT navigate back.
+   6  RENAMES: popup title "Dispatch Orders" → "Select DOs to Move to
+      Packing Slip"; its button "Save" → "MOVE TO PACKING SLIP".
+      ⚠ Minty flagged the button wording again S81.
+   7  ABSORB: the 3 remaining "Customer SO No" → "Customer PO No"
+      labels · P35 (the editPackslips throw — already fixed by
+      slice 1, verify when reachable) · the attach-a-doc-to-an-
+      unshipped-slip file loss.
+
+▶ NOT YET SCOPED — after slice 4:
+   THE SCAN. doLotCode() (slice 2) is the hook. A scanner is a
+   keyboard; it types into the search box, which already filters on
+   lot code. Scan and click must be ONE function taking a LOT CODE
+   with two thin callers (Minty, S80).
+   THE AMBIGUITY POPUP. Only at the FIRST pick, and only when one lot
+   resolves to more than one customer+address pair.
+   ⚠ DOMAIN CALL STILL OPEN: should documents be attachable to a slip
+   BEFORE dispatch? Minty's instinct: yes.
+```
+
+[J86 · J87 · J88 · J89 · J90 · J91 · J92 · J93]
+
+**P1  DOCUMENTATION CONVERGENCE — ✅ DONE.** All eight sections live in the repo. ⚠ REMAINING: delete the two dead physical files → P20 (old Section J) and P22 (old Section A).
+
+**P2  UNITS FIXES — ACT ON THE S73 WALK.** ⚠ A CAMPAIGN, NOT A FIX.
+⚠ GATE RESOLVED S79 — J13 WAS RIGHT, J80 WAS WRONG ON DISPLAY (J83). Do NOT re-derive:
   • Trace_ProductHeaderView is Kg-anchored THROUGHOUT. Every `_su` field is `<Kg> / wgt_kgs_per_unit`.
   • The Products list (admin-formulation.component.ts:878) divides SEPARATELY, and divides the OLD Kg column.
-  • ⚠ SCALE: ~30+ division sites. Many disguise it as `(qty / batch) * (batch / wgt)` — algebraically identical.
-  • ⚠ THE CORRECT PATTERN ALREADY EXISTS: PopUps/stock-info.component.ts:188 reads inventory_units and MULTIPLIES. That is R1. Copy it.
+  • ⚠ SCALE: ~30+ division sites, many disguised as `(qty / batch) * (batch / wgt)`.
+  • ⚠ THE CORRECT PATTERN EXISTS: PopUps/stock-info.component.ts:188 reads inventory_units and MULTIPLIES. That is R1. Copy it.
+⚠ **THE TWO PACKING-SLIP SITES ARE NOW P7 SLICE 3** — do not fix them separately.
+⚠ **S81 ADDED A NEW SITE TO FIND:** `soproducts.quanity_shipped_to_date` accumulates UNITS into a row whose sibling `quantity` column is Kg. Same mixed-units-on-one-row shape as JT4. Nobody has logged where it is read. → J91.
+▶ NEXT ACTION IS AN INVENTORY, NOT A FIX. List every division site with file, line, and the stored units column that should replace it. THEN rank.
+Sub-items behind the inventory: R5 display switch · MO-CREATE round-trip (add-mlo.ts:204-205, MO-0007 plan reads 50.004#) · DO/MR/intermediate-release subtract stored units · retire formulations.inventory.
+[3A.5 · §2 GR5 · J13 · J83 · J88 · J91]
 
-⚠ **S80 ADDED TWO SITES, BOTH IN THE P7 FILES** (→ J88):
-  • `create-packslips.component.ts:246` — the disguised divide, wrapped in `Math.round`. ⚠ The round makes it CORRECT TODAY but WRONG IN PRINCIPLE now that fractional units are confirmed by design.
-  • `edit-packslips.component.ts:245, 248, 267, 322` — same family.
-  ▶ Both are fixed by the SAME one-line change: read the stored `packing_units`, stop dividing. Do it as part of P7, not separately.
+**P3  CONFIRM THE PRE-8.4 FINAL SNAPSHOT EXISTS (minutes).** abletrace-lab-prod-old1 deleted; was to be deleted WITH a final snapshot. ⚠ UNVERIFIED. RDS → Snapshots. [3B.3]
 
-▶ NEXT ACTION IS AN INVENTORY, NOT A FIX. List every division site with its file, line, and the stored units column that should replace it. THEN rank the work.
+**P4  FILE-SIZE GATE + ALERT SWEEP.** ~448 alerts across ~110 files; 5 done. Every error reads "[object Object]". ⚠ The scan field must NOT raise a blocking alert on a bad scan. [J79, J29·JT18]
 
-Sub-items, still valid, sequenced behind the inventory:
-1. R5 DISPLAY SWITCH — the campaign above.
-2. MO-CREATE round-trip (DEFECT 1): store the entered units, or carry batches at full precision. add-mlo.ts:204-205. ⚠ SEEN LIVE S78: MO-0007 plan reads 50.004#.
-3. CLEANUP: DO/MR/intermediate-release subtract stored units instead of Kg×lot-ratio. Add a units column to rejectmaterialandproduct.
-4. R6: retire formulations.inventory (old Kg line) once display no longer reads it.
+**P5  PS GUARD BROWSER-CHECK (minutes).** Untested code on the live box. ⚠ Test attach-then-ship or an already-shipped slip. [J75]
 
-⚠ Touches live-client display. Dev-first, verify-in-DB, promote. [3A.5 · §2 GR5 · J13 · J83 · J88]
-
-**P3  CONFIRM THE PRE-8.4 FINAL SNAPSHOT EXISTS (minutes).** abletrace-lab-prod-old1 is deleted. It was to be deleted WITH a final snapshot — the only frozen record of the 8.0 DB. ⚠ UNVERIFIED. RDS → Snapshots. [3B.3]
-
-**P4  FILE-SIZE GATE + ALERT SWEEP (pays back every session).** Browser-side file-size check with a proper message; fold into the alert→toaster conversion. ~448 alerts across ~110 files; 5 done. Every error reads "[object Object]". Fix the top ~10 error paths first. ⚠ S80 NOTE: the scan field must NOT raise a blocking alert on a bad scan — it would stop the operator dead mid-scan. Inline "no match" only. [J79, J29·JT18]
-
-**P5  PS GUARD BROWSER-CHECK (minutes).** Untested code on the live box. Attach a file to a packing slip, confirm it lands. ⚠ Test attach-then-ship or an already-shipped slip — attaching to an unshipped slip loses the file (P7). [J75]
-
-**P6  PO RECEIVING REDESIGN (major, own session).** Scan-to-find, auto-open, global select, ordered-qty default; only Receiving Ref + Vehicle Condition by hand. ⚠ **STILL NOT READ AT S80 CLOSE:** the MO-Release Global Select mechanism (/Release-mat-details + MaterialsProductsReleased.js). P6 says read it BEFORE designing, and P7 should reuse the same pattern. ⚠ THIS IS THE FIRST JOB OF S81. NOT STARTED. [3A.3]
-
-**P7  PACKING-SLIP REDESIGN — ⚠ DESIGNED S80, READY TO BUILD.**
-
-▶ **THE DOMAIN CALL IS MADE.** Minty narrated the whole design in S80. Full evidence and code addresses in J87. The design:
-
+**P6  PO RECEIVING REDESIGN (major, own session).** Scan-to-find, auto-open, global select, ordered-qty default.
+✅ **PRECONDITION MET S81 — MO-Release Global Select HAS NOW BEEN READ.** Findings:
 ```
-ENTRY          /Dispatch-orders → "Create Packing Slip" opens the
-               DO-select popup (it already opens automatically —
-               create-packslips ngOnInit line 81).
-               ⚠ RENAME it from "Dispatch Orders" to something that
-               says what it is: "Select DOs to Move to Packing Slip".
-               Its button becomes "MOVE TO PACKING SLIP".
-
-THE GROUPING   Picking ONE DO auto-selects every other DO matching
-RULE           ALL THREE:  same LOT CODE · same CUSTOMER · same
-               SHIPPING ADDRESS.
-               ⚠ LOT CODE IS A HARD BOUNDARY. A different lot is
-               NEVER auto-selected, even for the same customer and
-               address. REASON (Minty): boxes of the same product
-               look identical in the warehouse; reading lot codes
-               off them by eye is error-prone. The rule exists so
-               the operator never has to distinguish two lots
-               visually.
-
-THE FILTER     After the first pick the list FILTERS DOWN to that
-               customer + address. Other customers vanish. He then
-               works down what remains — other lots, other products,
-               other SOs — each pick unambiguous by construction.
-               ⚠ The address half of this ALREADY EXISTS
-               (do-list.component.ts:69). Lot and customer are not
-               in the filter yet.
-
-THE SCAN       He scans the LOT CODE (already printed on the box —
-               the finished-product label is generated at START
-               PRODUCTION, not here). The scanner is a keyboard; it
-               types into the search field, which ALREADY filters on
-               lotCode only (filterPredicate :75, :155).
-               ⚠ SCAN AND CLICK MUST BE ONE FUNCTION taking a LOT
-               CODE, with two thin callers. Click reads the lot off
-               the row it was given; scan passes the string straight
-               in. That is what keeps them provably identical.
-               Relationships: lot→MO is 1:1 · lot→DOs is 1:MANY ·
-               DO→lot is 1:1 (a DO NEVER spans two lots).
-
-THE AMBIGUITY  ⚠ Only ever at the FIRST pick, and only when that lot
-POPUP          resolves to MORE THAN ONE customer+address pair.
-               Popup: "This lot ships to X and Y — which is this
-               shipment for?" He picks once; everything after is
-               automatic. Probably SCAN-ONLY: on the manual route
-               the click IS the choice.
-
-THE SHEET      /Create-Packslips renders the DO as a ROW, not a
-               stack of form fields. ⚠ PRESENTATION ONLY — multi-DO
-               already works (doList afterClosed :225 loops the
-               array and pushes one form row per DO).
-
-THE ROW —      MO Number · Internal DO Number · Customer PO No ·
-TEN FIELDS     Product · Product External Code · Pdt Lot Code ·
-               Best Before · Order Qty (Units) · Shipped Units (#) ·
-               Shipped Qty
-  DROPPED      Product Internal Code · System SO No
-  TO HEADER    Customer · Delivery Address (already in the header —
-               removing them from each row removes duplication, not
-               information)
-  ⚠ MO and DO numbers KEPT DELIBERATELY (Minty): they are the
-    handles the operator needs when a customer phones about a
-    shipment.
-  ⚠ THE OLD "SLIMMED 8 FIELDS" IS SUPERSEDED, NOT PENDING. The
-    count was recorded without its list and the list never existed.
-    Do not go looking for it.
-
-PO BARCODE     The DISTINCT SO-External values (customer PO numbers)
-               across the moved DOs appear as tabs, one per distinct
-               PO, each with a barcode the customer can scan.
-               ⚠ THIS GOES INTO THE PRINTED DOCUMENT, not to the
-               Zebra. The packing slip is a generated document; the
-               ZPL label path is a different surface (§4 print
-               language / MoSheetPdfService).
-
-ON SAVE        ⚠ DO NOT navigate back. Stay on the slip. Show the
-               packing slip number. Allow more DOs to be moved in.
-               ⚠ THIS IS THE PART THAT TOUCHES THE BROKEN BRANCH.
-
-LABELS         ⚠ NOT part of this work. The finished-product label
-               (lot code + barcode) is generated at START PRODUCTION.
-               By packing-slip time it is already on the box.
+FILE   src/app/Layouts/admin-dashboard/warehouse/mfg-lot-codes/
+       release-mat/release-mat-details/  (1243-line .ts, 265-line .html)
+BACK   MaterialsProductsReleased.js:150 createReleaseMaterialProductsV2
+CONTROL  html:35-40 one "Select All" checkbox → setAllSelect()
+HANDLER  ts:176-192 three near-identical blocks (materials, formulas,
+         packaging) each setting x.isDirectQty = !!this.selectAll
+PER-ROW  html:44 / 114 / 179, each with a guard:
+         (released_qty < final_qty) && fill...FromList(...)
+FIELD    the selection flag is `isDirectQty`, NOT `selected`
+⚠ IT IS A SELECT-ALL, NOT A SELECT-MATCHING. No predicate. What
+  transfers to P6/P7 is the SHAPE (one control, a flag per row, a
+  fill-handler per list, a guard that skips ineligible rows) — not
+  the matching logic, which does not exist here.
+⚠ DEAD CODE IN THIS FILE → P38.
 ```
+[3A.3 · J89]
 
-▶ **SEQUENCING — DECIDED S80: BUNDLE, DO NOT SPLIT.** The opener asked whether the defects and the redesign touch the same lines or just the same file. Answer: **the same lines.** The redesign must re-enable the very branch whose backend is broken, and the acrobatic divides sit in the exact display code being rewritten. Fixing them separately would mean writing a correct backend for a frontend path that is still commented out — untestable end to end. [J86 · J87 · J88]
+**P8  PROD FRONTEND CHECKOUT LAGS THE SERVED BUILD (minutes).** A git pull tidies it. ⚠ Reading a frontend file from prod's checkout shows code that is NOT LIVE. [3B.4]
 
-⚠ **ALSO ABSORBS:** the 3 remaining "Customer SO No" → "Customer PO No" labels · P35 (the editPackslips throw) · the attach-a-doc-to-an-unshipped-slip file loss. ▶ DOMAIN CALL STILL OPEN on that last one: should documents be attachable BEFORE dispatch? Minty's instinct: yes. [J74, J75, J16, J85, J86, J87]
+**P9  FEATURE A — FOOD SAFETY TOGGLE: declare the model attribute.** One line; unblocks Feature A. [J47·JT2]
 
-**P8  PROD FRONTEND CHECKOUT LAGS THE SERVED BUILD (minutes).** A git pull tidies it; does not affect what serves. ⚠ Reading a file from prod's checkout shows code that is NOT LIVE (caused a stale read S70). A diagnosis trap, not an app bug. [3B.4]
+**P10  MASTER-RECORD FIELD UNLOCKS.** Name / Storage Temp / Shelf Life / My Code edit IN PLACE. Also fixes My Code showing literal "null" — ⚠ SEEN AGAIN S81 on the packing slip ("Product External Code: null"). [§2 Master edit map]
 
-**P9  FEATURE A — FOOD SAFETY TOGGLE: declare the model attribute.** DB column exists; code half does not. ⚠ Without it the toggle write silently does nothing. One line; unblocks Feature A. [J47·JT2]
+**P11  RECEIVE PRODUCT CAN BE SAVED WITH NO MATERIAL RELEASED.** Needs a backend guard. [J24]
 
-**P10  MASTER-RECORD FIELD UNLOCKS.** ⚠ RULE SET S73. Name / Storage Temp / Shelf Life / My Code edit IN PLACE. Only material/composition change forks a version. Material AND Formulation edit. Also fixes My Code showing literal "null" — ⚠ SEEN AGAIN S80 on the SO line ("External ID: null"). [§2 Master edit map]
+**P12  SWEEP MAC ~/Downloads (minutes).** ⚠ CONFIRMED WORSE S81 — now also holds several patch .py files and multiple dist zips. promote.sh deploys whatever zip you name. [3B.4]
 
-**P11  RECEIVE PRODUCT CAN BE SAVED WITH NO MATERIAL RELEASED.** Button disabled but screen reachable by URL and saves. ⚠ A disabled button is not a control. Needs a backend guard. Logged S50. [J24]
+**P13  FINISH GLUTENULL ONBOARDING.** [§2 Logic C]
 
-**P12  SWEEP MAC ~/Downloads (minutes).** 11+ old build artifacts back to S61. ⚠ promote.sh deploys whatever zip you name — a stale-zip promote is a real risk. [3B.4]
+**P14  REVIEW THE S53 FOOD-SAFETY DOWNLOAD BLOCKS.** [J36, J37]
 
-**P13  FINISH GLUTENULL ONBOARDING.** Rename "Oats"→"Oats Gluten Free", add an "Oats" material, re-import the 4 failed products (importer dedups by title, re-import safe). [§2 Logic C]
+**P15  PARAMETERIZE WhC_GetMoProductReceivingDetails_SP.** [J78]
 
-**P14  REVIEW THE S53 FOOD-SAFETY DOWNLOAD BLOCKS — WHERE DO THEY BELONG?** Three blocks parked (Procedures/Documents PDF, HACCP Excel, branding rule). ⚠ MIXED — some file mechanics, some DESIGN/DOMAIN. ▶ MINTY SPLITS: design → Section 4; mechanics → 3A.7 / Section 5. Parked, not lost. [J36, J37]
+**P16  BACK UP /home/ubuntu OFF THE BOX.** ⚠ THE STANDING RISK. [JR14 · JT20 · 3B.9]
 
-**P15  PARAMETERIZE WhC_GetMoProductReceivingDetails_SP.** Last string-interpolated proc call. id is app-controlled + numeric, risk LOW. Do it when the security pass next touches procs. [J78]
+**P17  DEACTIVATE THE TWO OLD-ACCOUNT IAM KEYS.** ⚠ Sequenced AFTER the app.abletrace.ca switch. [J1, J34 · 3B.10]
 
-**P16  BACK UP /home/ubuntu OFF THE BOX.** ⚠ THE STANDING RISK. Every rebuild file lives on the un-backed-up prod box; the Drive copy is not verified current. Also at risk: deploy-frontend.sh, promote.sh, both nginx vhosts. [JR14 · JT20 · 3B.9]
+**P18  HACCP EDIT-CASCADE REWORK.** ⚠ FOOD-SAFETY-CRITICAL. OWN SESSION. DO NOT BUNDLE. [J4 · JT3 · 3A.7]
 
-**P17  DEACTIVATE THE TWO OLD-ACCOUNT IAM KEYS.** Still valid, still in git history. ⚠ Sequenced AFTER the app.abletrace.ca domain switch, per Minty. [J1, J34 · 3B.10]
+**P19  TRACEABILITY PDF CUTS A ROW ACROSS A PAGE BREAK (cosmetic).** [J25]
 
-**P18  HACCP EDIT-CASCADE REWORK.** ⚠ FOOD-SAFETY-CRITICAL. OWN SESSION. Safe: edit rows in place, append at end. NOT SAFE: insert mid-sequence; change hazard type on a saved row. ⚠ DO NOT BUNDLE. [J4 · JT3 · 3A.7]
+**P20  DELETE THE OLD SECTION J (housekeeping).**
 
-**P19  TRACEABILITY PDF CUTS A ROW ACROSS A PAGE BREAK (cosmetic).** ⚠ Known limitation, NOT a regression. Real fix is section-aware capture. [J25]
+**P21  THE OS RESTART — PENDING SINCE S35.** ⚠ Both boxes still show "System restart required", confirmed again S81. The boxes run DIFFERENT operating systems (prod 26.04 / dev 24.04.4), so a dev reboot rehearses nothing. ▶ (1) confirm `systemctl is-enabled pm2-ubuntu` on PROD; (2) reboot prod standalone with rollback ready; (3) reboot dev separately. [3B.2 · 3B.5 · J84]
 
-**P20  DELETE THE OLD SECTION J (housekeeping).** Pre-S72 J still sits below the rebuilt one. ⚠ Search it for anything the rebuild missed BEFORE deleting.
+**P22  DELETE THE OLD SECTION A (housekeeping).**
 
-**P21  THE OS RESTART — PENDING SINCE S35. ⚠ RE-SCOPED S79, THE REHEARSAL NO LONGER WORKS.** Both boxes still show "System restart required", confirmed again at S80 login on BOTH boxes. ⚠ **THE OLD PLAN IS DEAD** — the boxes run different operating systems (prod 26.04 / kernel 7.0.0; dev 24.04.4 / kernel 6.17.0, verified S79). A clean dev reboot proves nothing about prod. ▶ THE WORK IS NOW: (1) confirm `pm2 save` has been run and `pm2 startup` is enabled ON PROD — `systemctl is-enabled pm2-ubuntu`; (2) reboot prod as its own standalone step with the rollback path ready; (3) reboot dev separately whenever. [3B.2 · 3B.5 · J84]
+**P23  ADD AN IPv6 RULE TO DEV SSH (minutes).** ⚠ `ssh -4` is the standing workaround and was needed throughout S81. [3B.2]
 
-**P22  DELETE THE OLD SECTION A (housekeeping).** ⚠ A is folded and its routing record is at the foot of 3B. It is now a duplicate with known-false content. Delete it, do not edit it. ⚠ Read 3B's ROUTING RECORD once before deleting.
+**P24  RESTORE MAT-6 SESAME ALLERGEN ON DEV (minutes).**
 
-**P23  ADD AN IPv6 RULE TO DEV SSH (minutes).** ⚠ Mac drifts onto IPv6; dev SG allows one IPv4 /32, so SSH times out unpredictably. Add the Mac's IPv6 /128, or accept `ssh -4` as the standing workaround. [3B.2]
+**P27  DO-CREATE POPUP: Qty(Kg) SHOWS "NaN" WHILE TYPING.** [3A.5 row 8 · 3A.4]
 
-**P24  RESTORE MAT-6 SESAME ALLERGEN ON DEV (minutes).** ⚠ Removed during S73 testing, not restored. Dev fixture hygiene.
+**P29  ALLERGEN RECORD IS MUTABLE ON SHIPPED LOTS — DOMAIN DECISION FIRST.** ⚠ FOOD-SAFETY. ▶ Does a shipped lot need an immutable as-declared record? ⚠ ALSO OPEN, one query: does mlomanagement.allergens hold a stored value nobody reads? [J82 · J80]
 
-**P27  DO-CREATE POPUP: Qty(Kg) SHOWS "NaN" WHILE TYPING SHIPPING UNITS.** ⚠ S76. On /Edit-SO → Create Dispatch Order: a partial number (e.g. ".") makes derived Qty(Kg) show "NaN". Should render BLANK. Display-guard gap. Transient only; no stored-data impact. [3A.5 row 8 · 3A.4]
+**P30  ADD-FORMULATION INTERMEDIATE SUMMARY SHOWS Kg-ONLY DURING ADD (minutes).** Batch with the R5 display switch. [J17]
 
-**P29  ALLERGEN RECORD IS MUTABLE ON SHIPPED LOTS — DOMAIN DECISION FIRST.** ⚠ FOOD-SAFETY. Editing a material's allergen rewrites the allergen shown on already-shipped lots, company-wide, with no audit trail. Live re-derivation is CORRECT per Minty. ⚠ THE RISK IS THE REVERSE: an allergen genuinely present can be REMOVED by a later edit. ▶ DOMAIN CALL: does a shipped lot need an immutable as-declared record? ⚠ ALSO OPEN, one query: does mlomanagement.allergens hold a stored value nobody reads? [J82 · J80]
+**P31  PROD SSL CERTIFICATE HAS NO EMAIL REGISTERED (minutes).** ⚠ PROD GETS NO RENEWAL-FAILURE WARNING. FIX: `sudo certbot update_account -m info@abletrace.ca --agree-tos`. [3B.6]
 
-**P30  ADD-FORMULATION INTERMEDIATE SUMMARY SHOWS Kg-ONLY DURING ADD (minutes).** Display flips to #(Kg) after save; DB correct throughout. Frontend-only. Batch it with the R5 display switch. [J17]
+**P32  RDS DATABASES ARE PUBLICLY ACCESSIBLE — REVIEW.** [3B.3]
 
-**P31  PROD SSL CERTIFICATE HAS NO EMAIL REGISTERED — NO EXPIRY WARNING (minutes).** ⚠ `sudo certbot show_account` → "Email contact: none". ⚠ PROD GETS NO RENEWAL-FAILURE WARNING; a silent failure's first symptom is a browser security warning on a LIVE CLIENT SITE. FIX: `sudo certbot update_account -m info@abletrace.ca --agree-tos`, then confirm. ⚠ Account metadata only — does not reissue the cert. [3B.6]
+**P33  CERT-STATUS INDICATOR SHOWS RED REGARDLESS OF STATE.** [§4 status colours]
 
-**P32  RDS DATABASES ARE PUBLICLY ACCESSIBLE — REVIEW WHETHER THEY NEED TO BE.** ⚠ Both instances carry public endpoints. NOT WIDE OPEN — password + SG rule in front — but a larger front door than the architecture needs. ▶ REVIEW: can prod RDS be private-only with EC2 reaching it over the VPC? ⚠ The Mac connects directly today for admin queries; that is what would stop working. Not urgent. [3B.3]
+**P34  PROD INSTALLS ITS OWN UPDATES, UNATTENDED AND UNDOCUMENTED.** ⚠ Do NOT disable casually. [3B.2 · J84]
 
-**P33  CERT-STATUS INDICATOR SHOWS RED REGARDLESS OF STATE (functional, not cosmetic).** Colour should be STATE-DRIVEN: red = no certificate · amber = expired · green = in-date. Currently hardcoded red. ⚠ A permanently-red indicator either trains operators to ignore it, or hides a genuine expiry. App-wide, once. [§4 status colours]
+**P35  EDITING A PACKING SLIP TO ADD A DISPATCH ORDER THROWS.** ⚠ **THE BACKEND HALF WAS FIXED IN S81 SLICE 1** (loop deleted, commit ff5d183). Still UNREACHABLE and therefore UNTESTED. ▶ Verify when slice 4 restores the button; do not close until then. [§2 to-verify 5 · J85 · J86 · 3A.4]
 
-**P34  PROD INSTALLS ITS OWN UPDATES, UNATTENDED AND UNDOCUMENTED.** ⚠ `unattended-upgrades` is active on the live client box. ⚠ AN UBUNTU DEFAULT, NOT A MISCONFIGURATION — but it means PROD CHANGES WITHOUT A DECISION. ▶ REVIEW: (a) confirm scope (`/etc/apt/apt.conf.d/50unattended-upgrades`); (b) decide whether a food-safety box should self-patch silently; (c) if it stays on, document it in 3B.2. ⚠ Do NOT disable it casually. [3B.2 · J84]
+**P36  DELETE THE DEAD add-dispatch (v1) POPUP COMPONENT.** `PopUps/add-dispatch/` declared in edit-sales-order.module.ts:20 but never opened. ⚠ Grep for other references first. [J87]
 
-**P35  EDITING A PACKING SLIP TO ADD A DISPATCH ORDER THROWS.** ⚠ **REACHABILITY SETTLED S80 — IT IS UNREACHABLE TODAY.** `req.body.DOs` is built only from `shipmentList`, which can only be populated by `addItem()`, whose ONLY caller is commented out in the template (edit-packslips.component.html:198-200). So `DOs` always posts as `[]` and the branch is never entered. It is "would break if used", NOT "does break". ⚠⚠ **BUT P7 RESTORES EXACTLY THAT BUTTON** — add-a-DO-to-an-existing-slip is the feature P7 wants back. The throw and the three bugs behind it (NaN write · same qty_shipped for every DO regardless of `i` · double subtraction on the old Kg line) go LIVE the moment the feature returns. ▶ THEREFORE: fix as part of P7, never as a standalone "quick win". Correct scope: decide whether this branch should update inventory AT ALL (per §2 Core #2 it should not), then either delete the loop and keep `createPackingSlipDOs`, or rewrite all four faults together. [§2 to-verify 5 · J85 · J86 · 3A.4]
+**P37  CONFIRM THE COMPANY OF PROD SO-0004 (one query, minutes).** ⚠ Run on prod: `SELECT id, internalCode, company_id FROM somanagement WHERE internalCode='SO-0004';` If 464 → harmless. If not → real client data was touched. [Section 1 PROD RESIDUE]
 
-**P36  DELETE THE DEAD add-dispatch (v1) POPUP COMPONENT.** ⚠ NEW S80. `PopUps/add-dispatch/` is declared in edit-sales-order.module.ts (line 20) but **never opened** — the only `matDialog.open` call is `AddDispatchV2Component` (edit-sales-order.component.ts:191), and line 35 shows v1 already commented out of a second list. ⚠ A dead component beside a live one is a JT9 trap: an edit there is an invisible no-op. Delete the folder and the module declaration. ⚠ Grep for other references first. Housekeeping, low risk.
+**P38  DELETE THE DEAD selectOption LOT-PICKER IN release-mat-details.** ⚠ NEW S81. The old "Add +" button and its `mat-select` lot dropdown are COMMENTED OUT in the template (html:94-111, 160-176, 223-240) but `selectOption` is STILL WRITTEN in the .ts (691-700, 810-818, 1066-1091, plus a commented block at 1104-1143). ⚠ Same JT9/JT22 decoy as P36, sitting in the exact file P6 will redesign — an edit there is an invisible no-op. Delete the dead template blocks and the orphaned .ts writes. [J89]
 
-**P37  CONFIRM THE COMPANY OF PROD SO-0004 (one query, minutes).** ⚠ NEW S80. A DO (DO-0006) was created on PROD in error during the S80 walk. The fixture family suggests sandbox company 464, but it was never confirmed. Run: `SELECT id, internalCode, company_id FROM somanagement WHERE internalCode='SO-0004';` on prod. If 464 → harmless test residue, note and close. If anything else → ⚠ real client data was touched and it needs proper handling. [Section 1 PROD RESIDUE block]
+**P39  CHECK THE THREE nestedPop POPULATE ARRAYS IN Formulations.js.** ⚠ NEW S81, but the finding is older — it was left as a closing note inside J85 and tracked nowhere. ⚠ FOOD-SAFETY-CRITICAL: JT8 says never two COLLECTION associations in one nestedPop populate array; v0.1.4 silently returns the SECOND one EMPTY. That bug hid missing intermediates once already (S55). Sites: Formulations.js lines 609, 632, 1063. ▶ Read each, confirm no two collections share a populate array. [§2 to-verify 1 · JT8 · J85]
 
-> ⚠ NUMBERING NOTE: the queue jumps P24 → P27, and P25/P26 are gone for good. P26 was "Fix A" — a fix for a bug that never existed (J81). P25 has no surviving record. ⚠ P28 CLOSED S79.
+**P40  REMOVE-ONE-DO FROM A PACKING SLIP IS UNUSABLE.** ⚠ NEW S81. Backend FIXED in slice 1. The FRONTEND has no commit path: /Edit-Packslips offers only SHIP and CANCEL, and `save()` sets `shipped_flag: true` unconditionally — so the only way to post `deletedDos` is to ship the slip. ▶ Owned by P7 slice 4 (needs a Save that does not ship). Logged separately so the defect has its own record. [J92]
+
+**P41  WRITE THE RULE INTO SECTION 2 — a DO coming off a slip always returns its quantity.** ⚠ NEW S81. Minty's decision. ⚠ DO NOT add a new standalone rule: §2 Core #2 already says "reverse walks back one bucket at a time, cancel logic already exists there" — a sentence that is TRUE of cancel-whole-slip and quietly FALSE of remove-one, which is part of why this sat broken. ▶ REISSUE that existing Core #2 sentence WHOLE with the decision folded in (rule 7.1). Two rules for one hop is how a document goes two-headed (9E). [J92]
+
+> ⚠ NUMBERING NOTE: the queue jumps P24 → P27; P25/P26 are gone for good (P26 was "Fix A", a fix for a bug that never existed — J81). P28 CLOSED S79.
 
 ---
 
@@ -312,6 +360,8 @@ LABELS         ⚠ NOT part of this work. The finished-product label
 
 ```
 Corrected v2 PDFs (Misc Release + Traceability label fixes).
+P7 slices 1 and 2 — dev only, deliberately NOT promoted to prod
+until P7 is whole and tested end to end.
 ```
 
 **END SECTION 1**

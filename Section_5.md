@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J88 — ⚠ the next one is J89, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Last restructured: S72, Jul 16 2026. Last appended: S80, Jul 23 2026.
+number. Highest is J93 — ⚠ the next one is J94, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Last restructured: S72, Jul 16 2026. Last appended: S81, Jul 23 2026.
 ══════════════════════════════════════════════════════════════════════
 
 TRAPS
@@ -1932,6 +1932,249 @@ J88  qty_shipped IS UNITS AND IS CLEAN — BUT THE ROUTE IS AN
      STATUS: column verified clean. The route is a P2 site living
      inside the P7 files → fix inside P7. Fractional-units rule
      locked into Section 1 carry-forward.
+========
+J89  MO-RELEASE GLOBAL SELECT READ AT LAST — IT IS A SELECT-ALL,
+     NOT A SELECT-MATCHING. P6's precondition is met.
+     (S81, dev, read-only.)
+
+     P6 has said "read the MO-Release Global Select mechanism BEFORE
+     designing" since S67 and it was never done. Read this session.
+
+     WHERE IT LIVES (the path is five levels deep; two wrong guesses
+     were made before finding it — record it so nobody guesses again):
+       src/app/Layouts/admin-dashboard/warehouse/mfg-lot-codes/
+       release-mat/release-mat-details/
+         release-mat-details.component.ts    1243 lines
+         release-mat-details.component.html   265 lines
+       Backend: MaterialsProductsReleased.js:150
+                createReleaseMaterialProductsV2   (V2 is live — JT9)
+
+     WHAT IT ACTUALLY IS:
+       html:35-40   ONE "Select All" mat-checkbox bound to selectAll,
+                    firing setAllSelect()
+       ts:176-192   setAllSelect() — three near-identical blocks at
+                    178, 185, 192, one per list (materials, formulas,
+                    packaging), each doing
+                      x.isDirectQty = !!this.selectAll
+       html:44/114/179  per-row checkboxes, each calling
+                    fill{Material,Formula,Pack}ItemFromList behind a
+                    guard:  (released_qty < final_qty) && fill...
+                    i.e. an already-released row is not re-filled
+       ts:146       selectAll = false on list reload
+       ⚠ THE FLAG IS `isDirectQty`, NOT `selected`.
+
+     ⚠⚠ THE FINDING THAT MATTERS: IT HAS NO PREDICATE. It ticks every
+     row in all three lists unconditionally and relies on the per-row
+     guard to skip ineligible ones. P7's rule is CONDITIONAL
+     (lot+customer+address). So what transfers is the SHAPE — one
+     control, a flag on each row, a fill-handler per list, a guard
+     that skips ineligible rows — and NOT the matching logic, which
+     does not exist here and had to be written from scratch (J90).
+     ⚠ P6 should expect the same: the pattern to reuse is structural,
+     not behavioural.
+
+     ⚠ ALSO FOUND — DEAD CODE IN THE SAME FILE. A previous per-row
+     lot-picker ("Add +" button + a mat-select of available lots) is
+     COMMENTED OUT in the template at html:94-111, 160-176, 223-240 —
+     but `selectOption` is STILL BEING WRITTEN in the .ts at 691-700,
+     810-818, 1066-1091, with a further commented block at 1104-1143.
+     Live writes feeding a dead template. Same JT9/JT22 decoy shape as
+     the add-dispatch v1 component (P36), and it sits in the exact
+     file P6 will redesign. → P38.
+
+     STATUS: P6's read-first precondition CLOSED. P38 raised.
+========
+
+
+J90  P7 SLICE 2 — THE SELECTION RULE BUILT, AND J87 CORRECTED.
+     (S81, dev, commit 0f4c0344, deployed and verified.)
+
+     THE RULE (Minty, S80): picking one DO auto-selects every other DO
+     matching ALL THREE — lot + customer + address. Lot is a HARD
+     BOUNDARY because identical-looking boxes cannot be told apart by
+     eye in the warehouse.
+
+     ⚠ J87 WAS WRONG ON ONE POINT AND IT IS WORTH CORRECTING, because
+     a wrong reason stops anyone looking again (JT22). J87 recorded "a
+     bug in getSelectedDo that will bite the auto-select: line 58
+     clears selectedItem and rebuilds it from getDoList — but
+     getDoList was already narrowed by a previous filter, so ticks on
+     rows since filtered out are silently dropped."
+     READING THE FILE: getDoList is NEVER narrowed. Only `dataSource`
+     is rebuilt from a filtered copy. So ticks were not being dropped
+     that way.
+     ⚠ THE REAL DEFECT WAS DIFFERENT AND WAS FIXED: the filter keyed
+     off `material` — the row just clicked — even when that row had
+     just been UNTICKED. The visible list could therefore be keyed to
+     a DO that was no longer selected. Now the filter anchors on
+     selectedItem[0], a DO that is actually selected.
+
+     WHAT WAS BUILT — three helpers, defined ONCE so the click path,
+     the auto-select and the list filter cannot drift apart:
+       doLotCode(item)    lot code, optional-chained at every hop
+       doMatchKey(item)   lot || customer || address   (SELECTION)
+       doFilterKey(item)  customer || address          (LIST FILTER)
+     doFilterKey deliberately excludes lot: after the first pick the
+     operator still works down the remaining lots for that customer
+     and address. The lot boundary is enforced at SELECTION, not at
+     display.
+     ⚠ doLotCode IS THE HOOK FOR THE SCAN. A scanner is a keyboard; it
+     types into the search box, which already filters on lot code.
+     Scan and click become two thin callers of one function.
+
+     ALSO FIXED: getAllDOs grouped by ADDRESS ALONE in BOTH branches
+     (addPS and else — near-duplicate blocks). Two different customers
+     can share a shipping address (a 3PL or distribution centre) and
+     nothing checked customer. Both branches now use doFilterKey.
+
+     VERIFIED LIVE (dev, after Cmd+Q — lazy chunks survive everything
+     less, J66): ticking DO-0004 auto-ticked DO-0005 AND DO-0006. All
+     three share lot Pdt-260701-1, customer testcustomer260703,
+     address 10518 — ⚠ note DO-0006 is a DIFFERENT SO (SO-0006 vs
+     SO-0002) and still matched, which is CORRECT: the rule is
+     lot+customer+address, not SO. DO-0008 stayed unticked (same
+     customer, same address, lot Pdt-260704-1). List went 6 rows → 4.
+
+     ⚠ THE CUSTOMER HALF IS UNPROVEN — SEE J93. Do not record this
+     entry as proving the customer key.
+
+     STATUS: slice 2 shipped to dev. J87's tick-dropping claim struck.
+========
+
+
+J91  soproducts MIXES UNITS AND Kg ON ONE ROW — A P2 SITE NOBODY HAD
+     LOGGED. (S81, dev DB read.)
+
+     Observed while verifying the packing-slip cycle on SO-0011:
+       soproducts.quantity                 = 13.9    (Kg)
+       soproducts.quanity_shipped_to_date  = 1       (UNITS)
+     Same row. createPS adds a UNIT count to quanity_shipped_to_date
+     while the sibling quantity column is Kg.
+
+     ⚠ SAME SHAPE AS JT4 (the DO row: qty_to_ship Kg next to
+     qty_shipped and packing_units in units). Known fossil family, but
+     this instance was not in the P2 inventory and nobody has checked
+     WHERE quanity_shipped_to_date IS READ. If any screen renders it
+     against quantity without converting, that display is wrong.
+
+     ⚠ NOTE THE SPELLING: `quanity_shipped_to_date`, not `quantity_`.
+     A grep for the correct spelling finds nothing.
+
+     ▶ ACTION: fold into the P2 inventory — find every read of
+     quanity_shipped_to_date before deciding anything.
+     BLAST RADIUS: unknown until the reads are found. No data is
+     wrong today; the risk is a display or a future calc that treats
+     the two columns as the same unit.
+========
+
+
+J92  REMOVE-ONE-DO FROM A PACKING SLIP IS NOT MERELY BROKEN — IT IS
+     UNREACHABLE, BECAUSE THE SCREEN HAS NO SAVE BUTTON.
+     ⚠ AND THE ONLY COMMIT PATH SHIPS THE SLIP.
+     (S81, dev, read + live walk.)
+
+     J86 established that ADD-a-DO is unreachable (its button is
+     commented out). REMOVE-a-DO was assumed reachable because
+     removeoldItem() exists and is wired to a visible Remove button.
+     ⚠ WALKED LIVE S81: the Remove button DOES drop the row from the
+     screen — and nothing else. Navigating away and back restores it.
+     The DO was still on the slip in the DB.
+
+     WHY: removeoldItem() (edit-packslips.component.ts:596) pushes the
+     DO into `deletedDOs`; save() (:518) posts it as `deletedDos`.
+     But /Edit-Packslips offers only SHIP and CANCEL — THERE IS NO
+     SAVE BUTTON. Ship calls save(), and save() builds PSOBJ with
+     `shipped_flag: true` unconditionally.
+     ⚠ SO THE ONLY WAY TO COMMIT A REMOVAL IS TO SHIP THE SLIP, and
+     shipping is TERMINAL with no un-ship (J16). Removing one DO is
+     therefore not a usable operation today.
+
+     ⚠ THE TRAP FOR A FUTURE SESSION: the Remove button LOOKS like it
+     works. The row disappears. Only the DB shows it did nothing
+     (JT12). This is why the S81 test appeared to "not work" and was
+     nearly recorded as a code failure rather than a missing commit
+     path.
+
+     MINTY'S DECISION (S81), now the rule: A DO COMING OFF A PACKING
+     SLIP ALWAYS RETURNS ITS QUANTITY AND BECOMES AVAILABLE AGAIN —
+     whether one DO or all of them. Remove-one is the SAME operation
+     as cancel-whole-slip on a smaller selection, not a different
+     operation. One function, cancel = "select all then remove".
+     ⚠ Neither path touches inventory_units: stock left SOH at DO
+     CREATION (§2 Core #2). "Available again" means available TO A
+     PACKING SLIP, not returned to store.
+
+     CANCEL-WHOLE-SLIP IS CORRECT AND IS THE REFERENCE IMPLEMENTATION.
+     inActivatePS (PackingSlips.js ~217): status_id 1→2, destroys the
+     PackingSlipDOs rows, and per DO subtracts data.shipped_qty from
+     dispatchorders.qty_shipped and from
+     soproducts.quanity_shipped_to_date. No division, no
+     wgt_kgs_per_unit — R1, clean. VERIFIED LIVE S81 on PS-0006:
+     qty_shipped 1→0, PSDO row gone, DO-0011 back in the selectable
+     list, FO-0004 inventory_units UNCHANGED at 41.
+
+     ⚠ THE PAYLOAD DOES NOT CARRY THE QUANTITY — THE FIX MUST NOT
+     TRUST IT. deletedDos items carry only {company_id, DO_id, PS_id}
+     (edit-packslips.component.ts:517-523). Mirroring inActivatePS's
+     `getDO.qty_shipped - data.shipped_qty` would compute
+     `number - undefined` = NaN and write it — reintroducing exactly
+     the J85 bug inside its own fix. Checked before writing, per 2.2.
+     ▶ THE CORRECT SOURCE IS THE STORED JOIN ROW:
+     PackingSlipDOs.shipped_qty is a DECLARED number attribute
+     (verified S81), so the backend can read what was actually
+     recorded rather than what a screen posts. This also sidesteps the
+     J88 disagreement about whether shipped_qty means units or Kg.
+
+     ⚠ ALSO CONFIRMED: the old deletedDos branch passed three PARALLEL
+     ARRAYS as criteria — {company_id: [x,x], DO_id: [a,b],
+     PS_id: [p,p]} — which Waterline reads as IN clauses that
+     cross-multiply rather than pairing. With two DOs removed it could
+     match more rows than intended. Fixed by working one DO at a time.
+
+     FIXED IN S81 SLICE 1 (backend, commit ff5d183, dev only). ⚠ STILL
+     UNTESTED — unreachable until slice 4 adds a commit path that does
+     not ship. → P40 (the defect), P41 (the rule into §2 Core #2).
+========
+
+
+J93  SLICE 2'S CUSTOMER KEY IS UNPROVEN — AND NO DEV FIXTURE CAN
+     PROVE IT. ⚠ A PASSING TEST THAT COULD NOT HAVE REVEALED THE
+     PROBLEM. (S81.)
+
+     Slice 2's doMatchKey and doFilterKey read the customer as
+     `SO_id.customer_id?.id ?? SO_id.customer_id ?? ''` — handling both
+     the populated-object and bare-number shapes (JT1).
+
+     ⚠ `customer_id` WAS NEVER OBSERVED IN THE POPUP'S PAYLOAD. The
+     component only ever read `SO_id.customer_shipping_address`. If the
+     DO payload does not include customer_id, the customer half of both
+     keys silently becomes '' for every row and the logic degrades to
+     ADDRESS-ONLY — the previous behaviour. No error, no crash, no
+     visible difference.
+
+     ⚠ AND THE S81 TEST COULD NOT DISTINGUISH THE TWO CASES. Every DO
+     in company 464 is either the same customer or at a different
+     address, so address-alone produces an identical result. The test
+     passed. It proved the LOT boundary and the auto-select. It proved
+     NOTHING about customer.
+
+     ⚠ SAME FAMILY AS JT21 (the 1:1 fixture) AND J84 (the mirror check
+     that never looked at the host): a result that could not have
+     revealed the problem, read as though it had. Recorded so a future
+     session does not cite J90 as evidence the customer key works.
+
+     ▶ TO PROVE IT, ONE OF:
+       (a) build a dev fixture with TWO DIFFERENT CUSTOMERS sharing
+           ONE shipping address, then confirm ticking one does not
+           select the other's DOs; or
+       (b) console.log a DO object from the popup and confirm
+           SO_id.customer_id is present and populated.
+     (b) is minutes and settles it. Do (b) first.
+
+     ⚠ IF customer_id IS ABSENT: the fix is a backend change — the
+     DO list read must populate it — not a frontend workaround.
+     BLAST RADIUS: none today. The degraded case is exactly the old
+     behaviour, which shipped for years.
 ========
 END SECTION J
 ────────────────────────────────────────────────────────────
