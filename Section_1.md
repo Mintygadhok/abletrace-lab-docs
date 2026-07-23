@@ -42,7 +42,7 @@ WHAT S80 DID — do not re-derive any of it.
   ✓ "ACROBATICS" adopted as standing vocabulary → §2 Core #1.
   ✓ add-dispatch (v1) found DEAD → P36.
 
-▶▶ THE NEXT JOB — S81. ◀◀
+▶▶ THE NEXT JOB — S81. P7 IS NOW THE TOP PRIORITY (Minty, S80). ◀◀
    1  READ MO-RELEASE GLOBAL SELECT (P6 says do this BEFORE designing;
       it is still unread). /Release-mat-details +
       MaterialsProductsReleased.js
@@ -120,7 +120,8 @@ SO-0004, customer "Jade 3", product testpdt260703 / FO-0001-4,
 ## PENDING WORK — everything outstanding, in priority order
 
 > ⚠ ONE FLAT LIST. NEW ITEMS APPEND AT THE BOTTOM with the next free number (rule 7.3). Minty re-ranks at open; Claude never renumbers.
-> ⚠ RE-RANK STILL OUTSTANDING. Not done at S80 open (deferred deliberately — Minty chose to walk first). The queue has not been re-ranked since S73 and several items changed shape in S79 and S80.
+> ⚠⚠ **P7 TAKES PRECEDENCE OVER EVERYTHING ELSE IN THIS LIST.** Minty's call, S80. The DO → packing-slip redesign is the active job: it is designed, the domain call is made, and the code addresses are recorded (J86 · J87 · J88). ⚠ P7 KEEPS ITS NUMBER — **the list is ordered by PRIORITY, and a P-number is a permanent ID, not a position**, exactly as J-numbers are. Do NOT renumber the queue to put it first; Section 5 entries point at these numbers.
+> ⚠ THE FULL RE-RANK IS STILL OUTSTANDING. Only ONE decision has been made (P7 to the front). The queue has not had a full pass since S73 and several items changed shape in S79 and S80. ▶ Minty's, one pass, at session open.
 > ⚠ Each line points at its Section-5 entry. EVIDENCE lives there, not here.
 
 **P1  DOCUMENTATION CONVERGENCE — THE FOLD.** ⚠ MINTY-SET, S73.
