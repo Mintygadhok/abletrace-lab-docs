@@ -36,7 +36,7 @@ S75–S77   written from the real session summaries, supplied S79.
           ⚠ These SUPERSEDE an earlier reconstruction that had S75 and
           S76 combined and got S75's central finding BACKWARDS.
 
-S78–S79   written from those sessions directly.
+S78–S80   written from those sessions directly.
 
 S74       ⚠ NO ENTRY. Falls inside the detailed band but no record was
           supplied. Stamped rather than invented.
@@ -432,7 +432,7 @@ The cause was a line from June 2023: `JSON.stringify` run over a value that was 
 
 ---
 
-## S73–S79 — PER-SESSION, FULL
+## S73–S80 — PER-SESSION, FULL
 
 ### S73 — THE VERIFICATION SESSION (Jul 17, 2026)
 
@@ -775,9 +775,48 @@ One site was found already doing it right — a stock popup that reads the store
 
 The routine cost is now stated plainly: rewrite Section 1, append to Section 5 if something was learned. Everything else is touched only when the system changes or a fact is found wrong.
 
+### S80 — THE DO → PACKING SLIP WALK, AND A DESIGN THAT WAS ALREADY HALF-BUILT (Jul 22–23, 2026)
+
+The first session in eight to open a screen with intent to change something rather than to verify something. It stayed read-only anyway — no app code was touched — but the output was a settled design rather than a corrected record, which is a different kind of session from the seven before it.
+
+**THE SHAPE.** Health check both boxes, then a walk of the outbound chain on dev: `/Edit-SO` → Create Dispatch Order popup → `/Dispatch-orders` → Create Packing Slip → the DO-select popup → `/Create-Packslips`. Then Minty narrated the redesign he wanted, screen by screen, and Claude read the code underneath it.
+
+**⚠ THE WALK STARTED ON THE WRONG BOX.** The first six screenshots were `trace.mintekfoodsafety.com` — PROD, the live client box — and a dispatch order (DO-0006) was created there before anyone noticed the URL. The fixture was the 464 sandbox family so it is almost certainly sandbox data, but ⚠ THE COMPANY ID WAS NEVER CONFIRMED, and "almost certainly" is not the standard rule 6.1 sets. The walk moved to dev immediately and nothing further was done on prod. Recorded as P37, a one-query check, so that a future session does not meet an unexplained prod row and guess at it. ⚠ THE LESSON IS NOT "CHECK THE URL". It is that six screens went by before anyone did — the two environments are visually identical by design, and the only tell is a subdomain.
+
+**THE FIXTURE CHOICE WAS THE SESSION'S QUIET WIN.** Minty picked `test1.39` / FO-0004, which runs at 1.39 Kg per shipping unit — deliberately not 1:1, not round — with the stated reason that it would expose any conversion "acrobatics". That is JT21 being applied by the person who was burned by its absence one session earlier. ⚠ IT IS THE FIRST TIME IN THIS RUN THAT A RULE FIRED BEFORE THE FAILURE RATHER THAN AFTER IT.
+
+**THE DESIGN.** Minty's narration produced a complete redesign of the DO → packing slip step, recorded in full in Section 1's P7. Its core is a grouping rule with a physical reason behind it: a DO selection auto-selects siblings sharing lot code AND customer AND address, with lot code as a hard boundary — because boxes of the same product look identical in a warehouse and reading lot codes off them by eye is where mistakes happen. The scan and the manual click resolve to ONE function taking a lot code, with two thin callers, so they cannot drift apart. An ambiguity popup fires only on the first pick and only when a lot resolves to more than one customer+address pair.
+
+⚠ **AND THE DOMAIN CALL WAS FINALLY MADE.** P7 had carried "slimmed 8-field customer row" since S67 — a COUNT THAT HAD OUTLIVED ITS LIST. Nobody could say which eight, and searching the record found only the number repeated in three places. The list was rebuilt from scratch this session: ten fields, with MO Number and Internal DO Number kept deliberately because they are the handles an operator needs when a customer phones about a shipment. ⚠ THIS IS THE SAME DECAY AS THE PHANTOM "FIX A", CAUGHT EARLIER: a fact that survived as a summary after the substance behind it was gone.
+
+**THE CODE SAID THE DESIGN WAS HALF-BUILT ALREADY.** Reading `do-list.component.ts` found the address filter, the splice-out of already-used DOs, and a search box whose filter predicate matches only on lot code — so a scanner typing into it already narrows the list. What is missing is narrow: lot and customer are not in the filter, nothing auto-ticks, and nothing starts from a lot code. ⚠ P7 IS AN EXTENSION, NOT A BUILD, AND THAT WAS NOT KNOWN BEFORE THIS SESSION. (J87.)
+
+**P35 SETTLED, AND ITS SEVERITY INVERTED.** S79 left open whether the edit-packing-slip screen ever sends a non-empty `DOs` array. Reading the whole file — not a grep, per S79's own lesson — showed it cannot: the only caller of the function that populates it is commented out in the template. So the throw is unreachable and it is not a live client bug. ⚠ BUT THE REDESIGN RESTORES EXACTLY THAT BUTTON. The defect and the feature are the same lines, which answered the sequencing question the session opened with: bundle, do not split. (J86.)
+
+**⚠ A CONFIDENT CLAUDE CLAIM, DISPROVEN BY ONE QUERY.** Claude found a disguised divide in `create-packslips` and predicted it would produce visible float garbage on the 1.39 fixture — 58.38 ÷ 1.39 = 41.99999…. The DB said no: on every row with a packing slip, `qty_shipped` equalled `packing_units` exactly. A `Math.round` was landing the division on the same integer the stored column already held. ⚠ THE PREDICTION WAS WRONG AND IT IS RECORDED AS WRONG (J88), because an unrecorded wrong answer is what becomes the next session's foundation.
+
+⚠ **AND THEN MINTY'S CORRECTION MADE IT WRONG AGAIN, FOR A BETTER REASON.** Told that fractional shipping units are permitted by design — evidenced by two DOs carrying `packing_units = 0.5` — the rounding stops being merely fragile and becomes wrong in principle: a half-unit DO would round to 0 or 1 and silently ship a different quantity than the DO authorises. It has not bitten only because no fractional DO has yet reached a packing slip. ⚠ SAFE BY ACCIDENT OF THE DATA, NOT BY CODE — the J74 shape, found again in a different file.
+
+**VOCABULARY.** Minty named the Kg↔units round-trips "acrobatics" and asked for it to be recorded. It is now in §2 Core #1 beside R1/R2/R3. ⚠ WORTH NOTING WHY THAT EARNS ITS PLACE: "R2" is a classification and requires the reader to remember a table. "Acrobatics" describes what the code is doing and is spottable by someone who is not holding the table in their head.
+
+**⚠ A PROCESS FAILURE WORTH KEEPING.** Mid-session Claude said "let me search the past conversations" and then produced a response without running the search. Minty waited on nothing and had to prompt. ⚠ IT WAS CAUGHT ONLY BECAUSE MINTY SAID "WAITING". Describing an action and then not taking it is a distinct failure from getting an answer wrong — the second is visible in the output, the first is not.
+
+⚠ **AND ONE AT CLOSE.** Claude stamped Section 6 "no change this session" while writing up a session. Rule 7.1 requires a status per section, and the status given was wrong — Section 6 changes every session by definition. Caught by Minty asking. This entry exists because he did.
+
+```
+BANKED       Section 1 rewritten whole · §2 +acrobatics ·
+             Section 5 +J86 +J87 +J88 +JT22 · Section 6 +this entry
+NOT DONE     MO-Release Global Select STILL UNREAD — P6 has said to
+             read it first since S67, and three sessions have now
+             planned around a pattern nobody has looked at.
+             editPackslips + InActivatePs unread.
+             ⚠ The queue re-rank, deferred at session open, still
+             outstanding since S73.
+```
+
 ---
 
-## ⚠ THE PATTERN ACROSS 79 SESSIONS
+## ⚠ THE PATTERN ACROSS 80 SESSIONS
 
 ```
 Written down because it is the thing this section exists to show, and
