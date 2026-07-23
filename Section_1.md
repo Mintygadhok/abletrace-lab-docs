@@ -352,6 +352,20 @@ FIELD    the selection flag is `isDirectQty`, NOT `selected`
 
 **P41  WRITE THE RULE INTO SECTION 2 — a DO coming off a slip always returns its quantity.** ⚠ NEW S81. Minty's decision. ⚠ DO NOT add a new standalone rule: §2 Core #2 already says "reverse walks back one bucket at a time, cancel logic already exists there" — a sentence that is TRUE of cancel-whole-slip and quietly FALSE of remove-one, which is part of why this sat broken. ▶ REISSUE that existing Core #2 sentence WHOLE with the decision folded in (rule 7.1). Two rules for one hop is how a document goes two-headed (9E). [J92]
 
+**P42  SPLIT SECTION 5 INTO TRAPS AND LOG.** ⚠ NEW S81. ⚠ DO NOT
+START UNTIL P7 IS CLOSED — P7 is actively generating J-entries
+(slices 3 and 4 will add more), and splitting a file mid-append is
+the worst moment. Section 5 is ~2000 lines and append-only, so it
+only ever grows. WHY: the JT traps block is short and worth reading
+EVERY session (rule 1.4); the J-entry log is long and rarely needed
+in full. Loading both costs context that buys nothing most sessions.
+▶ THE SPLIT: Section 5A = JT traps + JR rebuild checklist (short,
+standing paste). Section 5B = the J-entries (fetched by name, e.g.
+"send me J78"). ⚠⚠ J-NUMBERS ARE PERMANENT AND MUST NOT CHANGE —
+they are cross-referenced from Sections 1, 2 and 3A (J88 alone is
+cited in four places). A split that renumbers anything breaks every
+pointer in the repo. ⚠ Also update rule 0.3's standing-paste list
+and rule 9's structure block to name 5A and 5B.
 > ⚠ NUMBERING NOTE: the queue jumps P24 → P27; P25/P26 are gone for good (P26 was "Fix A", a fix for a bug that never existed — J81). P28 CLOSED S79.
 
 ---
