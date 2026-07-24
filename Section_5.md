@@ -2473,3 +2473,239 @@ WHY THE EARLIER RUN LOOKED EMPTY
   address alone would still produce the same result. Evidence gap,
   not a defect. (J93 stands.)
 ```
+
+---
+
+**J100 — THE DO PICKER ALWAYS RETURNS AN ARRAY. THE EDIT SCREEN NEVER KNEW.**
+STATUS: FIXED S84, frontend d223d6ed. Proven in the DB.
+
+```
+THE SYMPTOM     Adding a DO to a SAVED packing slip threw
+                "TypeError: Cannot read properties of undefined
+                (reading 'internalCode')" at edit-packslips ~:481.
+
+THE CAUSE       PopUps/do-list/do-list.component.ts closes with
+                `selectedItem`, declared as [] at line 24:
+                  addFirstItem()  :50-52  selectedItem = [element]
+                  save()          :54-55  selectedItem = [..ticked..]
+                BOTH gestures return an ARRAY. Edit's handler read
+                response.SO_id.internalCode straight off it.
+
+⚠ THE S83 HANDOVER WAS WRONG ABOUT WHY. It recorded that
+  addFirstItem returns an OBJECT and only tick+Save returns an array,
+  so only tick+Save was broken. FALSE. Both return arrays; BOTH
+  gestures threw. Anyone "verifying" the fix by single-clicking would
+  have been testing a path they believed already worked.
+
+⚠ A SECOND, INDEPENDENT PROOF sat in the repo the whole time: the
+  CREATE screen does result.forEach(...). Objects have no forEach. If
+  single-click returned an object, create would throw on every click.
+  Create works. Therefore the return is an array. THE BEHAVIOUR OF
+  WORKING CODE IS EVIDENCE ABOUT THE CODE IT SHARES. (Rule 0.1a
+  again - it was checkable by looking, not by reasoning.)
+
+THE FIX         Mirror create-packslips (~:227): loop the array,
+                patch at (index + i), and push a row via createItem()
+                for each DO beyond the first. Edit pre-spawns ONE
+                blank row via addItem(), so only the extras need
+                pushing. No normalising branch is needed - the shapes
+                never differed.
+
+PROVEN          DO-0012 added to a saved slip. Row populated with MO
+                number, lot code, best before, order qty. No throw.
+                Join row written, quantity correct.
+
+⚠ THE GESTURE IS TWO-STEP AND NON-OBVIOUS, BY DESIGN:
+  click "Add Dispatch order +" (spawns the blank row, html:198), THEN
+  click into that row's Internal Dispatch Order field (opens the
+  picker, html:124). Not a bug. Worth knowing before testing.
+```
+
+---
+
+**J101 — THE 500 BEHIND THE DOOR J100 OPENED. A BLANK STRING INTO A NUMERIC COLUMN.**
+STATUS: FIXED S84, frontend c3d463c9. Proven in the DB.
+
+```
+⚠ THIS DEFECT HAD NEVER RUN BEFORE. Save-after-add on the edit screen
+  was unreachable - first the `elem` scope throw (J85/P35), then J100.
+  Fixing J100 exposed it. IT IS NOT A REGRESSION; it is the next thing
+  that was always broken, now reachable for the first time.
+
+THE SYMPTOM     Save returned 500. The alert showed only the status
+                line. The real message was in pm2 logs:
+                  "New record contains the wrong type of data for
+                   property `shipped_qty`. Specified value (a string:
+                   '') doesn't match the expected type: 'number'"
+
+THE CAUSE       edit's doList handler patched
+                  shipping_order_units: ''
+                and nothing filled it. submitSlip posts
+                data.shipping_order_units into a numeric column.
+                Sails refused the row.
+
+WHY EXISTING    Rows loaded from the DB already carry a number, so
+ROWS WERE FINE  Save always worked on them. Only a freshly-added row
+                arrived blank. Same button, two different row states.
+
+THE FIX         Pre-fill from response.packing_units - the DO's own
+                stored unit count. shipping_order_qty gets the
+                matching Kg string (display only on this screen;
+                submitSlip does not post it).
+
+⚠ THE FIX IS THE DOMAIN RULE, NOT A PATCH. Minty, S84: SHIPPED
+  QUANTITY IS NOT AN OPERATOR INPUT. It is the DO's quantity carried
+  through unchanged. To change what ships, CANCEL the DO and raise a
+  fresh one. With nothing typed there is nothing to validate - which
+  is why P45's guards can be DELETED rather than repaired.
+
+⚠ THE OLD APP CORROBORATES. Its packing slip row has NO "Shipped
+  Units" and NO "Shipped Qty" fields at all - only Order Qty. The
+  typed box is a later addition, and it is the source of both the
+  dead validators and this 500. (Screens read live, S84.)
+
+PROVEN          PS 2397 wrote three join rows, shipped_qty 1 each,
+                for DO-0010 / DO-0011 / DO-0012.
+
+STILL OPEN      Existing rows are built as DISABLED controls
+                (edit-packslips.component.ts :274, :329). Angular
+                omits disabled controls from form.value, and
+                submitSlip reads exactly that. Whether a loaded row's
+                quantity reaches the payload at all is UNVERIFIED.
+                → carry into the S85 cancel run.
+```
+
+---
+
+**J102 — ⚠ D1 IS DISPROVEN. THE CREATE PATH DOES NOT DOUBLE-COUNT. DO NOT RE-DERIVE.**
+STATUS: NO DEFECT on create. The S83 finding does not reproduce.
+
+```
+⚠ THIS ENTRY EXISTS TO OVERRIDE THE S83 HANDOVER, which recorded the
+  create-path double-count as PROVEN and put it second in the S84
+  plan. It is not proven. It is not reproducible.
+
+WHAT S83 CLAIMED
+                "The DO you CLICK gets its qty_shipped incremented
+                TWICE on create. Auto-ticked DOs and separately-ticked
+                DOs increment once." Evidence given: DO-0010 went
+                1 -> 2 then 2 -> 4.
+
+THE CLEAN EXPERIMENT, S84
+                Fixtures reconciled first (see below). Fresh build.
+                DO-0004 / 0005 / 0006 all free, all at tally 0, all
+                sharing one lot + customer + address.
+                  CLICKED      DO-0004
+                  AUTO-TICKED  DO-0005, DO-0006
+                  UNTOUCHED    DO-0008 (different lot) - correct
+                RESULT, read from the DB:
+                  DO-0004  shipped_qty 1  tally 1   CORRECT
+                  DO-0005  shipped_qty 1  tally 1   CORRECT
+                  DO-0006  shipped_qty 1  tally 1   CORRECT
+                The CLICKED DO incremented ONCE, identically to the
+                auto-ticked ones.
+
+⚠ WHY S83 SAW A DOUBLE-COUNT: ITS EVIDENCE WAS GATHERED ON DIRTY
+  FIXTURES. No baseline existed, several cancels had already run, and
+  four DO tallies were inflated before testing began. Every quantity
+  measured against a wrong starting number lies. S83's own handover
+  says it dismissed the same numbers as "fixture residue" earlier in
+  that session and then reversed - it was right the first time.
+
+⚠ THE LESSON, AND IT IS THE POINT OF THIS ENTRY:
+  A QUANTITY FINDING MEASURED WITHOUT A RECONCILED BASELINE IS NOT A
+  FINDING. It cost S83 an afternoon and would have cost S84 another.
+  Reconcile first, then measure. (Same family as JT12 - the DB is
+  ground truth, but only if you know what it said BEFORE.)
+
+WHERE THE BUG ACTUALLY LIVES — CANCEL, NOT CREATE
+                Every DO whose history is create-only reconciles,
+                across all five companies.
+                The one bad number left is DO-0010 (tally 2, join
+                rows 1) and its history includes a CANCEL.
+⚠ UNEXPLAINED   DO-0011 went through the SAME cancel on the SAME slip
+                and came out CORRECT. Why one and not the other is
+                the open question. → S85 STEP 3.
+⚠ CANCEL DOES DELETE ITS JOIN ROWS - the packingslipdos id sequence
+  has gaps exactly where the cancelled slips were, and none of the
+  eight cancelled slips has a surviving row. What cancel does with
+  the DO's own qty_shipped is the untrusted half.
+⚠ DO-0010 WAS LEFT UNCORRECTED ON PURPOSE. It is the live evidence.
+  Read it before resetting it.
+
+⚠ THE FIXTURE RESET THAT MADE THIS MEASURABLE (S84, by id, company
+  464, after querying and agreeing each one):
+                  DO-0004 (10910)  3 -> 0
+                  DO-0005 (10911)  3 -> 0
+                  DO-0010 (10924)  4 -> 1
+                  DO-0011 (10925)  2 -> 1
+                Each set to the sum of its own join rows. The join
+                rows were correct in every case - S83 was right about
+                that much.
+```
+
+---
+
+**J103 — THE SAME QUANTITY STRING IS BUILT TWO WAYS, AND A DISPLAY COMMIT BROKE A VALIDATOR.**
+STATUS: FOUND S84, NOT FIXED. → P45 + P49.
+
+```
+THE TWO FORMATS, same form control (shipment_product_order_qty):
+
+  CREATE  `${packing_units} # ( ${qty_to_ship} ${unit} )`
+          ->  "1 # ( 20.000 Kg )"
+  EDIT    `${qty_to_ship} ${unit} ( ${packing_units} # )`
+          ->  "20.000 Kg ( 1 # )"
+
+⚠ CREATE READS NUMBERS BACK OUT OF THAT STRING BY POSITION:
+  create-packslips.component.ts
+    :169  caps qtyShip at  ...split(' ')[0]
+    :265  min AND max at   ...split(' ')[3]   <- AN EQUALITY LOCK
+    :296  reads            ...split(' ')[0]
+
+⚠ THE EQUALITY LOCK AT :265 IS MINTY'S DOMAIN RULE, WRITTEN IN CODE.
+  min and max set to the SAME value = shipped units must equal
+  ordered units exactly. Someone built that deliberately, years ago,
+  and it matches the rule Minty stated fresh in S84 without knowing
+  it was there.
+
+WHAT THE FLIP DID
+                       OLD FORMAT       AFTER THE FLIP
+  :169  reads [0]      Kg               units      -> improved
+  :265  reads [3]      units            Kg         -> BROKEN
+  :296  reads [0]      Kg               units      -> improved
+  On a 1-unit / 20 Kg DO, :265 now demands the units box equal
+  20.000. No valid entry exists.
+
+⚠ THE POINT: A COMMIT THAT TOUCHED DISPLAY CHANGED WHAT A VALIDATOR
+  ENFORCES, IN CODE NOBODY OPENED. Not one of those three lines was
+  edited. There is no diff to catch it and no test that would fail
+  loudly - the field simply stops accepting anything.
+
+⚠ NOT PROVEN: git blame has NOT been run. S82's slice 3 is the
+  plausible author (it touched five units sites in create and the old
+  format is recorded in P45 as Kg-first), but it is a plausible
+  author, not a confirmed one. Do not write it up as fact.
+
+⚠ ALSO CORRECTED S84 — P45 HAD THE TWO SCREENS BACKWARDS. The record
+  said EDIT had no over-ship guard and that the string-parsing guard
+  had been deleted. Both false:
+    EDIT   HAS the guard, and it is the CORRECT kind -
+           Validators.max(shipment_order_units), a raw stored number,
+           no parsing.  (~:514)
+    CREATE is the one still parsing a display string.
+  Anyone acting on the old P45 would have built a guard on edit that
+  already existed, and left the fragile one untouched on create.
+
+THE FIX IS SMALLER THAN THE PROBLEM
+                Under the read-only rule (J101) the field is never
+                typed, so the parsing and both validators can be
+                DELETED rather than repaired. Do it in slice 4b, and
+                make both screens build the string identically.
+
+STILL UNPROVEN  Whether edit applies its guard to rows on LOAD or
+                only to rows added via the popup; and whether an
+                invalid Angular form actually blocks Save at all. A
+                guard that reddens a field but still saves is not a
+                guard.
+```
