@@ -2178,3 +2178,298 @@ J93  SLICE 2'S CUSTOMER KEY IS UNPROVEN — AND NO DEV FIXTURE CAN
 ========
 END SECTION J
 ────────────────────────────────────────────────────────────
+---
+
+## S82 — J94 · J95 · J96 · J97 · J98
+
+---
+
+**J94 — SLICE 3: THE PACKING-SLIP UNITS FIX. FIVE SITES. VERIFIED IN THE DB.**
+STATUS: CLOSED. Commit 897096b4 (frontend, dev only).
+
+```
+THE BUG      Five sites rebuilt a unit count by DIVIDING Kg by the
+             per-unit weight, wrapped in Math.round. R2 acrobatics
+             (§2 Core #1). Math.round made it LOOK correct only
+             because no fractional DO had ever reached a slip.
+
+THE SITES    create-packslips.component.ts  :246  display string
+             edit-packslips.component.ts    :248  Math.round(shipped_qty / wgt)
+             edit-packslips.component.ts    :270  display string
+             edit-packslips.component.ts    :325  display string
+             edit-packslips.component.ts    :486  display string
+             ⚠ FOUR OF THE FIVE were the DISGUISED form:
+               (qty / batch) * (batch / wgt), algebraically the
+               same divide (J83).
+
+THE FIX      Read the STORED packing_units. It was already on the
+             same object in every case - at :247 the create screen
+             was literally reading it on the NEXT LINE.
+
+THE PROOF    DO-0008: qty_to_ship 10 Kg, packing_units 0.5, so
+             wgt = 20 Kg per unit. 10 / 20 = 0.5, and JavaScript
+             rounds 0.5 UP, so the old code shipped 1 unit against
+             a DO authorising 0.5.
+             After the fix, PS-0008 / DO-0008 reads:
+               shipped_qty    0.5
+               qty_shipped    0.5
+               packing_units  0.5
+             All three agree. Verified by SQL, not by the screen
+             (rule 5.1, JT12).
+
+⚠ A SECOND BUG WAS FOUND IN THE SAME LINE AND NOT FIXED. The create
+  screen's save() builds shipped_qty by SPLITTING the display string
+  on a space and taking index [0]. The validators at :268 split the
+  SAME string on index [3] - the Kg number - and apply it as BOTH
+  min and max to a UNITS field. A string-split is load-bearing in
+  three places. Fixing the display made index [0] correct; the
+  validator remains wrong. Logged, not fixed - it needs its own test.
+```
+
+---
+
+**J95 — THE TWO PACKING-SLIP SCREENS DISAGREED ABOUT WHAT shipped_qty MEANS. RESOLVED.**
+STATUS: CLOSED on the code. ⚠ UNTESTED.
+
+```
+THE FINDING  create-packslips posts shipped_qty as a UNIT COUNT.
+             edit-packslips posted it as shipping_order_units *
+             wt_per_unit - which is KILOGRAMS.
+             Both write the SAME column, PackingSlipDOs.shipped_qty,
+             and createPS then ADDS that value to
+             DispatchOrders.qty_shipped, which §2 GR7 says is UNITS.
+             So the edit screen was adding Kg into a units column.
+             (First noted J88; S82 confirmed it in the code.)
+
+⚠ WHY IT NEVER BIT      The edit screen's write path is reached only
+             via "Add Dispatch order +", and that button had been
+             COMMENTED OUT (J86). Every row in packingslipdos was
+             written by createPS. The mixing was LATENT, not banked.
+             ⚠ Ten rows checked on dev: all small whole numbers,
+               1 to 12. No Kg-scale values present.
+             ⚠ THAT IS INFERRED FROM THE CODE PATH, NOT PROVEN BY
+               THE NUMBERS - 1 and 5 are plausible as either. If it
+               ever matters, compare a row against its DO's
+               packing_units.
+
+⚠ THE TIMING TRAP       Re-enabling the button (slice 4a) is what
+             would have introduced Kg into the column for the first
+             time. The button fix and the units fix HAD to land in
+             the same commit. They did (db415d74).
+
+THE FIX      shipped_qty = data.shipping_order_units. No multiply.
+
+⚠ A GUARD DIED WITH IT. The old code tried to cap shipped_qty at
+  the ordered quantity:
+      if (shipped_qty > data.shipment_product_order_qty)
+  but shipment_product_order_qty is a DISPLAY STRING - "10 Kg
+  ( 0.5 # )". A number is never > a string in any useful sense, so
+  the cap NEVER FIRED in its entire life. Removing it changed
+  nothing in practice, but there is now NO over-ship guard on this
+  screen at all. → P45.
+```
+
+---
+
+**J96 — SAVE AND SHIP WERE THE SAME ACTION. SPLIT.**
+STATUS: CLOSED on the code. ⚠ UNTESTED.
+
+```
+THE PROBLEM  editPackslips built its update object with
+             shipped_flag: true HARDCODED. There was no other path
+             into it. So the ONLY way to post a DO addition or a DO
+             removal was to SHIP the slip - terminally, with no
+             un-ship (§2 Core #2).
+             That is why remove-one-DO was UNUSABLE rather than
+             merely broken (J92, P40): the frontend had a Remove
+             button that filled deletedDOs, and no button that could
+             post it without shipping.
+
+THE FIX      backend  2d22e5a
+               const isShipping = req.body.ship === true ||
+                                  req.body.ship === 'true';
+               PSOBJ carries vehicle_no and remarks always;
+               shippingdate, shipped_flag and finalShipmentUserId
+               ONLY when shipping.
+               ⚠ AN UNSHIPPED SLIP HAS NO SHIPPING DATE. Stamping
+                 one on a plain save would have been a quiet lie in
+                 the record.
+
+             frontend db415d74
+               save()  -> submitSlip(false)
+               ship()  -> submitSlip(true)
+               Both post the same payload; only ship sends the flag.
+               ⚠ sendMail now fires ONLY on Ship. Previously every
+                 edit could email the customer. Deliberate.
+               ⚠ Save STAYS on the slip; Ship navigates back.
+
+⚠ ORDERING HAZARD, worth remembering. Between the backend deploy and
+  the frontend deploy, the SHIP button no longer shipped - it just
+  saved, because nothing was sending the flag yet. Harmless on dev
+  for a few minutes; on prod it would be a live defect. Deploy both
+  halves together or backend-last.
+```
+
+---
+
+**J97 — THE PACKING-SLIP FLOW, SETTLED BY MINTY. S82.**
+STATUS: DOMAIN RULE. Belongs in §2 → P41.
+
+```
+THE SEQUENCE
+  1  MOVE       From the DO sheet, pick DOs. The WHOLE ROW moves
+                onto the slip.
+  2  SAVE       Banks whatever has been moved. REPEATABLE - move
+                more, save again. Each save just holds what is there.
+  3  DETAILS    Shipping Reference and Vehicle condition are entered
+                AFTER the DOs are settled, not before.
+  4  SHIP       Greyed until both details are filled. Terminal.
+  5  CANCEL     Available from the first save until Ship. Reverses
+                everything. NEVER available after Ship.
+
+⚠ THIS INVERTS THE ORIGINAL DESIGN. The app was built to demand
+  Shipping Reference and Vehicle condition BEFORE the first save -
+  they were `required` on the create form and the Save button was
+  [disabled] until they were filled. That is why an early S82 test
+  "did nothing": the button was disabled, not silently failing.
+
+⚠ THE DATE PICKER IS ESSENTIAL AND ALREADY CORRECT (Minty, S82).
+  Before ship: an editable date picker defaulting to today, so a
+  shipment missed yesterday can be dated yesterday. After ship: a
+  readonly field showing the shipped date. It sits in the header,
+  above the DO rows. MUST SURVIVE the 4b row rebuild - verify after,
+  do not assume.
+
+⚠ WHAT S82 BUILT vs WHAT MINTY DESCRIBED - the gap, stated honestly.
+  S82 made the shipping fields ALWAYS VISIBLE and always editable,
+  with Ship greyed until they are filled. Minty asked for a DISTINCT
+  STEP - a "Ready to Ship" moment that reveals them. Those are not
+  the same thing: the built version has no moment where the app says
+  "you are done adding, now enter the details".
+  ⚠ MINTY'S CALL: do the row template FIRST, then the sequencing
+    change as its own piece, with a REAL COLUMN behind "Ready to
+    Ship". A visual-only toggle forgets itself on reload. → P7 4c.
+
+⚠ SHIPPING REFERENCE MAY BE MULTIPLE INVOICES, and those invoices
+  will likely need to match QuickBooks records - all Minty's clients
+  run it. That rules out delimited text in the existing single
+  column and points at a child table. Deferred by Minty: "if it is a
+  larger task, we can do it later". → P43.
+```
+
+---
+
+**J98 — A BLANK FORM FIELD ARRIVES AS THE STRING 'null'. TWO ATTEMPTS TO FIX. READ BOTH.**
+STATUS: CLOSED. Commits df6d728 (incomplete) then 083fc96 (correct).
+
+```
+THE SYMPTOM  After slice 4a dropped `required` from the create
+             screen's two shipping fields, saving a slip with them
+             blank returned 500 Internal Server Error.
+             ⚠ Filling them in still worked - which is exactly the
+               shape that makes a defect look like "user error".
+
+THE CAUSE    FormData STRINGIFIES EVERYTHING. The frontend appends
+             the JavaScript value null; what reaches the backend is
+             the four-letter STRING 'null'.
+             vehicle_condition is a model association. Waterline saw
+             a string where it wanted a row id and rejected the
+             WHOLE record.
+
+⚠ ATTEMPT ONE WAS WRONG AND IS THE MORE USEFUL HALF OF THIS ENTRY.
+  The first patch coerced BOTH fields to null. That is correct for
+  vehicle_condition (an association) and WRONG for vehicle_no, which
+  is declared type: 'string'. Waterline refuses an EXPLICIT null on
+  a string attribute even when the attribute is optional. The second
+  500 said so verbatim:
+      "Even though this attribute is optional, it still does not
+       allow `null` to be explicitly set ... please set the value
+       for this attribute to the base value for its type, `''`."
+  So the fix HAD ALREADY BEEN TOLD TO US by the first error message
+  and was still got wrong.
+
+THE RULE     association  -> coerce blank to NULL
+             string       -> coerce blank to '' (empty string)
+             ⚠ They are not interchangeable. Waterline rejects the
+               wrong one loudly on associations and would have
+               stored the literal word 'null' on the string.
+
+⚠ AN ANCHOR GUARD EARNED ITS KEEP. The first patch anchored on the
+  bare line `vehicle_no: req.body.vehicle_no,` - which appears TWICE
+  (createPS :68 and editPackslips :298). The script reported
+  "found 2" and REFUSED TO WRITE. Without the exactly-once assertion
+  it would have patched both sites with text intended for one, or
+  patched the wrong one silently. Rule 4.2 works.
+
+⚠ SAME FAMILY AS P10. The literal string "null" showing in Product
+  External Code has this exact shape. S82 found the mechanism;
+  P10 is still open.
+
+⚠ AND IT EXPOSED P44. While patching, editPackslips was found to
+  write only vehicle_no and remarks - it NEVER writes
+  vehicle_condition at all. Pre-existing, not caused by S82, but it
+  matters more now that 4a made the dropdown editable AND gated Ship
+  on it: an operator can pick a condition, ship, and have it
+  silently discarded.
+```
+
+---
+
+**JT23 — NEW TRAP. A BLANK FIELD IS NOT AN EMPTY FIELD.**
+
+```
+FormData stringifies every value. A blank input does not arrive as
+null - it arrives as the four-letter STRING 'null', or 'undefined',
+or ''. Any backend that writes such a value straight into Waterline
+will either 500 (association) or store the literal word (string).
+⚠ GUARD EVERY OPTIONAL FORM FIELD AT THE WRITE, and coerce to the
+  RIGHT empty: null for associations, '' for strings.
+⚠ THIS ONLY APPEARS WHEN A FIELD STOPS BEING REQUIRED. Making a
+  field optional is never a one-line frontend change - it changes
+  what the backend receives. (S82, J98. Same family as P10.)
+```
+
+---
+
+**J99 — THE POPUP SHOWED "0 of 0" AND IT WAS NOT A BUG. RECORDED SO NOBODY RE-INVESTIGATES.**
+STATUS: NO DEFECT. Slice 2 behaves as designed.
+
+```
+WHAT WAS SEEN   On Create-Packslips, after moving two DOs onto a slip,
+                reopening the DO popup showed an empty table, 0 of 0 -
+                while four other DOs were still unallocated.
+                It looked like a filter failing to clear between opens.
+
+⚠ BOTH MINTY AND CLAUDE READ IT AS A DEFECT AT FIRST. Claude proposed
+  two mechanisms for it. Both were wrong. THE APPEARANCE OF A BUG IS
+  NOT A BUG - and the thing that settled it was making a new fixture
+  and looking again, not more reasoning. (Rule 0.1a.)
+
+WHAT ACTUALLY HAPPENS, proven with DO-0012 (a Jade 3 / Colombo DO on a
+DIFFERENT lot, Pdt-260721-2):
+                Ticking DO-0012 filtered the list to THREE rows -
+                DO-0010, DO-0011 and DO-0012, all Jade 3 / Colombo -
+                and auto-ticked ONLY DO-0012.
+                DO-0010 and DO-0011 were LISTED AND UNTICKED because
+                they share the address but not the lot.
+                Reopening the popup still offered them.
+
+THE TWO KEYS ARE DIFFERENT, AND THAT IS THE DESIGN:
+                AUTO-TICK   lot + customer + address
+                LIST FILTER customer + address only
+
+WHY THE EARLIER RUN LOOKED EMPTY
+                Both Colombo DOs on that lot had already been moved.
+                The filter narrowed to Jade 3 / Colombo. Nothing else
+                existed at that address at that moment. Zero was
+                arithmetically correct.
+                ⚠ DO-0012 DID NOT EXIST YET. Creating it is what
+                  proved the behaviour.
+
+⚠ SLICE 2's LOT HALF IS NOW PROVEN. J93 recorded that a same-lot DO
+  auto-ticks; this proves the converse - a same-address DIFFERENT-LOT
+  DO stays visible and unticked. THE CUSTOMER HALF REMAINS UNPROVEN:
+  no dev fixture has two different customers sharing one address, so
+  address alone would still produce the same result. Evidence gap,
+  not a defect. (J93 stands.)
+```
