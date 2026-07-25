@@ -2709,3 +2709,218 @@ STILL UNPROVEN  Whether edit applies its guard to rows on LOAD or
                 guard that reddens a field but still saves is not a
                 guard.
 ```
+
+---
+
+## S85 — APPENDED 25 JUL 2026
+
+> **NUMBERING CONFIRMED S85.** The highest existing entry was verified as **J103** by grepping the whole file:
+> `grep -oE 'J[0-9]+' Section_5.md | grep -oE '[0-9]+' | sort -n | tail -1` → `103`
+> These entries therefore run **J104 – J108**. Section 1's cross-references were renumbered to match in the same pass.
+>
+> **JT NUMBERING ALSO CONFIRMED S85.** A separate grep was needed because `J[0-9]+` does not match `JT23` — the letter T breaks the pattern. `grep -oE 'JT[0-9]+'` returned **23** as the highest existing trap, so these run **JT24 – JT26**.
+>
+> ⚠ **BEFORE PASTING, GLANCE AT THE EXISTING JT23.** Claude has not read it. If it already covers the same ground as one of the traps below, say so — rule 7.7 warns that two entries stating one thing is how drift starts, and a duplicate trap is worse than no trap because it splits the reader's attention.
+>
+> ⚠ **ALSO CORRECT THE HEADER.** Section 5's own header still reads "highest is J93 — next is J94" and "Last appended: S81". It is ten entries and four sessions stale. Fix it in this commit.
+
+---
+
+### J104 — SLICE 4b: THE UNIFIED READ-ONLY DO ROW. SHIPPED AND VERIFIED.
+
+**Commit 453f1f44 (frontend). 2 files, +59 −130. Built green, deployed to dev, verified live in the browser.**
+
+`edit-packslips.component.html` carried **TWO** DO row templates, not one:
+
+```
+orderNumList   lines 35-116   EXISTING DO rows (already on the slip)
+shipmentList   lines 117-197  NEWLY ADDED rows (via the picker)
+```
+
+They had drifted apart — Customer, Delivery Address, Shipped Units and Shipped Qty were commented out on the existing-DO row and LIVE on the new-DO row. **4b replaced both with ONE template.**
+
+**THE EIGHT FIELDS (final, Minty S85):** MO Number · Internal DO Number · Customer PO No · Product · Product External Code · Pdt Lot Code · Best Before · Shipped Qty.
+
+Derivation from the S84 ten: Order Qty cut, Shipped Units cut (the unit count already opens the quantity string), leaving eight.
+
+**THE DOMAIN RULE THAT DROVE IT (Minty, S85):** *the DO row is a read-only display of the dispatch order. Nothing on it is typed. To change what is on the slip, remove the DO and add a different one.* This is the S84 shipped-quantity rule widened to the whole row.
+
+**THE UNIFORM QUANTITY STRING (Minty, S85):** `<units># (<Kg> <uom>)` — e.g. `1# (20.000 Kg)`. Units read STORED; Kg DERIVED by multiplying. R1, never R2.
+
+⚠ **THE TRAP THAT WAS AVOIDED, AND IT WOULD HAVE BEEN SILENT.**
+The obvious way to make the new row read-only is `disabled: true`, matching the existing-DO row. **That would have broken Save with a 200 and an empty join table.** `submitSlip` (:536) reads `this.packForm.get('shipmentList').value`, and **Angular excludes disabled controls from `.value`** — `do_id` and `shipping_order_units` would both have returned undefined.
+
+⚠ The existing-DO row IS all-disabled and is safe **only because `submitSlip` never reads `orderNumList`.** Safe by accident of which array is read, not by design. (Rule 7.4.)
+
+**THE FIX:** `readonly` in the **template**; controls stay live.
+
+⚠ **PROVEN ON A NON-1:1 FIXTURE.** JT21 says never verify a conversion with a 1:1 fixture. Product `test1.39` is **1.39 Kg per unit** and renders `1# (1.390 Kg)` correctly; the DO list independently shows `1.390 Kg (1#)`. Two screens, two code paths, same number. Earlier proofs used 20:1 or 1:1 only.
+
+⚠ **`decimalPlaces` RESOLVED TO 3.** `environment.decimalPlaces` was declared at :86 and used nowhere; its value was unknown when the patch was written. Flagged as a risk before deploying; confirmed correct on screen.
+
+**STATUS: DONE. DEV ONLY. NOT PROMOTED — blocked by J105.**
+
+---
+
+### J105 — ⚠⚠ CANCELLING A PACKING SLIP DOES NOT RETURN THE DO QUANTITY. REPRODUCED S85.
+
+**THE DEFECT.** Cancelling a packing slip **deletes its `packingslipdos` join rows but leaves `dispatchorders.qty_shipped` untouched.** The DO's tally climbs and never comes back. The app believes more has shipped than actually has.
+
+**THE EVIDENCE — four DOs, arithmetic fits every one:**
+
+```
+                   BASELINE (S85 ~21:30)      AFTER TESTING (S85 ~23:00)
+  DO-0004            1 / 1  ✓                   3 / 0 rows
+  DO-0005            1 / 1  ✓                   3 / 0 rows
+  DO-0010            2 / 1  ✗ (S84 drift)       3 / 1 row
+  DO-0011            1 / 1  ✓                   2 / 1 row
+
+  DO-0004  1 → +1 (PS-0018) → cancel → +1 (PS-0019) → cancel = 3 / 0
+  DO-0005  same history                                       = 3 / 0
+  DO-0010  2 → cancel PS-0016 → +1 (PS-0020)                  = 3 / 1
+  DO-0011  1 → cancel PS-0016 → +1 (PS-0020)                  = 2 / 1
+```
+
+⚠ **DO-0004 AND DO-0005 WERE CLEAN AT THE START OF THE SESSION.** They drifted *during* S85. Reproduced live, not inherited.
+
+**CONFIRMED BY MINTY: he used CANCEL (whole slip), not Remove (one row).** So the guilty path is the **whole-slip cancel**.
+
+**THE FRONTEND IS INNOCENT.** `deletePs()` (edit-packslips.component.ts ~:642) walks `packslip.Refer_DOs` and sends per-DO `shipped_qty` in the payload. The data the backend needs is on the wire.
+
+**`inActivatePS` HAS NOT YET BEEN READ.** That is the first file to open in S86.
+
+⚠ **THIS CONTRADICTS THE SETTLED DOMAIN RULE (Minty S81, J92):** *"a DO coming off a packing slip ALWAYS returns its quantity."* The rule is right. The code does not implement it. Record the rule in Section 2 (P41); track the bug here.
+
+⚠⚠ **IT DISSOLVES THE S84 MYSTERY, AND THAT IS THE LESSON.**
+S84 recorded as UNEXPLAINED that DO-0010 came out of a cancel wrong while DO-0011 came out of the *same cancel on the same slip* correct. That framing sent S85 looking for a difference between the two DOs. **There was none.** DO-0010 had simply been through one more cancel than DO-0011. The "anomaly" was cancel *count*.
+▶ **AN UNEXPLAINED DIFFERENCE BETWEEN TWO SIMILAR CASES IS OFTEN A DIFFERENCE IN HISTORY, NOT IN KIND.** Count the events before hunting for a property.
+
+⚠⚠ **SLICE 1 (ff5d183) IS NOW SUSPECT, NOT MERELY UNVERIFIED.**
+Slice 1 fixed the `deletedDos` (remove-one-DO) path **by mirroring `inActivatePS`.** If `inActivatePS` never returns the quantity, slice 1 copied a broken pattern into the remove-one path. **Read both together; do not fix one in isolation.** → P40.
+
+⚠⚠ **PROD RUNS THE SAME CANCEL CODE, WITH A REAL CLIENT.**
+Nothing in P7 touched `deletePs`/`inActivatePS`, and slice 1 was never promoted — so prod almost certainly behaves identically. **That is a reading, not a proof; prod's copy has not been read.** If Glutenull has ever cancelled a packing slip, their `qty_shipped` is overstated **right now**. Real traceability data on a food-safety system.
+▶ **S86 STEP 1, BEFORE ANY CODE: run the reconcile oracle on PROD, unscoped.** Read-only. Empty = forward fix only. Not empty = a data heal must be planned.
+
+⚠ **OPEN, UNEXPLAINED:** DO-0006 went onto PS-0019 alongside DO-0004/0005 and does **not** appear in the drift list. It was not queried directly. Why it behaved differently is not known and may sharpen the diagnosis. → S86.
+
+**STATUS: OPEN. → P53. BLOCKS P7 PROMOTION.**
+
+---
+
+### J106 — `createEditItem` / `addEditItem` ARE DEAD. PROVEN, NOT ASSUMED.
+
+`grep -rn "addEditItem\|createEditItem" src/` returns **three hits only**: `addEditItem`'s definition (:221), its call to `createEditItem` (:222), and `createEditItem`'s own definition (:292). **Nothing calls `addEditItem`.**
+
+⚠ `createEditItem` contains textbook R3 acrobatics — divide `qty_to_ship` by the per-unit weight, compare, multiply back. **It is therefore a DEAD defect, not a live one.** P2's "the two row builders disagree in this file" was half a problem, not a whole one.
+
+⚠ **JT22 IN ACTION:** "dead code" is a claim about reachability, and reachability is checkable. It was checked rather than assumed. → P51.
+
+---
+
+### J107 — THE VALIDATOR LOOP THAT THREW INVISIBLY. DELETED BY 4b.
+
+Before 4b, `doList()`'s success handler ended with:
+
+```
+:513  for (let i = 0; i < this.shipmentArray.length; i++) {
+:514    this.shipmentArray.at(i).get('shipping_order_units').setValidators(
+:515      Validators.compose([Validators.required,
+:515        Validators.max(this.shipmentArray.at(i)
+:515          .get('shipment_order_units').value)]));
+```
+
+**`shipment_order_units` IS COMMENTED OUT of `createItem()` (:368).** `get()` returns `null` for a control that was never declared, so `.value` was read off `null` and **threw**.
+
+⚠ **IT THREW INSIDE `afterClosed()`, AFTER `patchValue` had already run** — so the row populated correctly and the failure was **invisible on screen, console only**. Consistent with S84 seeing DO-0012 land cleanly.
+
+⚠ **ALSO CLOSES A P45 SUB-QUESTION.** P45 asked whether an invalid form actually blocks Save. **It does not.** Nothing anywhere reads `packForm.valid`; Save and Ship are gated only on `vehicle_num` + `vehicle_condition` (html :313-314). And `manufacturing_LOT_order_num` is declared `Validators.required` (:362) but **never patched** — the doList line for it is commented out (:493) — so the new-DO group has **always** been invalid and it has never blocked anything.
+
+Deleted by 4b: under the read-only rule nothing on the row can be typed, so there is nothing to validate.
+
+---
+
+### J108 — `company` HAS AN ADDRESS COLUMN AND NO LOGO COLUMN.
+
+`SHOW COLUMNS FROM company` on dev, S85:
+
+```
+HAS       company_name  varchar(255)  NOT NULL
+          address       varchar(255)  NULL   ⚠ never seen on any
+                                             screen; whether it is
+                                             populated is untested
+NO        no logo column, and no obvious home for one elsewhere
+```
+
+▶ The letterhead can carry **name + address** immediately. The **logo is its own feature** — column + Waterline attribute + Super Admin upload + render-time retrieval. → P54, P55.
+
+⚠ **THE COLUMN ALONE IS NOT ENOUGH.** A column written via `.update().set()` is silently dropped unless it is **also declared in the Waterline model attributes** (J20 / JT2). Same trap as P9. Both, or the write vanishes with no error.
+
+---
+
+### JT24 — ⚠ A CHECK THAT CAN PASS OR FAIL FOR THE WRONG REASON IS NOT A CHECK.
+
+**EARNED S85. TWO OF THIRTEEN post-write checks in the 4b patch script were unsound — and they were unsound in opposite directions.**
+
+```
+FALSE FAIL   "validator loop removed" tested whether the string
+             get('shipment_order_units') was absent from the WHOLE
+             FILE. It failed — because Claude's OWN EXPLANATORY
+             COMMENT contains that string. The patch was correct;
+             the check matched itself.
+
+FALSE PASS   "no stale shippingQty reference" split the file on
+             "createEditItem" and tested the part BEFORE it. But
+             addEditItem calls createEditItem at line 222, ABOVE
+             the function being guarded — so the check never looked
+             at the code it was meant to protect. It passed for the
+             wrong reason.
+```
+
+⚠ **THE FALSE FAIL WAS THE DANGEROUS ONE.** The script printed *"Run: git checkout -- ."* — which would have thrown away a correct patch. **A verification failure must be diagnosed, not obeyed.**
+
+**THE RULES:**
+- A check must not match text the patch itself introduces. Scope it to a line range or exclude comment lines.
+- A check that scopes by splitting on a function name must confirm that name appears **once**, and in the position assumed.
+- ⚠ Write checks **after** reading the file, never from memory of what the file probably contains. Both bad checks were written before Claude had the file.
+
+(Companion to JT12 "screens lie" and rule 0.1a. A self-written check is also a screen.)
+
+---
+
+### JT25 — ⚠ NEVER NAME A RECORD BY DATABASE id IN A DOCUMENT MINTY READS.
+
+**EARNED S85. Cost two wrong instructions and a round trip.**
+
+Section 1 carried `PS 2389`, `PS 2393`, `PS 2397` (database ids) in the **same block** as `PS-0010`, `PS-0013` (internalCodes). **Minty's screen only ever shows internalCode.** He reported, correctly, that no such slips existed.
+
+```
+2389 = PS-0008   (and it was CANCELLED, not live as recorded)
+2393 = PS-0012
+2397 = PS-0016
+2398 = PS-0017
+```
+
+⚠ Claude then sent Minty to PS-0008 for a fractional test — **a cancelled, empty slip** — by trusting the stale record over a query.
+
+**THE RULE:** in Section 1, name slips and DOs by the **internalCode Minty can see**. If a database id is genuinely needed, give **both**. The oracle returns ids; translate them before writing them down.
+
+⚠ Same family as P48 (two names for one thing), and it is why P48's aggregate cost is higher than any single item in it suggests.
+
+---
+
+### JT26 — ⚠ DO NOT CLOSE AN OPEN QUESTION WITH EVIDENCE THAT ANSWERS A DIFFERENT ONE.
+
+**EARNED S85, and Minty caught it, not Claude.**
+
+Minty asked whether PS-0008 and PS-0015 had been cancelled by him after S84 — slips already cancelled when the baseline query ran. Claude then saw screenshots of **PS-0018** being created and cancelled during the session, and wrote *"Closed."*
+
+**Different slips. Different times. The evidence did not touch the question.**
+
+⚠ **THE FAILURE MODE IS SPECIFIC:** an open question plus *some* arriving evidence produces an urge to mark it resolved. The check is mechanical — **does this evidence name the thing the question named?** If not, the question is still open.
+
+(Rule 0.1a says look rather than reason. This is its sibling: **having looked, confirm you looked at the right thing.**)
+
+---
+
+**END S85 APPEND**
