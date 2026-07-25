@@ -30,12 +30,31 @@ THIS SESSION   S86 — CANCEL FIRST, IN THIS ORDER:
 DOCS REPO IS LIVE — this is the standing paste.
   Repo      Mintygadhok/abletrace-lab-docs   (public)
   Web       https://github.com/Mintygadhok/abletrace-lab-docs
-  ⚠ CLAUDE CANNOT BUILD A FETCH URL ITSELF. A raw URL is only
-    fetchable if it appears IN THE CHAT AS TEXT. Minty pastes
-    ONE raw URL, e.g.
-      https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_5.md
-    and Claude can then fetch the rest. Proven S85.
-  ⚠ A SCREENSHOT OF A URL DOES NOT COUNT. It must be text.
+  ⚠⚠ CLAUDE CANNOT BUILD A FETCH URL ITSELF. EVERY SECTION NEEDS
+    ITS OWN FULL URL, AS TEXT, IN THE CHAT. Fetching one file does
+    NOT unlock the others — TESTED AND DISPROVEN S85: after
+    Section_5 fetched cleanly, Section_0 was still refused until
+    its own URL was pasted.
+  ⚠ A REPO URL DOES NOT WORK. A DIRECTORY URL DOES NOT WORK. A
+    SCREENSHOT OF A URL DOES NOT WORK. Only full file URLs, as text.
+
+  ▶▶ THE STANDING PASTE — these eight lines, then "pull the docs":
+
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_0.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_1.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_2.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_3A.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_3B.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_4.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_5.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_6.md
+
+  ⚠ PROVEN S85 on Section_0 and Section_5. The `/main/` form works;
+    the `/refs/heads/main/` form is UNTESTED — use the one above.
+  ⚠ SECTION 0 RULES 0.3 AND 9C STILL CARRY THE OLD, WRONG
+    INSTRUCTION ("give Claude the repo URL"). That is what cost
+    S85 its first three hours. ▶ Patch them at S86 open — stable
+    section, so say it out loud (rule 9E).
   ⚠ THE GITHUB WEB PAGE READS AS README-ONLY when Claude fetches
     it — the file list is stripped by the extractor. That is a
     rendering artifact, NOT a missing repo. Do not re-raise it.
@@ -106,11 +125,26 @@ BACKEND        inActivatePS — ⚠ NOT YET READ. That is the first
   on the same slip. Nothing differed about the DOs — DO-0010 had
   simply been through one more cancel. Not an anomaly. → J105.
 
-⚠⚠ SLICE 1 IS NOW SUSPECT, NOT MERELY UNVERIFIED.
-   Slice 1 (backend ff5d183) fixed deletedDos BY MIRRORING
-   inActivatePS. If inActivatePS never returns the quantity, slice 1
-   copied a broken pattern into the remove-one-DO path.
-   ▶ READ BOTH TOGETHER. DO NOT FIX ONE IN ISOLATION.
+⚠⚠ THE COMMIT LOG NAMES THE GAP. Read at S85 close, from the
+   promote list below:
+     ff5d183   (S81, backend)  "rewrite deletedDos branch to return
+               qty_shipped and quanity_shipped_to_date per DO"
+     b324bcea  (S83, frontend) "cancel PS returns correct per-slip
+               qty to each DO (read PackingSlipDOs.shipped_qty not
+               DO running total)"
+   ⚠ SO THE REMOVE-ONE-DO PATH WAS FIXED (S81) AND THE FRONTEND WAS
+     FIXED (S83). ⚠⚠ NOTHING IN EITHER LIST TOUCHES inActivatePS.
+     THE WHOLE-SLIP CANCEL HAS NEVER BEEN FIXED — and that is the
+     path Minty used when the drift appeared.
+   ⚠ SLICE 1 IS THEREFORE PROBABLY NOT THE PROBLEM. An earlier S85
+     note called it suspect on the theory that it mirrored a broken
+     inActivatePS; its own commit message says it returns the
+     quantity. That theory is retired.
+   ⚠ THIS IS READ FROM COMMIT MESSAGES, NOT FROM CODE. A strong
+     lead, NOT a proof.
+   ▶ S86: open inActivatePS FIRST. Compare it against the
+     deletedDos branch ff5d183 already fixed. The fix may be
+     applying the same treatment.
 
 ⚠⚠ PROD RUNS THE SAME CANCEL CODE, WITH A REAL CLIENT.
    Nothing in P7 touched deletePs/inActivatePS, and slice 1 was
@@ -142,8 +176,10 @@ DONE AND PROVEN
             the EDIT screen. Built green, deployed, verified live.
             → J104.
 
-⚠ DONE BUT SUSPECT
-  SLICE 1   backend ff5d183. See the P53 block above.
+⚠ DONE, PROBABLY SOUND, STILL UNVERIFIED BY TEST
+  SLICE 1   backend ff5d183 — remove-one-DO. Its commit message
+            says it DOES return the quantity per DO. The S85
+            "suspect" note is retired. See the P53 block above.
 
 STEP A  ⚠ FIX CANCEL (P53). BLOCKS EVERYTHING ELSE.
 
@@ -553,6 +589,38 @@ BARCODE       one per UNIQUE customer PO, first occurrence only.
 
 ```
 Corrected v2 PDFs (Misc Release + Traceability label fixes).
+⚠ THE PROMOTE SET — READ FROM GIT AT S85 CLOSE, NOT FROM MEMORY.
+  `git log --oneline <prod>..<dev>` on both repos. ELEVEN COMMITS,
+  ALL P7, NOTHING ELSE:
+
+    FRONTEND  53db203d..453f1f44   (7)
+      0f4c0344  S81 slice 2  DO-select popup, auto-select group
+      897096b4  S82 slice 3  read stored packing_units (5 sites)
+      db415d74  S82 slice 4a Save/Ship split, re-enable add-DO
+      b324bcea  S83          cancel PS returns per-slip qty to DO
+      d223d6ed  S84 D2       edit doList loops the picker array
+      c3d463c9  S84          shipped units pre-fill (fixes the 500)
+      453f1f44  S85 slice 4b unified read-only DO row template
+
+    BACKEND   d3104ea..083fc96    (4)
+      ff5d183   S81 slice 1  deletedDos returns qty per DO
+      2d22e5a   S82 slice 4a split save from ship in editPackslips
+      df6d728   S82          vehicle_no null coercion
+      083fc96   S82          vehicle_no blank -> empty string
+
+  ⚠ USE PROD'S SERVED BUNDLE SHA (53db203d), NEVER ITS CHECKOUT
+    (9bce0238). The checkout lags and gives a wrong range. → P8.
+  ⚠ AN S85 CLAIM WAS WRONG AND IS CORRECTED HERE: Claude listed
+    licence-banner, SQL-parameterisation, double-encoding and
+    config-cleanup commits as riding along. THEY ARE ALREADY ON
+    PROD. Git says the range is P7-only. Spoken from memory, then
+    disproven by reading — rule 0.1a.
+  ⚠ BECAUSE IT IS ONE FEATURE AREA AND NOT CROSS-CUTTING, THIS CAN
+    PROMOTE AT THE END OF S86 rather than needing its own session.
+  ⚠ ORDER: BACKEND FIRST, THEN FRONTEND (J96).
+  ⚠ REGRESSION PAIR STILL APPLIES (rule 5.2 / J78): test document
+    save with BOTH an apostrophe AND a pasted image.
+
 P7 slices 1, 2, 3, 4a, 4b + the S83 cancel fix + the S84 D2 and
 pre-fill fixes — dev only, deliberately NOT promoted.
 ⚠⚠ PROMOTION IS NOW BLOCKED BY P53, NOT MERELY DEFERRED. Shipping a
