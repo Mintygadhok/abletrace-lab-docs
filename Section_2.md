@@ -57,9 +57,27 @@ Side exit 2      Stock-On-Hand → parent MO      (consumed as intermediate)
 
 Rules            Stock leaves SOH at DO CREATION, not at ship (J80). Ship is
                  a terminal flag flip — no stock touched, no un-ship. Reverse
-                 walks back one bucket at a time, only up to PS/DO; cancel
-                 logic already exists there. MR/reject is a separate one-way
-                 exit pulled straight from SOH.
+                 walks back one bucket at a time, only up to PS/DO.
+                 ⚠ A DO COMING OFF A PACKING SLIP ALWAYS RETURNS ITS
+                 QUANTITY and becomes available again — whether ONE DO is
+                 removed or the WHOLE SLIP is cancelled. Both directions,
+                 not cancel alone. (Minty, S81. J92.)
+                 MR/reject is a separate one-way exit pulled straight
+                 from SOH.
+
+Packing slip     Move DOs onto the slip → SAVE → enter shipping reference +
+flow             vehicle condition → SHIP. Ship is terminal. Cancel is
+                 available until Ship and never after. The packing slip
+                 number is assigned once, at that save, and never changes.
+                 (Minty, S82. J97.)
+
+⚠ Shipped        SHIPPED QUANTITY IS NOT AN OPERATOR INPUT. It is the DO's
+quantity         quantity, carried through unchanged. No partial ship, no
+                 over-ship. To change what goes out, CANCEL the DO and
+                 raise a fresh one.
+                 Corroborated by the OLD APP, read live S84: its packing
+                 slip row carries no Shipped Units and no Shipped Qty
+                 field at all — only Order Qty. (Minty, S84. J101.)
 
 Two lines        Ingredients/materials — Kg-anchored end to end, leave alone.
                  Products (incl. intermediates) — unit-anchored end to end.
