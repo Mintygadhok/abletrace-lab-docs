@@ -432,7 +432,7 @@ The cause was a line from June 2023: `JSON.stringify` run over a value that was 
 
 ---
 
-## S73–S80 — PER-SESSION, FULL
+## S73–S84 — PER-SESSION, FULL
 
 ### S73 — THE VERIFICATION SESSION (Jul 17, 2026)
 
@@ -816,6 +816,160 @@ NOT DONE     MO-Release Global Select STILL UNREAD — P6 has said to
 
 ---
 
+### S81 — THE BUILD RESUMES (Jul 23, 2026)
+
+The first session in ten to ship application code. Two P7 slices written, one deployed and verified on dev, prod untouched throughout.
+
+**SLICE 1 (backend `ff5d183`).** `editPackslips` had a loop that threw on an out-of-scope identifier, and behind that throw sat three further bugs the throw was accidentally preventing (S79 read them; J86). The loop was deleted rather than repaired, and the `deletedDos` branch rewritten to return quantity per DO from the stored `PackingSlipDOs` row. ⚠ SHIPPED DORMANT — no button reached it until slice 4a, three sessions later.
+
+**SLICE 2 (frontend `0f4c0344`).** The DO-select popup now auto-selects every DO sharing lot code AND customer AND address, with lot as a hard boundary. Verified live: picking DO-0004 ticked DO-0005 and DO-0006; DO-0008 on a different lot stayed unticked.
+
+**⚠ J87 CORRECTED IN THE SAME SESSION THAT USED IT.** S80 had recorded that the popup drops ticks when the list re-filters. Reading the code while building on it showed the real defect was different — the filter keyed off a row that had just been *unticked*, so selection and filter could disagree. The rebuilt version derives the selection from the full list *after* the group toggle, which is why it cannot drift.
+
+**⚠ AND A TEST THAT COULD NOT HAVE FAILED, CAUGHT THIS TIME BEFORE IT WAS TRUSTED.** Slice 2 keys on lot + customer + address. No dev fixture has two different customers sharing one shipping address — a 3PL or distribution centre — so address alone would produce the identical result. The customer half of the key is UNPROVEN and was recorded as unproven (J93). ⚠ THIS IS THE S79 LESSON FIRING BEFORE THE FAILURE RATHER THAN AFTER IT, for the second time in two sessions.
+
+**J92 — THE DEFECT THAT WAS REALLY A MISSING BUTTON.** Removing one DO from a packing slip was found unusable: the screen had no Save, and its only commit path was Ship, which is terminal. The backend half was fixed in slice 1; the frontend half needed a button that did not exist. ⚠ A BACKEND FIX WITH NO REACHABLE CALLER IS NOT A FIX — it is a fix that will be tested three sessions later, by someone who has forgotten what it was for.
+
+```
+BANKED       backend ff5d183 · frontend 0f4c0344 · docs 89548cb
+             Section 5 +J89 +J90 +J91 +J92 +J93
+NEW QUEUE    P38 dead lot-picker · P39 nestedPop check (food-safety)
+             P40 remove-DO defect · P41 write the rule into §2
+             P42 split Section 5, after P7 closes
+⚠ OVERHEAD   Four turns lost to a stale raw-URL cache the docs had
+             already warned about. Two wrong file-path guesses. Three
+             commands sent to the wrong box. The fixes went into
+             Section 1: find, never guess; every command block names
+             its box. ⚠ ALL THREE WERE ALREADY WRITTEN DOWN.
+```
+
+---
+
+### S82 — THE UNITS FIX LANDS, AND A SPLIT THAT OPENED A DOOR (Jul 23–24, 2026)
+
+**SLICE 3 — THE UNITS FIX (`897096b4`), DONE AND VERIFIED IN THE DB.** Five sites across the two packing-slip screens were rebuilding a unit count by dividing kilograms by per-unit weight and rounding. The fix reads the stored `packing_units`. Proven live: PS-0008 / DO-0008 carries 0.5 in `shipped_qty`, `qty_shipped` and `packing_units` — all three agree. ⚠ BEFORE THE FIX A HALF-UNIT DO WOULD HAVE SHIPPED ONE. It had not bitten only because no fractional DO had yet reached a packing slip — safe by accident of the data, the J74 shape again.
+
+**SLICE 4a — SAVE SPLIT FROM SHIP (`2d22e5a`, `db415d74`).** Until this commit, saving a packing slip *was* shipping it. The split let a slip be built up and saved without stamping `shipped_flag`, a shipping date or a shipping person. The "Add Dispatch order +" button was re-enabled and the shipping fields made editable. ⚠ SHIPPED TO DEV LARGELY UNTESTED, deliberately, with the untested state written into Section 1.
+
+**THE 500 THAT FOLLOWED, AND THE TWO ATTEMPTS TO FIX IT.** Dropping `required` let blank fields reach the backend as the four-letter string `'null'`. The first fix coerced both fields to `null`; `vehicle_no` is a string attribute and Waterline wants `''`. ⚠ THE ERROR MESSAGE SAID SO VERBATIM AND IT WAS STILL MISSED ONCE. (`df6d728` then `083fc96`. J98.)
+
+**⚠ A NON-DEFECT, RECORDED SO NOBODY RE-INVESTIGATES.** The DO popup showed "0 of 0" on reopening and both Minty and Claude read it as a bug. Claude proposed two mechanisms; both were wrong. Making a third fixture and looking settled it — the list filters on customer + address, auto-tick keys on lot + customer + address, and the empty view was arithmetic, not a defect. (J99.) ⚠ THE THING THAT SETTLED IT WAS A NEW FIXTURE AND A LOOK, NOT MORE REASONING.
+
+**⚠ THE TERMINAL PASTE FAILURE, AND TWO DISPROVEN THEORIES.** Long patch scripts pasted into the SSH session truncated or scrambled 6+ times, always cutting at the same content. "It is the paste size" — a fresh window took the same size fine. "It is stale window state" — a fresh window also failed. ⚠ BOTH THEORIES WERE DISPROVEN BY EVIDENCE AND RECORDED AS DISPROVEN (P46). The workaround — hand the script over as a FILE, `scp` it, run from `/tmp` — became the default and has not failed since.
+
+```
+BANKED       frontend 897096b4 · backend 2d22e5a · frontend db415d74
+             backend df6d728 · backend 083fc96 · docs b6a3b1f
+             Section 5 +J94 +J95 +J96 +J97 +J98 +J99
+NEW QUEUE    P43 multiple invoices (QuickBooks child table)
+             P44 edit never writes vehicle_condition
+             P45 no over-ship guard   ⚠ THIS ENTRY WAS BACKWARDS —
+                 corrected S84, see below
+             P46 terminal paste truncation
+⚠ PROCESS    Claude switched output formats mid-session without
+             saying so. Recorded because a format change that is not
+             announced reads as a mistake.
+```
+
+---
+
+### S83 — THREE DEFECTS FOUND, AND ONE OF THEM WAS NOT THERE (Jul 24, 2026)
+
+Scope was set narrow by Minty at open: test what S82 shipped, fix what it breaks, build nothing.
+
+**THE FRAME THE SESSION PRODUCED.** Testing exposed that the edit packing-slip screen was only half-wired, and the session worked out why: **the old app was one-save-then-ship.** The edit screen was a view/ship screen. It never supported editing, cancelling, or adding DOs to a saved slip. Slice 4a is the first attempt to convert it into a working-edit screen, so every gap hit is one root cause — the create component was rewritten for the new world and the edit component was not. ⚠ THAT FRAME HELD UP AND IS STILL THE RIGHT ONE.
+
+**THE WIN — CANCEL (`b324bcea`), deployed to dev.** `deletePs()` now resets `deleteDOs` before the loop and reads the stored `PackingSlipDOs.shipped_qty` per row instead of the DO's running total. ⚠ STILL NOT INDEPENDENTLY VERIFIED at S84 close — the one thing S83 owed and could not give, because its own fixtures were too dirty to measure against.
+
+**⚠ TWO OF S83's THREE DEFECTS WERE WITHDRAWN OR CORRECTED BY S84. THE RECORD OF WHAT IT CONCLUDED IS KEPT HERE BECAUSE THE ERROR IS THE INSTRUCTIVE PART.**
+
+```
+D1  CREATE DOUBLE-COUNT      ⚠ DISPROVEN S84 (J102). S83 recorded it
+    as PROVEN — "DO-0010 went 1→2 then 2→4" — and put it second in
+    the S84 plan as food-safety adjacent. It does not reproduce. On
+    reconciled fixtures the clicked DO increments ONCE, identically
+    to the auto-ticked ones.
+    ⚠ WHY S83 SAW IT: its evidence was gathered on DIRTY FIXTURES
+      with no baseline, after several cancels, with four DO tallies
+      already inflated before testing began. S83's own handover says
+      it dismissed those same numbers as "fixture residue" earlier in
+      the session and then reversed. ⚠ IT WAS RIGHT THE FIRST TIME.
+
+D2  EDIT POPUP SHAPE          ⚠ REAL, FIXED S84 — but the stated
+    REASON was wrong. S83 said the popup returns an OBJECT on single
+    click and an ARRAY on tick+Save, so only tick+Save broke. Both
+    gestures return arrays; BOTH were broken. Anyone verifying the
+    fix by single-clicking would have been testing a path they
+    believed already worked. (J100.)
+
+D3  getPSs INDEX-STITCH       ⚠ REAL, LATENT, AND STILL NOT FIXED —
+    and ⚠ IT WAS NEVER GIVEN A QUEUE NUMBER. It exists in the S83
+    handover file and nowhere else. Waterline `find()` does not
+    guarantee id-array order, so deep DO objects can be stitched onto
+    the wrong join rows on a slip whose DOs are not in ascending id
+    order. Would show WRONG DO DETAILS, not an empty screen.
+```
+
+**⚠ THE LESSON, AND IT IS THE ONE THIS SECTION EXISTS FOR.** S83 measured quantities against a baseline it had not established. Every number it read was true; every conclusion it drew from them was unsafe. ⚠ A QUANTITY FINDING MEASURED WITHOUT A RECONCILED BASELINE IS NOT A FINDING. It cost S83 an afternoon and would have cost S84 another, because the finding was written into the handover as proven and scheduled as the second job.
+
+⚠ **WHAT S83 DID RIGHT AND SHOULD BE COPIED.** Several shape and filter theories Claude raised were disproven by reading before patching. The "DO-0012 not showing" symptom was resolved by looking — the picker works; the gesture is two-step by design. ⚠ THE DISCIPLINE HELD ON EVERYTHING THAT COULD BE SETTLED BY LOOKING. It failed only where the evidence was arithmetic on a dirty baseline, which looks exactly like evidence.
+
+```
+BANKED       frontend b324bcea · handover file (not the repo)
+NOT DONE     ⚠ DOCS DELIBERATELY NOT UPDATED. Deferred to S84 so the
+             Section 1 rewrite would happen against a fresh copy.
+             Defensible, and it worked — but it meant S84 opened on a
+             record that was a full session stale AND carried a
+             disproven finding as its second scheduled job.
+```
+
+---
+
+### S84 — THE BASELINE, AND A FINDING WITHDRAWN (Jul 24, 2026)
+
+Opened intending to fix two defects. Fixed one, found and fixed a third nobody knew about, and disproved the other. ⚠ THE MOST USEFUL OUTPUT WAS A SUBTRACTION.
+
+**THE SESSION'S FIRST ACT WAS NOT CODE.** The fixtures were reconciled before anything was touched: four DO tallies in company 464 disagreed with the sum of their own join rows, and each was reset to what its rows said. ⚠ MINTY APPROVED EACH RESET BY ID AFTER QUERYING. Only then did testing begin. **That single decision is what made everything after it mean anything** — and it is the direct answer to S83's failure.
+
+**THE ORACLE.** The reconcile query became a standing tool: a DO's `qty_shipped` must always equal the sum of its `packingslipdos` rows. One query, run after every quantity change, empty = clean. ⚠ IT IS NOW IN SECTION 1 AS A PASTEABLE BLOCK. Before this session there was no way to ask "is the bucket chain intact" in one step.
+
+**D2 FIXED (`d223d6ed`).** The picker always closes with an array; edit's handler read fields straight off it. Fix mirrors create's `forEach`. The picker's Save button was renamed **MOVE TO PACKING SLIP** in the same commit, at Minty's request — so exactly one Save now exists in the flow, and it is the one that saves.
+
+**THE 500 BEHIND THE DOOR (`c3d463c9`).** Fixing D2 exposed a defect that had never run: `shipping_order_units` was patched as an empty string and posted into a numeric column. ⚠ NOT A REGRESSION — the next thing that was always broken, now reachable for the first time.
+
+**⚠ AND THE FIX WAS A DOMAIN RULE, NOT A PATCH.** Minty, asked what should happen if an operator ships more or less than the DO authorises: *the DO's quantity is fixed and cannot be altered — either cancel and raise a fresh DO, or ship it.* ⚠ THE OLD APP CORROBORATED IT WITHIN THE HOUR: its packing slip row carries no Shipped Units and no Shipped Qty field at all, only Order Qty. The typed box is a later addition, and it is the source of both the dead validators and the 500. The rule is now in §2 Core #2.
+
+**⚠ D1 DISPROVEN — THE CLEAN EXPERIMENT.** DO-0004 / 0005 / 0006, all free, all at zero, all sharing one lot + customer + address. Clicked DO-0004; DO-0005 and DO-0006 auto-ticked; DO-0008 on a different lot stayed clear. Every one wrote `shipped_qty` 1 and every tally read 1. ⚠ THE CLICKED DO INCREMENTED ONCE. (J102.)
+
+**⚠ WHICH RE-POINTED THE BUG AT CANCEL.** Every DO whose history is create-only reconciles. The one bad number left — DO-0010, tally 2 against 1 join row — belongs to a DO that went through a cancel. ⚠ AND DO-0011 WENT THROUGH THE SAME CANCEL ON THE SAME SLIP AND CAME OUT CORRECT. Why one and not the other is S85's job. DO-0010 was **left uncorrected on purpose** as the live evidence.
+
+**⚠ P45 WAS BACKWARDS, AND THE CORRECTION CAME OUT OF A DESIGN QUESTION.** Minty asked to see the DO screen, the picker and the packing slip side by side, because the fields did not match between them. Reading all three turned up something else entirely: the same quantity string is built **units-first on create and Kg-first on edit** — and create reads numbers back out of that string *by position*. So a commit that changed how something displays silently changed what a validator enforces, in code nobody opened. ⚠ THE EQUALITY LOCK AT `:265` IS MINTY'S RULE WRITTEN IN CODE YEARS AGO, and the flip pointed it at the kilogram figure. (J103, P49.)
+
+⚠ And the record had the two screens the wrong way round: **edit** has the correct guard; **create** is the one parsing a display string. Anyone acting on the old P45 would have built a guard that already existed and left the fragile one untouched.
+
+**P7 GOT SMALLER, THREE TIMES, ALL MINTY'S CALLS.** Slice 4c cut — 4a already delivers the flow, and cutting it removed the only DB column left in P7. The PO barcode moved out to its own feature (P47) — it had never been designed, and nobody had decided what it encodes. The picker gains a quantity column but does **not** mirror the DO screen, because the modal is narrow on his machine. ⚠ P7 WENT FROM FOUR SESSIONS TO TWO BY REMOVING THINGS.
+
+```
+BANKED       frontend d223d6ed · frontend c3d463c9
+             docs a0e26ce (Section 1 whole) · f1b2dca (Section 5,
+             J100-J103) · 95b1559 (Section 2, closes P41)
+             Section 6 +this entry
+NEW QUEUE    P47 PO barcode, held · P48 naming defects
+             P49 the quantity string built two ways
+CLOSED       P35 (add-DO throws) · P41 (the §2 rules)
+NOT DONE     ⚠ PROD WAS NOT HEALTH-CHECKED in S83 or S84. Asked for
+             twice, deferred twice to spec work. Nothing was
+             promoted, so it SHOULD be untouched — but that is an
+             expectation, not a reading. Rule 1.1 wants both boxes.
+             ⚠ D3 (getPSs index-stitch) still has no queue number.
+             ⚠ Cancel still unverified — the last untrusted
+             quantity path in P7.
+             ⚠ The queue re-rank, outstanding since S73, now across
+             46 items.
+```
+
+---
+
 ## ⚠ THE PATTERN ACROSS 80 SESSIONS
 
 ```
@@ -852,6 +1006,16 @@ THE SAME SHAPE APPEARS EARLIER:
         it sat on top of the biggest item in the queue for six
         sessions. ⚠ NOT A MISREADING THIS TIME. A TEST THAT LOOKED
         LIKE EVIDENCE AND WAS NOT. (J83 · JT21)
+  S83   ⚠ THE NEWEST INSTANCE, AND IT TOOK ONE SESSION TO PROPAGATE
+        RATHER THAN TWELVE. A double-count was measured on fixtures
+        that were already inflated, recorded as PROVEN, written into
+        the handover as food-safety adjacent, and scheduled as the
+        second job of the next session. S84 reconciled the fixtures
+        first, re-ran it clean, and it did not reproduce. ⚠ THE
+        NUMBERS S83 READ WERE ALL TRUE. THE BASELINE WAS NOT
+        ESTABLISHED, SO NOTHING COULD BE CONCLUDED FROM THEM — and
+        arithmetic on a dirty baseline looks exactly like evidence.
+        (J102)
 
 ⚠ THE COMMON FACTOR IS NEVER A BAD DECISION. It is a confident claim
   that was never tested by looking, and a record that grew by
