@@ -491,3 +491,48 @@ NEVER           give 2 / 3A / 3B / 4 a "latest updates" tail
 
 **END SECTION 0**
 
+
+---
+
+## 10. SESSION CLOSE PROTOCOL
+
+> ⚠ EARNED S86. That session produced FIVE COMMITS and reached its final hour
+> with NONE of them in the record. Section 1 still named the wrong next job and
+> Section 5 had no entry for any of them. It was recoverable only because the
+> session had not actually ended. This rule exists so that is never left to luck.
+
+**10.1  REISSUE SECTION 1 WHOLE.** Never patch it, never append to it. The
+resume block must name the NEXT job, not the last one. ⚠ A Section 1 that
+describes what just happened instead of what happens next is the #1 failure
+mode of this whole system.
+
+**10.2  APPEND TO SECTION 5.** Every commit gets an entry. ⚠ AND EVERY
+DISPROVEN THEORY GETS ONE TOO — an unrecorded wrong answer becomes the next
+session's foundation. S86 disproved four theories about one defect; all four are
+in J109 precisely so nobody re-derives them.
+
+**10.3  WRITE THE HANDOVER BLOCK at the top of Section 1.** Four parts, in
+this order:
+```
+   THE GOAL              one line. What the next session is FOR.
+   THE PASTE LIST        which sections, and why those ones.
+   FIRST THREE ACTIONS   in order, specific enough to execute.
+   TRAPS THAT COST TIME  the mechanical ones from today.
+```
+
+**10.4  NAME THE PASTE LIST BY TASK, NOT BY HABIT.** ⚠ The eight-section paste
+is the DEBUGGING default, not the universal one. A promote needs 0, 1 and 3B. A
+domain question needs 0, 1 and 2. A design session needs 0, 1 and 4. Say which
+and say why — half the context saved is half the context available for the work.
+
+**10.5  ⚠⚠ DO NOT START WORK THAT CANNOT BE RECORDED.** If there is not time
+for 10.1 to 10.3, there is not time for another commit. Documentation time is
+RESERVED, not leftover. ⚠ S86 wrote its docs last, after nine hours, and they
+went stale TWICE while being written because work continued around them.
+
+**10.6  CLAUDE RAISES THE CLOSE, MINTY DECIDES.** When Claude judges that the
+record is falling behind the work, it says so plainly and proposes stopping —
+even mid-task, even when the momentum is good. ⚠ Minty may override; that is
+his call. But the drift must be NAMED, not silently tolerated.
+
+---

@@ -3111,3 +3111,190 @@ verification failure is a hypothesis about the patch, not a verdict on it.
 DIAGNOSE, THEN DECIDE. (JT24's own warning, earned again immediately.)
 
 END S86 APPEND
+
+S86 — APPENDED 25 JUL 2026
+NUMBERING: highest existing entry verified as J108, highest trap as JT26 (both
+from the S85 append). These run J109 – J110 and JT27.
+
+⚠ HEADER STILL WRONG. Section 5's own header reads "highest is J93 — next is
+J94" and "Last appended: S81". S85 asked for this to be fixed and it was not.
+It is now FIFTEEN entries and five sessions stale. ▶ Fix it in this commit.
+
+⚠ TWO EXISTING ENTRIES NEED A STATUS LINE (rule 7.1 — whole items, Claude does
+the diffing). Both are superseded by J109 below:
+   J92   its line "CANCEL-WHOLE-SLIP IS CORRECT AND IS THE REFERENCE
+         IMPLEMENTATION" is FALSE and is the sentence slice 1 was built to
+         mirror. ▶ Needs a STATUS S86 stamp pointing at J109.
+   J105  reads "STATUS: OPEN → P53". ▶ Now CLOSED. Stamp it.
+
+
+J109 — ⚠⚠ THE CANCEL DEFECT: FIXED, AND FOUR CLAUDE THEORIES DISPROVEN ON THE
+WAY. STATUS: CLOSED. Backend commit 44759a9, dev only. Reproduced failing,
+then proven passing, both on a reconciled baseline.
+
+THE DEFECT, as it actually was:
+     inActivatePS trusted req.body.DOs for the quantity to return, and
+     DESTROYED EVERY packingslipdos ROW FIRST, before returning anything.
+     So when the payload was wrong or short, the rows were already gone and
+     the DO's qty_shipped stayed high. No error. A 200 and a clean-looking
+     screen (JT12).
+
+⚠ PROVEN ON DEMAND — the thing S85 could not do:
+     PS-0020, three DOs, all at 1 unit, baseline captured first.
+       BEFORE  DO-0010 tally 3 / 1 row · DO-0011 2 / 1 · DO-0012 1 / 1
+       AFTER   DO-0010 tally 3 / 0 rows · DO-0011 2 / 0 · DO-0012 0 / 0
+     ⚠ EXACTLY ONE of three subtractions ran. Rows gone for all three.
+
+THE FIX — three changes, and the first is the one that matters:
+     1  READ THE STORED JOIN ROW, never the payload. The backend now derives
+        everything from PackingSlipDOs.find({PS_id}). The screen is not asked.
+     2  RETURN BEFORE DESTROY, per row. A failure can no longer strand a tally.
+     3  SEQUENTIAL for...of, not Promise.all. Concurrent read-modify-write on
+        the same row was a live hazard.
+     Plus: a no-match guard (the status update could match nothing and the old
+     code destroyed anyway), and type guards on both quantities.
+     ⚠ SAME PATTERN AS ff5d183, the deletedDos branch. Not invented here.
+
+⚠ VERIFIED: PS-0021, two DOs at 1 unit each.
+     BEFORE  DO-0010 tally 4 / 1 row · DO-0011 tally 3 / 1 row
+     AFTER   DO-0010 tally 3 / 0 rows · DO-0011 tally 2 / 0 rows
+     BOTH returned. Four control slips untouched, including the 0.5 fractional
+     row on DO-0009.
+
+⚠⚠ FOUR THEORIES WERE PROPOSED AND DISPROVEN BEFORE THE TEST WAS RUN. Recorded
+in full because an unrecorded wrong answer becomes the next session's
+foundation (0.1a, J88):
+     1  "shipped_qty is missing from storage"      → the baseline query showed
+                                                      it present on every row.
+     2  "the edit screen loads via a path with no nestedPop, so DO_id.id is
+        undefined"                                  → :154 reads result[i] out
+                                                      of getPSs, which does
+                                                      nestedPop. Dead.
+     3  "the index stitch rotates the quantities"   → arithmetic kills it: with
+                                                      three equal quantities any
+                                                      permutation still gives
+                                                      1 to each.
+     4  "the backend throws"                        → no error, no alert, clean
+                                                      pm2 log, and one
+                                                      subtraction did run.
+     ⚠ THE EXACT TRIGGER INSIDE THE PAYLOAD WAS NEVER PINNED, AND IS NOW
+     UNRECOVERABLE — cancel destroys its own evidence by design. THE FIX DOES
+     NOT DEPEND ON IT: removing the payload dependency covers every surviving
+     hypothesis, and sequentialising covers the race. ⚠ That is why it was
+     right to stop diagnosing and fix.
+
+⚠ THE PROCESS LESSON, AND IT IS THE COSTLY ONE. Rule 0.1a says look rather than
+reason. The cancel could have been tested in ten minutes at session open. It was
+tested after four hours of reading code. ⚠ EVERY THEORY WAS PLAUSIBLE AND EVERY
+ONE WAS WRONG. When a behaviour is reproducible on a sandbox, reproduce it
+FIRST and read the code SECOND.
+
+⚠ PROD EXPOSURE — MEASURED, NOT ASSUMED. The reconcile oracle was run UNSCOPED
+on prod before any code was touched: EMPTY. And only companies 464 and 465 have
+any packing slips at all — GLUTENULL HAS ZERO. So the defect never reached real
+client data and no heal is needed. ⚠ Prod also has one cancelled slip (PS-0002,
+co 464, status_id 2) that reconciles — but whether it reconciles because cancel
+worked or because it had nothing to return is UNKNOWABLE, for the same
+evidence-destroying reason. Do not write either version down as fact.
+
+⚠ SCHEMA CONFIRMED IN PASSING: common_status 1 Active · 2 Inactive · 3 Deleted.
+Cancel sets status_id 2. There is no is_cancelled column.
+
+⚠ IT ALSO SETTLED TWO OPEN QUESTIONS BY ELIMINATION:
+     · DO-0006's "unexplained" behaviour (J105) — it reconciles. It never
+       appeared in the oracle because its tally equals its rows. Not an anomaly.
+     · The S85 drift on DO-0004/0005/0010/0011 was healed AFTER the fix was
+       proven, deliberately in that order — they were the reproduction.
+       Company 464's oracle is now EMPTY for the first time since S83.
+
+FIXTURE RESIDUE ⚠ DEV ONLY: PS-0020 and PS-0021 cancelled during testing.
+BLAST RADIUS: dev only. No prod code, no prod data.
+
+
+J110 — P7 STEP B: THE READ-ONLY ROW MIRRORED ONTO CREATE. P45 AND P49 CLOSED.
+STATUS: DONE, DEV ONLY. Frontend commit 6b269ab3, 3 files, +31 −117.
+
+WHAT SHIPPED: the CREATE packing slip now carries the identical eight-field
+read-only row the EDIT screen got in 4b — MO Number · Internal DO Number ·
+Customer PO No · Product · Product External Code · Pdt Lot Code · Best Before ·
+Shipped Qty. Customer, System SO No, Delivery Address, Product Internal ID and
+the typed Shipped Units box are gone from the markup.
+
+⚠ MARKUP ONLY — THE FORM CONTROLS SURVIVE. create populates its header from
+those controls, so deleting the controls would have broken it. Only the display
+was removed. (Section 1 flagged this before the patch was written; it was
+checked, not assumed.)
+
+P45 CLOSED — the equality-lock validator loop is DELETED, not repaired. Under
+the read-only rule nothing is typed, so there is nothing to validate. This is
+the loop J103 found pointing Validators.min AND max at the Kg figure after S82's
+format flip.
+
+P49 CLOSED — save() no longer parses a display string. It read
+`data.shipment_product_order_qty.split(' ')[0]`; it now reads
+`data.shipment_order_units`, a stored number.
+⚠ THE ENABLING DETAIL: shipment_order_units was COMMENTED OUT of createItem
+while patchValue still wrote to it — a silent no-op for who knows how long.
+Uncommenting the control made the existing write live. ⚠ Angular discards a
+patchValue for a control that does not exist, with no error. Same family as
+JT2 (Waterline drops undeclared columns): a write to a thing that is not
+declared vanishes quietly.
+
+⚠ A SECOND SILENT GAP, CAUGHT BEFORE DEPLOY: on create, shipping_order_qty was
+never patched by anything except the dead setShipQty — so the mirrored "Shipped
+Qty" field would have rendered BLANK. The patch populates it with the uniform
+string `${packing_units}# (${qty_to_ship} ${uom})`.
+
+ALSO DELETED: setShipQty (18 lines). Its only caller is commented out in the
+template, and it parsed the quantity string by position. Dead code that
+computes wrongly is a decoy — JT22.
+
+⚠ .dark IS A COMPONENT-SCOPED STYLE. It lives in edit-packslips.component.scss
+and would NOT have applied on create. Three lines (`.dark{color:black;}`) were
+appended to create's own stylesheet. ⚠ Angular component styles do not leak —
+copying markup between components does not copy its CSS.
+
+PROVEN IN THE DB, NOT THE TOAST. A new slip PS-0024 with two DOs:
+     row_qty 1 · qty_shipped 1 · packing_units 1, on BOTH lines.
+     ⚠ This path had NEVER EXECUTED before — save() was reading a control that
+     did not exist. A green "Packing Slip Created Successfully" alert proves
+     nothing (JT12); the query is the proof.
+     Older slips untouched, including DO-0009 at 0.5.
+
+⚠ A DISPLAY DEFECT SPOTTED, NOT FIXED: /Dispatch-orders renders the shipped
+figure for DO-0010 and DO-0011 as `0 Kg(0#)` while the DB holds 1 for both.
+Pre-existing, not caused by this commit — a P2 division site. → P2.
+
+
+JT27 — ⚠ A POST-WRITE CHECK MUST NOT MATCH THE PATCH'S OWN COMMENTS.
+     ⚠ AMENDS JT24, WHICH WAS NOT SPECIFIC ENOUGH — AND IT FIRED TWICE IN ONE
+     SESSION, ON THE VERY SESSION THAT LOGGED IT.
+
+JT24 says "a check must not match text the patch itself introduces." S86 proved
+that is read too narrowly. BOTH false failures came from EXPLANATORY COMMENTS,
+not from code:
+
+  PATCH 1   check "payload no longer read" searched the block for
+            `req.body.DOs`. The new comment says "trusted req.body.DOs".
+            FALSE FAIL.
+            check "no Promise.all in block" — the comment says "Sequential,
+            not Promise.all". FALSE FAIL.
+
+  PATCH 2   check "8 readonly inputs" counted `readonly>` across the WHOLE
+            FILE. "Authorized By" sits outside the row block and is the ninth.
+            FALSE FAIL.
+
+THE RULES, sharpened:
+  1  A check for the ABSENCE of a string must exclude comment lines, or the
+     comment must not contain the string. Prefer testing for the CODE SHAPE
+     (`for (const psdo of`) over the absence of a name.
+  2  A COUNT must be scoped to the block being changed, never to the file.
+  3  ⚠ WRITE THE CHECKS AFTER WRITING THE COMMENT, and re-read both together.
+     Both S86 failures were invisible until the script ran.
+
+⚠ AND THE HALF THAT MATTERS MOST: the script printed "Run: git checkout -- ."
+on failure. Obeying it would have thrown away TWO CORRECT PATCHES. A
+verification failure is a hypothesis about the patch, not a verdict on it.
+DIAGNOSE, THEN DECIDE. (JT24's own warning, earned again immediately.)
+
+END S86 APPEND

@@ -1,248 +1,290 @@
 # SECTION 1 — NOW
 
-> Rewritten WHOLE every session. ~1 page. The DRIVER, not a log.
-> ⚠ THE TEST — BOTH DIRECTIONS. If a line does NOT change session to session, it does not belong here (it belongs in 0 / 2 / 3A / 3B / 4). And if a STABLE section needs editing every session, that content belongs HERE. One fact, one home, decided by how often it changes.
-> Paste order (or repo-pull order): Section 0 → Section 1 (this) → Section 2. Others on demand.
-> ⚠ THE #1 DISCIPLINE: keep HISTORY out of NOW. When a story is told, it goes to Section 6. Evidence goes to Section 5. Only the live driving state stays here.
+> Rewritten WHOLE every session. The DRIVER, not a log.
+> ⚠ THE TEST — BOTH DIRECTIONS. If a line does NOT change session to session, it does not belong here (it belongs in 0 / 2 / 3A / 3B / 4). And if a STABLE section needs editing every session, that content belongs HERE.
+> ⚠ THE #1 DISCIPLINE: keep HISTORY out of NOW. When a story is told, it goes to Section 6. Evidence goes to Section 5.
 
 ---
 
-## ▶ RESUME HERE — S83 START (Claude reads this FIRST, before anything)
+# ▶▶ S87 HANDOVER — READ THIS BLOCK FIRST, BEFORE ANYTHING ELSE
 
 ```
-LAST SESSION   S82 — P7 SLICE 3 DONE AND VERIFIED IN THE DB.
-               P7 SLICE 4a WRITTEN AND SHIPPED TO DEV BUT
-               LARGELY UNTESTED. Four commits, two repos.
-THIS SESSION   S83 — TEST 4a FIRST, then slice 4b (the row
-               template), then the sequencing change.
-               ⚠ DO NOT BUILD BEFORE TESTING. Half of 4a has
-               never been exercised even once.
+THE GOAL      PROMOTE 16 COMMITS TO PROD. That is the whole session.
+              ⚠ NOT the barcode. NOT P42. Both come after.
 
-DOCS REPO IS LIVE — this is the standing paste.
+⚠ PASTE ONLY THESE FOUR — not all eight
+    Section_0.md    the rules
+    Section_1.md    this file, the driver
+    Section_3B.md   boxes · promote commands · rollback points
+    Section_5.md    ⚠ truncates at J88; fine for a promote, the JT
+                    trap block is inside the readable part. Only
+                    paste the tail if something goes wrong.
+  ▶ SKIP 2, 3A, 4 and 6. A promote needs no domain logic, no module
+    map, no design spec and no history. Saves roughly half the
+    context for the work itself.
+
+FIRST THREE ACTIONS, IN ORDER
+  1  Health-check BOTH boxes (rule 1.1). ⚠ Read the promote range
+     FROM GIT, never from this document, and use prod's SERVED
+     bundle (53db203d), never its checkout (9bce0238) → P8.
+  2  Run the reconcile oracle on PROD, UNSCOPED. It was empty at
+     S86 open and must still be empty before anything deploys.
+  3  BACKEND FIRST, THEN FRONTEND, no pause between (J96).
+
+THE REGRESSION PAIR (rule 5.2 / J78)
+     Document save with BOTH an apostrophe AND a pasted image.
+
+AFTER DEPLOYING
+     Prod oracle again, unscoped. Then create a slip, save it,
+     cancel it, and confirm the quantity returns. ⚠ That is the S86
+     cancel fix landing on real infrastructure for the first time.
+
+⚠ MECHANICAL TRAPS THAT COST S86 TIME — all avoidable
+   · STUCK PASTE BUFFER replaying old scrollback. BIT TWICE. Only
+     closing the terminal window and opening a fresh one clears it.
+   · ssh typed while ALREADY ON DEV — the pem does not exist on the
+     boxes. Check the prompt colour before pasting (rule 6.2).
+   · A github URL pasted into the terminal. URLs go in the BROWSER;
+     Claude must never format one inside a command block.
+   · git push prompts for a password on dev — the PAT is missing
+     from the remote → P58.
+
+⚠⚠ THE TRAP THAT COST MOST, AND NO HANDOVER FIXES IT
+   S86 spent four hours on FOUR WRONG THEORIES about the cancel
+   defect before running a ten-minute test that settled it. Rule
+   0.1a. IF THE BEHAVIOUR IS REPRODUCIBLE ON A SANDBOX, REPRODUCE
+   IT FIRST AND READ THE CODE SECOND. → J109.
+```
+
+---
+
+## ▶ RESUME — what S86 actually did
+
+```
+⚠⚠ FIVE COMMITS, ALL PROVEN IN THE DB OR THE PRINT PREVIEW.
+
+  1  P53 CANCEL FIXED (44759a9, backend). Reproduced on demand,
+     fixed, re-proven on a reconciled baseline. Cancel now returns
+     every DO's quantity from the STORED join rows.
+  2  P7 STEP B (6b269ab3, frontend). The 4b read-only row mirrored
+     onto CREATE. P45 and P49 closed with it.
+  3  P56 (13e3fcd, backend). getPSs matched DO objects BY ARRAY
+     INDEX and was PROVEN MISMATCHED on a live slip. Now matches
+     by id. ⚠ This was S83's "D3", logged in a handover and left
+     without a queue number for three sessions.
+  4  P52a (ba3bfe9f, frontend). ⚠ THE PRINTED PACKING SLIP IS NOW
+     ITS OWN DOCUMENT, split from the editing screen.
+  5  P52a typography (8997acdc, frontend). Fixed column widths,
+     larger type, proper spacing.
+
+⚠ COMPANY 464 IS FULLY RECONCILED — first time since S83.
+⚠ NOTHING IS ON PROD. All five are dev-only.
+
+⚠⚠ SCOPE CHANGED MID-SESSION, AND THE RECORD MUST SAY SO. The
+   frozen P52 spec's section 11 reads "NOT PART OF P7 ... P52 IS
+   ITS OWN SESSION." MINTY OVERRULED THAT IN S86: the printed slip
+   IS P7's endpoint — it is the thing he has been trying to build
+   for six sessions, and the field work was scaffolding for it.
+   ▶ Section 11 of the frozen spec is now WRONG. Correct it when
+     the spec folds into Section 4.
+```
+
+## DOCS REPO — the standing paste
+
+```
   Repo      Mintygadhok/abletrace-lab-docs   (public)
-  Raw base  https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/refs/heads/main/
-  Minty     pastes the raw base + says "pull the docs" (+ the opener).
-  Claude    fetches Section_0 + Section_1 + Section_2 = the standing three.
-            Others (3A/3B/4/5/6) fetched by name when the work needs them.
-  ⚠ CACHE   the raw URL LAGS SEVERAL MINUTES behind a fresh commit. Minty's
-            GitHub WEB VIEW is immediate truth. If a fetch looks stale, ask
-            Minty to PASTE the section rather than re-fetching.
+  ⚠⚠ CLAUDE CANNOT BUILD A FETCH URL ITSELF. EVERY SECTION NEEDS
+    ITS OWN FULL URL, AS TEXT, IN THE CHAT. Fetching one file does
+    NOT unlock the others — TESTED AND DISPROVEN S85, again S86.
+  ⚠ A repo URL does not work. A directory URL does not work. A
+    screenshot of a URL does not work. Only full file URLs, as text.
 
-▶▶ THE NEXT JOB — S83. STEPS 1 AND 2 ONLY (test 4a, fix what it
-   breaks). ⚠ STEP 3 ONWARD IS A SEPARATE SESSION — Minty's call
-   S82. Do not start the row template in S83. ◀◀
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_0.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_1.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_2.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_3A.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_3B.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_4.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_5.md
+https://raw.githubusercontent.com/Mintygadhok/abletrace-lab-docs/main/Section_6.md
 
-⚠ CARRY FORWARD — settled, do not re-open:
+  ⚠ PASTE ONLY WHAT THE TASK NEEDS (rule 10.4). The eight-line
+    paste is the DEBUGGING default, not the universal one.
+
+  ⚠⚠ SECTION 5 CANNOT BE FETCHED IN FULL — MEASURED S86. 2711
+    lines / 158 KB; the fetch TRUNCATES MID-J88, twice, at the same
+    byte. A SIZE LIMIT, NOT A CACHE — retrying changes nothing.
+    Claude gets the whole JT block, the whole JR block, and J1–J88.
+    ⚠ J89 ONWARDS MUST BE PASTED BY MINTY.
+    ▶ THIS IS THE STRONGEST ARGUMENT FOR P42.
+  ⚠ SECTION 0 RULES 0.3 AND 9C STILL CARRY THE OLD, WRONG
+    INSTRUCTION ("give Claude the repo URL"). Not patched in S86 —
+    the session went to code. ▶ Still outstanding.
+  ⚠ CACHE  the raw URL can lag a fresh commit. Minty's web view is
+    immediate truth. If a fetch looks stale, paste the section.
+```
+
+## ⚠ CARRY FORWARD — settled, do not re-open
+
+```
   • "Fix A" does not exist and never did (J81).
   • The allergen snapshot does not exist (J80 + J82).
   • Release does not explode intermediates (J80). Trace does.
-  • J80's DISPLAY finding is withdrawn; its STOCK-HOP findings stand (J83).
+  • J80's DISPLAY finding is withdrawn; STOCK-HOP findings stand.
   • Fractional shipping units are PERMITTED BY DESIGN (Minty, S80).
-    packing_units = 0.5 is CORRECT. → J88. PROVEN LIVE S82 (J94).
-  • A DO coming off a packing slip ALWAYS returns its quantity and becomes
-    available again — whether one DO or all of them (Minty, S81). → J92.
-  • SLICE 2's POPUP BEHAVIOUR IS CORRECT AND PROVEN S82 — do NOT
-    re-investigate. Auto-tick keys on lot+customer+address; the LIST
-    filters on customer+address only. A same-address DIFFERENT-LOT DO
-    stays visible and UNTICKED, which is the intended design. An
-    apparent "0 of 0" on reopening the popup was ARITHMETIC, not a
-    defect: every DO at that address had been moved. → J99.
-  • THE PACKING SLIP FLOW (Minty, S82): move DOs → SAVE (repeatable) →
-    enter shipping reference + vehicle condition → SHIP (terminal).
-    Cancel available until Ship, never after. → J97.
+    Re-proven S85 and again S86 — DO-0009 carried 0.5 cleanly
+    through every change made today.
+  • THE PACKING SLIP FLOW (Minty, S82): move DOs → SAVE → shipping
+    reference + vehicle condition → SHIP (terminal). → J97.
+  • SHIPPED QUANTITY IS NOT AN OPERATOR INPUT (Minty, S84).
+  • THE DO ROW IS A READ-ONLY DISPLAY OF THE DISPATCH ORDER
+    (Minty, S85). ▶ Belongs in Section 2 — fold with P41.
+  • THE UNIFORM QUANTITY STRING: <units># (<Kg> <uom>). Units read
+    STORED, Kg DERIVED by multiplying.
+  • ⚠ THE RECONCILE ORACLE. A DO's qty_shipped must ALWAYS equal
+    the sum of its packingslipdos rows. Block below. Empty = clean.
 ```
 
 ---
 
-## ⚠⚠ P7 — THE SIX STEPS TO FINISH IT. AGREED S82.
+## ⚠ P7 — BUILD COMPLETE INCLUDING THE PRINTED SLIP. ONLY THE PROMOTE REMAINS.
 
 ```
-⚠ THIS IS THE WHOLE REMAINING SHAPE OF P7. Read it before planning a
-  session, so no step gets started out of order.
+DONE AND PROVEN
+  SLICE 1   backend ff5d183 — remove-one-DO returns qty per DO.
+            ⚠ STILL UNTESTED end to end → P40.
+  SLICE 2   auto-select by lot+customer+address. Proven 4x.
+            ⚠ The CUSTOMER half is still unproven (J93).
+  SLICE 3   stored packing_units instead of dividing Kg. S82.
+  SLICE 4a  Save/Ship split. S82–S84.
+  SLICE 4b  unified READ-ONLY DO row on EDIT. S85, 453f1f44. J104.
+  STEP A    ⚠ CANCEL FIXED. S86, 44759a9. → J109.
+  STEP B    ⚠ CREATE MIRRORED. S86, 6b269ab3. → J110. Closes P45+P49.
+  P56       ⚠ id-match in getPSs. S86, 13e3fcd. → J111. Had to
+            precede the printed slip: a mis-stitched row would put
+            the WRONG LOT CODE on a customer's document.
+  P52a      ⚠ THE PRINTED DOCUMENT. S86, ba3bfe9f + 8997acdc.
+            → J112. Verified in Chrome's print preview.
 
-STEP 1  TEST 4a.  ← S83 STARTS HERE
-        Six behaviours shipped in S82, none exercised. Detailed as
-        T1-T7 in the block below. ⚠ NOTHING NEW IS BUILT UNTIL THIS
-        PASSES.
+STEP C  ⚠ PROMOTE. THE ONLY THING LEFT IN P7.
 
-STEP 2  FIX WHAT STEP 1 BREAKS.  ← S83 ENDS HERE (Minty, S82)
-        Unknown until tested. Two candidates already logged:
-          P44  editPackslips never writes vehicle_condition — and
-               SHIP IS NOW GATED ON IT, so an operator can pick a
-               condition, ship, and have it discarded.
-          P45  no over-ship guard anywhere on the edit screen.
+STILL OPEN INSIDE P52 — not blocking the promote
+        · THE BARCODE. Design frozen, NOT BUILT. Minty's call S86:
+          structure first, barcode second. P47 folded into P52.
+        · OPEN 2 group rows by PO · OPEN 3 print before ship
+          (⚠ S86 PROVISIONALLY MADE PRINT ALWAYS VISIBLE so the
+          document could be seen without shipping terminally —
+          ONE *ngIf TO REVERT, Minty's call) · OPEN 4 allergens.
+        · TOTALS and PAGE FOOTER — cut "for the time being" (S85).
+        · ⚠ DATE FORMAT DISAGREEMENT: Minty's mockup shows
+          "24 July 2026"; the frozen spec §7 says "01 Jul 2027".
+          S86 followed the SPEC (abbreviated). ▶ Minty to confirm.
+        · LOGO — no column exists → P54. Slot is reserved and
+          renders as an empty bordered square until then.
+        · ⚠ CHROME'S OWN HEADERS/FOOTERS (date, page title, URL)
+          print by default and CANNOT be removed with CSS. They are
+          switched off under More settings in the print dialog.
+          ▶ Worth telling any client who prints these.
 
-STEP 3  SLICE 4b — THE NEW ROW TEMPLATE.  ⚠ SEPARATE SESSION.
-        · ten fields per row; the WHOLE ROW moves as one unit
-        · DROP  Product Internal Code · System SO No
-        · REMOVE Customer + Delivery Address from the ROW — they
-          already exist as header fields, so this is a deletion
-        · RESTORE Shipped Units (#) + Shipped Qty on existing-DO
-          rows (currently commented out — a behaviour change, not
-          just a re-layout)
-        · RENAME "Customer SO No" -> "Customer PO No" (TWICE in
-          edit-packslips.component.html)
-        · popup title -> "Select DOs to Move to Packing Slip"
-        · popup button "Save" -> "MOVE TO PACKING SLIP"
-        ⚠ THE DATE PICKER MUST SURVIVE. It sits in the header above
-          the rows and already behaves correctly. Verify after the
-          rebuild; do not assume. (J97.)
+STILL INSIDE P7, SMALL
+        · The DO picker POPUP TITLE still says "Dispatch Orders".
+        · P44 vehicle_condition never written on edit.
+          ▶ RIDE ALONG OR SEPARATE: asked S85 AND S86, STILL
+            UNANSWERED. Minty's call.
 
-STEP 4  SLICE 4b — PO BARCODE TABS.
-        One tab per distinct SO-External across the moved DOs, each
-        with a scannable barcode, into the PRINTED DOCUMENT (not the
-        Zebra).
-        ⚠ NOT YET DESIGNED. Decide WHAT THE BARCODE ENCODES before
-          any code is written.
-
-STEP 5  SLICE 4c — THE SEQUENCING CHANGE.
-        Save · Ready to Ship · Cancel. Pressing Ready to Ship reveals
-        the shipping fields and the Ship button.
-        ⚠ NEEDS A REAL DB COLUMN — Minty's call S82. A visual-only
-          toggle forgets itself on reload. DB change -> rule 4.8:
-          not in git, must go in the rebuild block.
-
-STEP 6  PROMOTE TO PROD.
-        Only when 1-5 are done and tested end to end.
-        ⚠ BACKEND FIRST, THEN FRONTEND. Deployed the other way round,
-          SHIP silently stops shipping until the frontend lands (J96).
-
-AFTER P7, NOT PART OF IT
-        P43  multiple invoices / QuickBooks child table
-        The scan · the ambiguity popup · documents-before-dispatch
+CUT FROM P7 — DO NOT REINSTATE
+        · Slice 4c / the sequencing change (S84).
 ```
 
 ---
 
-## ⚠⚠ S83 STEP 1 — TEST WHAT S82 SHIPPED. DO THIS BEFORE ANY BUILDING.
+## HEADS — ⚠ verify against the boxes before working (rule 1.2)
 
 ```
-Everything below is LIVE ON DEV and NEVER EXERCISED. Slice 4a
-re-enabled a code path that has not run since it was commented out,
-and that path is the one slice 1 (S81) was written to fix.
-⚠ VERIFY EVERY QUANTITY IN THE DB, NOT THE TOAST (rule 5.1, JT12).
+Frontend  DEV  8997acdc   ⚠ AHEAD OF PROD — 10 commits
+          PROD 53db203d   served bundle
+Backend   DEV  13e3fcd    ⚠ AHEAD OF PROD — 6 commits
+          PROD d3104ea
 
-T1  SAVE STAYS OPEN      Edit a slip, press Save. Must say "Saved",
-                         must NOT navigate away, slip still editable.
+⚠ BOTH BOXES HEALTH-CHECKED S86 AND CLEAN.
+  DEV   trees clean · pm2 abletrace-dev online · curl 200
+  PROD  backend d3104ea · tree clean · pm2 online · curl 200.
+        Frontend CHECKOUT reads 9bce0238 — the S66 lag trap,
+        expected, cosmetic → P8.
+  ⚠ PROD'S SERVED BUNDLE STILL HAS NOT BEEN INDEPENDENTLY READ.
+    Still a claim, not a reading. Carried since S85.
 
-T2  ADD A SECOND DO      "Add Dispatch order +" → pick a DO → Save.
-                         ⚠ NEVER-RUN PATH. This is where S81 slice 1
-                           finally gets exercised. Watch for errors.
-                         ⚠ Check PackingSlipDOs got a row AND the DO's
-                           qty_shipped moved.
+S86 COMMITS
+  backend   44759a9  P53 cancel returns qty from stored rows
+            13e3fcd  P56 getPSs matches DO objects by id
+  frontend  6b269ab3 P7 step B, create row + validators deleted
+            ba3bfe9f P52a printed slip as its own document
+            8997acdc P52a typography and fixed column widths
 
-T3  REMOVE A DO          Remove a DO row, press Save. The quantity
-                         must come back and the DO become available.
-                         ⚠ THIS IS P40 / J92 — the whole reason slice 1
-                           exists. If this works, P40 closes.
-
-T4  SHIP IS GATED        Blank reference/condition → Ship greyed.
-                         Fill both → Ship goes live.
-                         ⚠ UNPROVEN: does it ungrey immediately, or
-                           only after clicking elsewhere? If the latter,
-                           Ship will look permanently dead to an operator.
-
-T5  SHIP                 Terminal. Navigates back. Add-DO and Cancel
-                         disappear. shipped_flag = 1, shippingdate and
-                         finalShipmentUserId stamped.
-                         ⚠ A SAVE must NOT have stamped any of those.
-
-T6  CANCEL BEFORE SHIP   Reverses everything, all DOs return.
-
-T7  REGRESSION           Create a slip WITH reference and condition
-                         filled — the original path must still work.
-```
-
----
-
-## HEADS — ⚠ verify against the boxes before working (Section 0, rule 1.2)
-
-```
-Frontend  DEV  db415d74   ⚠ AHEAD OF PROD — S81 slice 2, S82 slices 3 + 4a
-          PROD 53db203d   unchanged
-Backend   DEV  083fc96    ⚠ AHEAD OF PROD — S81 slice 1, S82 slice 4a + guard
-          PROD d3104ea    unchanged
-
-⚠ THE DIVERGENCE IS DELIBERATE AND EXPECTED. Nothing was promoted to
-  prod in S81 or S82. Do NOT "reconcile" by promoting — P7 is mid-build
-  and 4a is untested.
-
-S82 COMMITS, in order:
-  frontend  897096b4  slice 3, five units sites
-  backend   2d22e5a   slice 4a, split save from ship
-  frontend  db415d74  slice 4a, Save/Ship buttons + add-DO + editable
-  backend   df6d728   null guard (INCOMPLETE — see 083fc96)
-  backend   083fc96   corrected: vehicle_no coerces to '' not null
-
-Trees clean both boxes at S82 close. Health 200 both. PM2 online both
-(abletrace-dev / abletrace-backend). PROD IS HEALTHY AND UNTOUCHED.
-
-(Prod's frontend CHECKOUT reads 9bce0238 — the S66 lag trap. The
- SERVED bundle is 53db203d. Cosmetic. → P8)
-
-ROLLBACK POINTS:
-  DEV frontend   www-html.bak-dev-db415d74b769     (S82, current)
-  PROD frontend  www-html.bak-prod-53db203d4ef4
-  DEV backend    /home/ubuntu/PackingSlips.js.bak-S82
-  DEV backend    /home/ubuntu/PackingSlips.js.bak-S81
+ROLLBACK POINTS
+  DEV frontend build  /home/ubuntu/www-html.bak-dev-<sha>
+  DEV backend cancel  /home/ubuntu/PackingSlips.js.bak-S86-cancel-20260725-211209
+  DEV backend P56     /home/ubuntu/PackingSlips.js.bak-S86-P56-20260725-224535
+  DEV step B          /home/ubuntu/create-packslips.component.{html,ts}.bak-S86-stepB-20260725-220420
+  DEV P52a            /home/ubuntu/P52a.{html,ts,styles-scss}.bak-S86-<stamp>
+  DEV P52a visual     /home/ubuntu/styles.scss.bak-S86-P52a-visual-20260725-231007
+  or                  git revert <sha>
+  PROD frontend       www-html.bak-prod-53db203d4ef4
 ```
 
 ## ⚠ CI — PUSH AUTO-BUILDS DEV
 
 ```
   PUSH to main  → automatically builds DEV. No manual trigger.
-  PROD          → still a deliberate manual dispatch.
-Build time observed S82: 4-10 minutes.
+  PROD          → deliberate manual dispatch.
+⚠ THE ARTIFACT NAME CARRIES THE COMMIT SHA — dist-dev-<full-sha>.zip
+  Match on the SHA, never the timestamp. → P12.
 ```
 
-## THE FRONTEND DEPLOY LOOP — exact commands (S82-verified)
+## THE FRONTEND DEPLOY LOOP — exact commands (S86-verified, used 3x)
 
 ```
 1  [DEV]  edit + commit + push
-2  WEB    github.com/Mintygadhok/abletrace-lab-frontend/actions
-          wait for green
-3  WEB    open the run, download the artifact
-          ⚠ CONFIRM the filename starts dist-dev- (rule 5.3)
-4  [MAC]  ~/promote.sh ~/Downloads/<artifact.zip> dev
-5  BROWSER  Cmd+Q ENTIRELY. Not a hard reload. Lazy popup chunks
-          survive everything else (J66).
+2  BROWSER  github.com/Mintygadhok/abletrace-lab-frontend/actions
+           wait for green (~8 min)
+3  BROWSER  open the run, download the artifact
+4  [MAC]  ZIP=$(ls -t ~/Downloads/dist-dev-<sha8>*.zip | head -1)
+          echo "MATCH: ${ZIP:-none}"
+          [ -n "$ZIP" ] && ~/promote.sh "$ZIP" dev
+5  BROWSER  Cmd+Q ENTIRELY. Not a hard reload (J66).
 
 ⚠ promote.sh lives on the MAC, not on a box.
 ⚠ ssh/scp always from the MAC:
     ssh -4 -i ~/.ssh/abletrace-lab-key.pem ubuntu@16.55.10.205
-    (the -4 is the S73 IPv6 workaround → P23)
-⚠ THE ARTIFACT DOES NOT ALWAYS DOWNLOAD ON THE FIRST CLICK (S82).
-  Check with: ls -lt ~/Downloads | head -5
+    (the -4 is the S73 IPv6 workaround → P23. ⚠ S86: scp worked
+     WITHOUT -4 — the drift is intermittent, not constant.)
+⚠ A BACKEND CHANGE NEEDS pm2 restart + sleep 8 + curl. A FRONTEND
+  change needs a CI build. Do not confuse the two.
 ```
 
-## ⚠ HANDING PATCH SCRIPTS TO MINTY — CHANGED S82. READ THIS.
+## ⚠ HANDING PATCH SCRIPTS TO MINTY — the scp route
 
 ```
-⚠ PASTING LONG PATCH SCRIPTS INTO THE TERMINAL FAILED 6+ TIMES IN S82.
-  Not once — repeatedly, and in FRESH WINDOWS TOO. Two theories were
-  proposed and both were DISPROVEN by the evidence:
-    "it is the paste size"      → a fresh window took the same size fine
-    "it is stale window state"  → a fresh window ALSO failed
-  The failures cut at the SAME CONTENT each time. Cause unknown. → P46.
-
-⚠ THE WORKING METHOD, USE IT BY DEFAULT FOR ANY PATCH SCRIPT:
-    1  Claude writes the patch and hands it over as a FILE (rule 0.2b)
+⚠ PASTING LONG PATCH SCRIPTS INTO THE TERMINAL FAILS. → P46.
+⚠ THE WORKING METHOD — used FOUR TIMES in S86, no failures:
+    1  Claude writes the patch and hands it over as a FILE (0.2b)
     2  [MAC]  scp -i ~/.ssh/abletrace-lab-key.pem ~/Downloads/<patch>.py ubuntu@16.55.10.205:/tmp/
     3  [DEV]  python3 /tmp/<patch>.py
     4  [DEV]  git --no-pager diff
-  Short commands paste fine. Only long multi-line scripts fail.
-
-⚠ MINTY ASKED FOR PASTEABLE BLOCKS, NOT DOWNLOAD LINKS (S82) — and he
-  is right for COMMANDS. The scp route above keeps the commands short
-  and pasteable while the SCRIPT travels as a file. Do not switch
-  formats mid-session without saying so.
+⚠ MINTY MUST DOWNLOAD THE FILE BEFORE THE scp.
+⚠ THE BOX LABEL GOES ABOVE THE BLOCK, NEVER INSIDE IT.
+⚠ AND CHECK WHICH BOX THE PROMPT SAYS (rule 6.2).
 ```
 
-## ⚠ DEV HAS NO ~/.my.cnf — THE DB QUERY RECIPE (J43)
+## ⚠ THE STANDING QUERIES — build a temp cnf from .env (J43)
 
 ```
-A bare `mysql` on dev hits a nonexistent local socket. Build a temp cnf
-from .env. This block is one paste and self-cleans:
+A bare `mysql` on dev hits a nonexistent local socket. This block
+is ONE PASTE and self-cleans.
+
+⚠ THE RECONCILE ORACLE — run after EVERY quantity change.
+  Empty = clean. ⚠ Add `WHERE d.company_id=464` to scope it on dev;
+  on PROD run it UNSCOPED to catch the real client.
 
 python3 - <<'EOF'
 import re
@@ -251,36 +293,55 @@ m = re.search(r'DATABASE_URL=mysql://([^:]+):([^@]+)@([^:/]+)', src)
 open('/tmp/q.cnf','w').write("[client]\nuser=%s\npassword=%s\nhost=%s\n" % (m.group(1), m.group(2), m.group(3)))
 EOF
 chmod 600 /tmp/q.cnf
-mysql --defaults-file=/tmp/q.cnf abletracelab_live -e "<QUERY>"
+mysql --defaults-file=/tmp/q.cnf abletracelab_live -e "SELECT d.id, d.internalCode, d.company_id, d.qty_shipped AS tally, COALESCE(SUM(p.shipped_qty),0) AS rows_total, COUNT(p.id) AS row_count FROM dispatchorders d LEFT JOIN packingslipdos p ON p.DO_id=d.id GROUP BY d.id, d.internalCode, d.company_id, d.qty_shipped HAVING d.qty_shipped <> COALESCE(SUM(p.shipped_qty),0);"
 rm -f /tmp/q.cnf
+
+⚠ ON PROD ~/.my.cnf EXISTS — no temp cnf needed. But it points at
+  the ARCHIVE, so NAME THE DB:  mysql abletracelab_live -e "<QUERY>"
+⚠ THE JOIN TABLE IS packingslipdos — ALL LOWERCASE. → P48.
+⚠ `rows` IS A RESERVED WORD in MySQL 8. Alias it row_count. (S86.)
 ```
 
-## DEV FIXTURE RESIDUE — ⚠ note before reusing company 464 as a baseline
+## ⚠ IDENTIFIERS — TWO SYSTEMS
 
 ```
-1. Ginger Powder MAT-5 carries Eggs        (S78, not reverted)
-2. MAT-6 missing its Sesame allergen       (S73 → P24)
-3. FO-0005 forked to two versions + srf rows 1042/1043  (S77)
-4. DO-0010 + PS-0005 on SO-0009 (test1.39/FO-0004)  (S80)
-5. SO-0011 · DO-0011 · PS-0006 (CANCELLED, status_id 2)  (S81)
-6. S82 ADDED: PS-0008 carries DO-0008 at 0.5 units — THE PROOF ROW
-   for slice 3. PS-0010 carries DO-0004/0005/0006. Plus at least two
-   slips created blank-field while chasing the 500.
+⚠ THE SCREEN SHOWS internalCode.  THE ORACLE RETURNS id.
+⚠ NEVER NAME A SLIP OR DO BY DB id IN THIS SECTION. → JT25.
 
-⚠ THE 0.5-UNIT FIXTURES ARE NOW PARTLY CONSUMED. DO-0008 is on PS-0008.
-  DO-0009 (packing_units 0.5, Jade 3, Victoria address) is STILL FREE
-  and is the remaining fractional test row.
-⚠ NOTE: DO-0008/0009 are 10 Kg at 0.5 units = 20 Kg per unit, on
-  FO-0001-4 — NOT the test1.39/FO-0004 fixture the old record named.
+  id ↔ code, company 464, confirmed S86:
+    10910 = DO-0004 · 10911 = DO-0005 · 10924 = DO-0010
+    10925 = DO-0011 · 10926 = DO-0012
 ```
 
-## ⚠ PROD RESIDUE — S80, STILL OPEN
+## DEV FIXTURE STATE — ⚠ AS AT S86 CLOSE. RE-QUERY BEFORE TRUSTING.
 
 ```
-DO-0006 created on PROD in error during the S80 walk (SO-0004,
-customer "Jade 3", testpdt260703 / FO-0001-4, 1# (20 Kg), lot
-Pdt-260701-1). Almost certainly sandbox company 464 but NEVER
-CONFIRMED. One query settles it → P37.
+⚠⚠ COMPANY 464 IS FULLY RECONCILED. Oracle empty at S86 close,
+  confirmed three times including after an edit-screen save.
+  ⚠ THE S85 DRIFT IS HEALED — DO-0004, DO-0005, DO-0010 and
+    DO-0011 all reset to the sum of their own join rows AFTER the
+    fix was proven, not before. That ordering was deliberate:
+    they were the reproduction.
+
+SLIPS at S86 close (company 464)
+    PS-0025   LIVE — DO-0010, DO-0011, both 1 unit. THE PRINT
+              FIXTURE. ⚠ NOT SHIPPED — keep it that way.
+    PS-0024   live, created during step B verification
+    PS-0021 · PS-0020   cancelled during the S86 proofs
+    PS-0001..0004 · PS-0012   older, untouched all session
+    ⚠ PS-0012 / DO-0009 carries 0.5 units — THE FRACTIONAL
+      FIXTURE. Survived every S86 change. KEEP IT.
+
+⚠ CLOSED S86: DO-0006's "unexplained" behaviour (J105). It simply
+  reconciles. Not an anomaly. Nothing to chase.
+⚠ CLOSED S86: "who cancelled PS-0008 and PS-0015" is retired. Never
+  answered, not load-bearing, and cancel now destroys its own
+  evidence by design. Do not re-open.
+
+STANDING FIXTURE DEFECTS (unrelated to P7)
+    1. Ginger Powder MAT-5 carries Eggs        (S78, not reverted)
+    2. MAT-6 missing its Sesame allergen       (S73 → P24)
+    3. FO-0005 forked to two versions + srf rows 1042/1043  (S77)
 ```
 
 ---
@@ -288,147 +349,42 @@ CONFIRMED. One query settles it → P37.
 ## PENDING WORK — everything outstanding, in priority order
 
 > ⚠ ONE FLAT LIST. NEW ITEMS APPEND AT THE BOTTOM with the next free number (rule 7.3). Minty re-ranks at open; Claude never renumbers.
-> ⚠⚠ **P7 REMAINS THE ACTIVE JOB.** Slices 1, 2, 3 done. 4a shipped but UNTESTED. 4b and the sequencing change are next.
-> ⚠ THE FULL RE-RANK IS STILL OUTSTANDING — no full pass since S73. ▶ Minty's, one pass, at session open.
+> ⚠ THE FULL RE-RANK IS STILL OUTSTANDING — no full pass since S73, now FOURTEEN sessions. ▶ Minty's, one pass, at session open.
 
-**P7  PACKING-SLIP REDESIGN — ⚠ IN BUILD. 1·2·3 DONE. 4a SHIPPED UNTESTED. 4b NEXT.**
+**P7  PACKING-SLIP REDESIGN — ⚠ BUILD COMPLETE. ONLY STEP C (PROMOTE) REMAINS. See the P7 block above.**
 
-```
-SLICE 1  ✅ DONE S81 — backend ff5d183. deletedDos returns qty from the
-         STORED PackingSlipDOs row. ⚠ STILL UNTESTED — becomes
-         reachable only now that 4a re-enabled the buttons. → S83 T3.
+**P42  SPLIT SECTION 5 INTO TRAPS AND LOG. ⚠ MINTY'S #3 PRIORITY, AFTER THE PROMOTE.** ▶ 5A = JT traps + JR rebuild checklist. 5B = J-entries. ⚠⚠ J-NUMBERS ARE PERMANENT. ⚠ Also update rule 0.3 and rule 9. ⚠ **S86 MADE THIS URGENT, NOT COSMETIC:** at 2711 lines / 158 KB the file EXCEEDS WHAT CLAUDE CAN FETCH — everything past J88 is invisible unless Minty pastes it. Measured, not estimated.
 
-SLICE 2  ✅ DONE S81 — frontend 0f4c0344. DO auto-select by
-         lot+customer+address. ⚠ REGRESSION RE-CONFIRMED S82: picking
-         DO-0008 did NOT tick DO-0004/5/6 (different lot). The CUSTOMER
-         half remains unproven — no fixture has two customers at one
-         address. → J93.
-
-SLICE 3  ✅ DONE AND VERIFIED S82 — frontend 897096b4. Five sites now
-         read the stored packing_units instead of dividing Kg by unit
-         weight. PROVEN IN THE DB: PS-0008/DO-0008 carries 0.5 in
-         shipped_qty, qty_shipped AND packing_units — all three agree.
-         Before the fix a 0.5-unit DO would have shipped 1. → J94.
-         ⚠ ONE SITE DELIBERATELY LEFT: edit's save() write. Fixed in
-           4a instead, where it could be tested. → J95.
-
-SLICE 4a ⚠ SHIPPED TO DEV S82, LARGELY UNTESTED. Four changes:
-         · backend 2d22e5a — editPackslips no longer hardcodes
-           shipped_flag. A plain Save does NOT stamp shipped_flag,
-           shippingdate or finalShipmentUserId. Ship does. → J96.
-         · frontend db415d74 — save() split into save()/ship() via
-           submitSlip(isShipping). Save stays on the slip; Ship
-           navigates back. sendMail only fires on Ship.
-         · frontend db415d74 — shipped_qty now posts the UNIT COUNT,
-           not units × weight. Closes J88 on the edit path. → J95.
-         · frontend db415d74 — "Add Dispatch order +" un-commented;
-           Save button added; Ship gated on both shipping fields;
-           reference/condition/storage now editable until shipped;
-           create screen no longer REQUIRES the two shipping fields.
-         ⚠ THE 500 THAT FOLLOWED, and its fix — J98. Two attempts were
-           needed. Do not repeat the first one.
-         ▶ ALL OF IT NEEDS TESTING — see the S83 STEP 1 block above.
-
-▶ SLICE 4b — THE ROW TEMPLATE. THE NEXT BUILD.
-   THE WHOLE DO ROW MOVES AS ONE UNIT into a new template.
-   1  THE ROW — ten fields, replacing the stacked form:
-      MO Number · Internal DO Number · Customer PO No · Product ·
-      Product External Code · Pdt Lot Code · Best Before ·
-      Order Qty (Units) · Shipped Units (#) · Shipped Qty
-      DROPPED: Product Internal Code · System SO No
-      TO HEADER: Customer · Delivery Address
-      ⚠ Customer and Delivery Address ALREADY EXIST as readonly header
-        fields. The work is REMOVING them from the row, not adding.
-      ⚠ The existing-DO row currently HIDES "Shipped Units (#)" and
-        "Shipped Qty" (commented out). The ten-field row RESTORES them.
-        That is a behaviour change, not just a re-layout.
-      ⚠ MO and DO numbers KEPT DELIBERATELY — the handles an operator
-        needs when a customer phones.
-   2  PO BARCODE tabs — one per distinct SO-External across the moved
-      DOs, each with a scannable barcode. ⚠ Into the PRINTED DOCUMENT,
-      not the Zebra.
-   3  RENAMES: popup title "Dispatch Orders" → "Select DOs to Move to
-      Packing Slip"; its button "Save" → "MOVE TO PACKING SLIP".
-   4  ABSORB: the remaining "Customer SO No" → "Customer PO No" labels
-      (⚠ TWICE EACH in edit-packslips.component.html — existing block
-      and shipment block) · the attach-a-doc-to-an-unshipped-slip
-      file loss.
-   ⚠ THE DATE PICKER MUST SURVIVE. It sits in the header, above the
-     row block, and already behaves correctly: editable and defaulting
-     to today before ship, readonly after. Minty flagged it S82 as
-     essential. Verify after the rebuild, do not assume. → J97.
-
-▶ SLICE 4c — THE SEQUENCING CHANGE. AFTER 4b. NEEDS A DB COLUMN.
-   Minty's flow (S82): move DOs → SAVE (repeatable, each move saved)
-   → "Ready to Ship" → shipping reference + vehicle condition appear
-   → Ship activates once both are filled → Ship.
-   ⚠ MINTY'S CALL S82: do this as its own piece, with a REAL COLUMN
-     behind "Ready to Ship", not a visual-only toggle. A visual toggle
-     forgets itself on reload.
-   ⚠ DB CHANGE → rule 4.8: not in git, must go in the rebuild block.
-
-▶ NOT YET SCOPED — after 4c:
-   THE SCAN. doLotCode() (slice 2) is the hook. A scanner is a
-   keyboard; it types into the search box, which already filters on
-   lot code. Scan and click must be ONE function taking a LOT CODE
-   with two thin callers (Minty, S80).
-   THE AMBIGUITY POPUP. Only at the FIRST pick, and only when one lot
-   resolves to more than one customer+address pair.
-   ⚠ DOMAIN CALL STILL OPEN: should documents be attachable to a slip
-   BEFORE dispatch? Minty's instinct: yes.
-```
-
-[J86 · J87 · J88 · J89 · J90 · J91 · J92 · J93 · J94 · J95 · J96 · J97 · J98]
-
-**P1  DOCUMENTATION CONVERGENCE — ✅ DONE.** All eight sections live in the repo. ⚠ REMAINING: delete the two dead physical files → P20 (old Section J) and P22 (old Section A).
+**P1  DOCUMENTATION CONVERGENCE — ✅ DONE.** ⚠ REMAINING: delete the two dead physical files → P20 and P22.
 
 **P2  UNITS FIXES — ACT ON THE S73 WALK.** ⚠ A CAMPAIGN, NOT A FIX.
-⚠ GATE RESOLVED S79 — J13 WAS RIGHT, J80 WAS WRONG ON DISPLAY (J83). Do NOT re-derive:
-  • Trace_ProductHeaderView is Kg-anchored THROUGHOUT. Every `_su` field is `<Kg> / wgt_kgs_per_unit`.
-  • The Products list (admin-formulation.component.ts:878) divides SEPARATELY, and divides the OLD Kg column.
+  • Trace_ProductHeaderView is Kg-anchored THROUGHOUT.
+  • Products list (admin-formulation.component.ts:878) divides separately.
   • ⚠ SCALE: ~30+ division sites, many disguised as `(qty / batch) * (batch / wgt)`.
-  • ⚠ THE CORRECT PATTERN EXISTS: PopUps/stock-info.component.ts:188 reads inventory_units and MULTIPLIES. That is R1. Copy it.
-⚠ **THE PACKING-SLIP SITES ARE DONE — S82 closed five of them (897096b4) plus edit's write (db415d74).** Six sites off the list. → J94, J95.
-⚠ **S81 ADDED A NEW SITE TO FIND:** `soproducts.quanity_shipped_to_date` accumulates UNITS into a row whose sibling `quantity` column is Kg. Same mixed-units-on-one-row shape as JT4. Nobody has logged where it is read. → J91.
-▶ NEXT ACTION IS AN INVENTORY, NOT A FIX. List every division site with file, line, and the stored units column that should replace it. THEN rank.
-Sub-items behind the inventory: R5 display switch · MO-CREATE round-trip (add-mlo.ts:204-205, MO-0007 plan reads 50.004#) · DO/MR/intermediate-release subtract stored units · retire formulations.inventory.
-[3A.5 · §2 GR5 · J13 · J83 · J88 · J91 · J94 · J95]
+  • ⚠ THE CORRECT PATTERN: PopUps/stock-info.component.ts:188 reads inventory_units and MULTIPLIES. Copy it.
+⚠ **THE PACKING-SLIP SITES ARE ALL CLOSED** — S82 (five), S85 (two), S86 (create's save path now reads the stored unit count, J110).
+⚠ **S86 SITE — THE DISPATCH ORDERS LIST.** `/Dispatch-orders` renders shipped quantity as `0 Kg(0#)` while the DB holds 1. ⚠ DISPLAY ONLY — verified against the DB the same minute. Pre-existing.
+⚠ **S81 SITE:** `soproducts.quanity_shipped_to_date` accumulates UNITS into a row whose sibling `quantity` column is Kg. → J91.
+▶ NEXT ACTION IS AN INVENTORY, NOT A FIX.
+[3A.5 · §2 GR5 · J13 · J83 · J88 · J91 · J104 · J110]
 
-**P3  CONFIRM THE PRE-8.4 FINAL SNAPSHOT EXISTS (minutes).** abletrace-lab-prod-old1 deleted; was to be deleted WITH a final snapshot. ⚠ UNVERIFIED. RDS → Snapshots. [3B.3]
+**P3  CONFIRM THE PRE-8.4 FINAL SNAPSHOT EXISTS (minutes).** [3B.3]
 
-**P4  FILE-SIZE GATE + ALERT SWEEP.** ~448 alerts across ~110 files; 5 done. Every error reads "[object Object]". ⚠ S82 NOTE: the packing-slip alerts DO surface real backend messages (the 500 text came through readable), so this screen is better than the average. ⚠ The scan field must NOT raise a blocking alert on a bad scan. [J79, J29·JT18]
+**P4  FILE-SIZE GATE + ALERT SWEEP.** ~448 alerts across ~110 files; 5 done. [J79, J29·JT18]
 
-**P5  PS GUARD BROWSER-CHECK (minutes).** Untested code on the live box. ⚠ Test attach-then-ship or an already-shipped slip. [J75]
+**P5  PS GUARD BROWSER-CHECK (minutes).** [J75]
 
-**P6  PO RECEIVING REDESIGN (major, own session).** Scan-to-find, auto-open, global select, ordered-qty default.
-✅ **PRECONDITION MET S81 — MO-Release Global Select HAS NOW BEEN READ.** Findings:
-```
-FILE   src/app/Layouts/admin-dashboard/warehouse/mfg-lot-codes/
-       release-mat/release-mat-details/  (1243-line .ts, 265-line .html)
-BACK   MaterialsProductsReleased.js:150 createReleaseMaterialProductsV2
-CONTROL  html:35-40 one "Select All" checkbox → setAllSelect()
-HANDLER  ts:176-192 three near-identical blocks (materials, formulas,
-         packaging) each setting x.isDirectQty = !!this.selectAll
-PER-ROW  html:44 / 114 / 179, each with a guard:
-         (released_qty < final_qty) && fill...FromList(...)
-FIELD    the selection flag is `isDirectQty`, NOT `selected`
-⚠ IT IS A SELECT-ALL, NOT A SELECT-MATCHING. No predicate. What
-  transfers to P6/P7 is the SHAPE (one control, a flag per row, a
-  fill-handler per list, a guard that skips ineligible rows) — not
-  the matching logic, which does not exist here.
-⚠ DEAD CODE IN THIS FILE → P38.
-```
-[3A.3 · J89]
+**P6  PO RECEIVING REDESIGN (major, own session).** ✅ PRECONDITION MET S81. ⚠ P6 AND P52's BARCODE ARE TWO ENDS OF ONE LOOP — design them together or they will not meet. [3A.3 · J89]
 
-**P8  PROD FRONTEND CHECKOUT LAGS THE SERVED BUILD (minutes).** A git pull tidies it. ⚠ Reading a frontend file from prod's checkout shows code that is NOT LIVE. [3B.4]
+**P8  PROD FRONTEND CHECKOUT LAGS THE SERVED BUILD (minutes).** ⚠ Confirmed again S86. [3B.4]
 
-**P9  FEATURE A — FOOD SAFETY TOGGLE: declare the model attribute.** One line; unblocks Feature A. [J47·JT2]
+**P9  FEATURE A — FOOD SAFETY TOGGLE: declare the model attribute.** [J47·JT2]
 
-**P10  MASTER-RECORD FIELD UNLOCKS.** Name / Storage Temp / Shelf Life / My Code edit IN PLACE. Also fixes My Code showing literal "null" — ⚠ SEEN AGAIN S81 on the packing slip ("Product External Code: null"). ⚠ S82 FOUND THE MECHANISM for the packing-slip case: FormData stringifies blanks so the four-letter string 'null' reaches the backend. Same family. → J98. [§2 Master edit map]
+**P10  MASTER-RECORD FIELD UNLOCKS.** ⚠ FormData stringifies blanks so the string 'null' reaches the backend → J98. ⚠ STILL VISIBLE S86 — "Customer PO No" shows the literal word `null` on the EDIT SCREEN. ⚠ The printed document guards it with an em dash regardless (J112); the screen does not.
 
-**P11  RECEIVE PRODUCT CAN BE SAVED WITH NO MATERIAL RELEASED.** Needs a backend guard. [J24]
+**P11  RECEIVE PRODUCT CAN BE SAVED WITH NO MATERIAL RELEASED.** [J24]
 
-**P12  SWEEP MAC ~/Downloads (minutes).** ⚠ WORSE AGAIN S82 — now also holds several patch .py files and three dist zips. promote.sh deploys whatever zip you name. [3B.4]
+**P12  SWEEP MAC ~/Downloads (minutes).** [3B.4]
 
 **P13  FINISH GLUTENULL ONBOARDING.** [§2 Logic C]
 
@@ -436,76 +392,142 @@ FIELD    the selection flag is `isDirectQty`, NOT `selected`
 
 **P15  PARAMETERIZE WhC_GetMoProductReceivingDetails_SP.** [J78]
 
-**P16  BACK UP /home/ubuntu OFF THE BOX.** ⚠ THE STANDING RISK. [JR14 · JT20 · 3B.9]
+**P16  BACK UP /home/ubuntu OFF THE BOX.** ⚠ THE STANDING RISK — it now holds SIX S86 backups and nothing else does. [JR14 · JT20 · 3B.9]
 
-**P17  DEACTIVATE THE TWO OLD-ACCOUNT IAM KEYS.** ⚠ Sequenced AFTER the app.abletrace.ca switch. [J1, J34 · 3B.10]
+**P17  DEACTIVATE THE TWO OLD-ACCOUNT IAM KEYS.** [J1, J34 · 3B.10]
 
-**P18  HACCP EDIT-CASCADE REWORK.** ⚠ FOOD-SAFETY-CRITICAL. OWN SESSION. DO NOT BUNDLE. [J4 · JT3 · 3A.7]
+**P18  HACCP EDIT-CASCADE REWORK.** ⚠ FOOD-SAFETY-CRITICAL. OWN SESSION. [J4 · JT3 · 3A.7]
 
-**P19  TRACEABILITY PDF CUTS A ROW ACROSS A PAGE BREAK (cosmetic).** [J25]
+**P19  TRACEABILITY PDF CUTS A ROW ACROSS A PAGE BREAK (cosmetic).** ⚠ RELATED TO P52 — S86's print CSS now carries `page-break-inside: avoid` on table rows, which is the pattern P19 needs. [J25]
 
 **P20  DELETE THE OLD SECTION J (housekeeping).**
 
-**P21  THE OS RESTART — PENDING SINCE S35.** ⚠ Both boxes still show "System restart required", confirmed again S82. The boxes run DIFFERENT operating systems (prod 26.04 / dev 24.04.4), so a dev reboot rehearses nothing. ▶ (1) confirm `systemctl is-enabled pm2-ubuntu` on PROD; (2) reboot prod standalone with rollback ready; (3) reboot dev separately. [3B.2 · 3B.5 · J84]
+**P21  THE OS RESTART — PENDING SINCE S35.** ⚠ Both boxes still show "System restart required", confirmed on every S86 login. ▶ (1) confirm `systemctl is-enabled pm2-ubuntu` on PROD; (2) reboot prod standalone with rollback ready; (3) reboot dev separately. [3B.2 · 3B.5 · J84]
 
 **P22  DELETE THE OLD SECTION A (housekeeping).**
 
-**P23  ADD AN IPv6 RULE TO DEV SSH (minutes).** ⚠ `ssh -4` is the standing workaround and was needed throughout S82. [3B.2]
+**P23  ADD AN IPv6 RULE TO DEV SSH (minutes).** ⚠ S86: `scp` connected WITHOUT `-4`, so the drift is intermittent. Keep using `-4`. [3B.2]
 
 **P24  RESTORE MAT-6 SESAME ALLERGEN ON DEV (minutes).**
 
-**P27  DO-CREATE POPUP: Qty(Kg) SHOWS "NaN" WHILE TYPING.** [3A.5 row 8 · 3A.4]
+**P27  DO-CREATE POPUP: Qty(Kg) SHOWS "NaN" WHILE TYPING.** [3A.5 row 8]
 
-**P29  ALLERGEN RECORD IS MUTABLE ON SHIPPED LOTS — DOMAIN DECISION FIRST.** ⚠ FOOD-SAFETY. ▶ Does a shipped lot need an immutable as-declared record? ⚠ ALSO OPEN, one query: does mlomanagement.allergens hold a stored value nobody reads? [J82 · J80]
+**P29  ALLERGEN RECORD IS MUTABLE ON SHIPPED LOTS — DOMAIN DECISION FIRST.** ⚠ FOOD-SAFETY. ⚠ TIES TO P52 OPEN 4. [J82 · J80]
 
-**P30  ADD-FORMULATION INTERMEDIATE SUMMARY SHOWS Kg-ONLY DURING ADD (minutes).** Batch with the R5 display switch. [J17]
+**P30  ADD-FORMULATION INTERMEDIATE SUMMARY SHOWS Kg-ONLY DURING ADD (minutes).** [J17]
 
-**P31  PROD SSL CERTIFICATE HAS NO EMAIL REGISTERED (minutes).** ⚠ PROD GETS NO RENEWAL-FAILURE WARNING. FIX: `sudo certbot update_account -m info@abletrace.ca --agree-tos`. [3B.6]
+**P31  PROD SSL CERTIFICATE HAS NO EMAIL REGISTERED (minutes).** FIX: `sudo certbot update_account -m info@abletrace.ca --agree-tos`. [3B.6]
 
 **P32  RDS DATABASES ARE PUBLICLY ACCESSIBLE — REVIEW.** [3B.3]
 
-**P33  CERT-STATUS INDICATOR SHOWS RED REGARDLESS OF STATE.** [§4 status colours]
+**P33  CERT-STATUS INDICATOR SHOWS RED REGARDLESS OF STATE.** [§4]
 
-**P34  PROD INSTALLS ITS OWN UPDATES, UNATTENDED AND UNDOCUMENTED.** ⚠ Do NOT disable casually. [3B.2 · J84]
+**P34  PROD INSTALLS ITS OWN UPDATES, UNATTENDED AND UNDOCUMENTED.** [3B.2 · J84]
 
-**P35  EDITING A PACKING SLIP TO ADD A DISPATCH ORDER THROWS.** ⚠ **BACKEND FIXED S81 SLICE 1** (loop deleted, ff5d183). ⚠ **THE BUTTON WAS RESTORED S82 SLICE 4a** — so it is NOW REACHABLE and testable for the first time. ▶ S83 T2 closes or re-opens this. [§2 to-verify 5 · J85 · J86 · 3A.4]
+**P36  DELETE THE DEAD add-dispatch (v1) POPUP COMPONENT.** [J87]
 
-**P36  DELETE THE DEAD add-dispatch (v1) POPUP COMPONENT.** `PopUps/add-dispatch/` declared in edit-sales-order.module.ts:20 but never opened. ⚠ Grep for other references first. [J87]
+**P38  DELETE THE DEAD selectOption LOT-PICKER IN release-mat-details.** [J89]
 
-**P37  CONFIRM THE COMPANY OF PROD SO-0004 (one query, minutes).** ⚠ Run on prod: `SELECT id, internalCode, company_id FROM somanagement WHERE internalCode='SO-0004';` If 464 → harmless. If not → real client data was touched. [Section 1 PROD RESIDUE]
+**P39  CHECK THE THREE nestedPop POPULATE ARRAYS IN Formulations.js.** ⚠ FOOD-SAFETY-CRITICAL: JT8. Lines 609, 632, 1063. [JT8 · J85]
 
-**P38  DELETE THE DEAD selectOption LOT-PICKER IN release-mat-details.** ⚠ The old "Add +" button and its `mat-select` lot dropdown are COMMENTED OUT in the template (html:94-111, 160-176, 223-240) but `selectOption` is STILL WRITTEN in the .ts (691-700, 810-818, 1066-1091, plus a commented block at 1104-1143). ⚠ Same JT9/JT22 decoy as P36, sitting in the exact file P6 will redesign. [J89]
+**P40  REMOVE-ONE-DO FROM A PACKING SLIP — ⚠ STILL UNTESTED.** ⚠ S86: the deletedDos branch (ff5d183) was NOT touched by the cancel fix and already reads the stored join row, so it is PROBABLY correct — ⚠ a reading of the code, NOT a test. ▶ Exercise it once: remove one DO from a saved slip, Save (not Ship), confirm the tally returns. [J92 · J105 · J109]
 
-**P39  CHECK THE THREE nestedPop POPULATE ARRAYS IN Formulations.js.** ⚠ FOOD-SAFETY-CRITICAL: JT8 says never two COLLECTION associations in one nestedPop populate array; v0.1.4 silently returns the SECOND one EMPTY. That bug hid missing intermediates once already (S55). Sites: Formulations.js lines 609, 632, 1063. ▶ Read each, confirm no two collections share a populate array. [§2 to-verify 1 · JT8 · J85]
+**P41  WRITE THE SETTLED RULES INTO SECTION 2 — ⚠ FIVE EDITS, ONE PASS.**
+  1. A DO coming off a slip ALWAYS returns its quantity. ⚠ REISSUE §2 Core #2's sentence WHOLE. ⚠ S86: the code NOW IMPLEMENTS THIS — record the rule, and note it was not implemented until 44759a9.
+  2. The three-step flow (move → save → ship) is settled domain logic (S82).
+  3. Shipped quantity is not an operator input (S84).
+  4. THE DO ROW IS A READ-ONLY DISPLAY. Nothing typed.
+  5. THE UNIFORM QUANTITY STRING: `<units># (<Kg> <uom>)`.
+[J92 · J97 · J104 · J109]
 
-**P40  REMOVE-ONE-DO FROM A PACKING SLIP IS UNUSABLE.** ⚠ **THE FRONTEND HALF WAS FIXED S82 SLICE 4a** — /Edit-Packslips now has a Save button that does not ship, so `deletedDos` finally has a commit path. ▶ UNTESTED. S83 T3 closes or re-opens this. [J92 · J96]
+**P43  SHIPPING REFERENCE → MULTIPLE INVOICES, QUICKBOOKS-READY.** ⚠ DESIGN DECIDED, BUILD DEFERRED: a CHILD TABLE, not delimited text. ⚠ DB CHANGE → rule 4.8. [J97]
 
-**P41  WRITE THE RULE INTO SECTION 2 — a DO coming off a slip always returns its quantity.** ⚠ Minty's decision S81. ⚠ DO NOT add a new standalone rule: §2 Core #2 already says "reverse walks back one bucket at a time, cancel logic already exists there" — TRUE of cancel-whole-slip and quietly FALSE of remove-one. ▶ REISSUE that existing Core #2 sentence WHOLE with the decision folded in (rule 7.1). ⚠ S82 ADDS A SECOND EDIT TO THE SAME SECTION: the three-step flow (move → save → ship) is now settled domain logic and belongs in §2 alongside it. Do both in one pass. [J92 · J97]
+**P44  editPackslips NEVER WRITES vehicle_condition.** ⚠ An operator can pick a condition, ship, and have it silently discarded. ▶ Asked S85 AND S86, STILL UNANSWERED. [J98]
 
-**P42  SPLIT SECTION 5 INTO TRAPS AND LOG.** ⚠ DO NOT START UNTIL P7 IS CLOSED — P7 is actively generating J-entries (S82 alone added five) and splitting a file mid-append is the worst moment. Section 5 is ~2000 lines and append-only. WHY: the JT traps block is short and worth reading EVERY session (rule 1.4); the J-entry log is long and rarely needed in full. ▶ THE SPLIT: Section 5A = JT traps + JR rebuild checklist (short, standing paste). Section 5B = the J-entries (fetched by name). ⚠⚠ J-NUMBERS ARE PERMANENT AND MUST NOT CHANGE — they are cross-referenced from Sections 1, 2 and 3A. ⚠ Also update rule 0.3's standing-paste list and rule 9's structure block to name 5A and 5B.
+**P46  TERMINAL PASTE TRUNCATION — INVESTIGATE, DO NOT KEEP GUESSING.** ⚠ TWO THEORIES DISPROVEN. THE WORKAROUND WORKS: files + scp, four for four in S86. ⚠ SEPARATE BUT RELATED, BIT TWICE IN S86: a STUCK PASTE BUFFER replaying old scrollback — only a fresh terminal window clears it.
 
-**P43  SHIPPING REFERENCE → MULTIPLE INVOICES, QUICKBOOKS-READY.** ⚠ NEW S82. Today `packingslips.vehicle_no` is ONE text column holding a single reference. Minty needs SEPARATE fields for multiple invoice documents.
-⚠ **DESIGN DECIDED, BUILD DEFERRED: a CHILD TABLE (one row per invoice), NOT delimited text.** Reason: all Minty's clients run QuickBooks and the invoice number will likely need to match a QuickBooks record. Delimited text cannot carry a per-invoice external id or sync state, and retrofitting rows later would mean migrating live shipped slips.
-⚠ **OPEN QUESTION, ASK FIRST:** are invoices raised in QuickBooks BEFORE or AFTER the slip ships? If after, the field must be fillable post-ship — which breaks "Ship is terminal" (§2 Core #2) and is a DOMAIN decision, not a code one.
-⚠ DB CHANGE → rule 4.8: not in git, must go in the rebuild block. [§2 GR7 vehicle_no · 3A.4 · J97]
+**P48  NAMING DEFECTS. Cheap individually, expensive in aggregate.**
+```
+moStartDate               holds a LOT CODE, not a date
+sales_order_num           holds the SYSTEM SO   ("System SO No")
+sales_order_num_system    holds the CUSTOMER's ref ("Customer PO No")
+shipment_order_units  vs  shipping_order_units
+"MO Lot Code" vs "Pdt Lot Code"   SAME THING, two captions
+"PackingSlipDOs"          the table is packingslipdos, lowercase
+vehicle_no                holds the SHIPPING REFERENCE
+```
+▶ Rename the CAPTIONS freely (safe). ⚠ Renaming CONTROLS touches form bindings, patchValue keys and the payload.
 
-**P44  editPackslips NEVER WRITES vehicle_condition.** ⚠ NEW S82, but PRE-EXISTING — not caused by S82. The edit PSOBJ sets only `vehicle_no` and `remarks` (plus the ship fields when shipping). So the Vehicle condition dropdown on the edit screen does not persist. ⚠ MATTERS MORE NOW: S82 made that dropdown editable and gated SHIP on it, so an operator can pick a condition, ship, and have it silently discarded. ▶ Add `vehicle_condition` to the edit PSOBJ with the same blank-guard as createPS. [J98]
+**P50  UNDOCUMENTED FOLDER ON THE PROD BOX.** `/home/ubuntu/abletrace-lab-backend-dev` exists on PROD and is NOT a git repository. ▶ One `ls` and a config grep during the S87 promote, while on the box.
 
-**P45  NO OVER-SHIP GUARD ON THE EDIT SCREEN.** ⚠ NEW S82. The old code tried to cap `shipped_qty` at the ordered quantity but compared a NUMBER against a DISPLAY STRING (`"10 Kg ( 0.5 # )"`), so the comparison never fired — the guard was dead for its whole life. S82 removed the dead code. ⚠ NOTHING NOW PREVENTS SHIPPING MORE UNITS THAN THE DO AUTHORISES. Food-safety adjacent. ▶ Compare against the stored `packing_units`, not a rendered string. [J95]
+**P51  DELETE createEditItem / addEditItem (dead code).** PROVEN unreachable S85. [J106]
 
-**P46  TERMINAL PASTE TRUNCATION — INVESTIGATE, DO NOT KEEP GUESSING.** ⚠ NEW S82. Long patch scripts pasted into the SSH session were truncated or scrambled 6+ times in one session, always cutting at the same content. ⚠ TWO THEORIES WERE PROPOSED AND BOTH DISPROVEN: "paste size" (a fresh window took the same size fine) and "stale window state" (a fresh window also failed). Cause unknown. ⚠ THE WORKAROUND WORKS AND IS NOW THE DEFAULT: hand patch scripts over as FILES, scp them across, run from /tmp (see the handover block above). ▶ When someone has ten minutes: try a large paste in a window that has run only simple commands, then again after a pager command (`git diff`, `less`), and see if it reproduces. Rule 0.1a — look, do not reason. [Section 0 rule 8]
+**P52  PRINTED PACKING SLIP — ⚠ STRUCTURE BUILT S86. BARCODE OUTSTANDING.**
+✅ **DONE:** the document is split from the editing screen, with its own markup and print CSS. Letterhead · slip number · Ship to / Shipping date · five-column two-line table · shipping reference · remarks · Shipped by printed / Received by blank. Real dates, em-dash blanks, fixed column widths. → J112.
+⚠ **REMAINING:** the barcode (Code 128, one per unique customer PO, first occurrence, two row heights, tall rows must not split a page). ⚠ Depends on OPEN 5 — the free-text PO matching problem, shared with P6.
+⚠ **DECISIONS STILL OPEN:** OPEN 2 grouping · OPEN 3 print-before-ship (provisionally YES in S86, one *ngIf to revert) · OPEN 4 allergens · the date-format disagreement between the mockup and the spec.
+⚠ **THE FROZEN SPEC'S SECTION 11 IS NOW WRONG** — it says P52 is not part of P7. Minty overruled that in S86.
 
-> ⚠ NUMBERING NOTE: the queue jumps P24 → P27; P25/P26 are gone for good (P26 was "Fix A", a fix for a bug that never existed — J81). P28 CLOSED S79.
+**P54  COMPANY LOGO: STORE AND SERVE.** ▶ Add `company.logo varchar(255)` + ⚠ **the Waterline model attribute — BOTH, or the write is silently dropped (rule 4.7 / JT2)**. ⚠ The print template already reserves the slot. ⚠ DB change → rule 4.8. [J108]
+⚠ **S86 CONFIRMED `company.address` REACHES THE LOGIN SESSION** — the letterhead renders it live. That half of J108 is settled.
+
+**P55  COMPANY LOGO: SUPER ADMIN CAPTURE.** Upload on company CREATE and EDIT. ⚠ Depends on P54.
+
+**P56  ✅ CLOSED S86 (13e3fcd).** getPSs matched DO objects by array index; proven mismatched on PS-0020. Now matches by id. → J111.
+
+**P57  CANCEL IS NOT BLOCKED AFTER SHIP AT THE BACKEND.** `inActivatePS` gates on `status_id: 1`, but shipping sets `shipped_flag`, NOT `status_id` — so a shipped slip still satisfies the gate. Only the frontend hides the button. ⚠ §2 says ship is TERMINAL. ▶ DOMAIN QUESTION FOR MINTY: should the backend refuse? If yes it is a one-line guard.
+
+**P58  THE DEV REMOTES DO NOT CARRY THE PAT.** `git push` prompted for a password on every push in S86 — five times. 3B.9 says the token is embedded. ⚠ Minutes. ▶ Reset both remote URLs.
+
+**P59  PROD'S PM2 RESTART COUNTER READS 335 AGAINST DEV'S 33.** Appears in no section. ⚠ "Almost certainly accumulated deploys" is reasoning, not a reading. ▶ One look at `pm2 describe abletrace-backend` during the S87 promote.
+
+> ⚠ NUMBERING NOTE: the queue jumps P24 → P27; P25/P26 are gone for good. P28 CLOSED S79. P35 CLOSED S84. P37 CLOSED S86 (prod SO-0004 is company 464 — sandbox). P45 + P49 CLOSED S86 (6b269ab3). P47 folded into P52. P53 CLOSED S86 (44759a9). P56 CLOSED S86 (13e3fcd).
 
 ---
 
 ## BANKED, AWAITING DEPLOYMENT
 
 ```
-Corrected v2 PDFs (Misc Release + Traceability label fixes).
-P7 slices 1, 2, 3 and 4a — dev only, deliberately NOT promoted to
-prod until P7 is whole and tested end to end.
-⚠ 4a IS UNTESTED. Promoting now would be a rule 5.5 violation.
+⚠ THE PROMOTE SET — 16 COMMITS. ⚠ RE-READ FROM GIT AT S87 OPEN,
+  NOT FROM THIS LIST:
+    git log --oneline <prod>..<dev>   on both repos
+
+    FRONTEND  53db203d..8997acdc   (10)
+      0f4c0344  S81 slice 2  DO-select popup, auto-select group
+      897096b4  S82 slice 3  read stored packing_units (5 sites)
+      db415d74  S82 slice 4a Save/Ship split, re-enable add-DO
+      b324bcea  S83          cancel PS reads per-slip qty
+      d223d6ed  S84 D2       edit doList loops the picker array
+      c3d463c9  S84          shipped units pre-fill (fixes the 500)
+      453f1f44  S85 slice 4b unified read-only DO row on EDIT
+      6b269ab3  S86 step B   same row on CREATE, validators deleted
+      ba3bfe9f  S86 P52a     printed slip as its own document
+      8997acdc  S86 P52a     typography and fixed column widths
+
+    BACKEND   d3104ea..13e3fcd    (6)
+      ff5d183   S81 slice 1  deletedDos returns qty per DO
+      2d22e5a   S82 slice 4a split save from ship in editPackslips
+      df6d728   S82          vehicle_no null coercion
+      083fc96   S82          vehicle_no blank -> empty string
+      44759a9   S86 P53      cancel returns qty from stored rows
+      13e3fcd   S86 P56      getPSs matches DO objects by id
+
+  ⚠ USE PROD'S SERVED BUNDLE SHA (53db203d), NEVER ITS CHECKOUT
+    (9bce0238). The checkout lags and gives a wrong range. → P8.
+  ⚠ ORDER: BACKEND FIRST, THEN FRONTEND (J96). Between the two
+    deploys the Ship button saves without shipping — harmless for
+    minutes on dev, a live defect on prod. Do not pause between.
+  ⚠ REGRESSION PAIR (rule 5.2 / J78): document save with BOTH an
+    apostrophe AND a pasted image.
+  ⚠ AFTER PROMOTING: run the reconcile oracle on PROD UNSCOPED.
+    It was EMPTY at S86 open and must still be empty.
+
+⚠⚠ THE S85 PROMOTION BLOCK IS LIFTED. P53 is fixed and proven.
+
+⚠ PROD EXPOSURE, MEASURED S86: Glutenull has ZERO PACKING SLIPS.
+  Only companies 464 and 465 have any. The cancel defect never
+  touched real client data and NO DATA HEAL IS NEEDED ON PROD —
+  the fix is forward-only.
 ```
 
 **END SECTION 1**
