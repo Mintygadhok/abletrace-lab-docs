@@ -10,37 +10,57 @@
 # ▶▶ S87 HANDOVER — READ THIS BLOCK FIRST, BEFORE ANYTHING ELSE
 
 ```
-THE GOAL      ⚠ MINTY RE-RANKS THE QUEUE, THEN A SWEEP OF THE
-              "MINUTES" ITEMS. Not a build session.
-              S86 closed NINE items and P7 with them — the top of
-              the list is free for the first time in six sessions,
-              and roughly FIFTEEN of the 49 are marked "minutes".
-              They have accumulated because every session goes to
-              what matters most and small things never win that
-              contest. One sweep changes the shape of the list.
-              ⚠ NOT P13. Onboarding is the next BIG job and it
-                deserves a session that starts fresh, not one that
-                starts with a re-rank.
+THE GOAL      ▶ MINTY'S CALL, S86: P61 THEN P42. FINISH THE
+              SECTION 5 SPLIT. That is the whole session.
+              A DOCUMENT SESSION — no code, no boxes, no deploy.
+              Everything happens in ~/abletrace-lab-docs on the MAC.
+              ⚠ P61 FIRST. The split ABORTED in S86 rather than
+                ship a 5A missing five traps. Move them, then cut.
+              ▶ S88 IS ALREADY CHOSEN: P3, then P4, then P2.
+                ⚠ P3 is minutes; P4 and P2 are CAMPAIGNS. S88's
+                goal is START AND MAKE PROGRESS, not close them.
 
 THE PASTE LIST  (rule 10.4 — named by task, not by habit)
-    Section_0.md    the rules
+    Section_0.md    the rules — ⚠ AND THE THING BEING EDITED:
+                    rules 0.3, 9 and 9C must be updated to name
+                    5A and 5B. Not just a reference this time.
     Section_1.md    this file, the driver
-    Section_3B.md   boxes, promote commands, rollback points
-  ▶ THAT IS ALL. A sweep of small items needs no domain logic
-    (2), no module map (3A), no design spec (4), no history (6).
-  ▶ Section_5.md ONLY IF P61 is tackled — and ⚠ it truncates
-    around J88, so paste the tail separately if the split resumes.
+    Section_5.md    ⚠ THE SUBJECT OF THE WORK. It truncates around
+                    J88 — paste the tail separately when the split
+                    itself runs.
+  ▶ NOT 3B. No boxes, no promote, no rollback points — P42 never
+    leaves the Mac. NOT 2, 3A, 4 or 6.
+
+⚠⚠ THE SCRIPT ALREADY EXISTS — DO NOT REWRITE IT FROM SCRATCH.
+    ~/Downloads/patch-S86-split-section5.py
+  Written and tested in S86. Its anchors are PROVEN: body bytes
+  in == out, 104 entries indexed, and both prose lines that mimic
+  an entry header were correctly refused. It aborts cleanly if
+  either output file already exists.
+  ⚠ TWO KNOWN FIXES BEFORE IT RUNS:
+    1  carry JT23-JT27 into 5A  (that is P61, do it first)
+    2  widen the index pattern — J85 is rejected because its
+       title opens with a quote mark. Index should be 105, not 104.
+  ⚠ IF THE FILE IS GONE FROM ~/Downloads, say so at open. Claude
+    can rebuild it, but knowing it existed saves the rediscovery.
 
 FIRST THREE ACTIONS, IN ORDER
-  1  HEALTH-CHECK BOTH BOXES (rule 1.1). ⚠ CHECK DEV'S HEAD
-     FIRST — dev is where work lands and where this document
-     goes stale. Expect backend 13e3fcd and frontend 8997acdc on
-     BOTH boxes; they were in sync at S86 close.
-  2  RUN THE RECONCILE ORACLE ON PROD, UNSCOPED. It was empty at
-     S86 close and must still be empty. ⚠ Use the COALESCE form
-     in this section, not an older copy → P62.
-  3  ⚠ MINTY RE-RANKS. One pass, top to bottom, before any work
-     starts. No full pass since S73 — FOURTEEN sessions.
+  1  cd ~/abletrace-lab-docs && git pull
+     git log -1 --oneline    ▶ expect 95582df or later
+     ls -la *.md             ▶ expect Section_5.md at ~190 KB and
+                               NO Section_5A/5B (S86 removed the
+                               aborted attempt cleanly)
+  2  P61 — read the five trap blocks and get their EXACT bounds
+     before writing anything. They are at roughly lines 2418,
+     2861, 2891, 2912 and 3082, but ⚠ THOSE NUMBERS ARE FROM THE
+     PRE-REPAIR FILE. Re-grep; 70afcae changed the line count.
+  3  P42 — fix the two script issues, run it, read the index,
+     `git rm Section_5.md`, then update rules 0.3, 9, 9C AND the
+     paste list in this document.
+
+⚠ NO HEALTH CHECK NEEDED. Rule 1.1 is about the boxes and this
+  session does not touch them. Dev and prod were IN SYNC at S86
+  close — backend 13e3fcd, frontend 8997acdc on both.
 
 TRAPS THAT COST TIME IN S86 — all avoidable
    · ⚠⚠ THE RAW CDN SERVED A STALE SECTION 1, TWICE, HOURS
@@ -51,17 +71,20 @@ TRAPS THAT COST TIME IN S86 — all avoidable
      work you know was done, PASTE IT.
    · ⚠⚠ FOUR HOURS ON FOUR WRONG THEORIES about the cancel
      defect before a ten-minute test settled it. ▶ IF IT IS
-     REPRODUCIBLE ON A SANDBOX, REPRODUCE IT FIRST AND READ THE
-     CODE SECOND. → J109.
-   · THE PROD BUILD BUTTON IS NOT ON THE "All workflows" PAGE.
-     Click "Build Frontend" in the LEFT SIDEBAR first. ~15 min lost.
+     REPRODUCIBLE, REPRODUCE IT FIRST AND READ THE CODE SECOND.
+     → J109.
+   · ⚠ A DOC PATCH FAILS SILENTLY. Nothing breaks, the file just
+     reads fine and is wrong. S86 shipped a commit claiming
+     "J109-J112" that actually pasted J109/J110 TWICE and wrote
+     neither J111 nor J112. ▶ COUNT THINGS AFTER EVERY DOC PATCH.
    · STUCK PASTE BUFFER and a lingering ":" pager. Control-C,
      then q. If the prompt still misbehaves, OPEN A FRESH
-     TERMINAL WINDOW — the only reliable clear.
+     TERMINAL WINDOW — the only reliable clear. ⚠ IT ALSO EATS
+     WHOLE COMMANDS: S86's final `git commit` and `git push`
+     both silently failed to run. VERIFY WITH git log, NOT with
+     the absence of an error.
    · A URL PASTED INTO THE TERMINAL. URLs go in the BROWSER;
      Claude must never format one inside a command block.
-   · `ssh` typed while ALREADY ON DEV — the pem does not exist
-     on the boxes. Check the prompt colour first (rule 6.2).
    · git push prompts for a password on dev → P58.
 ```
 
@@ -82,20 +105,22 @@ LAST SESSION   S86 — ⚠⚠ EVERYTHING SHIPPED. SIXTEEN COMMITS
                written, split ATTEMPTED AND ABORTED on a real
                finding (see P58).
 
-THIS SESSION   S87 — ⚠ MINTY RE-RANKS THE QUEUE FIRST. No full
-               pass since S73, now FOURTEEN sessions, and P7's
-               closure frees the top of the list for the first
-               time in six sessions. One pass, at open.
+THIS SESSION   S87 — P61 THEN P42. FINISH THE SECTION 5 SPLIT.
+               ▶ MINTY'S CALL, MADE AT S86 CLOSE. The handover
+               block above carries the paste list, the script
+               location and the two fixes it needs.
 
-               THEN, suggested order — Minty's call:
-                 1  P61 — five traps are in the WRONG HALF of
-                    Section 5. Rule 1.4 has been reading an
-                    INCOMPLETE trap set for five sessions.
-                 2  P42 — finish the split (blocked by P58).
-                 3  P13 — Glutenull onboarding. ⚠ SEE THE CLOCK
-                    NOTE BELOW: this is now the gating item for
-                    everything food-safety-critical.
-                 4  P6 / P52 barcode — design together.
+               ▶ S88 IS ALSO CHOSEN: P3, then P4, then P2.
+                 ⚠ P3 is minutes. P4 (448 alerts) and P2 (~30
+                 division sites) are CAMPAIGNS — S88's goal is
+                 START AND MAKE PROGRESS, not close them.
+
+               ⚠ THE FULL RE-RANK IS STILL OUTSTANDING. Minty has
+                 ranked the next TWO sessions, not the whole list.
+                 No full pass since S73 — fourteen sessions.
+                 ▶ Raise it again at S89 open.
+               ⚠ P13 (Glutenull onboarding) REMAINS THE CLOCK for
+                 everything outbound — see the note below.
 
 ⚠⚠ THE CLOCK, STATED PLAINLY. Glutenull has NO dispatch orders
    and NO packing slips on prod (queried S86, and Minty confirms
