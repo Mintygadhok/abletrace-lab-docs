@@ -56,7 +56,20 @@ REVERTS       A revert is a trade, not a fix. Ask what the commit was
 QUEUE         New items go at the BOTTOM with the next free number.
               Claude never renumbers. Ranking is Minty's, in one pass.
 
+ASK FIRST     Before reading a script, a config or a box to learn how
+              something works, ask Minty for the document that covers
+              it, BY NAME. S87: Claude read promote.sh instead of
+              asking for 3B.4 and had been stating the CI direction
+              backwards as a result. The doc is the first stop; the
+              artifact is the tiebreaker if they disagree.
+
 DOCS          NOW.md is the only file rewritten each session. TRAPS.md
               grows only when something bites twice. Everything else is
               frozen and is allowed to be imperfect — it is not tidied.
+              ⚠ ANYTHING WORTH KEEPING MUST NOT LIVE IN NOW.md. NOW is
+              rewritten whole, so a note left there is deleted next
+              session. Traps go to TRAPS, rules go here.
+              ⚠ SECTION 5 IS NOT DELETABLE. It holds the JR rebuild
+              block — the only record of every stored proc, view,
+              column add and seed — and the reconcile oracle. → P67
 ```

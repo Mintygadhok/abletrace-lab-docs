@@ -108,6 +108,20 @@ The same fixture (464) has different row ids on each. Never compare ids
 across boxes. And name the database explicitly — a bare `mysql` on prod
 lands in the dormant archive.
 
+**THE BROWSER CACHES ITS SECURITY VERDICT TOO**
+Chrome decides secure/not-secure once, when a page loads, and a long-open
+tab keeps that verdict through reloads. S87 spent an hour treating a red
+"Not Secure" chip on both boxes as a server fault; certificates were valid
+to October and http was redirecting to https on both. Cmd+Q cleared it.
+Same family as J66 lazy chunks: before diagnosing anything TLS-shaped,
+full-quit the browser first.
+
+**TWO SCREENS ARE BOTH CALLED "DISPATCH ORDERS"**
+`/Dispatch-orders` is the list, with Back and Create Packing Slip. The
+DIALOG that opens on top of Create Packing Slip is DoListComponent. Both
+carry that heading and both have a Search box in the same place. A console
+reading was taken on the wrong one in S87 and read as a null result.
+
 **RAW GITHUB URLS SERVE STALE CONTENT**
 The CDN caches. Reasoning that it "should be fine" has been wrong more than
 once. Test it, do not argue it.
