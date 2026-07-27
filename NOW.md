@@ -84,7 +84,7 @@ DEV       16.55.10.205 · pm2 abletrace-dev
           frontend HEAD 734f3305, serving dev-734f330507ed
 PROD      15.157.38.101 · pm2 abletrace-backend · Glutenull live
           NOT TOUCHED IN S87
-DOCS      Mintygadhok/abletrace-lab-docs HEAD 2e203a2
+DOCS      Mintygadhok/abletrace-lab-docs HEAD 3de64a8
           ⚠ NOTHING WAS DELETED. Sections 0-6 all still present
           alongside the new RULES / NOW / TRAPS.
 CERTS     trace expires 17 Oct 2026 · dev 9 Oct 2026. certbot clean.

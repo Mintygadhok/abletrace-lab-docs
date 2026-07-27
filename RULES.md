@@ -9,6 +9,28 @@ WHO           Minty: domain expert, sole operator, runs every command.
               Claude: sole coder and only reviewer. If Claude misses
               it, nobody catches it.
 
+OPEN          Every session starts with this, on BOTH boxes, before any
+              work. Paste it and give Claude the output:
+
+                git -C ~/abletrace-lab-frontend rev-parse --short HEAD
+                git -C ~/abletrace-lab-backend  rev-parse --short HEAD
+                git status --short
+                pm2 status
+                curl -s -o /dev/null -w "%{http_code}\n" localhost:1337
+
+              Expect clean trees, the NAMED process online, and 200.
+              ⚠ COMPARE THE REAL HEADS AGAINST WHAT NOW.md CLAIMS. If
+              they differ, STOP and reconcile the record before doing
+              any work. S70 opened by chasing a delta that did not
+              exist — and that same unrecorded commit turned out to be
+              the cause of the client's bug four hours later.
+              ⚠ After any backend restart, sleep 8 before the curl.
+              000 means Sails is still booting, not that it crashed.
+              ⚠ Prod's frontend git checkout LAGS the served build.
+              Judge prod's frontend by the bundle, not the checkout.
+              ⚠ Note the rollback points before touching anything.
+              (Fuller version, plus the host check, lives in 3B.5.)
+
 LOOK          When a claim can be CHECKED ON A SCREEN, ask Minty to
               look. Do not reason across it. S73 tested seven claims
               against the live app: five were false, and three of those
