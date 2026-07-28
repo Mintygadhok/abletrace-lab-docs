@@ -125,3 +125,126 @@ reading was taken on the wrong one in S87 and read as a null result.
 **RAW GITHUB URLS SERVE STALE CONTENT**
 The CDN caches. Reasoning that it "should be fine" has been wrong more than
 once. Test it, do not argue it.
+---
+
+## JT — FOCUS DECIDES WHETHER A KEYSTROKE TEST MEANS ANYTHING
+
+```
+A key event only reaches the element that HOLDS FOCUS. Clicking into
+DevTools — the Console, the Search panel, anywhere — takes focus OUT of
+the page. Press Enter after that and the app receives nothing.
+
+S87 concluded "pressing Enter ticks nothing, the (keyup.enter) binding
+is broken" and wrote two hypotheses into NOW off the back of it. S90
+spent most of a session investigating. The binding was never broken.
+Clicking the field first and pressing Enter ticked correctly on the
+first attempt.
+
+⚠ THE RULE: before reporting that a keystroke does nothing, state where
+  the focus was. If the answer involves having clicked DevTools first,
+  the test is void. Re-run it with the cursor visibly in the field and
+  nothing clicked in between.
+
+⚠ THE WIDER SHAPE: a negative observation ("nothing happened") is only
+  evidence if the setup could have produced a positive one.
+```
+
+---
+
+## JT — AN ABSENT CONSOLE LOG IS NOT EVIDENCE OF ANYTHING
+
+```
+Through all of S90 the diagnostic console.log inside onScan NEVER
+PRINTED — not once — while onScan demonstrably ran and ticked rows.
+
+This was not a stale build. DevTools Search proved the string present in
+the chunk the browser had actually loaded:
+  9576.1fe196695fc02a9c.js   served from dev.mintekfoodsafety.com
+  do-list.component.ts:153   via sourcemap
+Cause never established.
+
+NOW ALSO CARRIED A FALSE CLAIM built on this: "DoListComponent logs on
+open at line ~44". It does not, or the log is never reached. That claim
+became a DECISION RULE in the handover ("if nothing appears on open, the
+browser is not running the deployed chunk") and nearly sent S90 chasing a
+caching problem that did not exist.
+
+⚠ THE RULE: do not build a decision rule on a log line nobody has
+  watched appear. Verify the log fires before treating its absence as a
+  signal.
+```
+
+---
+
+## JT — A BARCODE THAT OVERRUNS THE LABEL PRINTS INVALID, NOT FAINT
+
+```
+ZPL draws the barcode from ^FO<x> at module width ^BY<n>. Nothing warns
+when the result runs past the label edge — it simply prints as far as
+the media goes and the tail is gone. Losing the stop pattern makes the
+symbol INVALID, so a scanner will not beep at all. Silence reads exactly
+like a dead scanner, a flat battery, or a disabled symbology.
+
+⚠ THE ARITHMETIC, on a 4x4 label at 203 dpi = 812 dots:
+    Code 128 packs DIGIT PAIRS two-to-a-symbol, but any letter or dash
+    forces one module per character.
+      "260530"       6 digits       ~68 modules  x BY4 = ~272 dots
+      "Pdt-260718-1" 12 alphanum   ~167 modules  x BY4 = ~668 dots
+    Same ^BY, same printer, nearly 2.5x the width. At ^FO256 the second
+    one ends around 924 — off the label.
+
+⚠ THE TELL: the barcode sits visibly off-centre, with a large margin on
+  one side and none on the other. Check ^FO + estimated width against
+  the media width BEFORE blaming hardware.
+
+⚠ WHAT WAS WRONGLY BLAMED FIRST, in order: the scanner, print quality,
+  a disabled symbology, a changed scanner config, and app code. All
+  wrong. The content had grown; the layout had not.
+
+⚠ AND: a factory reset was advised on the scanner to fix this. It was
+  not the cause, and a reset WIPES any custom configuration the unit was
+  carrying. Do not reset a working scanner to chase a barcode fault.
+```
+
+---
+
+## JT — CLAUDE MAPPING COMMITS TO SESSIONS FROM MEMORY
+
+```
+S90 opened by asserting that backend HEAD 13e3fcd was an S84-era commit,
+and reasoned from there that NEITHER BOX carried 44759a9 — the P53
+cancel-packing-slip fix — on a live-client box. Stated with more
+confidence than it deserved.
+
+git log settled it in one command: 13e3fcd is S86 P56, with 44759a9
+directly beneath it. Both boxes were correct and always had been.
+
+⚠ THE RULE: a commit's session, purpose or ordering is a FACT ON THE
+  BOX, not a recollection. Read git log before building any argument on
+  which commit is which — especially before saying something is missing
+  from prod.
+```
+
+---
+
+## RULES CORRECTION OWED (→ P68)
+
+```
+The OPEN block restored in S87 cannot be pasted. Its prose sits inside
+the same fenced box as the commands, so the terminal receives
+"(Fuller version, plus the host check, lives in 3B.5.)" and dies with
+  zsh: parse error near `)'
+It also carries a bare `git status --short` with no -C, which from ~ on
+dev runs against no repository at all and reports nothing useful.
+
+REPLACE THE COMMAND LIST WITH:
+
+  git -C ~/abletrace-lab-frontend rev-parse --short HEAD
+  git -C ~/abletrace-lab-backend rev-parse --short HEAD
+  git -C ~/abletrace-lab-frontend status --short
+  git -C ~/abletrace-lab-backend status --short
+  pm2 status
+  curl -s -o /dev/null -w "%{http_code}\n" localhost:1337
+
+and keep every warning line OUTSIDE the fenced command block.
+```
