@@ -8,19 +8,26 @@ The only file that changes each session.
 ## HANDOVER
 
 ```
-THE GOAL      Scan-to-select is DONE and proven end to end, typed and
-              scanned. What remains is cleanup: strip the S87 diagnostic
-              logging (P63) so the feature can be called finished, then
-              decide on promotion.
+THE GOAL      MINTY'S RANKING: P73 then P74 then P63. The first two
+              are the ones that reach clients. Scan-to-select is DONE
+              and proven; its cleanup waits.
 
-PASTE LIST    RULES.md + NOW.md. Add TRAPS.md if debugging deepens.
-              3B only if a deploy or a printer misbehaves.
+PASTE LIST    RULES.md + NOW.md + TRAPS.md. Add 3B — 3B.7 covers the
+              printer and Browser Print, 3B.6 covers the certs.
 
-FIRST TWO     1  Strip the four console.log lines from onScan
-ACTIONS          (do-list.component.ts ~line 153). Commit, build,
-                 promote to dev, verify scan still ticks.
-              2  Then P58 (dev remotes lost the PAT — pushes prompt for
-                 a password every time. Minutes to fix).
+FIRST THREE   1  P73 PRINT ROBUSTNESS. Minty's words: clients will not
+ACTIONS          be able to handle what he was walked through twice in
+                 S90. Decide the setup track vs the code track.
+                 ⚠ TWO things were changed before printing worked and
+                 WHICH ONE FIXED IT IS NOT KNOWN. Do not record a cause
+                 without testing it.
+              2  P74 CERTS. ⚠ The live-account piece is that PROD
+                 CERTBOT HAS NO REGISTERED EMAIL — no renewal warning
+                 will ever arrive, cert good to 17 Oct. Dev's "Not
+                 Secure" is cosmetic beside it; prod itself is clean.
+              3  P63 CLEANUP. Strip the four console.log lines from
+                 onScan (do-list.component.ts ~line 153). Only then can
+                 the stack be considered for promotion.
 
 ⚠ CLEANUP     734f3305 is DIAGNOSTIC ONLY (P63) and 822fa248 SITS ON TOP
 OWED          OF IT. Nothing in this stack goes to prod until the
