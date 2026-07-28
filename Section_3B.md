@@ -281,11 +281,17 @@ FULL DUMP   /home/ubuntu/abletrace-pre-upgrade-20260701.sql (116 MB,
 ```
 1  BUILD      GitHub Actions. .github/workflows/build-frontend.yml,
               IN GIT (commit 1bf26deb), frontend repo.
-              A PUSH to main auto-builds PROD.
+              ⚠ A PUSH to main auto-builds DEV, NOT PROD. Corrected
+              S91 (P75). Settled by artifact name three times: a push
+              produces dist-dev-<sha>. The earlier claim in this block
+              was wrong and had stood for an unknown number of sessions.
+              PROD REQUIRES A MANUAL DISPATCH with target=prod.
               A MANUAL DISPATCH takes a `target` input (prod|dev).
               Runner ~7 GB RAM, Node pinned 18,
               NODE_OPTIONS=--max-old-space-size=4096. ~9 min.
               Artifact name: dist-<target>-<sha>
+              ⚠ <sha> IS THE FULL 40-CHARACTER SHA, not the short form.
+              e.g. dist-prod-275c025039d77a3b88b6e5e1b5671108d33d389a
 
 2  PROMOTE    ~/promote.sh ON THE MAC.
               Usage:  ~/promote.sh <artifact.zip> <dev|prod>
@@ -336,12 +342,16 @@ curl -s -o /dev/null -w "%{http_code}\n" localhost:1337    → expect 200
 Every deploy leaves /home/ubuntu/www-html.bak-<label>. Restore by
 copying it back over /var/www/html.
 
-CURRENT ROLLBACK POINTS:
-  www-html.bak-prod-53db203d4ef4
-  www-html.bak-dev-53db203d4ef4
+CURRENT ROLLBACK POINTS (S91):
+  www-html.bak-prod-275c025039d7
+  www-html.bak-dev-275c025039d7
+⚠ A BACKUP DIRECTORY HOLDS THE BUILD THAT WAS REPLACED, NOT THE ONE IT
+  IS NAMED AFTER. See TRAPS. The newest backup name tells you what is
+  CURRENTLY SERVED — the only reliable way to read that.
 
 ⚠ PROD'S FRONTEND GIT CHECKOUT LAGS THE SERVED BUILD. It reads
-  9bce0238 while prod SERVES 53db203d. The deploy swaps built files
+  9bce0238 and has for a long time; prod SERVES whatever was last
+  promoted (prod-275c025039d7 as of S91). The deploy swaps built files
   into /var/www/html; the git checkout is not what is served.
   ⚠ READING A FILE FROM PROD'S CHECKOUT SHOWS CODE THAT IS NOT LIVE.
   This caused a stale read in S70. Cosmetic to fix (a git pull tidies
@@ -428,11 +438,16 @@ DEV    Let's Encrypt via certbot (snap install --classic certbot).
          -m info@abletrace.ca --agree-tos --no-eff-email --redirect
        Auto-renew scheduled. Files under
        /etc/letsencrypt/live/dev.mintekfoodsafety.com/
-       ⚠ Registered WITH an email so renewal warnings arrive.
+       ⚠ Registered WITH an email — but this is now WORTHLESS.
+       See the PROD note below and P74.
 
-PROD   ⚠ REGISTERED WITH NO EMAIL. Confirmed via
-       `sudo certbot show_account` → "Email contact: none".
-       ⚠ SO PROD GETS NO RENEWAL WARNINGS. Worth fixing.
+PROD   ⚠ NO EMAIL REGISTERED — AND IT NO LONGER MATTERS.
+       LET'S ENCRYPT ENDED EXPIRATION NOTIFICATION EMAILS ON
+       4 JUNE 2025 and no longer stores contact addresses at all.
+       S91 tried: HTTP 200 returned, NOTHING STORED. See TRAPS.
+       ⚠ SO NEITHER BOX GETS RENEWAL WARNINGS, AND NO EMAIL SETTING
+       CAN CHANGE THAT. The real risk — silent renewal failure with
+       nothing watching — needs MONITORING, not an address. → P74
 ```
 
 ### THE FUTURE MOVE — app.abletrace.ca
@@ -506,8 +521,16 @@ ZEBRA       Zebra ZT230-203dpi ZPL · Serial 52N224501603 · USB via hub.
             Driver: Zebra Browser Print (Mac), https://localhost:9101
             (test /available). Label 4"x4" (812x812 @203dpi), Code128,
             CI27.
-            ⚠ A Java process may occupy port 9100 on Mac startup and
-            block Browser Print → sudo lsof -i :9100, kill, reopen.
+            ⚠ THE "java" PROCESS ON 9100 IS BROWSER PRINT ITSELF.
+            It bundles its own JRE and holds BOTH 9100 and 9101 under
+            one pid. DO NOT KILL IT AS AN INTRUDER — the previous text
+            here said exactly that and was BACKWARDS (corrected S91,
+            P76). Confirm with ps -p <pid> -o command=.
+            ⚠ NEVER add the Zebra in System Settings > Printers &
+            Scanners. Labels do not go through macOS and adding it can
+            compete for the USB device. → P77
+            ⚠ The https certificate is generated LOCALLY at install and
+            must be accepted PER BROWSER and PER USER. See TRAPS.
 ```
 
 ---

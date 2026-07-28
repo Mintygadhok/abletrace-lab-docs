@@ -1,6 +1,6 @@
 # NOW
 
-Last rewritten: S90, 27 July 2026.
+Last rewritten: S91, 28 July 2026.
 The only file that changes each session.
 
 ---
@@ -8,98 +8,115 @@ The only file that changes each session.
 ## HANDOVER
 
 ```
-THE GOAL      MINTY'S RANKING: P73 then P74 then P63. The first two
-              are the ones that reach clients. Scan-to-select is DONE
-              and proven; its cleanup waits.
+THE GOAL      MINTY'S RANKING, SET S91: PRINTER first — finish the
+              client instructions, Mac then Windows, then into the
+              help-guides set. ACROBATICS second — the units/Kg divide
+              sweep. Everything else is below the line.
 
-PASTE LIST    RULES.md + NOW.md + TRAPS.md. Add 3B — 3B.7 covers the
-              printer and Browser Print, 3B.6 covers the certs.
+PASTE LIST    RULES.md + NOW.md + TRAPS.md + Section_3B.md
+              PLUS the two S91 files, which live outside git until
+              committed:
+                zebra-printer-setup-mac.md   client procedure + tests
+                S92-opening-note.md          the brief
+              ⚠ IF THOSE TWO WERE NOT SAVED, THE PRINTER WORK IS GONE.
 
-FIRST THREE   1  P73 PRINT ROBUSTNESS. Minty's words: clients will not
-ACTIONS          be able to handle what he was walked through twice in
-                 S90. Decide the setup track vs the code track.
-                 ⚠ TWO things were changed before printing worked and
-                 WHICH ONE FIXED IT IS NOT KNOWN. Do not record a cause
-                 without testing it.
-              2  P74 CERTS. ⚠ The live-account piece is that PROD
-                 CERTBOT HAS NO REGISTERED EMAIL — no renewal warning
-                 will ever arrive, cert good to 17 Oct. Dev's "Not
-                 Secure" is cosmetic beside it; prod itself is clean.
-              3  P63 CLEANUP. Strip the four console.log lines from
-                 onScan (do-list.component.ts ~line 153). Only then can
-                 the stack be considered for promotion.
+FIRST THREE   1  Confirm the two S91 files exist. Commit them into the
+ACTIONS          docs repo so they stop living in a chat.
+              2  PRINTER. Fold in the second-Mac results if Minty has
+                 run them. The one answer that changes the document is
+                 COLD BOOT BLINDNESS — see below.
+              3  ACROBATICS. Commit the map off dev FIRST (it sits in
+                 /home/ubuntu, which is not backed up — P16), then
+                 scope from it.
 
-⚠ CLEANUP     734f3305 is DIAGNOSTIC ONLY (P63) and 822fa248 SITS ON TOP
-OWED          OF IT. Nothing in this stack goes to prod until the
-              logging is out.
+⚠ RULES OPEN  Still not pasteable (P68, carried again). Use the
+BLOCK         corrected six commands at the FOOT OF TRAPS.md.
 ```
 
 ---
 
-## THE SCAN WORK — DONE, pending cleanup
+## THE PRINTER — S91's main work
 
 ```
-⚠ S87's FINDING WAS AN ARTIFACT. "Pressing Enter ticks nothing" was
-  almost certainly tested with focus in DevTools, not in the Search box.
-  The binding was never broken. A whole session was nearly spent fixing
-  a working feature. → TRAPS.
+THE CHAIN     browser → Browser Print → printer over USB.
+              macOS IS NOT IN IT. The Zebra does not appear in
+              Printers & Scanners and MUST NOT be added. → P77
 
-VERIFIED      Typed: filter narrows, Enter ticks every row matching the
-S90, ON DEV   lot code within one address, other lots untouched.
-              MOVE TO PACKING SLIP appears. Three DOs (DO-0010, DO-0011,
-              DO-0012) moved onto PS-0026, saved, and confirmed on a
-              SERVER-LOADED list — not browser state.
-              Scanned: same route as manual click. Confirmed by Minty.
+PROVEN S91, ON THE BOX. Do not re-derive.
 
-NOT TESTED    The address lock. Every DO tested sat at the same address
-              (Jade 3, ITC RATNADIPA). Per the frozen spec only the
-              FIRST selection was changed, so cross-address behaviour is
-              not built and was never exercised. Not evidence either way.
+· The certificate is the WHOLE barrier. Accepting it took Safari from
+  "cannot connect" to working, nothing else touched.
+· The exception is PER BROWSER and PER USER ACCOUNT. No admin password.
+  Chrome working does nothing for Safari. → TRAPS
+· It SURVIVES a full browser quit, and survives a restart.
+· Auto-start works. LaunchAgent ~/Library/LaunchAgents/
+  com.zebra.browserprint.plist, RunAtLoad true. Confirmed by restart —
+  fresh PIDs, nothing opened by hand.
+· ⚠ NO KeepAlive. Dies mid-shift → stays dead until next login.
+  Proven: killed it, it stayed dead.
+· ⚠ ~40 SECONDS after login before it answers. Login 10:08:37, java
+  process 10:09:16. Printing fails in that window with nothing wrong.
+· The certificate is GENERATED LOCALLY at install, NOT shipped by
+  Zebra. App bundle built Feb 2023; certificate issued 30 May 2026, the
+  SAME SECOND as the LaunchAgent file. → P78 CLOSED, safe to trust
+  machine-wide if ever needed.
+· ⚠ REINSTALL OR UPGRADE makes a new certificate — every browser
+  exception on that machine breaks at once. → TRAPS
+· Version 1.3.2.489. Fingerprint on Minty's Mac:
+  65:BA:58:3E:1D:71:75:64:D4:C2:D9:A9:3F:33:B6:50:
+  A7:2C:11:12:BB:8A:1E:01:CA:4E:AB:39:07:A8:B1:C9
 
-⚠ UNEXPLAINED The diagnostic console.log NEVER PRINTED, all session,
-              even though onScan demonstrably ran and the string was
-              proven present in the loaded chunk (DevTools Search found
-              it in 9576.1fe196695fc02a9c.js AND do-list.component.ts
-              line 153). Dies with P63, but it is why S87 read the
-              situation wrong. → TRAPS.
+⚠ COLD BOOT BLINDNESS — SEEN ONCE, UNEXPLAINED, THE OPEN QUESTION.
+  After a FULL RESTART, Browser Print came up RUNNING BUT BLIND: it
+  returned {} while macOS listed the printer perfectly (system_profiler
+  showed manufacturer, model, ZPL, drawing power). A manual relaunch
+  fixed it instantly.
+  ⚠ A LOGOUT/LOGIN did NOT reproduce it — printer seen normally.
+  ⚠ Once running it DOES track unplug and replug with no relaunch,
+  proven by cable pull. So the fault is in how it STARTS, not in
+  rescanning.
+  ⚠ DO NOT WRITE A CAUSE. The USB-not-ready-at-boot idea is a
+  hypothesis and nothing more. Minty's Zebra sits behind an Apple
+  USB-C Multiport Adapter — if the second Mac connects DIRECT and this
+  does not reproduce, the hub is the suspect.
+
+⚠ NEVER WALKED FROM NOTHING. Minty's copy was RECONFIGURED 30 MAY 2026
+  — an event that appears NOWHERE in the record. Install steps have
+  never been tested from a clean machine. That is what the second Mac
+  is for.
+
+⚠ CORRECTION OWED TO S90'S READING. S90 recorded that two things were
+  changed before printing worked and the cause was unknown. Settled
+  S91: the port-9100 kill was NOT it — that process IS Browser Print
+  (→ TRAPS). The certificate was the barrier. BUT the kill-and-reopen
+  was probably not useless either: it would have cleared an empty
+  device list. TWO faults, one fix each.
 ```
 
 ---
 
-## THE LABEL BARCODE — fixed this session
+## COMMITS — S91, frontend, DEV AND PROD
 
 ```
-THE FAULT     The product label's Code 128 stopped scanning. Not print
-              quality, not the scanner, not a config change.
-              ^FO256,210^BY4,3,160^BCN — the barcode STARTED 256 dots in.
-              Old content "260530" = 6 digits, Code 128 packs digit pairs
-              two-to-a-symbol, ~272 dots wide. Ends at 528, inside 812.
-              New content "Pdt-260718-1" = 12 chars, letters and dashes
-              force one module each, ~668 dots. Starts at 256, would end
-              at ~924 — PAST THE 812-DOT LABEL EDGE.
-              A Code 128 missing its stop pattern is not faint, it is
-              INVALID. The scanner never beeped because it never
-              decoded. → TRAPS.
+275c0250   P63. Revert of 734f3305 — the four S87 diagnostic
+           console.log lines out of onScan. One file, 11 deletions,
+           clean revert, no conflict (822fa248 touched a different
+           file). Verified: only the line-133 COMMENT survives, and
+           the five other console.log lines in that file are
+           PRE-EXISTING, unchanged before and after → P79.
 
-THE FIX       ^FO72 — (812 − 668) / 2 = 72, centred. ^BY4 unchanged,
-              content unchanged, onScan unchanged.
-              Commit 822fa248. Printed, verified, scans.
-
-⚠ NOT DONE    The MATERIAL lot label is a SEPARATE template
-              (print-label.component.ts, received-lots). A material lot
-              code like Mat-260703-13 has the same 12-ish alphanumeric
-              shape and is probably heading for the same truncation.
-              → P71.
-```
-
----
-
-## COMMITS — S90, frontend, DEV ONLY, prod untouched
-
-```
-822fa248   P72. Product label barcode origin ^FO256 → ^FO72. Centres a
-           12-char Code 128 that was running off the label edge.
-           ⚠ Sits on top of 734f3305 (diagnostic). Not prod-safe yet.
+PROMOTED   dev  serving dev-275c025039d7
+           prod serving prod-275c025039d7   ⚠ GLUTENULL IS ON THIS
+           Scan-to-select verified on dev by SCANNER after the rebuild;
+           DO-0010 and DO-0011 both moved on one scan, quantity read
+           1# (1.39 Kg) on the non-1:1 fixture (R1 intact).
+           Prod verified: accounts open, app loads.
+           ⚠ P72 (barcode fix, 822fa248) AND P7 scan-to-select
+           (26123e0a) BOTH REACHED PROD IN THIS PROMOTE. They could not
+           be separated — prod was four commits behind.
+           ⚠ THE ADDRESS LOCK IS STILL UNTESTED and is now on a live
+           client. It only fires if someone SCANS in that popup;
+           clicking is the unchanged path.
 ```
 
 ---
@@ -107,22 +124,75 @@ THE FIX       ^FO72 — (812 − 668) / 2 = 72, centred. ^BY4 unchanged,
 ## STATE
 
 ```
-DEV       16.55.10.205 · pm2 abletrace-dev (33 restarts)
-          frontend HEAD 822fa248, serving dev-822fa2484d75
+DEV       16.55.10.205 · pm2 abletrace-dev
+          frontend HEAD 275c0250, serving dev-275c025039d7
           backend HEAD 13e3fcd
-          Rollback: sudo rm -rf /var/www/html/* && sudo cp -r \
-            /home/ubuntu/www-html.bak-dev-822fa2484d75/* /var/www/html/
+          Rollback: /home/ubuntu/www-html.bak-dev-275c025039d7
 PROD      15.157.38.101 · pm2 abletrace-backend (336 restarts) · Glutenull
-          backend HEAD 13e3fcd — IDENTICAL TO DEV, verified S90
-          frontend checkout 9bce0238 (NOT READ — checkout lags the bundle)
-          NOT TOUCHED IN S90
+          backend HEAD 13e3fcd — identical to dev
+          SERVING prod-275c025039d7
+          Rollback: /home/ubuntu/www-html.bak-prod-275c025039d7
+          ⚠ THAT BACKUP HOLDS THE OLD BUILD, NOT THE NEW ONE. The
+          backup is named after the build that REPLACED it. → TRAPS
+          ⚠ Prod was found serving 8997acdcf4ab from 26 JULY — a deploy
+          NO DOCUMENT RECORDED. Discovered only by reading the backup
+          directory. → P81
+CERTS     trace expires 17 Oct 2026 · dev 9 Oct 2026 · certbot timer
+          healthy, ran 11h before S91 close, next in ~2h.
+          ⚠ SEE P74 — THE OLD FRAMING WAS WRONG.
 DOCS      Mintygadhok/abletrace-lab-docs
-          ⚠ The docs-HEAD line was REMOVED. It can never be correct —
-          any commit that writes the current HEAD into NOW becomes a new
-          HEAD the moment it lands. Do not reinstate it.
-CERTS     trace expires 17 Oct 2026 · dev 9 Oct 2026. certbot clean.
-          ⚠ PROD CERTBOT HAS NO REGISTERED EMAIL — no renewal warnings
-          will ever arrive. Live client. → P74.
+ACROBATICS MAP
+          /home/ubuntu/acrobatics-map-S91.txt ON DEV. 157 lines.
+          ⚠ NOT BACKED UP (P16). COMMIT IT EARLY IN S92.
+```
+
+---
+
+## THE ACROBATICS SWEEP — recovered, re-entered as P82
+
+```
+⚠ THIS ITEM WAS LOST IN THE S74–S79 DOC RESTRUCTURE. It ran across
+  S40–S43 as P1b, "finish the batch_qty display-tail sweep", and is
+  absent from every current document. Recovered S91 by searching past
+  sessions. Minty's #2 priority.
+
+THE MAP       48 files, 154 hits: frontend .ts + .html + backend api.
+              Full list in the map file on dev.
+
+⚠ 48 FILES IS THE SEARCH SPACE, NOT THE DEFECT COUNT. Reading
+  wgt_kgs_per_unit is CORRECT wherever Kg is derived (units × weight =
+  R1). Only DIVISION is suspect, and only where the divided field is
+  units-stored.
+
+⚠ 14 HTML FILES carry it. Templates were suspected in S41 and NEVER
+  CHECKED. Most likely place for survivors.
+⚠ BACKEND api: only 1 hit — but S43 proved real bugs lived in DB VIEWS
+  AND STORED PROCS, which no file grep reaches. Needs the temp .my.cnf
+  (3B.3).
+
+TOP FILES     13  edit-formulation.component.ts  ← probably legitimate,
+                  it is where per-unit weight is set. Confirm and strike
+                  it off EARLY so it stops distorting the estimate.
+               6  edit-mlc · edit-packslips · add-new-formulation
+               5  select-material · mlo-list(.ts+.html) ·
+                  edit-quantity-info · add-dispatch-v2 ·
+                  production-controller · admin-formulation
+               4  add-dispatch · mfg-lot-codes · receive-product ·
+                  product-traceability · material-traceability-details ·
+                  start-mlc · edit-sales-order · mlo-management ·
+                  edit-mlo · add-mlo.component.html
+
+⚠ TWO PATTERNS (S41) — the judgment that cannot be greped:
+  PATTERN X   qty / wgt                             → bug if units-stored
+  PATTERN Y   (qty / batch_qty) × (batch_qty / wgt) → batch_qty cancels
+  ⚠ S43 DISPROVED "the rest are all Pattern Y". It found real bugs in
+    the lot-code list path AND in a stored proc. VERIFY EACH ON SCREEN.
+    DO NOT BLANKET-EDIT.
+
+RELATED       add-mlo appears in both .ts and .html, and add-mlo.ts:204-205
+              IS DEFECT 1 (stores 50.004 instead of 50). Likely the same
+              problem. The three open defects below belong to this
+              family and should be scoped together.
 ```
 
 ---
@@ -135,82 +205,92 @@ with the next free number. Claude never renumbers.
 ```
 P20   Delete pre-S72 Section J file.
 P22   Delete old Section A file.
-P42   Section 5 restructure. Largely superseded by the S87 doc
-      conversion. Minty to confirm closed — but see P67 first.
-P58   Dev remotes do not carry the PAT. Prompted for a password AGAIN in
-      S90. ▶ Reset both remote URLs. Minutes.
-P59   Prod pm2 restart counter reads 336 against dev's 33. ▶ One look at
-      pm2 describe abletrace-backend. Still not a reading of WHY.
+P42   Section 5 restructure. Minty to confirm closed — see P67 first.
+P58   ⚠ FIRED TWICE MORE IN S91. Dev remotes still prompt for the PAT.
+      ▶ Reset both remote URLs. Minutes. Worth ranking up — it costs a
+      manual paste at exactly the wrong moment every time.
+P59   Prod pm2 restart counter 336 vs dev's 33. Still not read.
 P60   DO picker popup HEADING never renamed. Last remnant of P7.
-P62   qty_shipped must never be NULL. Count NULLs both boxes, heal to 0,
+P62   qty_shipped must never be NULL. Count both boxes, heal to 0,
       ALTER NOT NULL DEFAULT 0, check the Waterline model, and check
-      soproducts.quanity_shipped_to_date and packingslipdos.shipped_qty
-      while the SQL is open.
-P63   ⚠ NEXT ACTION. Remove the S87 diagnostic logging (734f3305).
-      Blocks calling scan-to-select done and blocks any promotion.
+      soproducts.quanity_shipped_to_date and packingslipdos.shipped_qty.
+P63   ✅ CLOSED S91. Diagnostic logging out (275c0250), built,
+      promoted to dev AND prod, verified by scanner.
 P64   Product label prints the string "null" for Ext ID, twice.
-      CONFIRMED S90 on a physical printed label. Customer-facing.
-P65   promote.sh runs plain scp and ssh with no -4, but 3B.2 says dev
-      always needs -4. Works today only because the Mac resolves v4.
-P66   ✅ CLOSED S90. SETTLED BY ARTIFACT NAME. A push to main builds
-      DEV, not prod — run #33 produced dist-dev-822fa248…. 3B.4's claim
-      that a push auto-builds PROD is WRONG and needs correcting.
-      Also: the artifact carries the FULL 40-char SHA, not the short
-      form 3B.4 implies.
-P67   ⚠ SECTION 5 CANNOT BE DELETED YET. Before any old section is
-      removed, the JR REBUILD BLOCK and the RECONCILE ORACLE SQL must be
-      extracted to a permanent home. P20, P22 and P42 all wait on this.
-P68   The OPEN block in RULES IS NOT PASTEABLE. Its prose sits inside
-      the same fenced box as the commands, so pasting it sends zsh a
-      line of bare parentheses → "parse error near )". It also carries a
-      bare `git status --short` with no -C, which from ~ on dev runs
-      against no repo at all. ▶ Fix in RULES: commands only, -C on both
-      repos. (Corrected text is in TRAPS.)
-P69   The DO popup search box CLEARS ITSELF after Enter. NOW previously
-      listed a self-clearing search box under PARKED — deliberately not
-      built. Either it exists and the record is wrong, or something else
-      resets the field. Seen twice in S90. Cosmetic; unexplained.
-P70   ✅ CLOSED S90. The scanner works. The DS2208 reads and transmits
-      with an Enter terminator, verified into Excel and into the app.
-      Every earlier "scanner broken" reading was the TRUNCATED BARCODE.
-P71   Material lot label barcode (print-label.component.ts, received-
-      lots) has NOT been checked for the same truncation as P72. A
-      Mat-YYMMDD-N code is the same alphanumeric length. ▶ Read its
-      ^FO/^BY, do the arithmetic against 812.
-P72   ✅ CLOSED S90. Product label barcode centred (822fa248).
-P73   PRINT IS NOT ROBUST ENOUGH FOR CLIENTS. Failed twice in S90 with
-      "Print failed: Failed to fetch" — the browser could not reach
-      Zebra Browser Print at https://localhost:9101.
-      ⚠ TWO THINGS WERE CHANGED BEFORE IT WORKED (killed a java process
-      holding port 9100, AND loaded localhost:9101 to accept its
-      certificate). WHICH ONE FIXED IT IS NOT KNOWN. Do not record a
-      cause without testing.
-      Two tracks: (a) per-machine setup — trust the Browser Print cert
-      in the keychain, set it to launch at login; (b) app side — probe
-      the connection before enabling Print, and replace "Failed to
-      fetch" with an operator-readable message. Minty's call which.
-P74   CERT / "NOT SECURE" HYGIENE.
-      ⚠ PROD IS FINE — trace.mintekfoodsafety.com shows the normal
-      secure icon, verified S90. The live client does not see this.
-      DEV shows "Not Secure" on /login, so dev is being served over
-      plain http even though certbot ran with --redirect.
-      ▶ curl -I http://dev.mintekfoodsafety.com — a 301 means the
-      redirect works and it is the bookmark; anything else means the dev
-      vhost lost its redirect block.
-      ⚠ SEPARATE AND MORE IMPORTANT: prod's certbot has NO REGISTERED
-      EMAIL (3B.6), so no renewal warning will ever arrive. Cert is good
-      to 17 Oct. A silent expiry on a live client is the real risk here.
+      CONFIRMED S90 on a physical label. Customer-facing. ⚠ NOW ON PROD.
+P65   promote.sh runs plain scp and ssh with no -4. Works today only
+      because the Mac resolves v4.
+P66   ✅ CLOSED S90. Confirmed a third time S91.
+P67   ⚠ SECTION 5 CANNOT BE DELETED YET. JR REBUILD BLOCK and the
+      RECONCILE ORACLE SQL must be extracted first. P20, P22, P42 wait.
+P68   ⚠ STILL OPEN, CARRIED FROM S91. The OPEN block in RULES is not
+      pasteable. Corrected text is at the foot of TRAPS.
+P69   DO popup search box clears itself after Enter. Cosmetic,
+      unexplained.
+P70   ✅ CLOSED S90.
+P71   Material lot label barcode (print-label.component.ts,
+      received-lots) NOT checked for the same truncation as P72.
+      ▶ Read its ^FO/^BY, do the arithmetic against 812.
+P72   ✅ CLOSED S91. On prod in prod-275c025039d7.
+P73   ⚠ THE PRINTER. Client instructions, Mac drafted, Windows not.
+      MINTY'S #1. Blocked on the second-Mac test and on seeing an
+      existing help guide. Details above and in
+      zebra-printer-setup-mac.md.
+P74   ⚠ REWRITTEN S91 — THE OLD FRAMING WAS WRONG.
+      NOT "prod certbot has no email". LET'S ENCRYPT ENDED EXPIRATION
+      NOTIFICATION EMAILS ON 4 JUNE 2025 and no longer stores contact
+      addresses at all. S91 registered info@abletrace.ca on prod:
+      HTTP 200 returned AND NOTHING STORED — the account object came
+      back with no contact field. No email will ever arrive, for
+      anyone, on either box. Dev's registered address is equally
+      worthless. → TRAPS
+      ⚠ THE REAL RISK IS UNCHANGED: if renewal fails, nothing tells
+      you. Cert good to 17 OCTOBER 2026. PARKED BY MINTY, with that as
+      the deadline.
+      ▶ FIX IS MONITORING. External service (Let's Encrypt points at
+      Red Sift Certificates Lite, free to 250 certs) or an own daily
+      check. ⚠ If own check: SES swallows send errors silently (3B.7),
+      so a failed warning looks like no warning needed — send WEEKLY
+      regardless so silence is itself the alarm. ⚠ And a cron/systemd
+      job is HOST territory: prod 26.04 vs dev 24.04, so dev is NOT a
+      rehearsal (3B.2).
+      ✅ THE OTHER HALF IS CLOSED. Dev "Not Secure" is NOT a server
+      fault — curl -I http://dev.mintekfoodsafety.com returns 301. It
+      is the BOOKMARK pointing at http://.
+P75   ✅ CLOSED S91. 3B.4 corrected — a push builds DEV, and the
+      artifact carries the full 40-char SHA.
+P76   ✅ CLOSED S91. 3B.7 corrected — the java process on 9100 IS
+      Browser Print.
+P77   Never add the Zebra in Printers & Scanners. Belongs in the client
+      procedure and in 3B.7. Recorded S91.
+P78   ✅ CLOSED S91. Certificate generated locally, not shipped.
+P79   Five PRE-EXISTING console.log lines in do-list.component.ts
+      (44, 175 commented, 193, 217, 240). Unrelated to the S87
+      diagnostic, unchanged before and after it, already on prod.
+      ⚠ Line 44 is the log NOW's old false claim was built on.
+P80   CI warns Node.js 20 is deprecated and actions are forced onto
+      Node 24. Green today, future break.
+P81   ⚠ THE RECORD NEVER STATED WHAT PROD SERVES. Only the checkout,
+      which lags. Prod was found on 8997acdcf4ab from 26 July — an
+      unrecorded deploy. ▶ Keep the SERVED build in STATE every
+      session, and read it from the backup directory, not the checkout.
+P82   ⚠ THE ACROBATICS SWEEP. Recovered S91, was P1b in S40–S43, lost in
+      the doc restructure. MINTY'S #2. Full scope above.
+P83   Angular core.mjs regex error in the console on /Create-Packslips
+      ("Pattern attribute value ... is not a valid regular expression").
+      Framework-level, pre-existing, not application code. Cosmetic.
 
 DEFERRED — on dev, not promoted
       Licence banner shows on all role tabs. isAdmin stays true when the
       user holds an Admin role among several. Fix: gate the *ngIf on
-      selectedRole===2. Commits dfbadbb0 and 277b2491, dev only.
+      selectedRole===2. Commits dfbadbb0 and 277b2491.
+      ⚠ RE-CHECK: these may have ridden to prod inside
+      prod-275c025039d7. Confirm before assuming they are still dev-only.
 
-OPEN DEFECTS — diagnosed, not fixed
+OPEN DEFECTS — diagnosed, not fixed. ⚠ ALL THREE BELONG TO P82.
       MO create round-trips units through a rounded batches figure and
-      stores 50.004 instead of 50.
-      Display reconstructs units as Kg / weight, producing float garbage
-      on screen.
+      stores 50.004 instead of 50. (add-mlo.ts:204-205)
+      Display reconstructs units as Kg / weight, producing float garbage.
       Version fork copies qty (Kg) but writes ship_qty 0 for
       intermediates. Fix the fork handler in Formulations.js, then heal
       existing 0 rows. Do this BEFORE re-anchoring stock to units.
@@ -219,10 +299,10 @@ FROZEN SPEC — ready to build
       P52 printed packing slip: letterhead, stacked DO rows, Code 128
       barcode per unique Customer PO, Shipped By from
       finalShipmentUserId.
-      ⚠ QUESTION RAISED S90, NOT ANSWERED: the slip printed in S90
-      ALREADY carries letterhead, stacked DO rows and a Shipped By line.
+      ⚠ QUESTION RAISED S90, STILL NOT ANSWERED: the slip printed in S90
+      already carries letterhead, stacked DO rows and a Shipped By line.
       Either P52 was largely built and the record is stale, or that is a
-      different print. Minty to confirm — it changes what P52 means.
+      different print. Minty to confirm.
 ```
 
 ---
@@ -236,21 +316,23 @@ ONE ADDRESS   many DOs. Address is the invariant; lot code is only what
 
 FIRST SCAN    No address set. Filter to the scanned lot code, take the
               FIRST matching row's address (ascending DO order, so
-              oldest wins — FIFO, sort confirmed by Minty), then tick
-              every row matching that lot code AND that address.
+              oldest wins — FIFO, confirmed by Minty), then tick every
+              row matching that lot code AND that address.
 
 EVERY SCAN    Address already locked and the list already filtered to
 AFTER         it. Tick everything matching the scanned lot code within
-              that address. Nothing to decide.
+              that address.
 
 SCOPE         ⚠ Minty's call: change the FIRST selection only. Move to
               Packing Slip, Add Dispatch order and the round-trip
-              rhythm all stay as they are. Watch it in use first.
-              ⚠ S90: confirmed still the position. Scanning inside the
-              SECOND popup follows the manual click route, which is
-              correct behaviour, not a defect.
+              rhythm all stay as they are.
 
-PARKED        No-match message. Self-clearing search box (⚠ but see
-              P69 — it appears to clear anyway). Running count of
-              selected DOs. Deliberately not built.
+⚠ ON PROD     S91 promoted this to the live client. THE ADDRESS LOCK IS
+AND UNTESTED  STILL NOT EXERCISED — every DO ever tested sat at the same
+              address (Jade 3, ITC RATNADIPA). Cross-address behaviour
+              is not built and has never been seen. It only fires on a
+              SCAN; clicking is the unchanged path.
+
+PARKED        No-match message. Running count of selected DOs.
+              Deliberately not built.
 ```

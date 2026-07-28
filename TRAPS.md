@@ -248,3 +248,130 @@ REPLACE THE COMMAND LIST WITH:
 
 and keep every warning line OUTSIDE the fenced command block.
 ```
+
+---
+
+## JT — BROWSER PRINT IS THE JAVA PROCESS ON 9100. IT IS NOT AN INTRUDER.
+
+```
+Zebra Browser Print ships its own bundled Java runtime, so it appears in
+lsof and ps as "java" with no vendor name. IT HOLDS BOTH 9100 AND 9101,
+under ONE process id.
+
+  /Applications/Browser Print.app/Contents/MacOS/jre/bin/java
+
+⚠ 3B.7 SAID THE OPPOSITE for an unknown number of sessions — that a
+  Java process may occupy 9100 and block Browser Print, and should be
+  killed. That is BACKWARDS. Following it tells a client to kill their
+  own printer software. Corrected S91 (P76).
+
+⚠ WHAT IT COST: S90 killed that process and also accepted the browser
+  certificate, then could not tell which had fixed printing. S91 proved
+  the certificate was the barrier — but ALSO found the kill-and-reopen
+  probably fixed a SECOND, separate fault (an empty device list). Two
+  faults, one fix each, and the record had collapsed them into one
+  mystery.
+
+⚠ THE RULE: "a java process" names a RUNTIME, not a program. Read the
+  full path with  ps -p <pid> -o command=  before concluding anything
+  about what it is.
+```
+
+---
+
+## JT — A LOCALHOST CERTIFICATE IS TRUSTED PER BROWSER AND PER USER
+
+```
+Browser Print serves https on localhost with a SELF-SIGNED certificate
+it generates AT INSTALL on that machine. Browsers reject it by default.
+
+⚠ ACCEPTING IT IN ONE BROWSER DOES NOTHING FOR ANOTHER. Proven S91:
+  Chrome printed successfully while Safari, same machine, same moment,
+  same running helper, could not connect at all.
+⚠ IT IS ALSO PER USER ACCOUNT. Safari stored it with NO admin password,
+  so nothing was written machine-wide. A second login on the same Mac
+  starts from zero.
+⚠ IT SURVIVES a full browser quit AND a restart. So it is not fragile —
+  it is just narrow.
+⚠ REINSTALLING OR UPGRADING Browser Print GENERATES A NEW CERTIFICATE.
+  Every browser exception on that machine breaks at once, silently, and
+  the app shows only "Failed to fetch".
+
+⚠ WHY THE APP CANNOT DIAGNOSE IT: a browser that rejects a certificate
+  tells the page NOTHING, by design. Untrusted certificate, helper not
+  running, and helper never installed all produce the identical error.
+  The app can only list what to check.
+
+⚠ THE SEARCH RESULTS ARE WRONG ON THIS. Public setup guides say
+  accepting once "usually works in other browsers too". Disproven on the
+  box S91. Trust the machine over the guide.
+```
+
+---
+
+## JT — HTTP 200 IS NOT "ACCEPTED". READ WHAT CAME BACK.
+
+```
+S91 ran certbot update_account to put an email on prod's Let's Encrypt
+account. Certbot printed "Your e-mail address was updated". The server
+returned HTTP 200. BOTH WERE MISLEADING.
+
+The returned account object contained key, createdAt and status — AND NO
+CONTACT FIELD. Content-Length was 467 bytes before and after: identical.
+Nothing had changed. certbot show_account had been right all along and
+was talked past twice.
+
+CAUSE: LET'S ENCRYPT ENDED EXPIRATION NOTIFICATION EMAILS ON 4 JUNE 2025
+and no longer stores contact addresses. Their own community forum notes
+that Boulder still returns 200 while storing nothing.
+
+⚠ THE RULE: a success message from a client tool is the CLIENT's claim.
+  A 200 means the request was processed, not that it did what you asked.
+  Read the returned object. If the tool caches nothing locally (certbot's
+  regr.json body is {}), the log of the server's REPLY is the only truth.
+
+⚠ THE WIDER SHAPE: an assumption inherited from the documentation sent
+  40 minutes into a change that could never have worked. The docs said
+  the missing email was the risk. The conclusion was right; the mechanism
+  was wrong; the implied fix was impossible.
+```
+
+---
+
+## JT — THE DEPLOY BACKUP IS NAMED AFTER THE BUILD THAT REPLACED IT
+
+```
+deploy-frontend.sh backs up the CURRENT live directory to
+/home/ubuntu/www-html.bak-<label>, where <label> is the INCOMING build.
+
+  So  www-html.bak-prod-275c025039d7  contains the build that was live
+  BEFORE 275c025039d7 — NOT 275c025039d7 itself.
+
+⚠ THE ROLLBACK LINE THE SCRIPT PRINTS IS CORRECT, but reads as though
+  you are restoring TO the new build. Under pressure that inverts.
+
+⚠ THE USEFUL SIDE: the newest backup directory names the build you are
+  CURRENTLY serving. That is how S91 discovered prod had been running
+  8997acdcf4ab since 26 July — a deploy NO DOCUMENT RECORDED. The
+  record only ever carried the git checkout, which lags and means
+  nothing. → P81
+```
+
+---
+
+## JT — "NOT SECURE" HAS MORE THAN ONE CAUSE, AND NEITHER IS THE SERVER
+
+```
+Chased twice now, different cause each time, same wasted hunt.
+
+S87  A long-open tab held a CACHED security verdict. Certificates were
+     valid and http was redirecting on both boxes. Cmd+Q cleared it.
+S91  Dev showed "Not Secure" on /login. The vhost was FINE —
+     curl -I http://dev.mintekfoodsafety.com returned 301. The BOOKMARK
+     pointed at http://, so the chip appeared for the instant before
+     the redirect completed.
+
+⚠ THE RULE: before touching nginx or certbot, do two things — full-quit
+  the browser, and curl -I the http:// address. A 301 means the server
+  is doing its job and the fault is on the client side.
+
