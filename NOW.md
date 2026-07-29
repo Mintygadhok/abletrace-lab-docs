@@ -1,85 +1,185 @@
 # NOW
 
-Last rewritten: S87, 27 July 2026, 11:15.
+Last rewritten: S93, 29 July 2026.
 The only file that changes each session.
+
+⚠ THE S91 AND S92 REWRITES OF THIS FILE WERE NEVER COMMITTED. The repo
+  carried the S87 version until today. S93 opened by pasting it, and the
+  first stretch of the session went on working out which document to
+  believe. See TRAPS. The fix is in RULES now: NOW is committed AT close,
+  not downloaded and forgotten.
 
 ---
 
 ## HANDOVER
 
 ```
-⚠ FIRST JOB   RESTORE THE JR BLOCK. See P67. Claude told Minty to
-              delete Section_5.md this morning while converting the
-              docs. The JT traps were carried into TRAPS.md; the JR
-              REBUILD BLOCK WAS NOT. 3B.9 states JR is the ONLY record
-              of ~36 procs, 9 views, every column add, all seed data
-              and RDS config. It is recoverable from the docs repo git
-              history. Nothing else should start until it is back.
+THE GOAL      P82 THE ACROBATICS SWEEP is now a SHORT LIST, not a survey.
+              Phases 1, 2 and 3 are DONE. What remains is verification on
+              screen, then R5.
 
-THE GOAL      After that: finish scan-to-select. Typing a lot code
-              filters correctly. Pressing Enter does not tick.
+PASTE LIST    RULES.md + NOW.md + TRAPS.md.
+              Section 2 if any judgment about which fields are
+              units-stored is needed (GR7 is the oracle).
+              db-definitions-S93.txt for anything database-side.
 
-PASTE LIST    RULES.md + NOW.md. 3B only if a deploy misbehaves.
+FIRST THREE   1  Health check both boxes. Six corrected commands are in
+ACTIONS          TRAPS under RULES CORRECTION OWED. Expect dev 0b7ba967,
+                 prod SERVING prod-0b7ba96779ad, backends 13e3fcd.
+              2  Verify the dispatch-orders find on screen (P92). It is
+                 the only probable frontend BUG the sweep produced, and
+                 it needs a non-1:1 fixture.
+              3  Rule on R5 scope now that Phase 3 has sized it.
 
-FIRST THREE   1  Restore JR (P67).
-ACTIONS       2  Open the popup with the Console open. Does ANY console
-                 output appear when the dialog opens? That single
-                 observation was never cleanly obtained today and it
-                 decides the scan bug.
-              3  Fix the binding, or work out why the browser is not
-                 running the deployed chunk.
-
-⚠ CLEANUP     734f3305 is DIAGNOSTIC ONLY (P63). Never promote it to
-OWED          prod.
+⚠ FIRST       P89. batches rounding reaches MATERIAL RELEASE on a live
+CANDIDATE     client. It is the only S93 finding that moves real stock.
 ```
 
 ---
 
-## THE SCAN WORK — where it stands
+## WHAT S93 DID
 
 ```
-WHAT WORKS    Typing a lot code narrows the list correctly (7 rows to
-              the 2 matching rows, verified on screen).
-              Manual click still ticks the whole lot+customer+address
-              group and leaves other-lot DOs alone. NO REGRESSION.
+GLUTENULL BUG, END TO END, CLOSED
+  Reported: MO-0001 planned qty read 1750.08# where 1750 was entered.
+  Mechanism: add-mlo.component.ts:204-205. batches = 1750/240 = 7.29166…
+  stored rounded to 7.292, then totalQty = 7.292 x 240 = 1750.08. The
+  entered units were discarded at 204. totalQty feeds the HIDDEN
+  "quantity" control -> saveMLO obj.qty -> mlomanagement.qty.
+  Scope: ONE row on the whole of prod. No other MO carries a fraction.
+  Heal: prod row 11789 (company 471) qty 1750.08 -> 1750. Backup at
+  /home/ubuntu/mo-0001-before-heal-S93.txt on prod (24 lines).
+  Fix: commit 0b7ba967, line 205 now Number(qty) || 0.
+  Proof: CONTROLLED EXPERIMENT on dev, company 464, product FO-0008,
+  batch_qty 240, same entered 1750, minutes apart -
+      MO-0013  old code  qty 1750.08  batches 7.292
+      MO-0014  new code  qty 1750     batches 7.292
+  Read from the DATABASE, not the screen.
+  Promoted prod-0b7ba96779ad. Client screen confirmed 1750# (560 Kg).
+  ▶ 3A.5 ROW 2 IS NO LONGER RED. Defect 1 is closed.
 
-WHAT DOES     Pressing Enter ticks nothing. selectedItem stays 0, so
-NOT WORK      MOVE TO PACKING SLIP never appears.
+P82 SWEEP - PHASES 0, 1, 2 AND 3 ALL DONE
+  Map committed (dcfea9c). 157 lines = 154 hits + 3 headers.
+  edit-formulation.component.ts struck: 13 hits, ZERO divisions.
+  Whole map triaged: ~22 multiplications, ~45 reads/declarations,
+  ~14 commented out, ~6 text slashes, ~39 LIVE DIVISION SITES.
+  ⚠ PHASE 2 WAS ALREADY DONE. The 14 HTML templates the plan called
+  "never checked, most likely place for survivors" were in the map all
+  along under === HTML ===. No survivors.
 
-RULED OUT     The scanner — never in play, every failing test was typed
-              by hand.
-              A stale deploy — grep found "S87 onScan FIRED" inside
-              /var/www/html/9576.1fe196695fc02a9c.js on dev.
-              The wrong component — the popup is DoListComponent
-              (src/app/PopUps/do-list/), NOT add-dispatch or
-              add-dispatch-v2. Those belong to edit-sales-order and
-              were never in this path.
+PHASE 3 - THE DATABASE. 9 views, 35 routines.
+  11 objects mention wgt_kgs_per_unit. FOUR divide. SEVEN just pass it
+  through. Full text committed as db-definitions-S93.txt (65ef245).
 
-HYPOTHESIS 1  onScan never fires — the (keyup.enter) binding is not
-              reaching the method. UNTESTED.
-
-HYPOTHESIS 2  onScan fires but finds no row. The filter matches on
-              "contains"; the tick requires an EXACT match, so a stored
-              lot code carrying any extra character would filter fine
-              and never tick.
-
-⚠ THE UNREAD  One observation settles both: does "S87 onScan FIRED"
-  SIGNAL      appear in the Console on Enter? Note DoListComponent ALSO
-              logs on open (line ~44, pre-existing). If NOTHING appears
-              when the dialog opens, the browser is not running the
-              deployed chunk — a different problem entirely.
+P67 CLOSED. JR1 through JR14 all present in Section_5.md, no gaps.
 ```
 
 ---
 
-## COMMITS THIS SESSION — frontend, DEV ONLY, prod untouched
+## THE P82 SHORT LIST — what is actually left
 
 ```
-26123e0a   S87 P7 scan-to-select. onScan() plus (keyup.enter) on the
-           search input. THE REAL FEATURE. Reuses the existing
-           click-path grouping so scan and click cannot drift.
-734f3305   S87 P7 DIAG. Four console.log lines inside onScan.
-           ⚠ TEMPORARY. → P63
+DATABASE (Phase 3, read on dev, text committed)
+
+  Trace_ProductHeaderView        SEVEN divisions, one per _su field:
+                                 qty_produced_su · qty_misc_release_su ·
+                                 intermediate_prd_su · qty_packing_slip_su ·
+                                 qty_do_su · SOH_su · qty_shipped_su
+                                 ⚠ CONTAINS NEITHER inventory_units NOR
+                                   received_units. The view must be
+                                   ALTERED, not repointed.
+                                 ⚠ RDS ONLY, NOT IN GIT. Any change needs
+                                   a JR entry or it is lost on rebuild.
+
+  Trace_ProductProdLotView       divides received_qty to make
+                                 received_qty_su WHILE SELECTING
+                                 received_units IN THE SAME VIEW.
+                                 ▶ THE EASIEST FIX IN THE CODEBASE. The
+                                   correct value is already in hand.
+
+  Trace_ProductOneStepBackwardIP_SP   qty_allocated / wgt -> shipping_units
+  Trace_ProductOneStepForwardIP_SP    qty_allocated / wgt -> qty_used_su
+                                 ⚠ UNRESOLVED: is qty_allocated Kg or
+                                   units? GR7 does not carry it. Settle
+                                   before touching either.
+
+  CLEAN, no action: Trace_MaterialDetails_SP ·
+  Trace_ProductOneStepForward_SP · WhC_GetAllRejectedList_SP ·
+  WhC_GetFormulaPackagingMaterials · WhC_GetMoDetails_SP ·
+  WhC_GetMoPackagingConfiguration_SP · WhC_GetMoProductReceivingDetails_SP
+
+FRONTEND - the one probable BUG (as opposed to a display fix)
+
+  dispatch-orders.component.ts:145   getShippingUnit() is
+                                 (data/batchQty) * (batchQty/wgt).
+                                 batchQty cancels: it is data / wgt.
+    html:121  passes qty_to_ship         Kg-stored    -> LEGITIMATE
+    html:117  passes Refer_PS.shipped_qty UNITS-stored -> ⚠ SUSPECT
+                                 ⚠ CORROBORATED: Trace_ProductOneStep-
+                                   Forward_SP MULTIPLIES shipped_qty by
+                                   wgt to get weight. shipped_qty is
+                                   units. Two independent sources.
+                                 ▶ NOT CONFIRMED. Needs a shipped slip on
+                                   screen with wgt_kgs_per_unit ≠ 1. → P92
+
+  R5 DISPLAY SITES, already known, not re-listed here:
+    admin-formulation:878 · edit-mlc:298 · edit-mlo:251 · start-mlc:155 ·
+    product-traceability:109 and :161 · add-mlo.html:87 · getWduUnits
+
+  LEGITIMATE, leave alone: the material-traceability pair (materials are
+  Kg-anchored end to end) · add-dispatch:71/72 · edit-sales-order:393 ·
+  dispatch-orders.html:121 · add-dispatch-v2.html:12
+
+  SCHEMA GAP not a code bug: rejected-materials:154 and
+  reject-product.html:34 divide qty_rejected, which GR7 confirms is
+  Kg-ONLY with no units column. The division is forced. → 3A.5 row 11.
+
+  DOCUMENTED FRAGILITY, not new: add-dispatch:150 and
+  add-dispatch-v2:194 write packing_units by dividing Kg. → 3A.5 row 8.
+
+⚠ DO NOT TOUCH: PackingSlips.js editPackslips ~325-336. It is live code
+  that THROWS, and the throw is the only thing preventing three worse
+  bugs behind it. → P35, and §2 TO BE VERIFIED item 5.
+```
+
+---
+
+## ⚠ THE SECOND REFERENCE IMPLEMENTATION
+
+```
+The docs named ONE place that does R1 correctly:
+  PopUps/stock-info.component.ts:188   reads inventory_units, MULTIPLIES.
+
+S93 found a SECOND, in SQL:
+  Trace_ProductOneStepForward_SP
+      psd.shipped_qty * fop.wgt_kgs_per_unit AS shipped_qty_weight,
+      psd.shipped_qty                        AS shipped_qty_units
+
+  ▶ Copy this shape for any database-side fix. Do not invent one.
+  ▶ It also PROVES shipped_qty is units-stored.
+```
+
+---
+
+## CORRECTION OWED TO THE FROZEN DOCS
+
+```
+⚠ SECTION 3A, 3A.5 ROW 7, CARRIES A FALSE CLAIM.
+
+  It says:   "R5(D) — trace reads received_units directly
+              (ALREADY PRESENT IN THE VIEW)"
+
+  MEASURED ON DEV S93, information_schema.VIEWS:
+      Trace_ProductHeaderView
+        has_inventory_units   0
+        has_received_units    0
+        mentions_weight       1
+
+  Section 2 GR5 was RIGHT and 3A.5 row 7 is WRONG. §2 needs no change.
+
+  ▶ Strike the "(ALREADY PRESENT IN THE VIEW)" claim from 3A.5 row 7 and
+    replace with: the view carries NEITHER unit column; the R5 fix is an
+    ALTER, not a repoint, and needs a JR entry. → P90
 ```
 
 ---
@@ -87,122 +187,121 @@ HYPOTHESIS 2  onScan fires but finds no row. The filter matches on
 ## STATE
 
 ```
-DEV       16.55.10.205 · pm2 abletrace-dev · frontend HEAD 734f3305
-          serving dev-734f330507ed
-PROD      15.157.38.101 · pm2 abletrace-backend · Glutenull live
-          NOT TOUCHED THIS SESSION
-CERTS     trace expires 17 Oct 2026 · dev 9 Oct 2026. certbot clean.
+DEV       16.55.10.205 · pm2 abletrace-dev ↺33 · frontend HEAD 0b7ba967
+          serving dev-0b7ba96779ad · backend 13e3fcd · clean · 200
+PROD      15.157.38.101 · pm2 abletrace-backend ↺336 · Glutenull live
+          SERVING prod-0b7ba96779ad
+          ⚠ frontend checkout reads 9bce0238 — stale BY DESIGN (P8).
+            Judge prod by the served bundle, never the checkout.
+          backend 13e3fcd · clean · 200
+ROLLBACK  prod: /home/ubuntu/www-html.bak-prod-0b7ba96779ad
+          dev:  /home/ubuntu/www-html.bak-dev-0b7ba96779ad
+          ⚠ each holds the build it REPLACED (275c025039d7), not the one
+            it is named after.
+CERTS     trace expires 17 Oct 2026 · dev 9 Oct 2026.
+BACKENDS  UNTOUCHED THIS SESSION. No git pull, no pm2 restart.
+```
+
+---
+
+## COMMITS THIS SESSION
+
+```
+FRONTEND, dev then promoted to prod
+  0b7ba967   S93 Defect 1 fix. MO create stored a round-trip of the
+             entered units. Line 205 now stores what was entered.
+             batches deliberately unchanged.
+
+DOCS
+  dcfea9c    acrobatics-map-S91.txt preserved off /home/ubuntu (P16).
+  65ef245    db-definitions-S93.txt. Full text of the 2 views and 9
+             procs referencing wgt_kgs_per_unit. NOT otherwise in git.
+
+PROD DATA
+  mlomanagement id 11789 company 471 · qty 1750.08 -> 1750
+  Backup /home/ubuntu/mo-0001-before-heal-S93.txt on prod.
+  ⚠ /home/ubuntu is not backed up. Move or delete when no longer needed.
 ```
 
 ---
 
 ## QUEUE
 
-⚠ Logging is mechanical, ranking is Minty's. New items are at the
-bottom with the next free number. **P67 should almost certainly be
-ranked first** — Claude is saying so rather than moving it.
+⚠ Logging is mechanical, ranking is Minty's. New items at the bottom with
+the next free number. Claude never renumbers.
 
 ```
+CARRIED FORWARD, still open
 P20   Delete pre-S72 Section J file.
 P22   Delete old Section A file.
-P42   Section 5 restructure. ⚠ SUPERSEDED by the S87 doc conversion —
-      Minty to confirm closed. Do NOT close it until P67 is done.
-P58   Dev remotes do not carry the PAT. Push prompted for a password
-      TWICE AGAIN today. ▶ Reset both remote URLs. Minutes.
-P59   Prod pm2 restart counter reads 335 against dev's 33, and went
-      336 on the S86 promote. ▶ One look at
-      pm2 describe abletrace-backend. Still not a reading of WHY.
-P60   DO picker popup HEADING never renamed. Last remnant of P7. The
-      button was renamed in S84 and is live; the heading was not.
-P62   qty_shipped must never be NULL. Decision made, work outstanding
-      — count NULLs both boxes, heal to 0, ALTER NOT NULL DEFAULT 0,
-      check the Waterline model too, and check
-      soproducts.quanity_shipped_to_date and
-      packingslipdos.shipped_qty while the SQL is open.
+P58   Dev remotes do not carry the PAT. ⚠ PROMPTED AGAIN IN S93. That is
+      every session that has pushed. Minutes to fix.
+P59   pm2 restart counters: prod 336, dev 33.
+      ⚠ S93 FINDING: prod still reads 336, unchanged since the S86
+      promote. The gap is HISTORICAL ACCUMULATION, not something
+      climbing. No crash loop. Downgraded, not closed.
+P60   DO picker popup HEADING never renamed.
+P62   qty_shipped must never be NULL.
+P64   Product label prints "null" for Ext ID twice, on prod.
+P65   promote.sh runs plain scp and ssh with no -4.
+P66   3B.4 accuracy: stale rollback points.
+P68   ⚠ THE RULES OPEN BLOCK STILL CANNOT BE PASTED. THIRD SESSION.
+      Corrected commands are at the foot of TRAPS. Fix RULES itself.
+P82   The acrobatics sweep. ▶ NOW A SHORT LIST, see above.
+P84   Zebra guide into the app. Mechanical.
+P85   Windows printer guide.
+P86   Cold boot blindness, untested.
+P88   Grep Section 5 for J81 / "Fix A" dead pointers.
 
-P63   Remove the S87 diagnostic logging (734f3305). Blocks calling
-      the scan feature done. Never promote 734f3305 to prod.
-P64   Product label prints the string "null" for Ext ID, twice.
-      Cosmetic, but customer-facing.
-P65   promote.sh runs plain scp and ssh with no -4, but 3B.2 says dev
-      always needs -4. Works today only because the Mac resolves v4.
-      When it drifts, promote-to-dev hangs for no obvious reason.
-P66   3B.4 accuracy, five minutes: its rollback points are stale
-      (still 53db203d4ef4), and it says a push auto-builds PROD while
-      today's pushes produced dist-dev- artifacts. One of the two is
-      wrong.
-P67   ⚠ RESTORE THE JR REBUILD BLOCK from Section_5.md via the docs
-      repo git history. CLAUDE'S ERROR, S87. JR is the only record of
-      ~36 procs, 9 views, every column add, seed data and RDS config
-      (3B.9 says so explicitly). Also recover the reconcile oracle SQL
-      with its COALESCE(d.qty_shipped,0) fix, and decide its permanent
-      home — it is run every session, so by the both-directions test
-      it belongs in RULES, not in a file that gets rewritten.
+NEW IN S93
+P89   ⚠ batches ROUNDING REACHES MATERIAL RELEASE. batch count is stored
+      rounded to 3 places (7.292 against a true 7.29166…) and is
+      multiplied out at release-mat-details.component.ts:1071, 1083 and
+      1095 to compute final_qty for ingredients, intermediates AND
+      packaging. Also add-mlo:150 and :223 for packaging quantities.
+      ⚠ THIS MOVES REAL STOCK, not pixels. ~5g in 100kg, on a live
+      client. It is the only S93 finding with a physical effect.
+      ⚠ DO NOT "TIDY" THE batches LINE while in add-mlo. S93 deliberately
+      left it alone for exactly this reason.
+P90   Strike the false claim in 3A.5 row 7 that Trace_ProductHeaderView
+      already carries received_units. Measured false on dev, S93.
+P91   Trace_ProductProdLotView: read received_units instead of dividing
+      received_qty. The column is already selected in the same view.
+      ⚠ RDS only, not in git. Needs a JR entry.
+P92   Verify dispatch-orders.component.ts:145 via html:117 on a shipped
+      slip. ⚠ MUST use a product whose wgt_kgs_per_unit is not 1.
+P93   Establish whether qty_allocated is Kg-stored or units-stored. Two
+      IP procs divide it. GR7 does not carry the answer.
+P94   Move or delete /home/ubuntu/mo-0001-before-heal-S93.txt on prod
+      once the heal is settled. /home/ubuntu is not backed up.
 
 DEFERRED — on dev, not promoted
-      Licence banner shows on all role tabs. isAdmin stays true when
-      the user holds an Admin role among several. Fix: gate the *ngIf
-      on selectedRole===2. Commits dfbadbb0 and 277b2491, dev only.
+      Licence banner shows on all role tabs. Fix: gate the *ngIf on
+      selectedRole===2. Commits dfbadbb0 and 277b2491, dev only.
 
 OPEN DEFECTS — diagnosed, not fixed
-      MO create round-trips units through a rounded batches figure and
-      stores 50.004 instead of 50.
-      Display reconstructs units as Kg / weight, producing float
-      garbage on screen.
-      Version fork copies qty (Kg) but writes ship_qty 0 for
-      intermediates. Fix the fork handler in Formulations.js, then
-      heal existing 0 rows. Do this BEFORE re-anchoring stock to units.
+      ⚠ DEFECT 1 IS CLOSED. Fixed and promoted in S93.
+      Defect 2: display reconstructs units as Kg / weight. ~30+ sites
+      plus the 4 database objects above. This is R5.
+      ⚠ THERE IS NO THIRD DEFECT. The "version fork writes ship_qty 0"
+        claim is FALSE and never was true (J81). "Fix A" is a dead name.
 
 FROZEN SPEC — ready to build
-      P52 printed packing slip: letterhead, stacked DO rows, Code 128
-      barcode per unique Customer PO, Shipped By from
-      finalShipmentUserId.
+      P52 printed packing slip.
 ```
 
 ---
 
-## THE SCAN SPEC — settled with Minty, do not re-derive
+## THE FIVE THINGS THAT COST TIME IN S93
 
 ```
-ONE SLIP =    A packing slip is ONE ship-to address, many lot codes,
-ONE ADDRESS   many DOs. Address is the invariant; lot code is only what
-              gets scanned.
-
-FIRST SCAN    No address set. Filter to the scanned lot code, take the
-              FIRST matching row's address (ascending DO order, so
-              oldest wins — FIFO, sort confirmed by Minty), then tick
-              every row matching that lot code AND that address.
-
-EVERY SCAN    Address already locked and the list already filtered to
-AFTER         it. Tick everything matching the scanned lot code within
-              that address. Nothing to decide.
-
-SCOPE         ⚠ Minty's call: change the FIRST selection only. Move to
-              Packing Slip, Add Dispatch order and the round-trip
-              rhythm all stay as they are. Watch it in use first.
-
-PARKED        No-match message. Self-clearing search box. Running count
-              of selected DOs. Deliberately not built.
-```
-
----
-
-## TRAPS THAT COST TIME TODAY
-
-```
-BROWSER       An hour went on "both sites have gone insecure". Nothing
-CACHES ITS    was wrong — certs valid to October, http redirecting to
-VERDICT       https on both boxes. Chrome had cached the not-secure
-              state in long-open tabs; Cmd+Q cleared it. The security
-              indicator is cached and survives a reload. Same family
-              as J66.
-
-TWO SCREENS   /Dispatch-orders (the list) and the DIALOG that opens on
-NAMED THE     Create Packing Slip are both titled "Dispatch Orders" and
-SAME THING    both have a Search box in the same place. A console
-              reading was taken on the wrong one.
-
-READING THE   Claude read promote.sh instead of asking for 3B.4, and
-SCRIPT NOT    had been stating the CI direction backwards as a result.
-THE DOC       Minty caught it. Deploy sessions paste 3B.
+1  THE RECORD WAS FIVE SESSIONS STALE and nobody knew until the boxes
+   were read. Cause: NOW written at close, downloaded, never committed.
+   Twice running.
+2  P68. The RULES OPEN block still cannot be pasted. Third session.
+3  The trailing command dropped off a pasted block on prod. Again.
+4  P58. The PAT prompt. Again.
+5  Two of Claude's own grep patterns were wrong in ways that looked
+   right — JR1[0-4]* cannot match JR2-9, and LIKE '%/%needle%' does not
+   test for division. Both caught, neither became a finding. See TRAPS.
 ```

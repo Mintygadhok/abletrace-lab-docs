@@ -3,6 +3,11 @@
 Only things that bit twice or cost real hours. A line goes in when it
 bites again — not every session. Never cut, never reorganised.
 
+⚠ MERGED S93: the separate TRAPS-additions-S92.md has been folded into
+  this file, as instructed. There is now ONE traps file. Nothing was cut
+  or reordered; the S92 edit was inserted where it was marked to go and
+  the rest appended.
+
 ---
 
 **A POPULATED FK IS AN OBJECT, NOT A NUMBER**
@@ -125,6 +130,7 @@ reading was taken on the wrong one in S87 and read as a null result.
 **RAW GITHUB URLS SERVE STALE CONTENT**
 The CDN caches. Reasoning that it "should be fine" has been wrong more than
 once. Test it, do not argue it.
+
 ---
 
 ## JT — FOCUS DECIDES WHETHER A KEYSTROKE TEST MEANS ANYTHING
@@ -230,6 +236,8 @@ directly beneath it. Both boxes were correct and always had been.
 ## RULES CORRECTION OWED (→ P68)
 
 ```
+⚠ STILL OWED AS AT S93 CLOSE. THIRD SESSION RUNNING.
+
 The OPEN block restored in S87 cannot be pasted. Its prose sits inside
 the same fenced box as the commands, so the terminal receives
 "(Fuller version, plus the host check, lives in 3B.5.)" and dies with
@@ -247,6 +255,11 @@ REPLACE THE COMMAND LIST WITH:
   curl -s -o /dev/null -w "%{http_code}\n" localhost:1337
 
 and keep every warning line OUTSIDE the fenced command block.
+
+⚠ ON PROD, ADD THIS SEVENTH LINE. The git checkout lags the served build,
+  so it is the ONLY reliable read of what prod is actually serving:
+
+  ls -1dt /home/ubuntu/www-html.bak-* | head -1
 ```
 
 ---
@@ -370,8 +383,295 @@ S91  Dev showed "Not Secure" on /login. The vhost was FINE —
      curl -I http://dev.mintekfoodsafety.com returned 301. The BOOKMARK
      pointed at http://, so the chip appeared for the instant before
      the redirect completed.
+S92  Chased TWICE MORE in one session, on a second Mac. Same two
+     causes, no new mechanism. FOURTH AND FIFTH TIME.
 
 ⚠ THE RULE: before touching nginx or certbot, do two things — full-quit
   the browser, and curl -I the http:// address. A 301 means the server
   is doing its job and the fault is on the client side.
 
+⚠ AND THE SEPARATE, PERMANENT CASE — see the localhost entry below.
+  Do not confuse them: on an app URL the chip is a fault to clear,
+  on localhost:9101 it is normal forever.
+```
+
+---
+
+## JT — LABEL PRINTING HAS THREE BARRIERS, NOT ONE
+
+```
+S91 documented ONE barrier — the self-signed certificate — and closed
+the question. S92 walked a clean second Mac as a client and found
+THREE, all real, all required, and they fire in a FIXED ORDER:
+
+  1 CERTIFICATE        Browser warning at https://localhost:9101.
+                       Cleared via Advanced → Proceed.
+                       Scope: PER BROWSER, PER USER. Stored: browser.
+
+  2 CHROME LOCAL NET   "<site> wants to Access other apps and services
+                       on this device"   Block / ALLOW
+                       Scope: PER BROWSER, PER SITE. Stored: Chrome
+                       site settings.
+
+  3 BROWSER PRINT      "<site> wants to access your Zebra Devices.
+                       Allow <site> and add it to the accepted hosts
+                       list?"   Cancel / No / YES
+                       Scope: PER USER, PER HOSTNAME. Stored: Browser
+                       Print's own Accepted Hosts list.
+
+⚠ THE ORDER IS FIXED AND IT IS WHY ONLY ONE WAS EVER SEEN. Barrier 1
+  blocks the connection outright, so 2 and 3 CANNOT FIRE until it is
+  cleared. S91 cleared the certificate, saw printing work, and
+  concluded the certificate was the whole story. It was the first
+  gate of three.
+
+⚠ 2 AND 3 FIRE ON THE FIRST PRINT, NOT DURING INSTALL. Anyone
+  documenting setup and stopping at "it prints" will miss both.
+
+⚠ CLICKING Block OR No BREAKS PRINTING SILENTLY AND PERMANENTLY, and
+  the two are undone in DIFFERENT PLACES:
+    Chrome  Settings → Privacy and security → Site settings → the site
+    Browser Print  menu bar icon → Settings → Blocked Hosts →
+                   Delete Selected
+  The app shows only "print failed" for either.
+
+⚠ PER HOSTNAME, PROVEN: dev.mintekfoodsafety.com and
+  trace.mintekfoodsafety.com are SEPARATE Accepted Hosts entries.
+  Testing on dev does NOT pre-authorise prod.
+
+⚠ BROWSER PRINT'S CONTROLS ARE IN THE MENU BAR, TOP RIGHT, NOT THE
+  DOCK. Clicking the Dock icon appears to do nothing. Cost real
+  minutes in S92 to somebody who already knew the app existed.
+
+⚠ THE WIDER SHAPE: "it worked after I did X" identifies A barrier,
+  never THE barrier — because a gate that is still closed downstream
+  cannot announce itself. Same family as S90's kill-and-reopen, where
+  two faults had one fix each and the record collapsed them into one
+  mystery. When a fix works, ask what ELSE would have been invisible
+  until that moment.
+```
+
+---
+
+## JT — ON localhost, "NOT SECURE" IS PERMANENT AND MEANS NOTHING
+
+```
+Accepting a self-signed certificate stops the browser BLOCKING the
+connection. It does NOT turn the padlock green. The chip on
+https://localhost:9101 reads Not Secure forever, on every machine,
+including while printing works perfectly.
+
+PHOTOGRAPHED S92, one screen: chip red "Not Secure", printer listed in
+full (usb#vid_0a5f&pid_00d5#52N224501603, ZPL), label printed.
+
+⚠ THE TRAP: this is the SAME CHIP that has been a real fault twice on
+  app URLs (see the Not Secure entry above). On localhost it is
+  meaningless. Reading it as a health indicator will mislead every
+  time, and a client will read it exactly that way.
+
+⚠ NOW IN THE CLIENT GUIDE for that reason.
+```
+
+---
+
+## JT — A HANDOVER NOTE IS NOT THE RECORD. NOW SUPERSEDES IT.
+
+```
+S92 opened with an S92-opening-note.md written DURING S91, before
+S91 finished. Claude read it as current and told Minty that the
+275c0250 prod artifact still needed promoting and that P72 had not
+reached Glutenull.
+
+BOTH WERE ALREADY DONE. NOW.md, written at S91 CLOSE, recorded the
+promote to dev AND prod with scanner verification. The note also
+listed P75, P76 and P78 as new/open when NOW had all three closed,
+and described P58 as a different item entirely.
+
+⚠ THE RULE: a note written mid-session freezes at the moment it was
+  written. NOW.md is rewritten at CLOSE and is the only current
+  record. WHERE THEY DISAGREE, NOW WINS — always, without checking.
+
+⚠ WHY IT MATTERS MORE THAN IT LOOKS: the note is pasted FIRST and
+  reads as a brief, so it frames everything after it. Claude acted on
+  it for two turns before NOW arrived and contradicted it.
+
+⚠ S93 ADDENDUM — THE RULE HAS A PRECONDITION NOBODY CHECKED. "NOW
+  wins" assumes NOW is the close-of-last-session record. In S93 it was
+  not: the repo held the S87 version, five sessions stale, because the
+  S91 and S92 rewrites were downloaded and never committed. See the
+  next entry.
+```
+
+---
+
+## JT — "A JAVA PROCESS" AND "A SECURITY WARNING" NAME NOTHING
+
+```
+Extension of the existing Browser Print / java entry, same shape,
+different surface.
+
+S92: Minty reported "a security warning which said something about
+accessing your other apps". Claude inferred a macOS permission prompt
+and reasoned from there. IT WAS CHROME'S OWN local-network prompt —
+different mechanism, different place to undo it, different platform
+behaviour.
+
+⚠ THE RULE: a half-remembered dialog is a CATEGORY, not an identity.
+  "A security warning", "a java process", "a permission popup" — all
+  name a shape and no more. Get the WORDING, or a photograph, before
+  building anything on it. The wording is one screenshot away and the
+  inference is always cheaper and always worse.
+```
+
+---
+
+## JT — THE ZEBRA DOWNLOAD PATH IS NOT WHERE ANYONE LOOKS
+
+```
+Browser Print is NOT under support.zebra.com's "Drivers and
+Downloads". It is on the main site:
+  zebra.com/us/en/support-downloads/software/printer-software/
+    browser-print.html
+Breadcrumb: Support and Downloads → SOFTWARE → Browser Print.
+
+⚠ THE DANGER IS NOT GETTING LOST. "Drivers and Downloads" leads to a
+  printer DRIVER, which installs the macOS print path and invites
+  adding the Zebra in Printers & Scanners — the exact thing the client
+  procedure forbids. The wrong door does not dead-end, it succeeds at
+  the wrong thing.
+
+⚠ The link is labelled "Download Browser Print For OSX", not Mac.
+⚠ The form is plain — country, name, company, email. NO ACCOUNT AND
+  NO MFA, despite the site-wide MFA banner (effective 1 July 2026).
+```
+
+---
+
+## JT — A DOCUMENT THAT IS WRITTEN BUT NEVER COMMITTED DOES NOT EXIST
+
+```
+S93 opened by pasting NOW.md. It was the S87 version, dated 27 July,
+FIVE SESSIONS STALE. The first stretch of the session went on
+establishing that the record — not the boxes — was what was wrong.
+
+CAUSE: NOW is rewritten at close, produced in the chat, and downloaded.
+Nothing then commits it. The S91 rewrite and the S92 rewrite were both
+still sitting in ~/Downloads as NOW (5).md when S93 found them, along
+with TRAPS-additions-S92.md and the opening note.
+
+⚠ WHY IT IS WORSE THAN A FILING SLIP: the whole documentation system
+  rests on "NOW wins". That rule silently assumes NOW is current. When
+  it is not, the rule actively points at the wrong answer, and every
+  document that leans on NOW leans the same wrong way.
+
+⚠ THE TELL, and it is cheap: read the "Last rewritten" line against the
+  session number you are opening. One glance.
+
+⚠ THE HARDER TELL: the STATE block will not match the boxes. S93's
+  stale NOW claimed dev HEAD 734f3305 against an actual 275c0250. The
+  health check catches this — but only if someone compares rather than
+  skims.
+
+⚠ THE RULE: NOW IS COMMITTED AT CLOSE, IN THE SAME BREATH AS BEING
+  WRITTEN. A downloaded file is not the record. Now in RULES.
+```
+
+---
+
+## JT — A SLASH IS NOT ALWAYS A DIVISION
+
+```
+S93 swept 154 grep hits for `/` to find acrobatics. Six of them looked
+exactly like divisions and were not:
+
+  `${element.wgt_kgs_per_unit} ${unit_name} / ${materials_title}`
+
+That slash is TEXT inside a template literal — "2 Kg / Sugar" on screen.
+Sites: edit-mlc:126 · edit-mlo:454 · add-mlo:423 · edit-closed-mlcs:209 ·
+start-mlc:120.
+
+⚠ A grep for `/` CANNOT distinguish arithmetic from punctuation. Neither
+  can a LIKE pattern. Read the expression, not the character.
+```
+
+---
+
+## JT — A GREP PATTERN CAN BE INCAPABLE OF FINDING WHAT YOU ASKED IT FOR
+
+```
+Two of Claude's own patterns were wrong in S93 in ways that LOOKED
+right and returned confident-looking output.
+
+  grep -o "JR1[0-4]*"      Intended: find JR1 to JR14.
+                           Actually: matches JR1 and JR10-JR14 ONLY.
+                           It CANNOT match JR2 through JR9. The output
+                           looked like a complete list and was not.
+                           Correct: grep -o "JR[0-9][0-9]*" | sort -u -V
+
+  LIKE '%/%wgt_kgs_per_unit%'   Intended: find divisions BY the column.
+                           Actually: matches a slash ANYWHERE before the
+                           column name — a comment, a date, an unrelated
+                           divide three lines earlier. Produces suspects,
+                           never verdicts.
+
+Both were caught before becoming findings. Neither would have announced
+itself: a wrong pattern returns rows, and rows read as evidence.
+
+⚠ THE RULE: before trusting a pattern's OUTPUT, ask what it is
+  STRUCTURALLY capable of matching. A pattern that cannot express the
+  question will still answer it.
+⚠ Same family as GREP OUTPUT IS A RENDERED SCREEN — but one layer
+  earlier. That entry is about reading results wrongly; this is about
+  asking wrongly.
+```
+
+---
+
+## JT — THE FIELD ON SCREEN IS NOT ALWAYS THE FIELD THAT IS SAVED
+
+```
+Defect 1 hid for months in plain sight. The MO create form:
+
+  WDU          "Shipping Units"  — what the operator types
+  displayKg    readonly, visible — derived Kg
+  quantity     HIDDEN INPUT      — ⚠ THIS IS WHAT IS SAVED
+  batches      shown, disabled
+
+onQtyChange() took the typed value, round-tripped it through batches,
+and patched the RESULT into the hidden `quantity` control. saveMLO()
+then sent that as obj.qty. So the number the operator entered and the
+number stored were different fields, and nothing on screen showed the
+one that mattered.
+
+⚠ THE RULE: when a stored value is wrong but the form "looks right",
+  find which control actually feeds the save payload. It may not be on
+  screen at all. Read the save function, not the visible fields.
+```
+
+---
+
+## JT — A ROUNDED INTERMEDIATE FIGURE CAN REACH REAL QUANTITIES
+
+```
+`batches` looks like a display convenience. It is not.
+
+  mlomanagement.batches is stored ROUNDED to 3 decimal places —
+  7.292 against a true 7.29166… — and is then MULTIPLIED OUT at
+    release-mat-details.component.ts:1071  ingredients
+    release-mat-details.component.ts:1083  intermediates
+    release-mat-details.component.ts:1095  packaging
+  to compute final_qty, i.e. HOW MUCH MATERIAL IS RELEASED TO THE FLOOR.
+  Also add-mlo:150 and :223 for packaging quantities.
+
+So the rounding does not stay on screen. It slightly over-releases
+material on every MO whose plan does not divide evenly. ~5g in 100kg.
+
+⚠ S93 DELIBERATELY DID NOT TOUCH IT while fixing Defect 1 two lines
+  away. "Tidying" the batches line would have changed physical release
+  quantities on a live client, in a commit whose message said it was
+  fixing a display figure. → P89
+
+⚠ THE RULE: before changing how a number is CALCULATED, grep where that
+  number is CONSUMED. A figure that is cosmetic in one screen may be
+  load-bearing two files away.
+```

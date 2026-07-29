@@ -8,29 +8,49 @@ WHO           Minty: domain expert, sole operator, runs every command.
               never asked to judge a technical trade.
               Claude: sole coder and only reviewer. If Claude misses
               it, nobody catches it.
+```
 
-OPEN          Every session starts with this, on BOTH boxes, before any
-              work. Paste it and give Claude the output:
+## OPEN — paste this block, one box at a time
 
-                git -C ~/abletrace-lab-frontend rev-parse --short HEAD
-                git -C ~/abletrace-lab-backend  rev-parse --short HEAD
-                git status --short
-                pm2 status
-                curl -s -o /dev/null -w "%{http_code}\n" localhost:1337
+⚠ Everything below this fence is a COMMAND. Warnings live outside it.
+(This is the P68 fix. The old block had prose inside the fence, so the
+terminal received `(Fuller version…)` and died with a zsh parse error.
+It also carried a bare `git status` with no `-C`, which from `~` on dev
+runs against no repository at all.)
 
-              Expect clean trees, the NAMED process online, and 200.
-              ⚠ COMPARE THE REAL HEADS AGAINST WHAT NOW.md CLAIMS. If
-              they differ, STOP and reconcile the record before doing
-              any work. S70 opened by chasing a delta that did not
-              exist — and that same unrecorded commit turned out to be
-              the cause of the client's bug four hours later.
-              ⚠ After any backend restart, sleep 8 before the curl.
-              000 means Sails is still booting, not that it crashed.
-              ⚠ Prod's frontend git checkout LAGS the served build.
-              Judge prod's frontend by the bundle, not the checkout.
-              ⚠ Note the rollback points before touching anything.
-              (Fuller version, plus the host check, lives in 3B.5.)
+```
+git -C ~/abletrace-lab-frontend rev-parse --short HEAD
+git -C ~/abletrace-lab-backend rev-parse --short HEAD
+git -C ~/abletrace-lab-frontend status --short
+git -C ~/abletrace-lab-backend status --short
+pm2 status
+curl -s -o /dev/null -w "%{http_code}\n" localhost:1337
+```
 
+ON PROD ONLY, add this seventh line. Prod's git checkout LAGS the served
+build, so this is the only reliable read of what is actually live:
+
+```
+ls -1dt /home/ubuntu/www-html.bak-* | head -1
+```
+
+⚠ Expect clean trees, the NAMED process online, and 200.
+⚠ COMPARE THE REAL HEADS AGAINST WHAT NOW.md CLAIMS. If they differ,
+  STOP and reconcile the record before doing any work. S70 opened by
+  chasing a delta that did not exist — and that same unrecorded commit
+  turned out to be the cause of the client's bug four hours later.
+⚠ FIRST CHECK NOW's "Last rewritten" LINE AGAINST THE SESSION YOU ARE
+  OPENING. If it is stale, the STATE block is not a valid comparison
+  target and the BOXES are the arbiter. S93 opened on a NOW five
+  sessions old.
+⚠ After any backend restart, sleep 8 before the curl. 000 means Sails is
+  still booting, not that it crashed.
+⚠ If a pasted block loses its trailing command — it has, repeatedly —
+  send the lines singly.
+⚠ Note the rollback points before touching anything.
+(Fuller version, plus the host check, lives in 3B.5.)
+
+```
 LOOK          When a claim can be CHECKED ON A SCREEN, ask Minty to
               look. Do not reason across it. S73 tested seven claims
               against the live app: five were false, and three of those
@@ -46,9 +66,17 @@ RESPONSE      "WHAT MINTY DOES NOW". Plain language, one action per
 DB IS TRUTH   Toasts, file chips, loaded pages and green ticks prove
               nothing. Verify the stored row. Browser state is cached
               and survives a reload — including the security indicator.
+              ⚠ AND THE FIELD ON SCREEN MAY NOT BE THE FIELD SAVED. A
+              form can patch a HIDDEN control and send that instead.
+              Read the save function, not the visible inputs.
 
 DEV ONLY      Edit on dev. Never hand-edit prod. Never promote
               unverified code. If it is late and unproven, stop.
+              ⚠ DATA is the exception, and only deliberately: a wrong
+              row that already exists on prod will NEVER be corrected by
+              deploying correct code. Code fixes the future; a heal
+              fixes the past. Back up the row first, scope by id AND
+              company_id, and say out loud that it is a live write.
 
 LIVE CLIENT   Prod carries Glutenull. Only 464 and 465 are sandbox.
               Always act by company_id. A client-reported bug outranks
@@ -58,6 +86,13 @@ PATCHES       Long scripts fail when pasted into a terminal. Hand over
               as a FILE, scp -4 to /tmp/, run from there. Assert every
               anchor and write nothing unless all pass. Never assert on
               a string the patch itself introduces.
+              ⚠ Verify AFTERWARDS by checking the OLD text is GONE. A
+              check for the new text always passes and proves nothing.
+
+BLAST RADIUS  Before changing how a number is CALCULATED, grep where
+              that number is CONSUMED. S93: `batches` looked like a
+              display figure and turned out to drive MATERIAL RELEASE
+              quantities two files away.
 
 DEPLOY        pm2 restart <NAME>, never "all" — dev=abletrace-dev,
               prod=abletrace-backend. sleep 8 before curl.
@@ -65,6 +100,8 @@ DEPLOY        pm2 restart <NAME>, never "all" — dev=abletrace-dev,
               No "!" in commit messages — bash eats them.
               Frontend: promote.sh from the Mac, then Cmd+Q the browser
               (a hard reload does not clear lazy chunks).
+              ⚠ A push auto-builds DEV. PROD needs a manual dispatch
+              with target=prod.
 
 THE LOG       The commit message IS the record. What changed and WHY,
               written at the moment of committing. Nothing is written
@@ -85,6 +122,12 @@ ASK FIRST     Before reading a script, a config or a box to learn how
               backwards as a result. The doc is the first stop; the
               artifact is the tiebreaker if they disagree.
 
+PATTERNS      Before trusting what a grep or a LIKE RETURNED, ask what
+              it is STRUCTURALLY CAPABLE of matching. A pattern that
+              cannot express the question will still answer it, and the
+              rows it returns will read as evidence. Two of Claude's
+              own patterns failed this way in S93.
+
 DOCS          NOW.md is the only file rewritten each session. TRAPS.md
               grows only when something bites twice. Everything else is
               frozen and is allowed to be imperfect — it is not tidied.
@@ -93,5 +136,17 @@ DOCS          NOW.md is the only file rewritten each session. TRAPS.md
               session. Traps go to TRAPS, rules go here.
               ⚠ SECTION 5 IS NOT DELETABLE. It holds the JR rebuild
               block — the only record of every stored proc, view,
-              column add and seed — and the reconcile oracle. → P67
+              column add and seed — and the reconcile oracle.
+              ✅ P67 CLOSED S93: JR1 through JR14 verified present.
+
+CLOSE         ⚠ NOTHING IS CLOSED UNTIL IT IS COMMITTED AND PUSHED.
+              A file written in the chat and downloaded is NOT the
+              record. The S91 and S92 rewrites of NOW were both
+              downloaded and never committed; S93 opened on the S87
+              version, five sessions stale, and lost its first stretch
+              working out which document to believe.
+              ▶ Commit NOW.md, TRAPS.md and any corrected section IN
+                THE SAME BREATH AS WRITING THEM. Then run
+                `git -C ~/abletrace-lab-docs status --short`
+                and expect it to come back EMPTY.
 ```
