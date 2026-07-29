@@ -1,0 +1,293 @@
+AbleTrace DB definitions, read from dev abletrace-lab-dev-s62-dev.czwsy0m0axvx.ca-central-1.rds.amazonaws.com
+These objects live in RDS and are NOT in git.
+
+
+===== Trace_ProductHeaderView (VIEW) =====
+with `do_products` as (select `rp`.`mlc_id` AS `mlc_id`,sum((case when (`ps`.`shipped_flag` = true) then `do`.`qty_to_ship` else 0 end)) AS `qty_shipped`,sum((case when ((`ps`.`shipped_flag` = false) and (`ps`.`shippingdate` is null)) then `do`.`qty_to_ship` else 0 end)) AS `qty_packing_slip`,sum((case when (`ps`.`shipped_flag` is null) then `do`.`qty_to_ship` else 0 end)) AS `qty_do` from (((((`abletracelab_live`.`dispatchorders` `do` join `abletracelab_live`.`fopackaging` `fop` on((`do`.`packing_id` = `fop`.`id`))) join `abletracelab_live`.`do_receive_products` `drp` on((`drp`.`dispatch_order_id` = `do`.`id`))) join `abletracelab_live`.`receiveproducts` `rp` on((`drp`.`recProduct_id` = `rp`.`id`))) left join `abletracelab_live`.`packingslipdos` `psd` on((`do`.`id` = `psd`.`DO_id`))) left join `abletracelab_live`.`packingslips` `ps` on((`ps`.`id` = `psd`.`PS_id`))) where ((`do`.`status` = 'Active') and (`fop`.`whd_flag` = true)) group by `rp`.`mlc_id`), `int_prod` as (select `rp`.`mlc_id` AS `mlc_id`,sum(`mpr`.`qty_allocated`) AS `intermediate_prd` from ((((((`abletracelab_live`.`mprrecievelots` `mpr` join `abletracelab_live`.`receiveproducts` `rp` on((`mpr`.`Rec_Product_id` = `rp`.`id`))) join `abletracelab_live`.`formulations` `f` on((`f`.`id` = `rp`.`product_id`))) join `abletracelab_live`.`unitmeasurement` `um` on((`um`.`id` = `f`.`uom`))) join `abletracelab_live`.`fopackaging` `fop` on((`fop`.`formulation_id` = `rp`.`product_id`))) join `abletracelab_live`.`materialsproductsreleased` `mpr1` on((`mpr`.`MPR_id` = `mpr1`.`id`))) join `abletracelab_live`.`mlomanagement` `mlo` on((`mpr1`.`mlc_id` = `mlo`.`id`))) where (`fop`.`whd_flag` = true) group by `rp`.`mlc_id`), `misc_release` as (select `rmp`.`mlc_id` AS `mlc_id`,coalesce(sum(`rmp`.`qty_rejected`),0) AS `qty_misc_release` from `abletracelab_live`.`rejectmaterialandproduct` `rmp` group by `rmp`.`mlc_id`), `final_results` as (select `mm`.`internalCode` AS `mo_Number`,`mm`.`lotCode` AS `lotCode`,`f`.`id` AS `formulation_id`,`f`.`title` AS `product`,`f`.`internalCode` AS `internalCode`,`f`.`myCode` AS `ext_code`,`ms`.`status_name` AS `status_name`,`mm`.`received_qty` AS `qty_produced`,(`mm`.`received_qty` / `fop`.`wgt_kgs_per_unit`) AS `qty_produced_su`,`mm`.`id` AS `id`,`mm`.`formula_id` AS `formula_id`,`mm`.`startDate` AS `startDate`,`f`.`company_id` AS `company_id`,`u`.`unit_name` AS `unit_name`,coalesce(`mr`.`qty_misc_release`,0) AS `qty_misc_release`,coalesce((`mr`.`qty_misc_release` / `fop`.`wgt_kgs_per_unit`),0) AS `qty_misc_release_su`,round(coalesce(`ip`.`intermediate_prd`,0),3) AS `intermediate_prd`,round(coalesce((`ip`.`intermediate_prd` / `fop`.`wgt_kgs_per_unit`),0),3) AS `intermediate_prd_su`,coalesce(`do_products`.`qty_packing_slip`,0) AS `qty_packing_slip`,coalesce((`do_products`.`qty_packing_slip` / `fop`.`wgt_kgs_per_unit`),0) AS `qty_packing_slip_su`,coalesce(`do_products`.`qty_do`,0) AS `qty_do`,coalesce((`do_products`.`qty_do` / `fop`.`wgt_kgs_per_unit`),0) AS `qty_do_su`,round((((((coalesce(`mm`.`received_qty`,0) - coalesce(`do_products`.`qty_do`,0)) - coalesce(`do_products`.`qty_packing_slip`,0)) - coalesce(`mr`.`qty_misc_release`,0)) - coalesce(`do_products`.`qty_shipped`,0)) - coalesce(`ip`.`intermediate_prd`,0)),3) AS `SOH`,round(((((((coalesce(`mm`.`received_qty`,0) - coalesce(`do_products`.`qty_do`,0)) - coalesce(`do_products`.`qty_packing_slip`,0)) - coalesce(`mr`.`qty_misc_release`,0)) - coalesce(`do_products`.`qty_shipped`,0)) - coalesce(`ip`.`intermediate_prd`,0)) / `fop`.`wgt_kgs_per_unit`),3) AS `SOH_su`,coalesce(`do_products`.`qty_shipped`,0) AS `qty_shipped`,coalesce((`do_products`.`qty_shipped` / `fop`.`wgt_kgs_per_unit`),0) AS `qty_shipped_su`,coalesce(`mm`.`qty`,0) AS `mlo_qty`,coalesce(`mm`.`received_qty`,0) AS `mlo_qty_rec` from (((((((((((`abletracelab_live`.`formulations` `f` join `abletracelab_live`.`fopackaging` `fop` on((`fop`.`formulation_id` = `f`.`id`))) left join `abletracelab_live`.`unitmeasurement` `u` on((`f`.`uom` = `u`.`id`))) left join `abletracelab_live`.`mlomanagement` `mm` on((`f`.`id` = `mm`.`formula_id`))) left join `abletracelab_live`.`mlcpackaging` `mlc` on((`mlc`.`mlc_id` = `mm`.`id`))) left join `abletracelab_live`.`mlo_status_types` `ms` on((`mm`.`mlc_status` = `ms`.`id`))) left join `abletracelab_live`.`receiveproducts` `rp` on((`mm`.`id` = `rp`.`mlc_id`))) left join `abletracelab_live`.`materialsproductsreleased` `mpr` on((`mm`.`id` = `mpr`.`mlc_id`))) left join `abletracelab_live`.`returnmaterialproduct` `mprr` on((`mm`.`id` = `mprr`.`mlc_id`))) left join `do_products` on((`mm`.`id` = `do_products`.`mlc_id`))) left join `int_prod` `ip` on((`mm`.`id` = `ip`.`mlc_id`))) left join `misc_release` `mr` on((`mm`.`id` = `mr`.`mlc_id`))) where (`fop`.`whd_flag` = true)) select `final_results`.`mo_Number` AS `mo_Number`,`final_results`.`lotCode` AS `lotCode`,`final_results`.`formulation_id` AS `formulation_id`,`final_results`.`product` AS `product`,`final_results`.`internalCode` AS `internalCode`,`final_results`.`ext_code` AS `ext_code`,`final_results`.`status_name` AS `status_name`,`final_results`.`qty_produced` AS `qty_produced`,`final_results`.`qty_produced_su` AS `qty_produced_su`,`final_results`.`id` AS `id`,`final_results`.`formula_id` AS `formula_id`,`final_results`.`startDate` AS `startDate`,`final_results`.`company_id` AS `company_id`,`final_results`.`unit_name` AS `unit_name`,`final_results`.`qty_misc_release` AS `qty_misc_release`,`final_results`.`qty_misc_release_su` AS `qty_misc_release_su`,`final_results`.`intermediate_prd` AS `intermediate_prd`,`final_results`.`intermediate_prd_su` AS `intermediate_prd_su`,`final_results`.`qty_packing_slip` AS `qty_packing_slip`,`final_results`.`qty_packing_slip_su` AS `qty_packing_slip_su`,`final_results`.`qty_do` AS `qty_do`,`final_results`.`qty_do_su` AS `qty_do_su`,`final_results`.`SOH` AS `SOH`,`final_results`.`SOH_su` AS `SOH_su`,`final_results`.`qty_shipped` AS `qty_shipped`,`final_results`.`qty_shipped_su` AS `qty_shipped_su`,`final_results`.`mlo_qty` AS `mlo_qty`,`final_results`.`mlo_qty_rec` AS `mlo_qty_rec` from `final_results`
+
+
+===== Trace_ProductProdLotView (VIEW) =====
+select `mm`.`internalCode` AS `mo_Number`,`mm`.`lotCode` AS `lotCode`,`f`.`id` AS `formulation_id`,`f`.`title` AS `product`,`f`.`internalCode` AS `internalCode`,`f`.`myCode` AS `myCode`,`ms`.`status_name` AS `status_name`,`ms`.`id` AS `status_id`,`mm`.`qty` AS `qty_su`,(`mm`.`received_qty` / `fop`.`wgt_kgs_per_unit`) AS `received_qty_su`,`mm`.`qty` AS `qty`,`mm`.`received_qty` AS `received_qty`,`mm`.`received_units` AS `received_units`,`mm`.`id` AS `id`,`mm`.`startDate` AS `startDate`,`f`.`company_id` AS `company_id`,`u`.`unit_name` AS `unit_name`,`fop`.`wgt_kgs_per_unit` AS `wgt_kgs_per_unit` from (((((`abletracelab_live`.`formulations` `f` left join `abletracelab_live`.`unitmeasurement` `u` on((`f`.`uom` = `u`.`id`))) left join `abletracelab_live`.`mlomanagement` `mm` on((`f`.`id` = `mm`.`formula_id`))) left join `abletracelab_live`.`mlo_status_types` `ms` on((`mm`.`mlc_status` = `ms`.`id`))) left join `abletracelab_live`.`mlcpackaging` `mlc` on((`mlc`.`mlc_id` = `mm`.`id`))) left join `abletracelab_live`.`fopackaging` `fop` on((`mlc`.`pack_level_id` = `fop`.`id`))) order by `mm`.`startDate` desc
+
+
+===== Trace_MaterialDetails_SP (PROCEDURE) =====
+BEGIN
+	SET @receiveLotID := receiveLotID;
+	SET @materialID := materialID;
+	SET @companyID := companyID;
+    
+	CREATE TEMPORARY TABLE temp_table (
+		mlc_id VARCHAR(100),
+		mo_number VARCHAR(100),
+		product_lot_code VARCHAR(100),
+		qty VARCHAR(100),
+		received_qty VARCHAR(100),
+		formula_internal_code varchar(100),
+		formula_title varchar(100),
+		unit_name varchar(50),
+		wgt_kgs_per_unit varchar(50)
+	);
+
+	create temporary table temp_qty_allocated (
+		mlc_id varchar(100),
+		qty_allocated varchar(100),
+		material_id varchar(100),
+		uom varchar(100),
+		unit_name varchar(100)
+	);
+
+	create temporary table temp_qty_returned (
+		mlc_id varchar(100),
+		qty_returned varchar(100)
+	);	
+
+	SET @returnedQty := (SELECT SUM(qty_return) as qty_return from returnmpreceivelots WHERE material_id = @materialID);
+
+	SET @formulationIDs := (SELECT GROUP_CONCAT(`fosubrecipe__sub_recipe_id`.`formulation_id`) 
+	from `subrecipematerials` left outer join `fosubrecipe` as `fosubrecipe__sub_recipe_id` on `subrecipematerials`.`sub_recipe_id` = `fosubrecipe__sub_recipe_id`.`id` 
+	where `subrecipematerials`.`material_id` = @materialID);  -- this will give a sub_receipe_id for given material_id
+    
+    SET @formulationPackagingID := (SELECT GROUP_CONCAT(formulation_id) 
+	from `fopackaging` 
+	where `fopackaging`.`material_id` = @materialID);  -- this will give a formulation_id for given material_id
+    
+    SET @allFormulationIDs := TRIM(BOTH ',' FROM CONCAT_WS(',', @formulationIDs, @formulationPackagingID));
+
+	INSERT into temp_table(mlc_id, mo_number, product_lot_code, qty, received_qty, formula_internal_code, formula_title, unit_name, wgt_kgs_per_unit)
+	select mlomanagement.id, mlomanagement.internalCode, lotCode, mlomanagement.qty, mlomanagement.received_qty, formulations__formula_id.internalCode, formulations__formula_id.title, unitmeasurement.unit_name, (SELECT fopackaging.wgt_kgs_per_unit FROM mlcpackaging left join fopackaging on mlcpackaging.pack_level_id = fopackaging.id WHERE mlcpackaging.mlc_id = mlomanagement.id) as wgt_kgs_per_unit
+	from `mlomanagement` 
+	left outer join `mlo_status_types` as `mlo_status_types__mlc_status` on `mlomanagement`.`mlc_status` = `mlo_status_types__mlc_status`.`id`
+	left outer join `formulations` as `formulations__formula_id` on `mlomanagement`.`formula_id` = `formulations__formula_id`.`id` 
+	left outer join `unitmeasurement` on formulations__formula_id.uom = `unitmeasurement`.`id`
+	where `mlomanagement`.`company_id` = @companyID and FIND_IN_SET(`mlomanagement`.`formula_id`, @allFormulationIDs);
+
+	SET @mlcIDs := (SELECT GROUP_CONCAT(mlc_id) FROM temp_table);
+	-- SELECT @mlcIDs;
+
+	SET @mprIDs := (SELECT GROUP_CONCAT(id) FROM materialsproductsreleased WHERE FIND_IN_SET(mlc_id, @mlcIDs));
+	INSERT into temp_qty_allocated(mlc_id, qty_allocated, material_id, uom, unit_name)
+	SELECT materialsproductsreleased.mlc_id, mprrecievelots.qty_allocated, mprrecievelots.material_id, materials.uom, unitmeasurement.unit_name
+	FROM mprrecievelots 
+	left join materialsproductsreleased on mprrecievelots.MPR_id = materialsproductsreleased.id
+	left join materials on mprrecievelots.material_id = materials.id
+	left join unitmeasurement on materials.uom = unitmeasurement.id
+	WHERE Rec_Lot_id = @receiveLotID;
+
+	-- This is the code to get returned material
+	SET @rmpIDs := (SELECT GROUP_CONCAT(id) FROM returnmaterialproduct WHERE FIND_IN_SET(mlc_id, @mlcIDs));
+	INSERT into temp_qty_returned(mlc_id, qty_returned)
+	SELECT returnmaterialproduct.mlc_id, returnmpreceivelots.qty_return
+	FROM returnmpreceivelots 
+	left join returnmaterialproduct on returnmpreceivelots.ReturnMP_id = returnmaterialproduct.id 
+	WHERE FIND_IN_SET(`returnmpreceivelots`.`ReturnMP_id`, @rmpIDs) AND Rec_Lot_id = @receiveLotID;
+
+	-- SELECT * FROM temp_table;
+	SELECT temp_table.*, COALESCE(temp_qty_allocated.qty_allocated, 0) as qty_allocated, temp_qty_allocated.unit_name as qty_allocated_unit, (SELECT COALESCE(SUM(qty_returned), 0) from temp_qty_returned WHERE mlc_id = temp_table.mlc_id) as qty_returned FROM temp_qty_allocated 
+	left join temp_table on temp_qty_allocated.mlc_id = temp_table.mlc_id;
+	DROP TEMPORARY TABLE temp_table;
+	DROP TEMPORARY TABLE temp_qty_allocated;
+	DROP TEMPORARY TABLE temp_qty_returned;
+END
+
+
+===== Trace_ProductOneStepBackwardIP_SP (PROCEDURE) =====
+BEGIN
+	SET @formulationId := formulationId;
+	SET @mlcId := mlcId;
+    
+	select * from 
+(
+SELECT 
+		mpr.mlc_id as mlc_id,
+        f.title AS int_prod,
+        f.internalCode AS prod_id_int,
+        f.myCode AS prod_id_ext,
+        mlo.internalCode AS mo_no,
+        mlo.lotCode AS prod_lot_code,
+        mpr1.qty_allocated AS qty_used,
+        mpr1.qty_allocated / fo.wgt_kgs_per_unit AS shipping_units,
+        um.unit_name
+    FROM 
+        materialsproductsreleased mpr
+    JOIN 
+        mprrecievelots mpr1 ON mpr.id = mpr1.MPR_id
+    JOIN 
+        receiveproducts rp ON mpr1.Rec_Product_id = rp.id
+    JOIN 
+        mlomanagement mlo ON mlo.id = rp.mlc_id
+    JOIN 
+        formulations f ON f.id = mpr1.formula_id
+    JOIN 
+        fopackaging fo ON fo.formulation_id = f.id
+    JOIN 
+        unitmeasurement um ON um.id = f.uom
+) t
+where mlc_id = @mlcId;
+END
+
+
+===== Trace_ProductOneStepForwardIP_SP (PROCEDURE) =====
+BEGIN
+	SET @formulationId := formulationId;
+	SET @mlcId := mlcId;
+
+SELECT f.title as int_prod
+, f.internalCode as prod_id_int
+, f.myCode as prod_id_ext
+, mlo.internalCode
+, mlo.lotCode
+-- this is the amount of the actual product used
+, mpr.qty_allocated as qty_used
+, mpr.qty_allocated/fo2.wgt_kgs_per_unit as qty_used_su
+-- , rp.qty as qty_produced
+, um2.unit_name
+-- , f.*, mpr.*, rp.* , mpr1.*
+FROM mprrecievelots mpr
+join formulations f2 on f2.id = mpr.formula_id
+join unitmeasurement um2 on um2.id = f2.uom
+join fopackaging fo2 on fo2.formulation_id = mpr.formula_id
+JOIN receiveproducts rp ON mpr.Rec_Product_id = rp.id
+JOIN materialsproductsreleased mpr1 ON mpr.MPR_id = mpr1.id
+-- join recievedlots rl on rl.id = mpr.Rec_Lot_id
+join mlomanagement mlo on mpr1.mlc_id = mlo.id
+join formulations f on mlo.formula_id = f.id
+join fopackaging fo on fo.formulation_id = f.id
+join unitmeasurement um on um.id = f.uom
+-- This ensure we are using the lateset packaging data
+where fo.whd_flag = true
+and fo2.whd_flag = true
+and rp.mlc_id = @mlcId;
+
+END
+
+
+===== Trace_ProductOneStepForward_SP (PROCEDURE) =====
+BEGIN
+    DECLARE v_formulationId VARCHAR(100);
+    DECLARE v_mlcId VARCHAR(100);
+
+    SET v_formulationId = formulationId;
+    SET v_mlcId = mlcId;
+
+    SELECT 
+        c.customer_name,
+        s.customer_shipping_address,
+        c.address,
+        ps.internalCode,
+        DATE(ps.createdAt) AS ps_create_date,
+        DATE(ps.shippingdate) AS ps_shipping_date,
+        s.internalCode AS so_number,
+        ps.vehicle_no AS customer_ship_ref,
+        psd.shipped_qty * fop.wgt_kgs_per_unit AS shipped_qty_weight,
+        psd.shipped_qty AS shipped_qty_units,
+        u.unit_name
+    FROM 
+        dispatchorders do
+    JOIN fopackaging fop ON do.packing_id = fop.id
+    JOIN formulations f ON do.formula_id = f.id
+    JOIN unitmeasurement u ON f.uom = u.id
+    JOIN do_receive_products drp ON drp.dispatch_order_id = do.id
+    JOIN receiveproducts rp ON drp.recProduct_id = rp.id
+    JOIN somanagement s ON do.SO_id = s.id
+    JOIN companycustomers c ON s.customer_id = c.id AND s.company_id = c.company_id
+    JOIN packingslipdos psd ON do.id = psd.DO_id
+    JOIN packingslips ps ON ps.id = psd.PS_id
+    WHERE 
+        do.formula_id = v_formulationId
+        AND rp.mlc_id = v_mlcId
+        AND ps.shippingdate IS NOT NULL;
+END
+
+
+===== WhC_GetAllRejectedList_SP (PROCEDURE) =====
+BEGIN
+  select rejectmaterialandproduct.id, rejectmaterialandproduct.internalCode, rejectmaterialandproduct.qty_rejected, rejectmaterialandproduct.remarks_reasons, rejectmaterialandproduct.createdAt, rejectmaterialandproduct.type, rejectmaterialandproduct.material_id, rejectmaterialandproduct.formula_id, rejectmaterialandproduct.recievedlot_id, rejectmaterialandproduct.receiveProduct_id, rejectmaterialandproduct.mlc_id, rejectmaterialandproduct.disposition, rejectmaterialandproduct.disposition_authorized_by,
+  formulations.title as formulation_title, formulations.uom as formulation_uom, formulations.internalCode as formulation_internalCode, formulations.myCode as formulation_myCode,
+  materials.title as material_title, materials.uom as material_uom, materials.internalCode as material_internalCode, materials.myCode as material_myCode,
+  unitmeasurement_formulation.unit_name as formulation_unit_name,
+  unitmeasurement_material.unit_name as material_unit_name,
+  miscellaneous_reason.name as miscellaneous_reason_name,
+  recievedlots.internalCode as recievedlots_internalCode,
+  recievedlot_id_mlo.internalCode as recievedlot_id_mlo_internalCode, recievedlot_id_mlo.lotCode as recievedlot_id_mlo_lotCode, recievedlot_id_mlo.received_qty as recievedlot_id_mlo_received_qty,
+  receiveProduct_id_mlo.internalCode as receiveProduct_id_mlo_internalCode, receiveProduct_id_mlo.lotCode as receiveProduct_id_mlo_lotCode, receiveProduct_id_mlo.received_qty as receiveProduct_id_mlo_received_qty,
+  user.name as dispositionBy,
+  fopackaging.wgt_kgs_per_unit as wgt_kgs_per_unit
+  from `rejectmaterialandproduct` 
+  left outer join `formulations` on `rejectmaterialandproduct`.`formula_id` = `formulations`.`id`
+  left outer join `materials` on `rejectmaterialandproduct`.`material_id` = `materials`.`id`
+  left outer join `unitmeasurement` as `unitmeasurement_formulation` on `formulations`.`uom` = `unitmeasurement_formulation`.`id`
+  left outer join `unitmeasurement` as `unitmeasurement_material` on `materials`.`uom` = `unitmeasurement_material`.`id`
+  left outer join `miscellaneous_reason` on `rejectmaterialandproduct`.`remarks_reasons` = `miscellaneous_reason`.`id`
+  left outer join `recievedlots` on `rejectmaterialandproduct`.`recievedlot_id` = `recievedlots`.`id`
+  left outer join `mlomanagement` as `recievedlot_id_mlo` on `rejectmaterialandproduct`.`recievedlot_id` = `recievedlot_id_mlo`.`id`
+  left outer join `receiveproducts` on `rejectmaterialandproduct`.`receiveProduct_id` = `receiveproducts`.`id`
+  left outer join `mlomanagement` as `receiveProduct_id_mlo` on `receiveproducts`.`mlc_id` = `receiveProduct_id_mlo`.`id`
+  left outer join `user` on `rejectmaterialandproduct`.`disposition_authorized_by` = `user`.`id`
+  left outer join `fopackaging` on `receiveproducts`.`mlc_packaging_id` = `fopackaging`.`id`
+  where `rejectmaterialandproduct`.`company_id` = companyId and `rejectmaterialandproduct`.`status` = statusVal
+  order by `rejectmaterialandproduct`.`createdAt` DESC;
+END
+
+
+===== WhC_GetFormulaPackagingMaterials (PROCEDURE) =====
+BEGIN
+SELECT `fopackaging`.`formulation_id`, `fopackaging`.`quantity` as `qty`, `fopackaging`.`material_id`, `fopackaging`.`wgt_kgs_per_unit`, `fopackaging`.`whd_flag`, `fopackaging`.`pack_level`,
+`materials`.`title`, `materials`.`internalCode`, `materials`.`myCode`, `materials`.`inventory`, `materials`.`uom`, `materials`.`allergen`, `materials`.`status_id`,
+`unitmeasurement`.`unit_name` as `unit_name`
+FROM `fopackaging`
+left outer join `materials` on `fopackaging`.`material_id` = `materials`.`id`
+left outer join `unitmeasurement` on `materials`.`uom` = `unitmeasurement`.`id`
+where `fopackaging`.`formulation_id` = formulationId;
+END
+
+
+===== WhC_GetMoDetails_SP (PROCEDURE) =====
+BEGIN
+	select `mlomanagement`.`createdAt`, `mlomanagement`.`id`, `mlomanagement`.`company_id`, `mlomanagement`.`user_id`, `mlomanagement`.`internalCode`, `mlomanagement`.`formula_id`, `mlomanagement`.`qty`, `mlomanagement`.`received_qty`, `mlomanagement`.`batches`, `mlomanagement`.`best_before`, `mlomanagement`.`allergens`, `mlomanagement`.`remarks`, `mlomanagement`.`startedBy_userId`, `mlomanagement`.`startDate`, `mlomanagement`.`lotCode`, `mlomanagement`.`mlc_status`, 
+	`formulations__formula_id`.`id` as `formula_id__id`, `formulations__formula_id`.`internalCode` as `formula_id__internalCode`, `formulations__formula_id`.`myCode` as `formula_id__myCode`, `formulations__formula_id`.`title` as `formula_id__title`, `formulations__formula_id`.`uom` as `formula_id__uom`, `formulations__formula_id`.`batch_qty` as `formula_id__batch_qty`,
+	`unitmeasurement__uom`.`unit_name` as `unit_name`,
+	`mlcpackaging`.`id` as `mlcpackaging_id`, `mlcpackaging`.`pack_level_id` as `mlcpackaging_pack_level_id`,
+	`fopackaging`.`wgt_kgs_per_unit` as `fopackaging_wgt_kgs_per_unit`, `fopackaging`.`whd_flag` as `fopackaging_whd_flag`,
+	`materials`.`title` as `fopackaging_material_title`,
+	`materialsproductsreleased`.`id` as `MPR_id`,
+	`returnmaterialproduct`.`id` as `MPReturn_id`,
+    `user`.`name` as `start_production_supervisor`
+	from `mlomanagement` 
+	left outer join `formulations` as `formulations__formula_id` on `mlomanagement`.`formula_id` = `formulations__formula_id`.`id` 
+	left outer join `unitmeasurement` as `unitmeasurement__uom` on `formulations__formula_id`.`uom` = `unitmeasurement__uom`.`id`
+	left outer join `mlcpackaging` as `mlcpackaging` on `mlomanagement`.`id` = `mlcpackaging`.`mlc_id`
+	left outer join `fopackaging` as `fopackaging` on `mlcpackaging`.`pack_level_id` = `fopackaging`.`id`
+	left outer join `materials` as `materials` on `fopackaging`.`material_id` = `materials`.`id`
+	left outer join `materialsproductsreleased` on `mlomanagement`.`id` = `materialsproductsreleased`.`mlc_id`
+	left outer join `returnmaterialproduct` on `mlomanagement`.`id` = `returnmaterialproduct`.`mlc_id`
+	left outer join `user` on `mlomanagement`.`startedBy_userId` = `user`.`id`
+	where `mlomanagement`.`id` = mlcId and `mlomanagement`.`status_id` = statusId;
+END
+
+
+===== WhC_GetMoPackagingConfiguration_SP (PROCEDURE) =====
+BEGIN
+	SELECT `fopackaging`.`id`, `fopackaging`.`wgt_kgs_per_unit`, `fopackaging`.`material_id`, `fopackaging`.`whd_flag`, `fopackaging`.`pack_level`, `fopackaging`.`quantity`,
+	`materials`.`title` as `materials_title`, `materials`.`uom` as `materials_uom`, `materials`.`statutory_flag` as `materials_statutory_flag`, `materials`.`statutory_file_name` as `materials_statutory_file_name`,
+	`unitmeasurement_materials`.`unit_name` as `materials_unit_name`,
+	`unitmeasurement_formulations`.`unit_name` as `formulations_unit_name`
+	FROM `fopackaging`
+	left outer join `materials` on `fopackaging`.`material_id` = `materials`.`id` 
+	left outer join `unitmeasurement` as `unitmeasurement_materials` on `materials`.`uom` = `unitmeasurement_materials`.`id`
+	left outer join `formulations` on `fopackaging`.`formulation_id` = `formulations`.`id` 
+	left outer join `unitmeasurement` as `unitmeasurement_formulations` on `formulations`.`uom` = `unitmeasurement_formulations`.`id`
+	where `fopackaging`.`formulation_id` = formulationId;
+END
+
+
+===== WhC_GetMoProductReceivingDetails_SP (PROCEDURE) =====
+BEGIN
+SELECT `receiveproducts`.`id`, `receiveproducts`.`internalCode`, `receiveproducts`.`recieved_qty`, `receiveproducts`.`mlc_packaging_id`, `receiveproducts`.`mlc_id`,
+`receiveproducts`.`received_at`,
+`mlcpackaging`.`id` as `mlcpackaging_id`, `mlcpackaging`.`pack_level_id`,
+`fopackaging`.`wgt_kgs_per_unit`
+FROM `receiveproducts`
+left outer join `mlcpackaging` on `receiveproducts`.`mlc_packaging_id` = `mlcpackaging`.`id`
+left outer join `fopackaging` on `mlcpackaging`.`pack_level_id` = `fopackaging`.`id`
+where `receiveproducts`.`mlc_id` = mlcId;
+END
