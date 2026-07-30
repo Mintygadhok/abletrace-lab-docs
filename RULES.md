@@ -1,5 +1,9 @@
 # RULES
 
+Last revised: S94.
+⚠ THIS STAMP WILL OFTEN NOT MOVE. RULES changes only when a rule is
+  earned by a real failure. A stamp several sessions old is correct.
+
 Read first. Changes rarely. Everything here was earned by a real failure.
 
 ```
@@ -128,16 +132,44 @@ PATTERNS      Before trusting what a grep or a LIKE RETURNED, ask what
               rows it returns will read as evidence. Two of Claude's
               own patterns failed this way in S93.
 
-DOCS          NOW.md is the only file rewritten each session. TRAPS.md
-              grows only when something bites twice. Everything else is
-              frozen and is allowed to be imperfect — it is not tidied.
-              ⚠ ANYTHING WORTH KEEPING MUST NOT LIVE IN NOW.md. NOW is
-              rewritten whole, so a note left there is deleted next
-              session. Traps go to TRAPS, rules go here.
+DOCS          ⚠ FOUR WORKING FILES, FIXED NAMES. Git holds the
+              history. Nothing accumulates, nothing is suffixed.
+
+                RULES.md   how we work. Edited rarely.
+                           Last revised: S--
+                NOW.md     state + queue. REWRITTEN WHOLE each session.
+                           Last rewritten: S--
+                TRAPS.md   what bit us. APPENDED ONLY, never cut.
+                           Last appended: S--
+                PLAN.md    the next session's list. Rewritten whole,
+                           disposable. Written at close of: S-- for S--
+
+              ⚠ EVERY ONE CARRIES ITS STAMP ON THE FIRST LINES, NOT THE
+              LAST. The tell must cost one glance, and TRAPS is long.
+              At session open, read all four stamps against the session
+              being opened. If they lag, THE BOXES ARE THE ARBITER and
+              the record is reconciled before any work.
+
+              ⚠ NO SUFFIXED COPIES. S92 made TRAPS-additions-S92.md and
+              S93 had to merge it back. A suffix on a cumulative file
+              splits the one thing that made it valuable. And suffixed
+              copies of NOW would have sat in Downloads exactly as the
+              unsuffixed ones did — the fix was COMMITTING, not naming.
+
+              ⚠ THE PASTE LIST IS IN PLAN.md AND IT IS AUTHORITATIVE.
+              Paste what it names and nothing else. Claude asks by name
+              for anything further, and says why in the same breath.
+
+              ⚠ ANYTHING WORTH KEEPING MUST NOT LIVE IN NOW.md OR
+              PLAN.md. Both are rewritten whole, so a note left there is
+              deleted next session. Traps go to TRAPS, rules go here.
+
+              ⚠ THE RAW GITHUB URL CACHES. Read the web view, or paste.
+              A stale fetch is not evidence a commit failed.
+
               ⚠ SECTION 5 IS NOT DELETABLE. It holds the JR rebuild
               block — the only record of every stored proc, view,
               column add and seed — and the reconcile oracle.
-              ✅ P67 CLOSED S93: JR1 through JR14 verified present.
 
 CLOSE         ⚠ NOTHING IS CLOSED UNTIL IT IS COMMITTED AND PUSHED.
               A file written in the chat and downloaded is NOT the

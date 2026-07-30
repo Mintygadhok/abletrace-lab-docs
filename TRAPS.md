@@ -1,5 +1,7 @@
 # TRAPS
 
+Last appended: S94.
+
 Only things that bit twice or cost real hours. A line goes in when it
 bites again — not every session. Never cut, never reorganised.
 
@@ -675,3 +677,102 @@ material on every MO whose plan does not divide evenly. ~5g in 100kg.
   number is CONSUMED. A figure that is cosmetic in one screen may be
   load-bearing two files away.
 ```
+
+---
+
+## JT — SHIPPED_QTY IS UNITS-STORED, AND IT HAS BEEN MISREAD THREE TIMES
+
+```
+`packingslipdos.shipped_qty` and `dispatchorders.qty_shipped` hold a
+UNIT COUNT. The Kg figure beside them is DERIVED BY MULTIPLYING.
+
+MEASURED ON DEV, S94, company 464:
+    testpdt260703   20 Kg/unit    qty_to_ship 100    shipped_qty 5
+    test1.39        1.39 Kg/unit  qty_to_ship 9.73   shipped_qty 7
+7 x 1.39 = 9.73 EXACTLY. Not approximately.
+
+THREE SEPARATE BITES:
+  S16  stock-info.component.ts subtracted shipped_qty (units) from
+       qty_to_ship (Kg) in the same expression. Fixed by multiplying.
+  S93  dispatch-orders printed it raw as Kg AND divided it for the
+       unit figure. Diagnosed, not fixed.
+  S94  fixed. Same field, third encounter.
+
+⚠ THE RULE: the DO row mixes units and Kg in adjacent columns, and
+  every neighbouring field reads plausible. Before combining or
+  dividing anything on that row, look the column up in GR7. Do not
+  infer the basis from the column name — qty_to_ship and qty_shipped
+  sit side by side and are OPPOSITE bases.
+
+⚠ THE KNOWN-GOOD SHAPES, both already in the codebase:
+    frontend  edit-packslips.component.ts:280   units# (units x wgt Kg)
+    SQL       Trace_ProductOneStepForward_SP    shipped_qty * wgt
+  Copy one. Do not invent a third.
+```
+
+---
+
+## JT — TWO DOCUMENTS CAN BOTH CLAIM TO BE CURRENT
+
+```
+S93's trap was a STALE document. This is its sibling and it is worse:
+TWO LIVE DOCUMENTS, neither stale, both authoritative, disagreeing.
+
+FOUND S94, and it had stood for an unknown number of sessions:
+  Section 0's standing paste  =  Section 0 + Section 1 + Section 5
+  PLAN's paste list           =  RULES + NOW + TRAPS + PLAN
+  Section 0's rule 9 maps NOW to Section_1.md. NOW does not live there.
+
+So RULES and Section 0 are two heads of one document, and NOW and
+Section 1 are the other pair. Following either is defensible. Following
+both is impossible.
+
+⚠ WHY IT SURVIVED: neither head is WRONG about anything. They are each
+  internally consistent. A staleness check cannot see this — both
+  stamps are recent. Only reading them SIDE BY SIDE reveals it.
+
+⚠ THE TELL: two files whose OPENING INSTRUCTION differs. If two
+  documents both tell you what to read first, one of them is a head
+  that should have been retired.
+
+⚠ SAME FAMILY AS THE A COLLAPSE AND THE G COLLAPSE — but those went
+  two-headed WITHIN one file, by append. This went two-headed ACROSS
+  files, by a fold that retired the content and left the container.
+  Rule 9E catches the first shape and not the second.
+
+⚠ AND THE PART THAT MATTERS: the retired head is not empty. Section 0
+  carries five load-bearing rules RULES does not. Deleting it loses
+  them; keeping it keeps the contradiction. → P95
+```
+
+---
+
+## JT — A PLACEHOLDER IN A COMMAND BLOCK WILL BE PASTED LITERALLY
+
+```
+Twice in S94, Claude wrote a command containing a stand-in and Minty
+pasted it exactly as given, because that is what a command block means.
+
+  mysql --defaults-file=/tmp/dev.cnf ...
+      → ERROR 1049 Unknown database '...'
+  ~/promote.sh ~/Downloads/dist-dev-c2a52d8e<rest-of-sha>.zip dev
+      → -bash: rest-of-sha: No such file or directory
+
+Neither was ambiguous to Claude. Both were unambiguous to bash too,
+which is the problem: a placeholder is valid syntax.
+
+⚠ THE RULE: a command block contains ONLY what is to be typed. If
+  Claude does not know a value, it does not write the command — it asks
+  for the value first, or gives a form that does not need it:
+      type the stem and press Tab
+      ls -1t ~/Downloads/dist-* | head -5   then read the name back
+
+⚠ AND THE ANGLE BRACKETS ARE THEIR OWN HAZARD: `<` is a shell
+  redirect. A placeholder in brackets does not just fail, it fails
+  with an error about the wrong thing entirely.
+
+⚠ SAME SHAPE AS THE PROSE-INSIDE-THE-FENCE FAILURE (P68): anything
+  inside a command block is a command. Explanations, placeholders and
+  warnings all live OUTSIDE it.
+```
+
