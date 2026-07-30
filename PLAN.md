@@ -124,4 +124,29 @@ NOT IN THIS       NOW are the other pair. Fold 0.2a, 0.2b, 0.2c, 9E and
 SESSION           rule 10 into RULES, then retire Section 0 and
                   Section 1 together. ⚠ ONE SITTING, AT A CLOSE.
                   Until then Section 0 names the wrong paste list.
+
+THE SPLIT         ⚠ TARGET, NOT A MEASUREMENT. Judged roughly at close,
+                  never tracked during the session.
+
+                    OPENING DOCS    5%
+                    APP WORK       80%
+                    CLOSING DOCS   15%
+
+                  S94 ACTUAL: ~17 / ~48 / ~35.
+                  ⚠ The closing figure is NOT the baseline — most of it
+                    was one-time system design (the four-file set, the
+                    stamps, finding the Section 0 second head, creating
+                    PLAN). A routine close is NOW + TRAPS + PLAN, one
+                    patch, one commit.
+                  ⚠ Stripping the avoidable waste, S94 reads ~10/65/25.
+
+                  THE LEVERS, in order of size:
+                    1  Claude does not widen scope unasked (RULES SCOPE)
+                    2  Paste what PLAN names, nothing more
+                    3  "Just the command" whenever the reasoning is not
+                       wanted
+                    4  One command per fenced block, nothing else in it
+                       (RULES COMMANDS)
+                    5  Doc corrections attach to the work that touches
+                       them — never their own session
 ```

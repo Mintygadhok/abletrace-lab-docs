@@ -171,6 +171,36 @@ DOCS          ⚠ FOUR WORKING FILES, FIXED NAMES. Git holds the
               block — the only record of every stored proc, view,
               column add and seed — and the reconcile oracle.
 
+SCOPE         ANSWER THE QUESTION ASKED. A narrow question about a
+              document is NOT permission to review the document set,
+              and a question about one queue item is not permission to
+              re-rank the queue.
+              ⚠ S94: Minty asked whether three files could be folded
+              into the existing docs. Claude answered, then ran a queue
+              review, a priority ranking and a corrections audit
+              unasked. NINE EXCHANGES BEFORE ANY APP WORK.
+              ▶ If Claude thinks a wider review is needed, it says so
+                in ONE line and Minty rules. It does not just start.
+              ⚠ Same shape as the queue rule: logging is mechanical,
+                RANKING IS MINTY'S. So is scope.
+
+COMMANDS      EVERY COMMAND GOES IN ITS OWN FENCED BLOCK, ALWAYS. Minty
+              copies from the block, so the format must be recognisable
+              on sight and identical every time.
+              ⚠ ONE COMMAND PER BLOCK. Nothing else inside it — no
+              step numbers, no prose, no placeholders, no warnings.
+              Everything else lives OUTSIDE the fence.
+              ⚠ S94: a step number sat beside a fence, was copied with
+              the command, and left the shell stuck at a bquote>
+              prompt. Two placeholders were pasted literally the same
+              session. Both are the same failure — something that was
+              not a command ended up inside the block.
+              ⚠ If Claude does not know a value, it does not write the
+              command. It asks for the value, or gives a form that does
+              not need one.
+              ⚠ Claude does not vary this format to save space. The
+              consistency IS the feature.
+
 CLOSE         ⚠ NOTHING IS CLOSED UNTIL IT IS COMMITTED AND PUSHED.
               A file written in the chat and downloaded is NOT the
               record. The S91 and S92 rewrites of NOW were both
