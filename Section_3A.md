@@ -483,7 +483,7 @@ Trace_ProductHeaderView    ⚠ DB VIEW — RDS ONLY, NOT IN GIT.
                            nobody has yet identified exactly where.
 ```
 
-**KNOWN TRAPS** — ⚠ DB-only objects are NOT in git; the log is their only record (→ §2, stored-proc discipline; Section 0 rule 4.8) · Defect 2 display side · P19 (trace PDF cuts a row across a page break — cosmetic, a known limitation, real fix is section-aware capture).
+**KNOWN TRAPS** — ⚠ DB-only objects are NOT in git; the log is their only record (→ §2, stored-proc discipline; RULES DB-ONLY CHANGES) · Defect 2 display side · P19 (trace PDF cuts a row across a page break — cosmetic, a known limitation, real fix is section-aware capture).
 
 ---
 

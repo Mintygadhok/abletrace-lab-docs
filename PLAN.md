@@ -1,6 +1,6 @@
 # PLAN
 
-Written at close of: S94 · for S95.
+Written at close of: S95 · for S96.
 Disposable. Rewritten whole at every close. Nothing durable lives here.
 
 ---
@@ -8,43 +8,35 @@ Disposable. Rewritten whole at every close. Nothing durable lives here.
 ## THE JOB — three items, in order, nothing else
 
 ```
-1  P91   Trace_ProductProdLotView divides received_qty by
-         wgt_kgs_per_unit to produce received_qty_su, WHILE ALREADY
-         SELECTING received_units in the same view. Read the stored
-         column instead.
-         ▶ THE SMALLEST REAL FIX AVAILABLE. The correct value is
-           already in hand.
-         ⚠ RDS ONLY, NOT IN GIT. The JR entry is written in the SAME
-           BREATH as the ALTER, or it is lost on rebuild.
+1  R5    THE TWO REPOINTS. Minty ruled GO at the S95 close.
+           qty_produced_su → mm.received_units
+           qty_shipped_su  → SUM(dispatchorders.qty_shipped)
+         Both live in Trace_ProductHeaderView. Scope, measurements and
+         the consumer list are in J113 — read that, not a plan file.
 
-2  P93   Is qty_allocated Kg-stored or units-stored? GR7 does not
-         carry it. One SELECT settles it.
-         ▶ ONE ANSWER, FOUR OUTCOMES: two IP stored procs
-           (Trace_ProductOneStepBackwardIP_SP,
-           Trace_ProductOneStepForwardIP_SP) and two frontend sites
-           (product-traceability-details.component.html:352 and :383)
-           all divide it. If units-stored, all four are bugs. If
-           Kg-stored, all four are correct.
-         ⚠ SAME QUESTION HANGS OVER quanity_shipped_to_date (note the
-           misspelling), divided at add-dispatch.component.ts:72.
+         ⚠ THE TRAP THAT WILL BITE THIS. The do_products CTE inside the
+           same view defines its OWN alias called qty_shipped, which
+           sums qty_to_ship and is KG. The real column is UNITS. Same
+           name, opposite basis, a few lines apart. Read the TRAPS
+           entry before writing anything.
+         ⚠ GATE PROD BEFORE THE ALTER, as P91 did. Count the rows that
+           would go blank. Dev is not the answer for prod.
+         ⚠ RDS ONLY, NOT IN GIT. JR entry in the SAME BREATH.
+         ⚠ ONE SCREEN VERIFIES IT: product-traceability-details.
+         ⚠ SOH WILL NOT CHANGE and that is expected — it needs a column
+           that does not exist. Do not chase it.
+         ▶ P90 rides along: strike the two false claims in 3A.5 row 7
+           and 3A.6 while in that view. Needs Section_3A.md pasted.
 
-3  R5    SCOPE ONLY. NO BUILD.
-         Trace_ProductHeaderView has seven divisions and carries
-         NEITHER inventory_units NOR received_units, so the fix is an
-         ALTER, not a repoint.
-         ⚠ IT IS NOT ONE JOB. Read from the committed view text:
-             qty_produced_su      reachable now
-             qty_shipped_su       reachable now
-             intermediate_prd_su  BLOCKED on P93
-             qty_misc_release_su  IMPOSSIBLE — qty_rejected is Kg-only
-                                  with no units column anywhere. Needs
-                                  a schema change first.
-             SOH_su               calculated by subtracting the others,
-                                  so it stays wrong until the last one
-                                  is fixed. THIS IS THE HEADLINE FIGURE.
-         ⚠ AND NOBODY HAS ESTABLISHED WHICH SCREENS READ THIS VIEW.
-           Until that is known a fix cannot be verified on screen.
-         ▶ DELIVERABLE: a scoped plan, not a change.
+2  P52   SETTLE WHETHER THE PRINTED PACKING SLIP IS ALREADY DONE.
+         ⚠ J112 records it BUILT AND SHIPPED TO PROD IN S86, with
+           totals, page footer and barcode deliberately not built.
+         ▶ OPEN A SHIPPED SLIP ON PROD AND PRINT IT. Minutes. It either
+           closes the queue's only additive item, or what is missing IS
+           the job.
+
+3  P58   THE PAT. Dev remotes do not carry it. Minutes to fix. Has
+         fired every session that pushed.
 ```
 
 ---
@@ -53,14 +45,14 @@ Disposable. Rewritten whole at every close. Nothing durable lives here.
 
 ```
 RULES.md · NOW.md · TRAPS.md · PLAN.md
-PLUS db-definitions-S93.txt        both P91 and P93 are database-side
+PLUS Section_5.md      R5 writes its JR entry there. NOT OPTIONAL.
+PLUS Section_3A.md     P90 strikes two claims in it.
 
-Section_2.md    ONLY if a units-basis judgment is needed. GR7 is the
-                oracle for which fields are units-stored.
+NOTHING ELSE.
 
-NOTHING ELSE. Claude asks by name, and says why in the same breath.
-⚠ S94 opened with nine files pasted. 3A, 3B, the acrobatics map and the
-  S91 patch script were never opened.
+⚠ SECTION_0.md AND SECTION_1.md NO LONGER EXIST. Deleted S95 (P95).
+  RULES.md carries what Section 0 carried, including the map of what
+  each reference section holds. Anything asking for them is stale.
 ```
 
 ---
@@ -68,85 +60,24 @@ NOTHING ELSE. Claude asks by name, and says why in the same breath.
 ## FIRST THREE ACTIONS
 
 ```
-1  Health check both boxes. The OPEN block in RULES pastes cleanly now.
+1  Health check both boxes. Read all four stamps against S96 first.
    EXPECT  dev frontend c2a52d8e · prod SERVING prod-c2a52d8e...
            both backends 13e3fcd · clean · 200
-   ⚠ Read all four document stamps against S95 first.
+   ⚠ NOTHING WAS DEPLOYED IN S95. A delta here is a real finding.
 
-2  P91. Rebuild the temp cnf from .env (3B.3 recipe), read the view,
-   ALTER it, write the JR entry immediately.
+2  Read J113 and the CTE alias trap in TRAPS.
 
-3  P93. One SELECT against a known lot.
+3  R5. Gate dev, ALTER, verify, then gate prod, ALTER, verify.
 ```
 
 ---
 
-## OWED BY MINTY
+## NOT IN THIS SESSION
 
 ```
-P89       batches is stored rounded to 3 decimal places and multiplied
-          out to compute how much material is released to the floor.
-          ~5g in 100kg, on a live client, every MO whose plan does not
-          divide evenly.
-          ▶ ACCEPT IT, OR FIX IT. This is a business call, not a
-            technical one. It is the only open item that moves physical
-            stock rather than pixels.
-
-R5 SCOPE  After P93 answers. Which of the seven figures are worth
-          fixing, given misc-release cannot be fixed without a schema
-          change and SOH depends on it.
-
-DROPS     P59, P60, P94 proposed for drop in S94. Not ruled on.
-```
-
----
-
-## STANDING DISCIPLINE FOR THIS SESSION
-
-```
-NEW ISSUES        Logged with the next free number, one line, NEVER
-                  CHASED. If Claude thinks a find should change the
-                  plan, it says so ONCE and Minty rules.
-                  ⚠ Found is logged. Logged is not chased. S93 found
-                  P89 mid-session, deliberately did not touch it, and
-                  that was correct.
-
-DOC WORK          Corrections attach to the work that touches them.
-                  P90 is struck WHEN R5 touches that view. P97's JR
-                  pointer is written WHEN P91 needs it. Documentation
-                  is never its own session.
-
-"JUST THE         Minty may say this at any point. Claude gives the
-COMMAND"          command and stops.
-
-THE ONE DOC JOB   P95. Section 0 and RULES are two heads; Section 1 and
-NOT IN THIS       NOW are the other pair. Fold 0.2a, 0.2b, 0.2c, 9E and
-SESSION           rule 10 into RULES, then retire Section 0 and
-                  Section 1 together. ⚠ ONE SITTING, AT A CLOSE.
-                  Until then Section 0 names the wrong paste list.
-
-THE SPLIT         ⚠ TARGET, NOT A MEASUREMENT. Judged roughly at close,
-                  never tracked during the session.
-
-                    OPENING DOCS    5%
-                    APP WORK       80%
-                    CLOSING DOCS   15%
-
-                  S94 ACTUAL: ~17 / ~48 / ~35.
-                  ⚠ The closing figure is NOT the baseline — most of it
-                    was one-time system design (the four-file set, the
-                    stamps, finding the Section 0 second head, creating
-                    PLAN). A routine close is NOW + TRAPS + PLAN, one
-                    patch, one commit.
-                  ⚠ Stripping the avoidable waste, S94 reads ~10/65/25.
-
-                  THE LEVERS, in order of size:
-                    1  Claude does not widen scope unasked (RULES SCOPE)
-                    2  Paste what PLAN names, nothing more
-                    3  "Just the command" whenever the reasoning is not
-                       wanted
-                    4  One command per fenced block, nothing else in it
-                       (RULES COMMANDS)
-                    5  Doc corrections attach to the work that touches
-                       them — never their own session
+⚠ NO DOCUMENTATION JOB IS QUEUED. P95 and P105 both closed at the S95
+  close. Section 0 and Section 1 are gone, the traps are in one file,
+  and RULES carries the map. THIS SESSION IS FOR THE APP.
+⚠ P106 and P107 (acrobatics-map-S91.txt, units-kg-checklist-S93.md) are
+  rulings, not work. Neither file has been read.
 ```

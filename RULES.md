@@ -1,8 +1,11 @@
 # RULES
 
-Last revised: S94.
+Last revised: S95.
 ⚠ THIS STAMP WILL OFTEN NOT MOVE. RULES changes only when a rule is
   earned by a real failure. A stamp several sessions old is correct.
+⚠ S95 IS AN EXCEPTION AND THE LAST OF ITS KIND: Section 0 was folded in
+  here and deleted, closing P95. Everything below that came from Section 0
+  is marked with its original number so the history stays traceable.
 
 Read first. Changes rarely. Everything here was earned by a real failure.
 
@@ -12,6 +15,8 @@ WHO           Minty: domain expert, sole operator, runs every command.
               never asked to judge a technical trade.
               Claude: sole coder and only reviewer. If Claude misses
               it, nobody catches it.
+              ⚠ IF IT IS NOT WRITTEN DOWN, IT IS LOST. That is why
+              these files exist.  [0.1]
 ```
 
 ## OPEN — paste this block, one box at a time
@@ -61,11 +66,28 @@ LOOK          When a claim can be CHECKED ON A SCREEN, ask Minty to
               were already stamped "Confirmed" in the docs.
               A confident wrong answer becomes next session's
               foundation.
+              ⚠ NAME THE ROUTE, NOT THE SCREEN. S95 asked for "product
+              traceability" and got a different screen first, because
+              the URL was never stated. And filter by company_id BEFORE
+              naming a fixture.
 
 EVERY         Every response asking for action ends with
 RESPONSE      "WHAT MINTY DOES NOW". Plain language, one action per
               line, 3 steps or fewer — or the count goes in the header.
               Nothing after that block.
+              ⚠ A step = one thing Minty must think about or decide. A
+              single copy-paste block is ONE step however many lines it
+              contains — but it must be pasteable start to finish with
+              no choices inside it.  [0.2]
+              ⚠ IF THE ANSWER IS "NOTHING", SAY EXACTLY THAT:
+              "NOTHING TO DO — this is background."
+              ⚠ IF CLAUDE NEEDS A DOCUMENT, that request goes IN the
+              block as a step, plainly, by name. Never buried in the
+              body.
+              ⚠ A DOMAIN DECISION goes here too, phrased as a question
+              about the BUSINESS, never about the code. Never "should we
+              bind the parameter?" — always "should the file be
+              attachable before the truck leaves?"
 
 DB IS TRUTH   Toasts, file chips, loaded pages and green ticks prove
               nothing. Verify the stored row. Browser state is cached
@@ -81,10 +103,19 @@ DEV ONLY      Edit on dev. Never hand-edit prod. Never promote
               deploying correct code. Code fixes the future; a heal
               fixes the past. Back up the row first, scope by id AND
               company_id, and say out loud that it is a live write.
+              ⚠ AND A DATABASE OBJECT — a view, a proc, a column — NEVER
+              REACHES THE OTHER BOX BY DEPLOYING ANYTHING. Dev and prod
+              are separate RDS instances. Run it on each box, gate each
+              box separately. There is no promote path. (S95, P91.)
 
-LIVE CLIENT   Prod carries Glutenull. Only 464 and 465 are sandbox.
-              Always act by company_id. A client-reported bug outranks
-              the whole queue.
+LIVE CLIENT   Prod carries Glutenull, company_id 471. Only 464 and 465
+              are sandbox. Always act by company_id. A client-reported
+              bug outranks the whole queue.
+              ⚠ CHECK THE PROMPT COLOUR BEFORE EVERY COMMAND.
+              [MAC] cyan · [DEV] green · [PROD] red. S70 landed commands
+              on the wrong box twice — harmless both times, by luck.
+              ⚠ scp and ssh ALWAYS FROM THE MAC. The pem does not exist
+              on the boxes.  [6.2, 6.3]
 
 PATCHES       Long scripts fail when pasted into a terminal. Hand over
               as a FILE, scp -4 to /tmp/, run from there. Assert every
@@ -92,6 +123,42 @@ PATCHES       Long scripts fail when pasted into a terminal. Hand over
               a string the patch itself introduces.
               ⚠ Verify AFTERWARDS by checking the OLD text is GONE. A
               check for the new text always passes and proves nothing.
+              ⚠ AND A CHECK THAT CANNOT RETURN A PASS IS NOT A CHECK.
+              Scope it to the thing being changed. S95's verification
+              query omitted the schema name and matched a dormant
+              archive, reading as a failure when the patch was correct.
+
+              ⚠ DOC EDITS ARE PATCHES, NOT PASTES.  [0.2c]
+              The docs repo is cloned to the Mac at ~/abletrace-lab-docs
+              and edited like code.
+                1  Minty  git pull
+                2  Claude writes an assert-anchored patch, hands it over
+                          as a FILE
+                3  Minty  cp to /tmp, python3 /tmp/patch.py
+                4  Minty  git diff --stat, then git diff
+                5  Minty  git add <named files> && commit && push
+              ⚠ PULL BEFORE PATCHING. A patch built against a stale clone
+                can apply cleanly and still be wrong.
+              ⚠ THE DIFF IS THE VERIFICATION AND IT IS NOT OPTIONAL.
+                `git checkout -- .` throws everything away and loses
+                nothing — that undo is the safety net.
+              ⚠ DO NOT EDIT REPO FILES IN THE GITHUB WEB INTERFACE. It
+                silently desynchronises the clone and the next patch is
+                then built against a file that no longer matches.
+              ⚠ A PATCH SCRIPT IS A TOOL, NOT A DOCUMENT. Run it from
+                /tmp and delete it. P96 exists because one was committed.
+
+DB-ONLY       ⚠ Procs, views, seed data and RDS config are NOT IN GIT.
+CHANGES       Back the object up first, then log the exact change in
+              Section 5's JR block IN THE SAME BREATH — that log is the
+              only record they exist, and none of them fails loudly.
+              ⚠ Multi-statement SQL is SOURCED FROM A FILE
+              (`mysql <db> < file`), never pasted as a heredoc — an inner
+              `;` breaks the CREATE and a partial run can DROP a
+              procedure without recreating it.
+              ⚠ NAME THE DATABASE. Both boxes carry a dormant `abletrace`
+              archive alongside abletracelab_live, and a bare `mysql`
+              on prod lands in the archive.  [4.8, 4.9]
 
 BLAST RADIUS  Before changing how a number is CALCULATED, grep where
               that number is CONSUMED. S93: `batches` looked like a
@@ -106,6 +173,14 @@ DEPLOY        pm2 restart <NAME>, never "all" — dev=abletrace-dev,
               (a hard reload does not clear lazy chunks).
               ⚠ A push auto-builds DEV. PROD needs a manual dispatch
               with target=prod.
+              ⚠ REGRESSION-TEST THE PAIR, not just the fix. Every fix
+              needs its opposite. Standing example: document save is
+              always tested with BOTH text containing an apostrophe AND
+              a pasted image — fixing either alone has broken the other
+              twice.  [5.2]
+              ⚠ Backups to /home/ubuntu ONLY. Never a .bak inside
+              api/models, controllers or config — Sails loads every .js
+              as LIVE CODE.  [4.6]
 
 THE LOG       The commit message IS the record. What changed and WHY,
               written at the moment of committing. Nothing is written
@@ -115,9 +190,15 @@ REVERTS       A revert is a trade, not a fix. Ask what the commit was
               fixing before undoing it, and name both sides out loud.
               "It worked before" is not evidence the mechanism was
               sound — a mask can hide a bug for years.
+              ⚠ When both states are broken, say so plainly and let
+              Minty choose on domain grounds. Do not present the lesser
+              breakage as a solution.
 
 QUEUE         New items go at the BOTTOM with the next free number.
               Claude never renumbers. Ranking is Minty's, in one pass.
+              ⚠ A queue that renumbers itself mid-session breaks every
+              cross-reference Minty is holding in his head, and hands
+              Claude a priority decision that is not Claude's to make.
 
 ASK FIRST     Before reading a script, a config or a box to learn how
               something works, ask Minty for the document that covers
@@ -125,12 +206,39 @@ ASK FIRST     Before reading a script, a config or a box to learn how
               asking for 3B.4 and had been stating the CI direction
               backwards as a result. The doc is the first stop; the
               artifact is the tiebreaker if they disagree.
+              ⚠ Ask for the SMALLEST thing that answers the question —
+              one item, not the section — and say WHY in the same
+              breath. NEVER work from a half-remembered version of
+              something Minty has on file.
 
 PATTERNS      Before trusting what a grep or a LIKE RETURNED, ask what
               it is STRUCTURALLY CAPABLE of matching. A pattern that
               cannot express the question will still answer it, and the
               rows it returns will read as evidence. Two of Claude's
               own patterns failed this way in S93.
+
+HANDING       ⚠ CLAUDE WRITES THE FILE AND PRESENTS IT FOR DOWNLOAD.
+OVER          Never hand over a long document as chat text and hope the
+              paste survives. Copying from the rendered chat view copies
+              the OUTPUT, not the SOURCE — the backticks have already
+              been consumed to draw the grey box, so they are invisible
+              and uncopyable. This failed three times in S77, once while
+              the rule against it was being written.  [0.2b]
+              ⚠ Chat text is fine for a few lines. The FILE rule is for
+              whole files and anything containing a monospace block.
+              ⚠ If chat text is unavoidable, Minty uses the COPY BUTTON,
+              never a mouse-drag.
+
+              THE FORMAT — two columns, monospace, label left,
+              description right, aligned so the eye tracks one item per
+              row.  [0.2a]
+                LABEL          The description sits here, wrapping under
+                               itself, aligned.
+                NEXT LABEL     Next description.
+              ⚠ No ==== banner rules, no markdown tables (they mangle),
+              no emoji as structure. Quiet and aligned beats decorated.
+              ⚠ Exception: a copy-paste command block is given exactly
+              as typed, nothing added.
 
 DOCS          ⚠ FOUR WORKING FILES, FIXED NAMES. Git holds the
               history. Nothing accumulates, nothing is suffixed.
@@ -156,9 +264,19 @@ DOCS          ⚠ FOUR WORKING FILES, FIXED NAMES. Git holds the
               copies of NOW would have sat in Downloads exactly as the
               unsuffixed ones did — the fix was COMMITTING, not naming.
 
+              ⚠ NO FIFTH FILE. Before writing anything new, ask whether
+              the fact already has a home. Scope and plans → PLAN. Traps
+              → TRAPS. Rebuild steps → Section 5's JR block. Database
+              object text → db-definitions-S93.txt. S95's close proposed
+              four new files and every one was refused; all four facts
+              had homes already.
+
               ⚠ THE PASTE LIST IS IN PLAN.md AND IT IS AUTHORITATIVE.
               Paste what it names and nothing else. Claude asks by name
               for anything further, and says why in the same breath.
+              ⚠ THE PASTE LIST MUST NAME EVERY FILE THE JOB WILL WRITE
+              TO, not just the ones it will read. S95's list omitted
+              Section 5 and the JR entry could only be drafted.
 
               ⚠ ANYTHING WORTH KEEPING MUST NOT LIVE IN NOW.md OR
               PLAN.md. Both are rewritten whole, so a note left there is
@@ -167,9 +285,71 @@ DOCS          ⚠ FOUR WORKING FILES, FIXED NAMES. Git holds the
               ⚠ THE RAW GITHUB URL CACHES. Read the web view, or paste.
               A stale fetch is not evidence a commit failed.
 
+THE           The reference set. Edited rarely, by whole named item,
+REFERENCE     and touched ZERO times in a normal session.  [9, 9A, 9B]
+SET
+                2      WHY — the business logic. The permanent rules of
+                       how the business works. Should outlive the code.
+                3A     THE MODULES — the app, by module. Each carries
+                       its own front end, back end and database in one
+                       place, under five headings: WHAT IT DOES · FRONT
+                       END · BACK END · DATABASE · KNOWN TRAPS.
+                         3A.1  Materials & agents
+                         3A.2  Products, formulations & MOs
+                         3A.3  PO & receiving
+                         3A.4  Sales, DO, packing slip, ship
+                         3A.5  Stock — both lines together: core stock
+                               (formulations.inventory_units, moves both
+                               ways) and produced-to-date
+                               (mlomanagement.received_units, only
+                               climbs). Plus the bucket chain.
+                         3A.6  Traceability
+                         3A.7  Food safety — documents, HACCP
+                         3A.8  Super admin
+                3B     ARCHITECTURE & INFRA — what it runs on.
+                         3B.1  The picture
+                         3B.2  The boxes
+                         3B.3  The databases
+                         3B.4  The pipeline
+                         3B.5  Health check
+                         3B.6  Domains, DNS, SSL
+                         3B.7  Services
+                         3B.8  Credentials — POINTERS ONLY
+                         3B.9  Repos
+                         3B.10 The old app
+                         3B.11 When it breaks
+                4      LOOK & FEEL — visual and interaction language
+                       ONLY. ⚠ If an entry describes an ACTION TO TAKE
+                       or a stored-data change rather than how something
+                       LOOKS, it is in the wrong section.  [9D]
+                5      WHAT BIT US — the JR rebuild block and the
+                       J-entries. Append-only. Numbers PERMANENT.
+                6      HISTORY — session narrative.
+                H      SECRETS. ⚠ PRIVATE. Never in chat, never in the
+                       repo. Pointers only, in 3B.8.
+
               ⚠ SECTION 5 IS NOT DELETABLE. It holds the JR rebuild
               block — the only record of every stored proc, view,
               column add and seed — and the reconcile oracle.
+              ⚠ SECTIONS 0 AND 1 WERE DELETED IN S95. Section 0 folded
+              into this file; Section 1 was superseded by NOW.md. Both
+              remain in git history.
+
+ANTI-ROT      ⚠ THE BOTH-DIRECTIONS TEST. Every fact has one home,
+              decided by how often it changes.  [9E]
+                changes EVERY SESSION    → NOW.md, rewritten whole
+                changes when WE LEARN    → TRAPS.md, appended
+                changes when THE SYSTEM  → RULES or the reference set,
+                  ITSELF changes           by named WHOLE ITEM
+              ⚠ FORWARD: if a line does not change session to session,
+              it does not belong in NOW.
+              ⚠ REVERSE: if a stable file needs editing every session,
+              the content is in the wrong file. Move it to NOW.
+              ⚠ NEVER GIVE A STABLE FILE A "RECENT UPDATES" TAIL. Old
+              Section A grew one for ~30 sessions, and it eventually
+              contradicted the head on NINE load-bearing facts. A
+              dynamic tail on a stable file is how a document becomes
+              two-headed. There is no safe small version of it.
 
 SCOPE         ANSWER THE QUESTION ASKED. A narrow question about a
               document is NOT permission to review the document set,
@@ -211,4 +391,40 @@ CLOSE         ⚠ NOTHING IS CLOSED UNTIL IT IS COMMITTED AND PUSHED.
                 THE SAME BREATH AS WRITING THEM. Then run
                 `git -C ~/abletrace-lab-docs status --short`
                 and expect it to come back EMPTY.
+
+              ⚠ WHOLE ITEMS ONLY — NEVER A LINE, A BULLET OR A PHRASE.
+              Every edit target is a complete named unit with a top and
+              bottom Minty can see. If one line inside an item changes,
+              Claude reissues the ENTIRE item. CLAUDE DOES THE DIFFING,
+              NOT MINTY. There is no such thing as too small.  [7.1]
+              ⚠ AND A STRIKE THAT DOES NOT CHASE EVERY COPY IS NOT A
+              STRIKE. S95 found three separate entries asserting the
+              same superseded claim; all three moved in one patch.
+
+              ⚠ A BUG FOUND BUT NOT FIXED gets logged in Section 5 WITH
+              its evidence rows AND its DISPROVEN THEORIES, plus a line
+              in the queue. Both, not one. A finding that lives only in
+              a handover is a finding that does not exist.  [7.5]
+
+              ⚠ CLEAN AS YOU GO. At close, Claude flags anything that
+              has become redundant, superseded or duplicated — a closed
+              bug still described as open, two entries saying one thing.
+              CLAUDE PROPOSES, MINTY APPROVES. Conservative by default:
+              when unsure whether something is load-bearing, KEEP IT and
+              ask. Small steady approved cleanups beat a painful
+              periodic overhaul.  [7.7]
+
+              ⚠ DO NOT START WORK THAT CANNOT BE RECORDED. If there is
+              not time to write the close, there is not time for another
+              commit. Documentation time is RESERVED, not leftover. S86
+              wrote its docs last, after nine hours, and they went stale
+              TWICE while being written because work continued around
+              them.  [10.5]
+
+              ⚠ CLAUDE RAISES THE CLOSE, MINTY DECIDES. When Claude
+              judges the record is falling behind the work, it says so
+              plainly and proposes stopping — even mid-task, even when
+              the momentum is good. Minty may override; that is his
+              call. But the drift must be NAMED, not silently
+              tolerated.  [10.6]
 ```

@@ -1,6 +1,6 @@
 # TRAPS
 
-Last appended: S94.
+Last appended: S95.
 
 Only things that bit twice or cost real hours. A line goes in when it
 bites again — not every session. Never cut, never reorganised.
@@ -740,7 +740,15 @@ both is impossible.
   files, by a fold that retired the content and left the container.
   Rule 9E catches the first shape and not the second.
 
-⚠ AND THE PART THAT MATTERS: the retired head is not empty. Section 0
+⚠ AND THE PART THAT MATTERS: ⚠ STATUS S95: RESOLVED. Section 0 was folded into RULES.md and
+  DELETED, along with Section 1. RULES now carries all ten
+  load-bearing items — not the five this entry names — including
+  9A/9B, the map of what each reference section holds, which
+  nothing else in the repo carried. → P95, closed.
+⚠ THE TRAP ITSELF STANDS AND IS WHY THIS ENTRY IS KEPT: two files
+  whose OPENING INSTRUCTION differs is the tell.
+
+the retired head is not empty. Section 0
   carries five load-bearing rules RULES does not. Deleting it loses
   them; keeping it keeps the contradiction. → P95
 ```
@@ -776,3 +784,235 @@ which is the problem: a placeholder is valid syntax.
   warnings all live OUTSIDE it.
 ```
 
+---
+
+# MERGED FROM SECTION 5, S95 (P105)
+
+⚠ THESE ARE THE ORIGINAL JT1–JT22 STANDING TRAPS, MOVED VERBATIM
+  FROM SECTION 5. Nothing was cut, reworded or reordered - the block
+  was sliced by anchor, not retyped. Their JT NUMBERS ARE PERMANENT
+  and cross-references across every section still resolve.
+⚠ WHY: two traps files meant two places to look, and Claude reading
+  one and missing the other. Same two-heads shape as P95. Minty's
+  call, S95: bring the documentation down, simplify, get back to the
+  app.
+⚠ SECTION 5 NOW HOLDS THE JR REBUILD BLOCK AND THE J-ENTRIES ONLY.
+  New traps go HERE, never there.
+
+---
+
+JT — STANDING TRAPS. READ THIS BLOCK EVERY SESSION.
+The rules that have bitten more than once. Each names its entry; the
+entry holds the evidence. If a rule here contradicts your reasoning,
+the rule wins — it was earned.
+──────────────────────────────────────────────────────────────────────
+
+JT1. POPULATED FK IS AN OBJECT, NOT A NUMBER.  [J24, J-S69]
+    A status/id field read via Waterline populate comes back as an OBJECT
+    (.id, .role_name). An object is never === 2. It fails SILENTLY — no
+    error, the gate just never fires. Read via a STORED PROC, the same
+    field is a BARE NUMBER and ?.id is undefined — also silently false.
+    BEFORE comparing any FK to a scalar: confirm the read path.
+    Bit twice, 19 sessions apart (mlc_status S50; role_id S69).
+
+
+JT2. WATERLINE SILENTLY DROPS UNDECLARED COLUMNS.  [J20]
+    A column written via .update().set() is DISCARDED with no error unless
+    it is declared in the model's attributes block. The DB column alone is
+    not enough. Any new column needs BOTH.
+
+JT3. HACCP READS MUST ORDER BY step, NEVER id.  [J4]
+    hazardidentification rows insert in PARALLEL, so ids land in completion
+    order, not step order (id 1220 = step 10, id 1221 = step 1). The step
+    column is authoritative. Any read without ORDER BY step scrambles the
+    process flow — and a HACCP doc that reads out of sequence is wrong.
+
+JT4. THE DO ROW MIXES UNITS.  [J15]
+    dispatchorders.qty_to_ship = Kg. qty_shipped and packing_units = UNITS.
+    Same row. Any calc combining them must convert first. Known fossil,
+    retire at Route 6.
+
+JT5. do_status NEVER ADVANCES.  [J-S58 traps]
+    dispatchorders.do_status stays "Created" even after a full ship. The
+    authoritative shipped state is packingslips.shipped_flag. Never read
+    do_status to determine shipped.
+
+JT6. MO CLOSE ≠ MO COMPLETE.  [J28, J-S58 traps]
+    Closing sets close_status=1 and LEAVES mlc_status unchanged (commonly
+    still 3). Full receipt does NOT auto-close. A filter meaning "still
+    open" must test close_status; one meaning "production complete" tests
+    mlc_status=4. Different questions.
+
+JT7. EDITS ARE INVISIBLE TO ROW COUNTS.  [J-S58 traps, J82]
+    In-place updates (allergen, name, pencil qty, MO status, close_status)
+    change no row count. Verify edits by SELECT value comparison, never by
+    counting rows.
+    ⚠ WORSE THAN INVISIBLE — SOME EDITS PROPAGATE. J82: editing ONE material's
+    allergen silently rewrote the allergen shown on SEVEN products and on their
+    already-completed production lots, with zero rows added or removed anywhere.
+    A row count would have reported "nothing happened".
+
+JT8. NEVER TWO COLLECTIONS IN ONE nestedPop POPULATE ARRAY.  [S55, in git]
+    nested-pop v0.1.4 silently returns the SECOND collection EMPTY. Use a
+    dedicated second pass and stitch by index. Food-safety-critical when it
+    bit (subrecipeformulations vanished).
+
+JT9. THE LIVE PATH IS NOT THE OBVIOUS ONE.  [J12]
+    Release runs createReleaseMaterialProductsV2 (bulk loop), NOT the older
+    single-release function sitting beside it in the same file. An edit on a
+    dead path is an invisible no-op. Trace controller → model → the function
+    the button ACTUALLY calls, before editing.
+
+
+JT10. A BUTTON INSIDE A <form> NEEDS type="button".  [J35]
+     No type attribute defaults to type="submit". The implicit submit EATS
+     the (click). Any action button inside a form in this app needs it
+     explicitly, or the click silently does nothing.
+
+JT11. GUARD JSON-COLUMN READS WITH Array.isArray — NOT a null-check.  [J-S70]
+     Under the future mysql2 driver (G0e) a JSON column may return a STRING.
+     A string does NOT throw on spread: [..."[\"a\"]"] silently spreads into
+     CHARACTERS and corrupts the array with no error. Array.isArray(x) ? x : []
+     is correct under both drivers. Every JSON-column read follows this shape.
+
+JT12. THE DB IS GROUND TRUTH. SCREENS LIE.  [J-S70, J13]
+     A rendered file chip, a green toast, a loaded page — evidence of NOTHING.
+     The PO chip looked identical before and after the fix; the PS chip
+     rendered for a file never saved. Product SOH on screen is a live VIEW
+     (Trace_ProductHeaderView), not the stored column. Verify the row.
+
+JT13. MEASURE THE BOUNDARY, DON'T REASON ACROSS IT.  [J-S70]
+     When behaviour depends on a layer edge — driver / SQL literal parser /
+     JSON parser / Waterline populate — TEST IT DIRECTLY with one query before
+     changing code. S70: three fixes proposed from confident reasoning about
+     MySQL's JSON handling; two wrong, one shipped to prod before disproof. A
+     single SELECT settled it in seconds.
+
+JT14. A REVERT IS A TRADE, NOT A FIX.  [J-S70]
+     "The state it was in for months" is not evidence it was good — it may be
+     differently broken. Reverting 771d775 fixed pasted images and silently
+     re-opened the apostrophe bug that commit existed to fix. Before reverting,
+     ask what the commit was FIXING. Name both sides out loud.
+
+JT15. A MASK CAN HIDE A BUG FOR YEARS.  [J-S71]
+     Removing a mask does not CAUSE the bug it reveals. 771d775 exposed a
+     Jun-2023 double-encode; it did not create it. Corollary: "it worked
+     before" is not evidence the mechanism was sound.
+
+JT16. GREP THE PATTERN, NOT JUST THE BUG.  [J-S70]
+     One bug is usually four. grep "oldFiles" found the identical unguarded
+     read in 4 models — one crashed, two were safe only by ACCIDENT OF THEIR
+     DATA, one safe by code. Also grep the WHOLE repo before reformatting any
+     identity string — something parses it (S65).
+
+JT17. GREP OUTPUT IS A RENDERED SCREEN AND CAN LIE.  [J-S71]
+     S71: a missing dot in "datastore.sendNativeQuery" was a terminal PASTE
+     ARTIFACT, not a file defect. cat -A on the file settled it. Verify a
+     suspected typo against the FILE, never the grep echo.
+
+JT18. WHEN AN ERROR IS HIDDEN, GO TO THE BROWSER CONSOLE FIRST.  [J-S71]
+     nginx-level rejections (413/502) NEVER reach pm2 logs — Sails never runs.
+     The alert() plague renders every error as "[object Object]". S71 lost ~40
+     min extracting one string the Console showed in 90 seconds.
+
+JT19. SOME CODE IS DELIBERATELY WRONG. DO NOT "FIX" IT.
+     - J14: PackingSlips.js:333-334 — dead, NaN-producing, stale `elem`,
+       wrongly subtracts SOH. Skipped on normal ship. Cut at Route 6, not before.
+     - J9: intermediates are NOT imported. Manual entry post-upload, by design.
+     - J5: mlcpackaging stores FLAT per-level qtys. The cascade is computed at
+       READ time. Do not "correct" it to store multiples.
+     - J-S61: the batch_qty pencil-edit block was uncommented deliberately
+       (9bce0238), tested, shipped. Do not re-comment.
+     - PS/SO create paths seed [] — that is the ONLY reason their reads were
+       safe before the guards. Do not "tidy" the seeding away.  [J-S70]
+
+JT20. FILENAMES IN THIS LOG ARE THE REBUILD PATH — AND ONE IS WRONG.
+     Every /home/ubuntu/*.sql named in J is the source of truth for a
+     re-apply. VERIFIED S72 against the prod box: the S43 view backup is
+     `Trace_ProductProdLotView.bakS43.sql` — NO DOT before S43, unlike every
+     other file. The S43-end Section G recorded it with a dot; G was wrong.
+     Trust the box, not the doc.
+     ⚠ /home/ubuntu is NOT backed up off-instance. See J-S72a.
+     
+JT21. ⚠ NEVER VERIFY A CONVERSION PATH WITH A 1:1 FIXTURE. A weight ratio
+      of exactly 1 makes a division invisible — 10 / 1 = 10 reconciles
+      perfectly whether the code divides or reads the stored value. Pick a
+      product whose wgt_kgs_per_unit is NOT 1, and ideally not round.
+      (S79 — a 1:1 test in S78 produced a confident wrong conclusion that
+      became a documented finding. J83.)
+
+JT22. "DEAD CODE — DO NOT TOUCH" IS A CLAIM ABOUT REACHABILITY, AND
+      REACHABILITY IS CHECKABLE.  [J85, J86, J87]
+      §2 recorded PackingSlips.js:333-334 as a dead block for sessions.
+      S79 found it was LIVE CODE THAT THROWS; S80 found the throw is
+      unreachable only because the frontend button that reaches it is
+      COMMENTED OUT — and that the redesign restores that button.
+      ⚠ A right instruction for a wrong reason stops anyone looking again.
+      Before trusting "dead", trace the caller chain to a rendered
+      template, and check whether planned work makes it live.
+      ⚠ COROLLARY: a dead component sitting beside a live one (add-dispatch
+      vs add-dispatch-v2, S80) is the same trap in a different shape —
+      edits there are invisible no-ops (JT9). Delete dead code, don't
+      leave it as a decoy.
+──────────────────────────────────────────────────────────────────────
+
+---
+
+## JT — A VERIFICATION QUERY THAT DOES NOT NAME THE SCHEMA CANNOT FAIL CORRECTLY
+
+```
+S95 replaced Trace_ProductProdLotView on dev, then checked the old text
+was gone:
+
+  SELECT VIEW_DEFINITION FROM information_schema.VIEWS
+  WHERE TABLE_NAME='Trace_ProductProdLotView';        ⚠ NO SCHEMA
+
+It returned 1. Read alone, that says the ALTER did not take.
+
+IT HAD TAKEN. Dev carries the view in TWO schemas — abletracelab_live and
+the dormant abletrace archive. The check concatenated both definitions and
+matched the archive's untouched copy. Scoped to
+TABLE_SCHEMA='abletracelab_live' it returned 0, correctly.
+
+⚠ THE SHAPE THAT MATTERS: the query could not have returned 0 while the
+  archive existed, no matter what the ALTER did. A check that cannot
+  produce a pass is not a check. It was reporting on a different object
+  than the one being fixed, and looked identical either way.
+
+⚠ AND THE FALSE READ POINTS THE WRONG WAY. A blind check that returns a
+  FAILURE invites re-running the fix. On a live box that is a second write
+  chasing a phantom.
+
+⚠ 3B.3 RECORDS THE ARCHIVE AS LIVING ON THE PROD INSTANCE. Dev has one
+  too. Anything reading information_schema on EITHER box names the schema.
+  → P101
+
+⚠ SAME FAMILY AS "A GREP PATTERN CAN BE INCAPABLE OF FINDING WHAT YOU
+  ASKED IT FOR" — but on the VERIFICATION step rather than the search,
+  which is worse: this is the check that is supposed to catch the others.
+```
+
+---
+
+## JT — A CTE ALIAS CAN CARRY THE NAME OF A REAL COLUMN AND THE OPPOSITE BASIS
+
+```
+Inside Trace_ProductHeaderView, the do_products CTE defines:
+
+  sum(case when ps.shipped_flag then do.qty_to_ship else 0 end)
+      AS qty_shipped                    ⚠ THIS IS KG
+
+The real column dispatchorders.qty_shipped is UNITS. Same name, opposite
+basis, one view, a few lines apart.
+
+Anyone repointing qty_shipped_su to "the stored units column" by reading
+the CTE name will wire Kg into a units field, and the arithmetic will look
+plausible at every 1:1 fixture.
+
+⚠ NOT YET BITTEN. Logged in S95 while scoping R5, before anyone builds
+  it. The DO row already mixes bases (see THE DO ROW MIXES UNITS); this is
+  that trap wearing a disguise.
+
+⚠ THE RULE: inside a view, resolve every name to its DEFINITION before
+  trusting it. An alias is not a column and a CTE is not a table.
+```

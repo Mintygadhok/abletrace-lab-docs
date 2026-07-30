@@ -6,168 +6,16 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J112 — ⚠ the next one is J113, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Last appended: S86, Jul 25 2026.
+number. Highest is J113 — ⚠ the next one is J114, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Last appended: S95, Jul 30 2026.
 ══════════════════════════════════════════════════════════════════════
 
 TRAPS
 ──────────────────────────────────────────────────────────────────────
-JT — STANDING TRAPS. READ THIS BLOCK EVERY SESSION.
-The rules that have bitten more than once. Each names its entry; the
-entry holds the evidence. If a rule here contradicts your reasoning,
-the rule wins — it was earned.
-──────────────────────────────────────────────────────────────────────
+⚠ THE STANDING TRAPS THAT WERE HERE MOVED TO TRAPS.md IN S95 (P105).
+  JT1–JT22 are in that file, verbatim, with their numbers intact.
+  Later traps (JT23–JT27) remain inside their session appends below,
+  in place, as history. NEW TRAPS GO TO TRAPS.md — never here.
 
-JT1. POPULATED FK IS AN OBJECT, NOT A NUMBER.  [J24, J-S69]
-    A status/id field read via Waterline populate comes back as an OBJECT
-    (.id, .role_name). An object is never === 2. It fails SILENTLY — no
-    error, the gate just never fires. Read via a STORED PROC, the same
-    field is a BARE NUMBER and ?.id is undefined — also silently false.
-    BEFORE comparing any FK to a scalar: confirm the read path.
-    Bit twice, 19 sessions apart (mlc_status S50; role_id S69).
-
-
-JT2. WATERLINE SILENTLY DROPS UNDECLARED COLUMNS.  [J20]
-    A column written via .update().set() is DISCARDED with no error unless
-    it is declared in the model's attributes block. The DB column alone is
-    not enough. Any new column needs BOTH.
-
-JT3. HACCP READS MUST ORDER BY step, NEVER id.  [J4]
-    hazardidentification rows insert in PARALLEL, so ids land in completion
-    order, not step order (id 1220 = step 10, id 1221 = step 1). The step
-    column is authoritative. Any read without ORDER BY step scrambles the
-    process flow — and a HACCP doc that reads out of sequence is wrong.
-
-JT4. THE DO ROW MIXES UNITS.  [J15]
-    dispatchorders.qty_to_ship = Kg. qty_shipped and packing_units = UNITS.
-    Same row. Any calc combining them must convert first. Known fossil,
-    retire at Route 6.
-
-JT5. do_status NEVER ADVANCES.  [J-S58 traps]
-    dispatchorders.do_status stays "Created" even after a full ship. The
-    authoritative shipped state is packingslips.shipped_flag. Never read
-    do_status to determine shipped.
-
-JT6. MO CLOSE ≠ MO COMPLETE.  [J28, J-S58 traps]
-    Closing sets close_status=1 and LEAVES mlc_status unchanged (commonly
-    still 3). Full receipt does NOT auto-close. A filter meaning "still
-    open" must test close_status; one meaning "production complete" tests
-    mlc_status=4. Different questions.
-
-JT7. EDITS ARE INVISIBLE TO ROW COUNTS.  [J-S58 traps, J82]
-    In-place updates (allergen, name, pencil qty, MO status, close_status)
-    change no row count. Verify edits by SELECT value comparison, never by
-    counting rows.
-    ⚠ WORSE THAN INVISIBLE — SOME EDITS PROPAGATE. J82: editing ONE material's
-    allergen silently rewrote the allergen shown on SEVEN products and on their
-    already-completed production lots, with zero rows added or removed anywhere.
-    A row count would have reported "nothing happened".
-
-JT8. NEVER TWO COLLECTIONS IN ONE nestedPop POPULATE ARRAY.  [S55, in git]
-    nested-pop v0.1.4 silently returns the SECOND collection EMPTY. Use a
-    dedicated second pass and stitch by index. Food-safety-critical when it
-    bit (subrecipeformulations vanished).
-
-JT9. THE LIVE PATH IS NOT THE OBVIOUS ONE.  [J12]
-    Release runs createReleaseMaterialProductsV2 (bulk loop), NOT the older
-    single-release function sitting beside it in the same file. An edit on a
-    dead path is an invisible no-op. Trace controller → model → the function
-    the button ACTUALLY calls, before editing.
-
-
-JT10. A BUTTON INSIDE A <form> NEEDS type="button".  [J35]
-     No type attribute defaults to type="submit". The implicit submit EATS
-     the (click). Any action button inside a form in this app needs it
-     explicitly, or the click silently does nothing.
-
-JT11. GUARD JSON-COLUMN READS WITH Array.isArray — NOT a null-check.  [J-S70]
-     Under the future mysql2 driver (G0e) a JSON column may return a STRING.
-     A string does NOT throw on spread: [..."[\"a\"]"] silently spreads into
-     CHARACTERS and corrupts the array with no error. Array.isArray(x) ? x : []
-     is correct under both drivers. Every JSON-column read follows this shape.
-
-JT12. THE DB IS GROUND TRUTH. SCREENS LIE.  [J-S70, J13]
-     A rendered file chip, a green toast, a loaded page — evidence of NOTHING.
-     The PO chip looked identical before and after the fix; the PS chip
-     rendered for a file never saved. Product SOH on screen is a live VIEW
-     (Trace_ProductHeaderView), not the stored column. Verify the row.
-
-JT13. MEASURE THE BOUNDARY, DON'T REASON ACROSS IT.  [J-S70]
-     When behaviour depends on a layer edge — driver / SQL literal parser /
-     JSON parser / Waterline populate — TEST IT DIRECTLY with one query before
-     changing code. S70: three fixes proposed from confident reasoning about
-     MySQL's JSON handling; two wrong, one shipped to prod before disproof. A
-     single SELECT settled it in seconds.
-
-JT14. A REVERT IS A TRADE, NOT A FIX.  [J-S70]
-     "The state it was in for months" is not evidence it was good — it may be
-     differently broken. Reverting 771d775 fixed pasted images and silently
-     re-opened the apostrophe bug that commit existed to fix. Before reverting,
-     ask what the commit was FIXING. Name both sides out loud.
-
-JT15. A MASK CAN HIDE A BUG FOR YEARS.  [J-S71]
-     Removing a mask does not CAUSE the bug it reveals. 771d775 exposed a
-     Jun-2023 double-encode; it did not create it. Corollary: "it worked
-     before" is not evidence the mechanism was sound.
-
-JT16. GREP THE PATTERN, NOT JUST THE BUG.  [J-S70]
-     One bug is usually four. grep "oldFiles" found the identical unguarded
-     read in 4 models — one crashed, two were safe only by ACCIDENT OF THEIR
-     DATA, one safe by code. Also grep the WHOLE repo before reformatting any
-     identity string — something parses it (S65).
-
-JT17. GREP OUTPUT IS A RENDERED SCREEN AND CAN LIE.  [J-S71]
-     S71: a missing dot in "datastore.sendNativeQuery" was a terminal PASTE
-     ARTIFACT, not a file defect. cat -A on the file settled it. Verify a
-     suspected typo against the FILE, never the grep echo.
-
-JT18. WHEN AN ERROR IS HIDDEN, GO TO THE BROWSER CONSOLE FIRST.  [J-S71]
-     nginx-level rejections (413/502) NEVER reach pm2 logs — Sails never runs.
-     The alert() plague renders every error as "[object Object]". S71 lost ~40
-     min extracting one string the Console showed in 90 seconds.
-
-JT19. SOME CODE IS DELIBERATELY WRONG. DO NOT "FIX" IT.
-     - J14: PackingSlips.js:333-334 — dead, NaN-producing, stale `elem`,
-       wrongly subtracts SOH. Skipped on normal ship. Cut at Route 6, not before.
-     - J9: intermediates are NOT imported. Manual entry post-upload, by design.
-     - J5: mlcpackaging stores FLAT per-level qtys. The cascade is computed at
-       READ time. Do not "correct" it to store multiples.
-     - J-S61: the batch_qty pencil-edit block was uncommented deliberately
-       (9bce0238), tested, shipped. Do not re-comment.
-     - PS/SO create paths seed [] — that is the ONLY reason their reads were
-       safe before the guards. Do not "tidy" the seeding away.  [J-S70]
-
-JT20. FILENAMES IN THIS LOG ARE THE REBUILD PATH — AND ONE IS WRONG.
-     Every /home/ubuntu/*.sql named in J is the source of truth for a
-     re-apply. VERIFIED S72 against the prod box: the S43 view backup is
-     `Trace_ProductProdLotView.bakS43.sql` — NO DOT before S43, unlike every
-     other file. The S43-end Section G recorded it with a dot; G was wrong.
-     Trust the box, not the doc.
-     ⚠ /home/ubuntu is NOT backed up off-instance. See J-S72a.
-     
-JT21. ⚠ NEVER VERIFY A CONVERSION PATH WITH A 1:1 FIXTURE. A weight ratio
-      of exactly 1 makes a division invisible — 10 / 1 = 10 reconciles
-      perfectly whether the code divides or reads the stored value. Pick a
-      product whose wgt_kgs_per_unit is NOT 1, and ideally not round.
-      (S79 — a 1:1 test in S78 produced a confident wrong conclusion that
-      became a documented finding. J83.)
-
-JT22. "DEAD CODE — DO NOT TOUCH" IS A CLAIM ABOUT REACHABILITY, AND
-      REACHABILITY IS CHECKABLE.  [J85, J86, J87]
-      §2 recorded PackingSlips.js:333-334 as a dead block for sessions.
-      S79 found it was LIVE CODE THAT THROWS; S80 found the throw is
-      unreachable only because the frontend button that reaches it is
-      COMMENTED OUT — and that the redesign restores that button.
-      ⚠ A right instruction for a wrong reason stops anyone looking again.
-      Before trusting "dead", trace the caller chain to a rendered
-      template, and check whether planned work makes it live.
-      ⚠ COROLLARY: a dead component sitting beside a live one (add-dispatch
-      vs add-dispatch-v2, S80) is the same trap in a different shape —
-      edits there are invisible no-ops (JT9). Delete dead code, don't
-      leave it as a decoy.
-──────────────────────────────────────────────────────────────────────
-REBUILD
-
-──────────────────────────────────────────────────────────────────────
 JR — FRESH-DB REBUILD CHECKLIST
 Everything in the database that is NOT in git. Git gives you a working
 app pointed at a database that silently does the WRONG THING until every
@@ -235,6 +83,9 @@ JR7. Trace_* view + procs — four separate fixes, applied across three sessions
      Apply ALL of them.
 
      JR7a. Trace_ProductProdLotView — qty_su divide REMOVED  [J7, S43]
+       ⚠ STATUS S95: the second half of this item — "received_qty_su LEFT
+         AS-IS, its /wgt is correct" — IS SUPERSEDED BY JR7e. The divide
+         was removed in S95 (P91). The qty_su half of JR7a still stands.
        qty_su = mm.qty  (NOT mm.qty / fop.wgt_kgs_per_unit — mm.qty is now
        units-stored, post-S41 flip). received_qty_su LEFT AS-IS: mm.received_qty
        IS still Kg, so its /wgt is correct.
@@ -264,6 +115,38 @@ JR7. Trace_* view + procs — four separate fixes, applied across three sessions
        Backup: /home/ubuntu/Trace_ProductProdLotView.bak-S51.txt (SHOW CREATE)
        Applied via: /home/ubuntu/fix-prodlotview-S51.sql
        ⚠ JR7a and JR7d touch the SAME VIEW. The S51 backup contains both.
+
+     JR7e. Trace_ProductProdLotView — received_qty_su reads the STORED
+       column, not a division.  [J113, S95, P91]
+       received_qty_su = mm.received_units
+         (was  mm.received_qty / fop.wgt_kgs_per_unit)
+       Alias UNCHANGED, so no frontend change rides with it. Sole consumer
+       is product-traceability.component.html:79.
+       APPLIED TO BOTH BOXES 30 Jul 2026, dev then prod.
+       ⚠ NO SEPARATE .sql FILE. The REST of the view is in
+         db-definitions-S93.txt in this repo; the one changed term is
+         above. Take the view text from that file, swap that term, run it.
+         A third copy of the view would be a third thing to keep in step.
+       ⚠ SUPERSEDES JR7a's and J7's claim that this divide is CORRECT.
+         It was arithmetically correct and is now redundant: received_units
+         has been stored since S48 (JR3) and is cleaner — the division
+         produced float garbage (110.99999999999999 for 111).
+       ⚠ JR7a, JR7d AND JR7e ALL TOUCH THIS ONE VIEW. The copy in
+         db-definitions-S93.txt already carries JR7a and JR7d; only JR7e
+         is outstanding against it.
+       ⚠ RUN AGAINST abletracelab_live EXPLICITLY. Both boxes carry a
+         dormant `abletrace` archive holding its own copy of this view.
+         The archive copy is NOT updated. Leave it.
+       ⚠ GATE BEFORE APPLYING TO ANY NEW BOX: line 79 carries an *ngIf,
+         so a NULL or 0 received_units HIDES the figure where a wrong one
+         showed before. Count rows with received_qty > 0 and received_units
+         null or 0 first. Both boxes returned 0 in S95.
+       ⚠ VERIFY SCHEMA-SCOPED, or the check cannot fail correctly:
+         SELECT VIEW_DEFINITION FROM information_schema.VIEWS
+          WHERE TABLE_NAME='Trace_ProductProdLotView'
+            AND TABLE_SCHEMA='abletracelab_live';
+         grep -c for the old divide — expect 0. Without the schema clause
+         it matches the archive and always returns 1.
 
 JR8. Document-list procs — alphabetical sort  [J60, S60]
      FS_Documents_SP       : ORDER BY LOWER(d.title) ASC  (was d.version DESC)
@@ -336,7 +219,15 @@ JR14. On-box / off-git scripts and config  [J-S61, J-S66, J-S66b]
      Restore from Drive Master Brief.
 
 ──────────────────────────────────────────────────────────────────────
-⚠ JR — THE STANDING RISK
+⚠ ───────────────────────────────────────────────────────────────────────
+⚠ JR — WHERE THE OBJECT TEXT LIVES  [P97, S95]
+JR names the CHANGES. The COMMITTED TEXT of eleven database objects —
+views and stored procedures, read from dev — is in db-definitions-S93.txt
+IN THIS REPO. A rebuild driven from JR alone would not find them.
+⚠ That file is a SNAPSHOT, dated S93. Anything JR records after S93
+  (JR7e) is NOT reflected in it. Read JR for the changes, the file for the
+  shapes.
+JR — THE STANDING RISK
 Every source file above lives in /home/ubuntu on the PROD box, which is
 NOT backed up off-instance. The Drive Master Brief copy is the only other
 record and it is not verified current. If prod is lost, this checklist
@@ -465,6 +356,9 @@ WHAT: Product-traceability LIST "MO Qty" and details "One Step Forward → Qty
        mm.qty is now units → changed to qty_su = mm.qty (no divide).
        received_qty_su LEFT AS-IS (mm.received_qty IS still Kg, so its /wgt is
        correct → 2).
+       ⚠ STATUS S95: the "received_qty_su LEFT AS-IS" sentence above is
+         SUPERSEDED BY JR7e / J113. That divide was removed in S95 (P91).
+         Everything else in J7 stands.
     2. PROC Trace_ProductOneStepForward_SP — packingslipdos.shipped_qty is stored
        in UNITS (verified: stored 1, wgt 1.95 → 0.5128). The proc had it backwards.
        Corrected to shipped_qty_weight = shipped_qty * wgt (real Kg),
@@ -757,6 +651,9 @@ WHAT: The Product-Traceability LIST rows carried received_qty (Kg) but not
   had to be added to the view's SELECT. Added mm.received_units AS received_units
   (the view already joins mlomanagement — no new join, no logic change). The old
   received_qty_su Kg/wgt acrobatic left in place (retire at Route 6).
+  ⚠ STATUS S95: THE CLAIM ABOVE IS NO LONGER TRUE. That divide was
+  removed in S95 (P91) — it did not wait for Route 6. See JR7e / J113.
+  Everything else in J26 stands.
 SOURCE OF TRUTH: received_units = mlomanagement.received_units, the existing
   Produced-To-Date Line (J18). NOT a new/third line.
 REVISIT TRIGGER: rebuild from a pre-S51 snapshot → the column vanishes and the
@@ -3188,3 +3085,123 @@ BLAST RADIUS: frontend only, no DB change. On prod as of S86.
 
 
 END S86 APPEND
+
+S95 — APPENDED 30 JUL 2026
+NUMBERING: highest existing entry verified as J112, highest trap as JT27.
+This is J113. ⚠ NO JT ENTRY IS ADDED HERE — the two traps earned in S95
+are in TRAPS.md, the working file. Section 5's JT block is not extended.
+See the note at the foot of this entry.
+
+
+J113 — Trace_ProductProdLotView DIVIDED received_qty WHILE ALREADY
+SELECTING received_units. FIXED BOTH BOXES. STATUS: CLOSED.
+P91. RDS only, not in git — rebuild record is JR7e.
+
+WHAT IT WAS: the view produced received_qty_su as
+  (mm.received_qty / fop.wgt_kgs_per_unit) — while selecting
+  mm.received_units four columns further along the same SELECT. The
+  stored value and the derived value were both present; the derived one
+  was displayed.
+
+⚠ THE DIVISION WAS ARITHMETICALLY CORRECT. received_qty is Kg-stored,
+  so Kg / (Kg per unit) genuinely yields units, and every row agreed with
+  the stored column to within float noise. THIS WAS NOT A WRONG NUMBER.
+  It was a right number wearing garbage: 4 of 17 non-1:1 rows on dev
+  rendered 110.99999999999999, 51.00000000000001, 11.000000000000002 and
+  10.000000000000002. Rank this class of finding as cosmetic-plus-anchor,
+  not as a defect.
+
+THE FIX: received_qty_su = mm.received_units. Rebuild instruction is
+  JR7e; the view text it applies to is db-definitions-S93.txt. ⚠ NO
+  .sql FILE WAS COMMITTED — the object text is already recorded once and
+  a second copy is a second thing to keep in step. ALIAS UNCHANGED, so
+  product-traceability.component.html:79 — the sole consumer, grepped
+  across frontend src and backend api — needed no edit. No build, no
+  deploy, no commit of code.
+
+⚠ AND THE THING THAT FOLLOWS FROM IT: A DATABASE OBJECT NEVER REACHES
+  THE OTHER BOX BY DEPLOYING ANYTHING. Dev and prod are separate RDS
+  instances. The ALTER was run on each box directly. There is no promote
+  path for a view, and nothing in the deploy tooling would have told you.
+
+GATED BEFORE THE ALTER, ON BOTH BOXES — and the gate was not optional.
+  Line 79 carries *ngIf='item.received_qty_su', so a NULL or 0 unit count
+  HIDES THE SPAN ENTIRELY where a wrong number showed before. Counted
+  first:
+    dev   would_go_blank 0 · units_null 0 · units_zero 6 (all received_qty 0)
+    prod  would_go_blank 0 · units_null 0 · units_zero 2 (all received_qty 0)
+  ⚠ Glutenull (company 471) did not move: Fruits & Nut Breakfast Bars
+  560/0.32 = 1750, Buckwheat Granola Bar 192.48/0.24 = 802, identical
+  before and after. THE CLIENT SEES NO DIFFERENCE. Prod carried no float
+  garbage today; this stops the next awkward ratio producing it.
+
+⚠ THE VERIFICATION QUERY WAS WRONG THE FIRST TIME AND RETURNED A FALSE
+  FAILURE. Scoped to TABLE_NAME only, it matched the dormant `abletrace`
+  archive's untouched copy and returned 1 — reading as "the ALTER did not
+  take". It had taken. A check that cannot return a pass is not a check,
+  and a false FAILURE invites re-running a write on a live box. Full entry
+  in TRAPS.md. ⚠ 3B.3 records the archive as living on the prod instance;
+  DEV HAS ONE TOO. → P101
+
+DOCUMENTS CORRECTED IN THE SAME PATCH (rule 7.1 — a strike that does not
+  chase every copy is not a strike, J82): JR7a, J7 and J26 each asserted
+  that this divide was correct or was being left in place. All three
+  stamped, pointing here.
+
+⚠ WHERE THE TRAPS WENT. Section 5's JT block was NOT extended. S94
+  settled a four-file working set — RULES, NOW, TRAPS, PLAN — and TRAPS.md
+  is the cumulative traps file. Section 5 keeps the REBUILD record, which
+  is what makes it undeletable. Two homes for one kind of fact is what
+  rotted Section A and is what P95 is about. → P95
+
+BLAST RADIUS: a view definition on each box. No row written, no schema
+  change, no code. Rollback is the JR7a+JR7d text, which is in this file.
+
+⚠ MEASURED IN THE SAME PASS — THE R5 SCOPE. Recorded here because these
+  are measurements, and a disposable planning file is not where a
+  measurement lives.
+
+  ALL SEVEN _su DIVISIONS IN Trace_ProductHeaderView ARE ARITHMETICALLY
+  CORRECT. Every source field is Kg-stored. R5 is not seven wrong
+  figures — it is garbage generators and anchor violations.
+
+  CONSUMER, grepped across frontend src and backend api — the whole list:
+    product-traceability-details.component.ts + api/models/Traceability.js
+  ONE SCREEN. A fix is verifiable; nothing else reads this view.
+
+  REPOINT — 2, stored units exist and are reachable in the current joins
+    qty_produced_su  → mm.received_units          (P91 proved it clean)
+    qty_shipped_su   → SUM(dispatchorders.qty_shipped)   (units, GR7)
+
+  LEAVE — 3, correct and NO stored-units alternative exists
+    intermediate_prd_su   qty_allocated is Kg (P93). ⚠ mprrecievelots
+                          has NO units column — measured S95.
+    qty_packing_slip_su   sums qty_to_ship, Kg
+    qty_do_su             same source, same basis
+
+  SCHEMA — 1
+    qty_misc_release_su   ⚠ rejectmaterialandproduct has NO units column
+                          — measured S95. Needs a column add, a
+                          write-path change, and a BACKFILL ON A LIVE
+                          CLIENT derived from Kg, which is the Route 3
+                          round-trip this whole programme exists to
+                          eliminate. NOT COSTED.
+
+  DEPENDENT — 1
+    SOH_su   subtracts five Kg terms then divides. Cannot be
+             units-anchored until every subtrahend is, and one needs the
+             schema change. ⚠ THIS IS THE HEADLINE FIGURE — Stock on
+             Hand is the number anyone actually reads — AND IT IS THE
+             LAST ONE FIXABLE. Doing the two cheap repoints improves two
+             cells and leaves SOH exactly as it is. That is the ranking
+             question, and it is Minty's.
+
+  ⚠ SUPERSEDES 3A.6, which says nobody has identified where the R5
+    switch point is. → P90
+  ⚠ THE TRAP THAT WILL BITE THE REPOINT is in TRAPS: the do_products
+    CTE defines its own alias called qty_shipped which sums qty_to_ship
+    and is KG.
+========
+
+
+END S95 APPEND
