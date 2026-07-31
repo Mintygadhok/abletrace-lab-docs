@@ -229,6 +229,26 @@ P106  acrobatics-map-S91.txt has no queue item. Pasted at S94 open,
 P107  units-kg-checklist-S93.md — P82 points at items 2 and 3, so part
       of it is live. Whether the rest is spent is unknown; the file has
       not been read. Read it before deciding.
+P108  ⚠ J-ENTRIES ACCUMULATE AND NOTHING AGES THEM OUT. Section 5 holds
+      113 entries; perhaps twenty are settled arguments and disproven
+      theories from months ago, still read in full at every rebuild.
+      MINTY, S95: once a change is working, what is the relevance of
+      the record of what it was before?
+      ▶ THE SPLIT THAT ANSWERS IT:
+        JR block   PERMANENT. Not history — a BUILD SCRIPT. Every entry
+                   must be re-applied if the database is ever rebuilt.
+        J-entries  SHOULD AGE. An entry whose finding is built, closed
+                   and settled for ~10 sessions compresses to one line
+                   pointing at its commit. Git keeps the full text.
+      ⚠ WHAT MUST NOT BE COMPRESSED AWAY: disproven theories still being
+        re-derived, and notes protecting code that is WRONG ON PURPOSE.
+        Those belong in TRAPS, which is append-only, not in a dated
+        entry that ages out.
+      ⚠ THE COUNTER-ARGUMENT, RECORDED HONESTLY: "keep everything" is
+        what rotted old Section A — thirty sessions of appends that
+        ended up contradicting the head on nine load-bearing facts.
+        Volume is a real cost. README already says resolution decays.
+      ▶ A REAL JOB, NOT A TIDY-UP. Its own sitting, at a close.
 
 DROPPED S95 BY RULING
       P59, P60 and the duplicate P94 — all three dropped. P94's number
