@@ -249,6 +249,107 @@ P108  ⚠ J-ENTRIES ACCUMULATE AND NOTHING AGES THEM OUT. Section 5 holds
         ended up contradicting the head on nine load-bearing facts.
         Volume is a real cost. README already says resolution decays.
       ▶ A REAL JOB, NOT A TIDY-UP. Its own sitting, at a close.
+P109  RETIRE THE DORMANT `abletrace` ARCHIVE, BOTH BOXES.
+      MINTY'S RULING, S95: the folded client's old data is not needed.
+      Keep only what is being generated now, on dev and prod.
+      ⚠ WHY IT ALSO REMOVES A TRAP: prod's ~/.my.cnf defaults to the
+        ARCHIVE, so a bare `mysql` lands in the dead database and looks
+        completely normal. That has bitten twice — an old document named
+        it as the live database for ~30 sessions, and S95's first
+        verification query matched its untouched copy of a view and
+        reported a working patch as failed. Removing it removes the
+        trap, not just the disk.
+      ⚠ IRREVERSIBLE. A drop cannot be reverted. ORDER MATTERS:
+        1  Dump it OFF THE BOX first — to the Mac and to Drive.
+           NOT to /home/ubuntu, which is not backed up anywhere.
+        2  Repoint prod's ~/.my.cnf at abletracelab_live FIRST, or a
+           bare mysql starts erroring instead of quietly misfiring.
+        3  RENAME, leave it days, confirm nothing broke, THEN drop.
+           Rename is reversible. Drop is not.
+      ⚠ Also check 3B.3 records the reason it was kept. It does not —
+        "Kept, not migrated", no reason given. If a retention obligation
+        exists, it is not written anywhere. CONFIRM BEFORE DROPPING.
+      ▶ Dev first, whole way through, then prod. Not inside a working
+        session.
+P110  ⚠ RULES SIMPLIFICATION DRAFTED, NOT ADOPTED. S95 drafted RULES cut
+      from 44 rules to 14, on Minty's reading. The two that govern:
+        3  LOOK FIRST — if it is checkable, check it, and do NOT write
+           it down. A checkable fact stored is a fact that goes stale.
+        4  WRITE DOWN ONLY FOUR THINGS — Minty's rulings, wrong answers
+           already paid for, traps where looking misleads, and the
+           database rebuild list. Nothing else.
+      ⚠ THE OLD RULE 3 ("if it is not written down it is lost") WAS THE
+        LICENCE FOR WRITING EVERYTHING, and is what the volume grew out
+        of. Rule 4 replaces it with a closed list Claude cannot argue
+        past.
+      ⚠ MINTY WAS MID-REVIEW WHEN THE SESSION CLOSED. Agreed so far:
+        split old rule 7 — company scoping stays with the change rules,
+        "a client bug jumps the queue" moves to the queue block.
+      ⚠ ADOPTING IT IMPLIES A PRUNE. Rule 4 says most of Section 5's
+        J-entries should not exist — they are re-derivable state. Same
+        job as P108, now with a principle behind it.
+      ⚠ THREE MORE RULES, MINTY, S95 — ADD AFTER 14:
+        15  EVERY COMMAND GOES IN ITS OWN FENCED BLOCK. Never inline in
+            a sentence, never mixed with prose. ⚠ THIS RULE ALREADY
+            EXISTED AND CLAUDE BROKE IT REPEATEDLY IN S95, putting
+            commands inline in running text. The rule was not missing.
+        16  CLEANUP FINISHES BEFORE THE SESSION CLOSES. Temp files,
+            stray downloads, half-done edits, unrun patches. Nothing is
+            carried into the next session for tidying.
+        17  BEFORE CLOSING, CONFIRM THE NEXT SESSION CAN START COLD.
+            Everything it needs is committed and named in PLAN. If it
+            cannot be rebuilt from the repo, IT DOES NOT EXIST.
+            ⚠ This rule is why the simplified draft was not left as a
+              file: it would have been a second head, uncommitted.
+      ▶ FINISH THE REVIEW FIRST. Draft was NOT committed; it is in the
+        S95 chat only. ⚠ If it is wanted, it must be rebuilt from the
+        two rules above, not recovered.
+P111  ⚠ QUICKBOOKS INTEGRATION — MINTY, S95. THE TIME HAS COME.
+      SCOPE, PHASE 1: INVOICE LEVEL ONLY. Call the QuickBooks API with
+      a JSON payload carrying customer name, customer address, product
+      SKU/ID, and quantity per line. AbleTrace pushes; QuickBooks
+      receives.
+      ⚠ EVERY MINTY CLIENT RUNS QUICKBOOKS. This is not one client's
+        request — it is a platform feature.
+      ⚠ IT ALSO UNBLOCKS P43: shipping reference may be MULTIPLE
+        INVOICES, and those invoices need to match QuickBooks records.
+        That was deferred in S82 for exactly this reason.
+
+      ▶ ONE FULL SESSION ON PLANNING FIRST. NO CODE. The questions
+        below cannot be answered from our codebase and must be settled
+        before anything is written:
+
+        1  ONLINE OR DESKTOP? Two completely different products with
+           completely different APIs. Everything else depends on this.
+        2  WHOSE QUICKBOOKS? One shared Mintek app that each client
+           authorises, or a separate connection per client? This is a
+           multi-tenant platform — the answer shapes the whole design.
+        3  WHAT TRIGGERS THE PUSH? At Ship? At packing slip creation?
+           A button? ⚠ Shipping is TERMINAL with no un-ship, so a push
+           fired there cannot be retried by re-shipping.
+        4  DO THE PRODUCTS ALREADY EXIST IN QUICKBOOKS? If Glutenull's
+           items are already there, we map to them. If not, we create
+           them — a much bigger job. ⚠ CHECK, DO NOT ASSUME.
+        5  WHAT IS THE CUSTOMER KEY? Our companycustomers table has no
+           QuickBooks id. A new column, on both boxes, plus a Waterline
+           attribute or the write silently vanishes (JT2).
+        6  WHAT HAPPENS ON A DOUBLE PUSH? An invoice posted twice into
+           a client's accounts is a real-money error, not a display
+           bug. Needs an idempotency key stored on our side.
+        7  WHAT HAPPENS WHEN IT FAILS? QuickBooks down, token expired,
+           customer not found. ⚠ A silent failure means the client
+           thinks they invoiced and did not.
+
+      ⚠ OAUTH2 IS NOT OPTIONAL AND NOT SMALL. QuickBooks requires an
+        app registration, an authorisation flow a human completes in a
+        browser, and REFRESH TOKENS THAT EXPIRE. Something must store
+        and rotate them per client. Tokens go to Section H, never the
+        repo, never chat.
+      ⚠ TEST AGAINST A QUICKBOOKS SANDBOX COMPANY, never a client's
+        real books. There is no undo on a posted invoice.
+
+      ▶ SIZE, HONESTLY: planning one session, build three or four,
+        depending on answers 2 and 4. NOT a small feature.
 
 DROPPED S95 BY RULING
       P59, P60 and the duplicate P94 — all three dropped. P94's number
