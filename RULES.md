@@ -427,4 +427,101 @@ CLOSE         ⚠ NOTHING IS CLOSED UNTIL IT IS COMMITTED AND PUSHED.
               the momentum is good. Minty may override; that is his
               call. But the drift must be NAMED, not silently
               tolerated.  [10.6]
+
+```# RULES — ADDENDUM, S96
+
+⚠ THIS IS AN ADDENDUM, NOT A REWRITE. RULES.md was NOT pasted in S96,
+so Claude has not read the current file. Rule 7.1 forbids editing an
+item that has not been read whole — so these are delivered as text to
+be placed by hand, not as a rewritten file.
+
+⚠ BEFORE ADDING ANY OF THEM: check whether RULES already says it in
+other words. If it does, KEEP THE EXISTING WORDING and drop the new
+one. ⚠ TWO ENTRIES STATING ONE THING IS HOW DRIFT STARTS — and it is
+exactly what happened to TRAPS, where seventeen entries were
+duplicates of each other.
+
+---
+
+## FOUR LINES, PROMOTED OUT OF TRAPS IN S96
+
+These were trap entries. They are not traps — they are how you work.
+They were the most-cited entries in the whole log, which is the tell
+that they are principles rather than incidents.
+
 ```
+A GREEN MESSAGE IS NOT PROOF.
+Check the app first, then confirm the number in the database. A
+success toast, a file chip and a loaded page all look exactly the
+same whether or not anything was saved.
+⚠ EARNED: a PO file chip rendered identically before and after the
+  fix, for a file that was never stored.
+```
+
+```
+WHEN YOU FIND A BUG, GREP FOR THE SAME MISTAKE ELSEWHERE.
+It is usually in three or four places. One grep, seconds.
+⚠ EARNED: grepping one unguarded read found the identical pattern in
+  four models — one crashed, two were safe only by accident of their
+  data, one was safe by code.
+⚠ MINTY, S96: if there is a bug it may be in the connected areas
+  too, and checking costs almost nothing.
+```
+
+```
+MEASURE THE BOUNDARY, DO NOT REASON ACROSS IT.
+When behaviour depends on where two systems meet — a driver, a
+parser, a populate — run one query and look.
+⚠ EARNED: three fixes were proposed from confident reasoning about
+  how MySQL handles JSON. Two were wrong and one reached prod before
+  being disproven. A single SELECT settled it in seconds.
+⚠ THIS IS THE GOLDEN RULE'S OTHER HALF. The first line says do not
+  trust the screen. This one says do not trust reasoning either.
+```
+
+```
+A COMMAND BLOCK CONTAINS ONLY WHAT IS TO BE TYPED.
+No placeholders, no prose, no warnings inside the fence. If Claude
+does not know a value, it asks for the value first or gives a form
+that does not need one.
+⚠ EARNED TWICE IN ONE SESSION: <rest-of-sha> and ... were both
+  pasted literally, because that is what a command block means. A
+  placeholder is valid shell syntax, and < is a redirect, so it
+  fails with an error about the wrong thing entirely.
+⚠ RULES ALREADY HAS THE FENCING RULE AND CLAUDE BROKE IT REPEATEDLY
+  IN S95. This is the missing half of it, not a new rule.
+```
+
+---
+
+## ONE RULING TO RECORD, S96
+
+```
+IF IT CAN BE FIXED, IT IS A QUEUE ITEM. IF NOTHING IS BROKEN, IT IS
+NOTHING.
+MINTY, S96: "I need to understand the issue. If there's an issue, we
+sort it. If there's no issue, we cut it."
+⚠ THIS IS THE FILTER THAT TOOK TRAPS FROM ~40 ENTRIES TO 10.
+⚠ AND ITS COROLLARY: a warning that says "do not touch this" belongs
+  as a COMMENT ON THE LINE, not an entry in a file. The comment sits
+  three inches from the thing being tidied; the file sits in another
+  repo the tidier is not reading. → P118.
+```
+
+---
+
+## ⚠ WHERE THIS OVERLAPS P110
+
+P110 holds a drafted simplification of RULES — 44 rules down to 14 —
+which was never committed and exists only in the S95 chat.
+
+⚠ IF P110 IS PICKED UP, THESE FOUR LINES MUST BE FOLDED INTO IT
+RATHER THAN SITTING BESIDE IT. Two versions of RULES is precisely the
+two-headed-document shape that P95 existed to fix.
+
+⚠ AND THE HONEST NOTE: S96 applied P110's rule 4 to TRAPS without
+adopting it, and the file lost three quarters of its bulk without
+losing anything that was broken. The principle is now proven on real
+work, not just drafted.
+
+
