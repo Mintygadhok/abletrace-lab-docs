@@ -3,10 +3,24 @@
 Last revised: S96.
 ⚠ THIS STAMP WILL OFTEN NOT MOVE. RULES changes only when a rule is
   earned by a real failure. A stamp several sessions old is correct.
-⚠ S96 CHANGED FOUR THINGS AND NOTHING ELSE: one line added to BLAST
-  RADIUS, one to LOOK, one to DEPLOY, and DOCS reissued because S96
-  falsified it — TRAPS was rewritten whole and cut, so "appended only,
-  never cut" was no longer true.
+⚠ S96 REVISED THIS FILE TWICE. The first pass changed four items —
+  BLAST RADIUS, LOOK, DEPLOY, DOCS — because S96 falsified DOCS: TRAPS
+  was rewritten whole and cut, so "appended only, never cut" was no
+  longer true.
+⚠ THE SECOND PASS WAS AN OVERLAP SWEEP, ON MINTY'S INSTRUCTION:
+  "everything will be distinct. If there's any overlap, let's sort it
+  now." FOUR OVERLAPS WERE FOUND AND RESOLVED:
+    LOOK vs DB IS TRUTH   read as a CONTRADICTION. They are two halves
+                          of one rule and neither said so. Both now
+                          name the other.
+    PATCHES vs PATTERNS   both stated when a check is sound. Said once
+                          now, in PATTERNS. PATCHES points at it.
+    SCOPE vs QUEUE        SCOPE restated "ranking is Minty's". Now a
+                          pointer.
+    CLEAN AS YOU GO       merged with Minty's S96 no-tidying-at-the-
+                          open ruling. The two halves now sit in SCOPE
+                          (do not tidy at the start) and CLOSE (finish
+                          the tidying before you stop).
   ⚠ AND THREE PROPOSED LINES WERE DROPPED AS DUPLICATES. S96 drafted an
   addendum before this file had been read, and three of its four lines
   already existed here in this file's own wording. The addendum was
@@ -70,7 +84,16 @@ ls -1dt /home/ubuntu/www-html.bak-* | head -1
 (Fuller version, plus the host check, lives in 3B.5.)
 
 ```
-LOOK          When a claim can be CHECKED ON A SCREEN, ask Minty to
+LOOK          ⚠ THE FIRST HALF OF THE GOLDEN RULE. DB IS TRUTH is the
+              second half, a little further down. They are NOT in
+              conflict, and this line exists because they read as
+              though they are:
+                LOOK AT THE SCREEN to settle what the app DOES.
+                READ THE ROW to settle what was STORED.
+              A screen is authoritative about BEHAVIOUR and worthless
+              as evidence of a SAVED VALUE.
+
+              When a claim can be CHECKED ON A SCREEN, ask Minty to
               look. Do not reason across it. S73 tested seven claims
               against the live app: five were false, and three of those
               were already stamped "Confirmed" in the docs.
@@ -107,7 +130,8 @@ RESPONSE      "WHAT MINTY DOES NOW". Plain language, one action per
               bind the parameter?" — always "should the file be
               attachable before the truck leaves?"
 
-DB IS TRUTH   Toasts, file chips, loaded pages and green ticks prove
+DB IS TRUTH   ⚠ THE SECOND HALF OF THE GOLDEN RULE — see LOOK above.
+              Toasts, file chips, loaded pages and green ticks prove
               nothing. Verify the stored row. Browser state is cached
               and survives a reload — including the security indicator.
               ⚠ AND THE FIELD ON SCREEN MAY NOT BE THE FIELD SAVED. A
@@ -141,10 +165,8 @@ PATCHES       Long scripts fail when pasted into a terminal. Hand over
               a string the patch itself introduces.
               ⚠ Verify AFTERWARDS by checking the OLD text is GONE. A
               check for the new text always passes and proves nothing.
-              ⚠ AND A CHECK THAT CANNOT RETURN A PASS IS NOT A CHECK.
-              Scope it to the thing being changed. S95's verification
-              query omitted the schema name and matched a dormant
-              archive, reading as a failure when the patch was correct.
+              ⚠ Whether the check itself is sound is PATTERNS, below.
+              Not restated here.
 
               ⚠ DOC EDITS ARE PATCHES, NOT PASTES.  [0.2c]
               The docs repo is cloned to the Mac at ~/abletrace-lab-docs
@@ -245,11 +267,21 @@ ASK FIRST     Before reading a script, a config or a box to learn how
               breath. NEVER work from a half-remembered version of
               something Minty has on file.
 
-PATTERNS      Before trusting what a grep or a LIKE RETURNED, ask what
-              it is STRUCTURALLY CAPABLE of matching. A pattern that
-              cannot express the question will still answer it, and the
-              rows it returns will read as evidence. Two of Claude's
-              own patterns failed this way in S93.
+PATTERNS      ⚠ THE ONE RULE ABOUT WHETHER A CHECK IS SOUND. Everything
+              that used to be said twice — once here, once in PATCHES —
+              is said once, here.
+              Before trusting what a grep, a LIKE or a verification
+              query RETURNED, ask what it is STRUCTURALLY CAPABLE of
+              matching. A pattern that cannot express the question will
+              still answer it, and the rows it returns will read as
+              evidence. Two of Claude's own patterns failed this way in
+              S93.
+              ⚠ A CHECK THAT CANNOT RETURN A PASS IS NOT A CHECK. Scope
+              it to the thing being changed. S95's verification query
+              omitted the schema name, matched a dormant archive, and
+              read as a failure when the patch was correct.
+              ⚠ AND A FALSE FAILURE IS THE DANGEROUS DIRECTION — it
+              invites re-running a write on a live box.
 
 HANDING       ⚠ CLAUDE WRITES THE FILE AND PRESENTS IT FOR DOWNLOAD.
 OVER          Never hand over a long document as chat text and hope the
@@ -430,8 +462,18 @@ SCOPE         ANSWER THE QUESTION ASKED. A narrow question about a
               unasked. NINE EXCHANGES BEFORE ANY APP WORK.
               ▶ If Claude thinks a wider review is needed, it says so
                 in ONE line and Minty rules. It does not just start.
-              ⚠ Same shape as the queue rule: logging is mechanical,
-                RANKING IS MINTY'S. So is scope.
+              ⚠ Ranking is Minty's — see QUEUE. So is scope.
+
+              ⚠ NO TIDYING AT THE OPEN. MINTY'S RULING, S96.
+              Deletions, cleanups, housekeeping and file removal
+              happen at the CLOSE. Never at the start, never in the
+              middle. A SESSION THAT OPENS ON TIDYING STAYS THERE.
+              ▶ A session opens on the health check and then goes
+                STRAIGHT to the job PLAN names. Nothing else.
+              ⚠ THE OTHER HALF IS IN CLOSE: the tidying must actually
+                be DONE at the close, so the next session starts
+                clean. That is the point of the rule — not neatness,
+                but a clean start on the app.
 
 COMMANDS      EVERY COMMAND GOES IN ITS OWN FENCED BLOCK, ALWAYS. Minty
               copies from the block, so the format must be recognisable
@@ -475,13 +517,27 @@ CLOSE         ⚠ NOTHING IS CLOSED UNTIL IT IS COMMITTED AND PUSHED.
               in the queue. Both, not one. A finding that lives only in
               a handover is a finding that does not exist.  [7.5]
 
-              ⚠ CLEAN AS YOU GO. At close, Claude flags anything that
-              has become redundant, superseded or duplicated — a closed
-              bug still described as open, two entries saying one thing.
-              CLAUDE PROPOSES, MINTY APPROVES. Conservative by default:
-              when unsure whether something is load-bearing, KEEP IT and
-              ask. Small steady approved cleanups beat a painful
-              periodic overhaul.  [7.7]
+              ⚠ TIDYING HAPPENS HERE AND ONLY HERE. The open half of
+              this rule is in SCOPE — no tidying at the start of a
+              session. This is the other half, and it is what makes
+              that one workable.  [7.7]
+              ▶ AT CLOSE, CLAUDE FLAGS anything that has become
+                redundant, superseded or duplicated — a closed bug
+                still described as open, two entries saying one thing.
+                CLAUDE PROPOSES, MINTY APPROVES. Conservative by
+                default: when unsure whether something is
+                load-bearing, KEEP IT and ask.
+              ▶ AND THE CLOSE IS NOT FINISHED UNTIL THE TIDYING IS
+                DONE. Temp files, stray downloads, half-done edits,
+                unrun patch scripts, superseded copies. NOTHING IS
+                CARRIED INTO THE NEXT SESSION FOR CLEANING.
+              ⚠ MINTY'S RULING, S96: the point is that the next
+                session STARTS CLEAN AND STARTS ON THE APP.
+              ⚠ EARNED: at the S96 close, Downloads held 39 stale
+                copies of the four working files going back five
+                sessions — including the two that S93 had to go
+                hunting through. Small steady cleanups beat a
+                painful periodic overhaul.
 
               ⚠ DO NOT START WORK THAT CANNOT BE RECORDED. If there is
               not time to write the close, there is not time for another
