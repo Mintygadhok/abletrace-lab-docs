@@ -1,11 +1,21 @@
 # RULES
 
-Last revised: S95.
+Last revised: S96.
 ⚠ THIS STAMP WILL OFTEN NOT MOVE. RULES changes only when a rule is
   earned by a real failure. A stamp several sessions old is correct.
-⚠ S95 IS AN EXCEPTION AND THE LAST OF ITS KIND: Section 0 was folded in
-  here and deleted, closing P95. Everything below that came from Section 0
-  is marked with its original number so the history stays traceable.
+⚠ S96 CHANGED FOUR THINGS AND NOTHING ELSE: one line added to BLAST
+  RADIUS, one to LOOK, one to DEPLOY, and DOCS reissued because S96
+  falsified it — TRAPS was rewritten whole and cut, so "appended only,
+  never cut" was no longer true.
+  ⚠ AND THREE PROPOSED LINES WERE DROPPED AS DUPLICATES. S96 drafted an
+  addendum before this file had been read, and three of its four lines
+  already existed here in this file's own wording. The addendum was
+  REVERTED, not committed. ⚠ THE NEAR-MISS IS THE LESSON: it would have
+  sat at the end as a dated block — the "recent updates tail" that
+  ANTI-ROT forbids, and the shape that made old Section A contradict its
+  own head on nine load-bearing facts.
+⚠ S95's fold of Section 0 into this file remains marked with its original
+  numbers so the history stays traceable.
 
 Read first. Changes rarely. Everything here was earned by a real failure.
 
@@ -70,6 +80,14 @@ LOOK          When a claim can be CHECKED ON A SCREEN, ask Minty to
               traceability" and got a different screen first, because
               the URL was never stated. And filter by company_id BEFORE
               naming a fixture.
+              ⚠ WHEN A MEASUREMENT AND A RECOLLECTION CONFLICT, FIND A
+              THIRD MEASUREMENT THAT DATES THEM. Do not rebuild the
+              measurement to fit the memory. S96 read dev's firewall
+              rule off the console, then spent most of an hour
+              hypothesising that it had been edited — because Minty
+              recalled using a box the rule made unreachable. One date
+              killed it: the box was built ten days AFTER the trip.
+              The launch time had been on screen the whole time.
 
 EVERY         Every response asking for action ends with
 RESPONSE      "WHAT MINTY DOES NOW". Plain language, one action per
@@ -164,6 +182,14 @@ BLAST RADIUS  Before changing how a number is CALCULATED, grep where
               that number is CONSUMED. S93: `batches` looked like a
               display figure and turned out to drive MATERIAL RELEASE
               quantities two files away.
+              ⚠ AND WHEN YOU FIND A BUG, GREP FOR THE SAME MISTAKE
+              ELSEWHERE. It is usually in three or four places. One
+              grep, seconds. Grepping a single unguarded read found the
+              identical pattern in four models — one crashed, two were
+              safe only by ACCIDENT OF THEIR DATA, and one was safe by
+              code. ⚠ These are two different greps: the first asks
+              where this NUMBER goes, the second asks where this
+              MISTAKE was repeated. Both are cheap. Do both.
 
 DEPLOY        pm2 restart <NAME>, never "all" — dev=abletrace-dev,
               prod=abletrace-backend. sleep 8 before curl.
@@ -181,6 +207,14 @@ DEPLOY        pm2 restart <NAME>, never "all" — dev=abletrace-dev,
               ⚠ Backups to /home/ubuntu ONLY. Never a .bak inside
               api/models, controllers or config — Sails loads every .js
               as LIVE CODE.  [4.6]
+              ⚠ READ THE ROLLBACK PATH OFF THE BOX, NEVER WRITE IT FROM
+              THE BUILD LABEL. S95 recorded both boxes' rollback
+              directories using the full 40-character build code; the
+              deploy script uses TWELVE, so the recorded path matched
+              nothing on either box. It was found in S96 by accident.
+              ⚠ THE ROLLBACK PATH IS THE ONE THING THAT MUST BE RIGHT
+              BEFORE IT IS NEEDED, and a wrong one is discovered
+              mid-incident.
 
 THE LOG       The commit message IS the record. What changed and WHY,
               written at the moment of committing. Nothing is written
@@ -247,16 +281,43 @@ DOCS          ⚠ FOUR WORKING FILES, FIXED NAMES. Git holds the
                            Last revised: S--
                 NOW.md     state + queue. REWRITTEN WHOLE each session.
                            Last rewritten: S--
-                TRAPS.md   what bit us. APPENDED ONLY, never cut.
-                           Last appended: S--
+                TRAPS.md   what bit us. Grows by APPEND in a normal
+                           session, and is CUT ONLY DELIBERATELY, with
+                           Minty ruling on every entry one at a time.
+                           Last rewritten: S--
                 PLAN.md    the next session's list. Rewritten whole,
                            disposable. Written at close of: S-- for S--
 
+              ⚠ TRAPS WAS "APPEND ONLY, NEVER CUT" UNTIL S96, WHEN IT
+              WAS REWRITTEN WHOLE AND WENT FROM ~40 ENTRIES TO TEN. A
+              THIRD OF IT WAS ITSELF, TWICE — S95's merge moved a block
+              in verbatim without checking against what the file
+              already held. ⚠ NEVER-CUT WAS THE WRONG RULE: it made the
+              file grow until it sat between the reader and the ten
+              entries that matter.
+
+              ⚠ WHAT GOES IN TRAPS, AND IT IS A CLOSED LIST. A fact
+              about how this app is built that FAILS SILENTLY — no
+              error, no crash, just a wrong number or a missing row.
+              It cannot be discovered by testing, because nothing
+              announces itself.
+              ▶ MINTY'S RULING, S96: IF IT CAN BE FIXED, IT IS A QUEUE
+                ITEM. IF NOTHING IS BROKEN, IT IS NOTHING.
+              ⚠ AND THE COROLLARY THAT DID MOST OF THE WORK: a warning
+                that says "do not touch this" belongs as a COMMENT ON
+                THE LINE, not an entry in a file. The comment sits
+                three inches from the thing being tidied; the file sits
+                in another repo the tidier is not reading.
+              ⚠ A CLIENT SYMPTOM goes in the client guide, not here.
+              ⚠ A WORKING METHOD goes in RULES, not here.
+              ⚠ AN ENTRY THAT PROTECTS A JOB RETIRES WHEN THE JOB IS
+                DONE.
+
               ⚠ EVERY ONE CARRIES ITS STAMP ON THE FIRST LINES, NOT THE
-              LAST. The tell must cost one glance, and TRAPS is long.
-              At session open, read all four stamps against the session
-              being opened. If they lag, THE BOXES ARE THE ARBITER and
-              the record is reconciled before any work.
+              LAST. The tell must cost one glance. At session open, read
+              all four stamps against the session being opened. If they
+              lag, THE BOXES ARE THE ARBITER and the record is
+              reconciled before any work.
 
               ⚠ NO SUFFIXED COPIES. S92 made TRAPS-additions-S92.md and
               S93 had to merge it back. A suffix on a cumulative file
@@ -277,6 +338,10 @@ DOCS          ⚠ FOUR WORKING FILES, FIXED NAMES. Git holds the
               ⚠ THE PASTE LIST MUST NAME EVERY FILE THE JOB WILL WRITE
               TO, not just the ones it will read. S95's list omitted
               Section 5 and the JR entry could only be drafted.
+              ⚠ AND CLAUDE DOES NOT EDIT A FILE IT HAS NOT READ WHOLE,
+              EVEN TO ADD TO IT. S96 drafted a RULES addendum without
+              RULES in front of it; three of its four lines already
+              existed here. Reverted, not committed.
 
               ⚠ ANYTHING WORTH KEEPING MUST NOT LIVE IN NOW.md OR
               PLAN.md. Both are rewritten whole, so a note left there is
@@ -350,6 +415,10 @@ ANTI-ROT      ⚠ THE BOTH-DIRECTIONS TEST. Every fact has one home,
               contradicted the head on NINE load-bearing facts. A
               dynamic tail on a stable file is how a document becomes
               two-headed. There is no safe small version of it.
+              ⚠ THIS FILE NEARLY GREW ONE IN S96. An addendum block was
+              written, dated, and appended to the end. It was reverted
+              before it was committed. ⚠ A NEW RULE IS FOLDED INTO THE
+              ITEM IT BELONGS TO, or it is not added.
 
 SCOPE         ANSWER THE QUESTION ASKED. A narrow question about a
               document is NOT permission to review the document set,
@@ -428,100 +497,4 @@ CLOSE         ⚠ NOTHING IS CLOSED UNTIL IT IS COMMITTED AND PUSHED.
               call. But the drift must be NAMED, not silently
               tolerated.  [10.6]
 
-```# RULES — ADDENDUM, S96
-
-⚠ THIS IS AN ADDENDUM, NOT A REWRITE. RULES.md was NOT pasted in S96,
-so Claude has not read the current file. Rule 7.1 forbids editing an
-item that has not been read whole — so these are delivered as text to
-be placed by hand, not as a rewritten file.
-
-⚠ BEFORE ADDING ANY OF THEM: check whether RULES already says it in
-other words. If it does, KEEP THE EXISTING WORDING and drop the new
-one. ⚠ TWO ENTRIES STATING ONE THING IS HOW DRIFT STARTS — and it is
-exactly what happened to TRAPS, where seventeen entries were
-duplicates of each other.
-
----
-
-## FOUR LINES, PROMOTED OUT OF TRAPS IN S96
-
-These were trap entries. They are not traps — they are how you work.
-They were the most-cited entries in the whole log, which is the tell
-that they are principles rather than incidents.
-
 ```
-A GREEN MESSAGE IS NOT PROOF.
-Check the app first, then confirm the number in the database. A
-success toast, a file chip and a loaded page all look exactly the
-same whether or not anything was saved.
-⚠ EARNED: a PO file chip rendered identically before and after the
-  fix, for a file that was never stored.
-```
-
-```
-WHEN YOU FIND A BUG, GREP FOR THE SAME MISTAKE ELSEWHERE.
-It is usually in three or four places. One grep, seconds.
-⚠ EARNED: grepping one unguarded read found the identical pattern in
-  four models — one crashed, two were safe only by accident of their
-  data, one was safe by code.
-⚠ MINTY, S96: if there is a bug it may be in the connected areas
-  too, and checking costs almost nothing.
-```
-
-```
-MEASURE THE BOUNDARY, DO NOT REASON ACROSS IT.
-When behaviour depends on where two systems meet — a driver, a
-parser, a populate — run one query and look.
-⚠ EARNED: three fixes were proposed from confident reasoning about
-  how MySQL handles JSON. Two were wrong and one reached prod before
-  being disproven. A single SELECT settled it in seconds.
-⚠ THIS IS THE GOLDEN RULE'S OTHER HALF. The first line says do not
-  trust the screen. This one says do not trust reasoning either.
-```
-
-```
-A COMMAND BLOCK CONTAINS ONLY WHAT IS TO BE TYPED.
-No placeholders, no prose, no warnings inside the fence. If Claude
-does not know a value, it asks for the value first or gives a form
-that does not need one.
-⚠ EARNED TWICE IN ONE SESSION: <rest-of-sha> and ... were both
-  pasted literally, because that is what a command block means. A
-  placeholder is valid shell syntax, and < is a redirect, so it
-  fails with an error about the wrong thing entirely.
-⚠ RULES ALREADY HAS THE FENCING RULE AND CLAUDE BROKE IT REPEATEDLY
-  IN S95. This is the missing half of it, not a new rule.
-```
-
----
-
-## ONE RULING TO RECORD, S96
-
-```
-IF IT CAN BE FIXED, IT IS A QUEUE ITEM. IF NOTHING IS BROKEN, IT IS
-NOTHING.
-MINTY, S96: "I need to understand the issue. If there's an issue, we
-sort it. If there's no issue, we cut it."
-⚠ THIS IS THE FILTER THAT TOOK TRAPS FROM ~40 ENTRIES TO 10.
-⚠ AND ITS COROLLARY: a warning that says "do not touch this" belongs
-  as a COMMENT ON THE LINE, not an entry in a file. The comment sits
-  three inches from the thing being tidied; the file sits in another
-  repo the tidier is not reading. → P118.
-```
-
----
-
-## ⚠ WHERE THIS OVERLAPS P110
-
-P110 holds a drafted simplification of RULES — 44 rules down to 14 —
-which was never committed and exists only in the S95 chat.
-
-⚠ IF P110 IS PICKED UP, THESE FOUR LINES MUST BE FOLDED INTO IT
-RATHER THAN SITTING BESIDE IT. Two versions of RULES is precisely the
-two-headed-document shape that P95 existed to fix.
-
-⚠ AND THE HONEST NOTE: S96 applied P110's rule 4 to TRAPS without
-adopting it, and the file lost three quarters of its bulk without
-losing anything that was broken. The principle is now proven on real
-work, not just drafted.
-
-
