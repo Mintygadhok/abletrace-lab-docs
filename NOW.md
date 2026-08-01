@@ -305,11 +305,37 @@ P111  ⚠ QUICKBOOKS INTEGRATION — MINTY, S95. THE TIME HAS COME.
 ```
 
 ```
-P82   THE ACROBATICS SWEEP — ⚠ RE-RANKED S96 BY MINTY: PRIORITY.
+P82   THE ACROBATICS SWEEP — ⚠ RE-RANKED S96 BY MINTY: PRIORITY,
+      AND IT IS A CAMPAIGN, NOT A FIX.
       MINTY, S96: shipping units must come from the source AS
       SHIPPING UNITS. No acrobatics in between. Wherever a unit
       count is rebuilt by dividing Kg it is wrong, EVEN WHEN THE
       ARITHMETIC IS RIGHT. ▶ RESOLVE THEM IN ONE GO.
+      MINTY, S96: "rank within that one by one. We look at the
+      screen and see what the issue is and keep on cleaning it.
+      This is priority for me, I need to get that cleaned up
+      across the app."
+
+      ▶ WALK FIRST, THEN FIX — MINTY'S RULING, S96. The screen walk
+        (P82h) DEFINES THE JOB and may find sites nobody has
+        listed. Fixing the measured ones first and walking after
+        means two passes over the same view.
+      ⚠ ONE INFORMED PASS IS CHEAPER, and it is the golden rule
+        applied to a campaign: look before reasoning about size.
+
+      ⚠ THE SHAPE, so nobody mistakes one part for the whole:
+        SCREEN-AND-FIX   P82a · P82e · P82f · P82g · P82h
+                         read the screen, find the divide, repoint
+                         it to the stored value
+        ONE GREP FIRST   P82d — the reads have never been found.
+                         Then it joins the group above.
+        SCHEMA           P82c — no units column exists. Unblocked
+                         by Minty's S96 ruling.
+        LAST             P82b — SOH, once its inputs are clean.
+
+      ⚠ R5 IS NOT THE WHOLE SWEEP. R5 is one database view. P82a is
+        its two repointable fields. Everything from P82d down is in
+        different files entirely.
 
   P82a  R5 — THE TWO REPOINTS, Trace_ProductHeaderView.
         qty_produced_su → mm.received_units
@@ -331,21 +357,47 @@ P82   THE ACROBATICS SWEEP — ⚠ RE-RANKED S96 BY MINTY: PRIORITY.
         ⚠ ONE SCREEN VERIFIES IT: product-traceability-details.
         ⚠ SOH WILL NOT CHANGE. Expected — see P82b. Do not chase it.
 
-  P82b  SOH_su — THE HEADLINE FIGURE, AND THE LAST ONE FIXABLE.
-        Stock on Hand is the number anyone actually reads. It
-        subtracts five Kg terms then divides. Cannot be
-        unit-anchored until every subtrahend is, and one needs the
-        schema change in P82c.
-        ⚠ THE TWO CHEAP REPOINTS IMPROVE TWO CELLS AND LEAVE SOH
-          EXACTLY AS IT IS. That is the ranking question.
+  P82b  SOH_su — THE HEADLINE FIGURE. Stock on Hand is the number
+        anyone actually reads.
+        ⚠ IT IS NOT A STORED NUMBER. It is arithmetic — five Kg
+          terms subtracted, then divided to show units. It CANNOT
+          read a stored unit count, because there is not one to
+          read. This is why it differs in kind from every other
+          item in the sweep.
+        ▶ THEREFORE EVERY INPUT MUST BE UNIT-ANCHORED FIRST. Four
+          can be. The fifth is P82c — and Minty's S96 ruling has
+          UNBLOCKED it.
+        ⚠ SOH IS LAST, NOT SKIPPED. Doing the two cheap repoints
+          improves two cells and leaves SOH exactly as it is. That
+          is precisely why this is ranked as a CAMPAIGN and not a
+          fix.
 
   P82c  MISC RELEASE HAS NO UNITS COLUMN AT ALL.
         rejectmaterialandproduct stores Kg only — measured S95.
         Units are typed on the form and DROPPED from the record.
-        ⚠ Needs a column, a write-path change, AND A BACKFILL ON A
-          LIVE CLIENT derived from Kg — the exact round-trip this
-          whole programme exists to eliminate. NOT COSTED.
-        ⚠ Return quantity is Kg-only too, same residual.
+        ⚠ THIS IS WHAT BLOCKED SOH. SOH cannot be unit-anchored
+          while one of its five inputs has no unit figure to read.
+        ▶ MINTY'S RULING, S96 — AND IT REMOVES THE BLOCKER:
+          SAVE UNITS FROM NOW ON. THE PAST STAYS AS IT IS.
+          "We'll give it the future ones. The past can stay as it
+          is. Not an issue."
+        ⚠ WHAT THE RULING AVOIDS: the only way to backfill historic
+          rows is to divide the stored Kg by the weight — THE EXACT
+          ROUND-TRIP THIS WHOLE PROGRAMME EXISTS TO ELIMINATE.
+          Those rows have no true unit figure anywhere; it was
+          never saved. Reconstructing it is a guess, and on awkward
+          weights it produces the same float garbage we are
+          removing.
+        ⚠ THE CONSEQUENCE, STATED PLAINLY: for a period SOH reads a
+          MIX — stored units for new write-offs, derived Kg for old
+          ones. It gets cleaner over time rather than all at once,
+          and it stops getting worse the day the column lands.
+        ▶ THE WORK: add the column · DECLARE IT IN THE WATERLINE
+          MODEL · save the typed units on the write path.
+        ⚠ THE COLUMN ALONE IS NOT ENOUGH — TRAPS 3. An undeclared
+          column is discarded with NO ERROR. Both, or the write
+          vanishes silently.
+        ⚠ Return quantity is Kg-only too, same residual, same fix.
 
   P82d  quanity_shipped_to_date (⚠ NOTE THE MISSPELLING — a grep for
         the correct spelling finds nothing) is divided at
