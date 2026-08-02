@@ -201,6 +201,18 @@ JR12. RDS config — NOT in git, NOT a routine  [J41, J42]
        group MUST set this until the driver migration (G0e) lands.
      - CALL mysql.rds_set_configuration('binlog retention hours', 24);
        Verify: CALL mysql.rds_show_configuration;
+     ⚠ CHANGING THE MASTER PASSWORD IN THE RDS CONSOLE ALSO RESETS THE
+       USER'S AUTH PLUGIN to caching_sha2_password. The app will not
+       boot: ER_NOT_SUPPORTED_AUTH_MODE. ⚠ IT LOOKS LIKE A WRONG
+       PASSWORD AND IS NOT - the server never checks the password, it
+       refuses on protocol.
+     ▶ ALWAYS follow a console password change with:
+         ALTER USER 'admin'@'%' IDENTIFIED WITH mysql_native_password
+           BY '<the new password>';
+       The mysql CLIENT speaks the new protocol, so it can connect and
+       fix this where the app cannot. Test with SELECT 1 first - if
+       that succeeds, the password is right and only the plugin is
+       wrong. (S97, P125. Dev down ~10 minutes.)
 
 JR13. nginx client_max_body_size 10M — on BOTH boxes  [J-S71]
      The default is 1M. It was at the default since day one, silently capping
