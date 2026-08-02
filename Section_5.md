@@ -3345,4 +3345,37 @@ BLAST RADIUS: none. No code changed, nothing deployed, no prod touch.
 ========
 
 
+J115 - TWO POPUP ERRORS ON getActiveFormula. NOTHING PROVEN.
+STATUS: OPEN, CAUSE UNKNOWN, NOT REPRODUCIBLE ON DEMAND.
+
+WHAT MINTY SAW, twice, identical wording:
+  "Http failure response for .../getActiveFormula: 0 Unknown Error"
+  A blocking alert(). Had to be dismissed with OK.
+    14:07 UTC  /Add-SO    creating SO-0014
+    14:33 UTC  /Add-MLO   creating MO-0016
+  Both on product test0.7. Minty: never seen before.
+
+EFFECT: Shipping Unit and Quantity stayed blank - that call fills
+them. Both records SAVED CLEAN once refilled. No data harmed.
+
+MEASURED:
+  nginx      SERVER ANSWERED 200 BOTH TIMES, 21455 and 21456 bytes
+  pm2        restart count HELD AT 33 - no crash
+  error log  no stack trace, nothing near either time
+
+⚠ STATUS 0 IS NOT A SERVER ERROR - it means no response reached
+  the browser. Do not chase the backend.
+
+⚠ THE 14:07 REQUEST FIRED TWICE IN THE SAME SECOND. Same byte
+  count. A duplicate call is a LEAD, not a proven cause.
+
+▶ IF IT RECURS: read the nginx log for that second, and check
+  whether the request duplicated.
+⚠ A THIRD OCCURRENCE MAKES IT A DEFECT.
+
+⚠ NOT A QUEUE ITEM - nothing is broken. Recorded so the next
+  occurrence is the third data point, not the first.
+========
+
+
 END S97 APPEND
