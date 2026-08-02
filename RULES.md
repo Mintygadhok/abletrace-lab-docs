@@ -90,6 +90,9 @@ LOOK          ⚠ THE FIRST HALF OF THE GOLDEN RULE. DB IS TRUTH is the
               though they are:
                 LOOK AT THE SCREEN to settle what the app DOES.
                 READ THE ROW to settle what was STORED.
+                READ THE CODE LINE to settle WHICH ROUTE made a
+                  number.
+                GREP THE CALLER to settle whether it RUNS AT ALL.
               A screen is authoritative about BEHAVIOUR and worthless
               as evidence of a SAVED VALUE.
 

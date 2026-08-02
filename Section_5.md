@@ -3205,3 +3205,144 @@ BLAST RADIUS: a view definition on each box. No row written, no schema
 
 
 END S95 APPEND
+
+S97 - APPENDED 2 AUG 2026
+NUMBERING: highest existing entry verified as J113. This is J114.
+No JT entry - the traps file is not extended by this session.
+
+
+J114 - THE SO STATUS COMPARES UNITS TO Kg. AND THE FRONTEND SITE THAT
+LOOKS IDENTICAL IS DEAD. STATUS: DEFECT CONFIRMED, NOT YET FIXED.
+P124. Frontend paths verified S97 by find + grep.
+
+THE DEFECT, in api/models/SOManagement.js:182-206 - BACKEND:
+     dispatchedQty += DO.qty_shipped;      UNITS
+     soQty         += product.quantity;    KILOGRAMS
+     if (soQty <= dispatchedQty) finalState = 3   -> GREEN
+
+  PROVEN LIVE, not reasoned: SO-0014 on dev, test0.7 at 0.7 Kg per
+  unit. Ordered 5 units = 3.5 Kg stored. Shipped 4 units.
+  3.5 <= 4 is TRUE, so the dot went GREEN with one unit still owed.
+  ⚠ PREDICTED FIRST, THEN REPRODUCED. The prediction is what makes
+    it a finding rather than an observation.
+
+⚠ IT FAILS IN BOTH DIRECTIONS, from the same line:
+     under 1 Kg/unit   the unit count outruns the Kg figure, so it
+                       greens BEFORE the order is complete
+     over  1 Kg/unit   the unit count never reaches the Kg figure,
+                       so a completed order NEVER greens
+  ⚠ GLUTENULL IS ON THE DANGEROUS SIDE. Fruits & Nut bars are
+    0.32 Kg per unit (J113), so the EARLY-GREEN direction is what is
+    live on prod: an order reads complete while stock is still owed.
+
+⚠⚠ THE FRONTEND FUNCTION THAT LOOKS LIKE THE CAUSE IS DEAD, AND
+THIS IS THE HALF THAT MATTERS. so-management.component.ts:170
+  evalFinalStateElement carries the SAME units-vs-Kg comparison at
+  :179/182/185. It is the site the S93 checklist and P82d both point
+  at. ⚠ ITS ONLY CALLER, AT LINE 138, IS COMMENTED OUT.
+  Patching it would have built cleanly, deployed cleanly, and
+  changed NOTHING.
+  ▶ The status arrives from the backend already computed. html:73
+    reads element.finalState; the .ts never sets it.
+  ⚠ SECOND SITE, NOT YET READ: closed-so.component.ts:136 calls
+    evalFinalStateElement LIVE for the Closed SOs screen and computes
+    finalState in the frontend by its own route (:169/172/175). Two
+    implementations of one domain rule. Whether they agree is UNKNOWN.
+
+MINTY'S RULING, S97 - AND IT DECIDES THE FIX:
+  A DO CAN SHIP MORE OR LESS THAN AUTHORISED.
+  So the status must follow what ACTUALLY shipped (qty_shipped,
+  units), not what was authorised (qty_to_ship, Kg).
+  ⚠ That rules out the tempting no-conversion fix of summing
+    qty_to_ship, which is already Kg and would need no maths.
+  ▶ THE FIX IS THEREFORE: populate packing_id on the DispatchOrders
+    find at :179, then dispatchedQty += qty_shipped * wgt_kgs_per_unit.
+    MULTIPLY, never divide. R1.
+  ⚠ soproducts stores NO unit count - only quantity (Kg) and
+    quanity_shipped_to_date (units). Measured S97 from the model.
+    So comparing units to units is NOT available.
+
+⚠ ALSO SETTLED THIS SESSION - THREE SITES ARE DEAD, NOT DEFECTS.
+  lotReceived is assigned and its only consumer is commented out in
+  all three: edit-mlc:295 (consumer :311), edit-mlo:245 (:260),
+  start-mlc:151 (:164). ⚠ THE SURVIVOR IS edit-closed-mlcs:126,
+  whose consumer at :136 IS LIVE - somebody switched five of these
+  off and missed one. -> P115 for the dead three, PLAN fix 5 for the
+  survivor.
+
+⚠⚠ THE "MISSING DOT" IN dispatch-orders.component.html DOES NOT
+EXIST. A grep rendered line 116 as element?Refer_PS[0] - no dot -
+which reads as a broken ternary and would explain the 0# that screen
+shows on shipped DOs. A patch was written against it. THE ASSERTION
+REFUSED TO WRITE: anchor found 0 times. cat -A on the raw file shows
+element?.Refer_PS[0] - THE DOT IS THERE and always was.
+  ⚠ THIS IS J83's ARTEFACT RECURRING. S79 logged three "missing
+    operator" defects that were grep artefacts inside long template
+    literals. Same shape, seven sessions later.
+  ▶ THE RULE: confirm any ONE-CHARACTER defect with cat -A before
+    writing a patch. A grep is not a faithful renderer.
+  ⚠ AND THE ASSERT-ANCHORED PATCH IS WHAT SAVED THE FILE. A sed
+    would have corrupted a working line. Rule 4.2 earned again.
+  ⚠ P82g IS THEREFORE STILL UNEXPLAINED. The 0# is real - reproduced
+    on DO-0013 and again on DO-0014, both freshly shipped. The
+    template is correct. The cause is a ROW question now, not a code
+    question: read packingslips.shipped_flag and packingslipdos for
+    those DOs.
+
+THE SEVEN SITES SCOPED, all paths verified by find + grep, all read
+in the file. Full detail is in PLAN for S98; recorded here as the
+evidence:
+  SOManagement.js:182-206              units vs Kg      -> P124
+  admin-formulation.component.ts:878   legacy inventory column
+  add-mlo.component.html:87            legacy inventory column
+  closed-mlcs.component.html:79        divides units-stored qty
+  edit-closed-mlcs.component.ts:136    divides units-stored qty + R3
+  edit-mlc.component.ts:298            rebuilds received_qty
+  product-traceability.component.ts:109,161  rebuilds received_qty
+⚠ THE LAST THREE ARE THE JR7e / P91 SHAPE EXACTLY - a Kg-stored
+  source divided correctly while the stored units column sits unread.
+  Right number, wrong route. Same fix, already proven in S95.
+
+CORRECT AND STRUCK, verified by reading WHAT EACH CALLER PASSES:
+  mfg-lot-codes.html:69 - production-controller.html:50 -
+  mlo-management.html:78 - closed-mlcs.html:84 - add-dispatch-v2:25,28 -
+  mlo-list:38,40 - dispatch-orders:117,120. All pass a Kg source.
+  ⚠ closed-mlcs.html:84 IS CORRECT WHILE :79 IS WRONG - same helper,
+    adjacent lines, one passes received_qty (Kg) and one passes qty
+    (units). Do not "tidy" them into one call.
+
+⚠ FOUR CLAUDE THEORIES DISPROVEN. Recorded because an unrecorded
+wrong answer becomes the next session's foundation (0.1a, J88):
+  1 "the allocation buckets are broken"  -> the DO/PS/ship transfers
+      measured CORRECT at every hop on a clean product. The earlier
+      readings came from a product whose history included a cancel.
+  2 "0.666# is a division artefact"      -> real residue of
+      fractional allocations. Withdrawn.
+  3 "a foreign MO in the Stock Info popup" -> deliberate. The popup
+      lists DOWNSTREAM MOs for the edit gate: "close open MOs before
+      you can edit". Not a filter fault.
+  4 "a missing dot"                       -> see above.
+  ⚠ ALL FOUR WERE PROPOSED BEFORE LOOKING.
+
+⚠ THE FIXTURE ERROR, so nobody repeats it. test0.7 was built at
+0.7 Kg/unit to expose hidden divisions: 7 / 0.7 = 6.999999999999999
+in binary, so a divide should have confessed. EVERY SCREEN ROUNDS TO
+THREE DECIMALS, so it printed 10.000 either way. The same blind spot
+as a 1:1 fixture (TRAPS 9), reintroduced through the formatter.
+  ▶ A DISPLAY-ROUNDED SCREEN CANNOT REVEAL A DIVISION. Read the code.
+  ⚠ WHAT THE FIXTURE DID PROVE, and it is worth keeping: the whole
+    outbound chain reconciles - MO -> receive -> SO -> DO -> packing
+    slip -> ship, 8 in store + 2 shipped = 10 produced, buckets
+    moving correctly at every hop. And RECEIVE CANNOT BREAK THE
+    ANCHOR: Quantity (Kg) on the receive form is locked and derived,
+    so an operator cannot store an inconsistent pair.
+
+FIXTURE RESIDUE ⚠ DEV ONLY, company 464: product test0.7 (FO-0009),
+  MO-0015 (received 10), MO-0016 (released, not received), SO-0014
+  (5 ordered, 4 shipped, GREEN - this is the live evidence for P124,
+  do not clear it), DO-0013/0014, PS-0028/0029.
+BLAST RADIUS: none. No code changed, nothing deployed, no prod touch.
+========
+
+
+END S97 APPEND
