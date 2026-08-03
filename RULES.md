@@ -260,6 +260,10 @@ THE CLOSE PRODUCES THE PLAN. Every job in it carries:
   downloads. Never at the start of a session.
 ⚠ CLEAR THE DOWNLOADS AT THE CLOSE. Verify the STAMP after
   copying, before committing.
+⚠ COMMIT MESSAGES: TWO OR THREE SENTENCES. What changed and why,
+  plus anything a future reader would get wrong without it. The
+  detail belongs in the code comment and in PLAN, not repeated in
+  all three. Minty's ruling S99.
 ⚠ Do not start work that cannot be recorded.
 ⚠ Claude raises the close; Minty decides.
 ```

@@ -158,6 +158,12 @@ authoritative shipped state is `packingslips.shipped_flag`.
 ⚠ NEVER READ do_status TO DETERMINE SHIPPED. Reading it tells a client
   something shipped that did not, or the reverse.
 
+⚠ RETAINED UNTIL P133 IS FIXED. Moved to the queue S99 on Minty's
+  ruling — if it can be fixed it is a job, not a permanent fact. It
+  stays here because it protects live code: until the fix lands,
+  reading do_status still tells a client something shipped that did
+  not. TRAPS drops to nine when P133 closes.
+
 ---
 
 ## 9 · NEVER VERIFY A CONVERSION ON A 1:1 PRODUCT
