@@ -258,6 +258,8 @@ THE CLOSE PRODUCES THE PLAN. Every job in it carries:
   already knew, the close failed.
 ⚠ Tidy here and ONLY here — temp files, patch scripts, stale
   downloads. Never at the start of a session.
+⚠ CLEAR THE DOWNLOADS AT THE CLOSE. Verify the STAMP after
+  copying, before committing.
 ⚠ Do not start work that cannot be recorded.
 ⚠ Claude raises the close; Minty decides.
 ```
