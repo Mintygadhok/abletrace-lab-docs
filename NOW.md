@@ -54,15 +54,20 @@ DATABASES ⚠ THE LIVE DB ON BOTH BOXES IS `abletracelab_live`.
           ⚠ A query against the wrong one RETURNS ROWS, not an
             error. → P134
 
-⚠⚠ THE BOXES DIFFER AT THE DATABASE LAYER AS OF S100.
-   Trace_ProductHeaderView on DEV has qty_produced_su repointed
-   to mm.received_units. PROD STILL DIVIDES.
-   This is DELIBERATE and it is the ONLY known difference.
-   ▶ Prod's copy has NOT been read. Do not assume the two
-     definitions were identical before this change.
-   ▶ Dev's pre-change definition is saved at
-     /tmp/phv-dev-before-repoint.sql (temp — will not survive
-     a reboot; P82a/P135 does not depend on it).
+✓ THE BOXES MATCH AT THE DATABASE LAYER.
+   Trace_ProductHeaderView on BOTH boxes has qty_produced_su
+   repointed to mm.received_units. Six divisions remain on each.
+   ⚠ APPLIED TO PROD TOO, late in S100, on Minty's ruling:
+     "I will be more comfortable if both dev and prod are same
+      in all respects."
+   ▶ PROD'S DEFINITION WAS READ FIRST and matched dev's
+     pre-change shape EXACTLY — 5756 bytes, 7 divisions, same
+     target line. The boxes were identical before the change.
+   ▶ ROLLBACK, prod: /home/ubuntu/phv-prod-before-repoint-S100.sql
+     ⚠ NOT in /tmp. It survives a reboot. Recreate the view
+       from that file to undo.
+   ▶ Dev's pre-change copy was /tmp/phv-dev-before-repoint.sql
+     and will NOT survive a reboot. Prod's file is the record.
 ```
 
 ---
@@ -120,7 +125,21 @@ DATABASE — DEV ONLY
   ✓ VERIFIED by row: MO-0007 qty_produced_su 51, SOH_su 41,
     SOH 56.99 — identical to before.
   ✓ VERIFIED on screen, dev details page, unchanged.
-  ⚠ NOT APPLIED TO PROD. → the boxes differ. Recorded above.
+  ✓ THEN APPLIED TO PROD, same session, after Minty's ruling
+    that the boxes must match. Prod's definition was READ FIRST
+    and was byte-identical to dev's pre-change copy.
+  ✓ VERIFIED BY ROW on prod, before and after, companies 471
+    and 464. NOT ONE FIGURE MOVED:
+      Glutenull MO-0001  qty_produced 560     su 1750
+      Glutenull MO-0002  qty_produced 192.48  su  802
+    1750 x 0.32 = 560 and 802 x 0.24 = 192.48, both exact.
+  ✓ VERIFIED ON SCREEN on prod as the CLIENT'S OWN USER
+    (Arshita / Glutenull1), /MLO-Management: both MOs read
+    planned and completed identical, units-first, nothing blank.
+  ⚠ Before the repoint, qty_produced_su for MO-0001 came from
+    560 / 0.32, which in floating point is 1749.9999999999998.
+    It read 1750 only because the view rounds to 3 places. It
+    now reads 1750 because that is what is STORED.
 ```
 
 ---
@@ -183,9 +202,10 @@ dotenvx IS NOT INSTALLED ON DEV as a command.
 ```
 BACKEND    nothing pending.
 FRONTEND   nothing pending. Both boxes on f53986ca.
-DATABASE   ⚠ ONE ITEM. The qty_produced_su repoint is on DEV
-           and NOT on prod. Deliberate. → P135 decides whether
-           it ever goes.
+DATABASE   nothing pending. The qty_produced_su repoint is on
+           BOTH boxes as of the S100 close.
+           ⚠ There is still NO PROMOTE PATH for a database
+             object. Each box is changed separately, every time.
 ```
 
 ---
@@ -286,8 +306,8 @@ P135  ⚠ THE ACROBATICS WATCH ITEM. LOW PRIORITY, DELIBERATE.
         Trace_ProductHeaderView, six remaining divisions:
           qty_shipped_su · qty_packing_slip_su · qty_do_su
           qty_misc_release_su · intermediate_prd_su · SOH_su
-        ⚠ qty_produced_su was repointed on DEV in S100. Prod
-          was not. → the boxes differ. Recorded in STATE.
+        ⚠ qty_produced_su was repointed on BOTH boxes in S100
+          and is NOT part of this list. Six divisions remain.
 
       WHY IT IS LOW PRIORITY, IN PLAIN WORDS
         Every figure on the screen is right today. The view
