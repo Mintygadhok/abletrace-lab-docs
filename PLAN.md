@@ -1,14 +1,15 @@
 # PLAN
 
-Written at close of: S99 · for S100.
+Written at close of: S100 · for S101.
 Disposable. Rewritten whole at every close.
 
-⚠ RANKING IS MINTY'S, SET AT THE S99 CLOSE:
-  JOB B first, then FIX 7, then P82c. Fix 6 needs backend work and
-  is bigger than it looked — it is NOT in this session.
+⚠ MINTY'S RULING AT THE S100 CLOSE:
+  "next session we do 82c followed by 82b. no digression —
+   focused, complete. and I create 260804."
 
-⚠ EVERY PATH BELOW WAS VERIFIED IN S99 WITH `find` + `grep`.
-  DO NOT RE-LOCATE THEM. Paths in older documents are stale.
+⚠ THREE JOBS. NOTHING ELSE. No new investigation branches.
+  If something odd turns up, it goes in the QUEUE and is not
+  chased. That is the whole point of this session.
 
 ---
 
@@ -19,206 +20,88 @@ Disposable. Rewritten whole at every close.
    EXPECT  dev  backend 2ae869c · frontend checkout c2a52d8e · clean
            prod backend 2ae869c · frontend checkout 9bce0238 · clean
            both 200
-   ⚠ BACKENDS NOW MATCH. That is S99's promotion.
-   ⚠ ON DEV, IGNORE THE SEVENTH LINE. The newest backup dir is
-     named www-html.bak-dev-34e99c3e7a53 but dev was ROLLED BACK
-     from it and is serving 770d3c4f's code. The name lies. It
-     self-corrects on the next clean promote — which is JOB B.
+   ⚠ BACKENDS AND FRONTENDS BOTH MATCH NOW. Serving f53986ca.
+   ⚠ THE DATABASES DO NOT. Dev's Trace_ProductHeaderView has
+     qty_produced_su repointed; prod's still divides. Deliberate,
+     recorded in NOW. Do not "fix" it.
 
-2  Start JOB B. It is ranked first and it is the only job here
-   that touches the live client.
+2  Minty creates company 260804. JOB A. It comes first because
+   JOB B needs somewhere clean to test the write.
 ```
 
 ---
 
-## JOB B · PROMOTE FIVE FRONTEND FIXES TO PROD
+## JOB A · THE CLEAN FIXTURE COMPANY  (Minty creates it)
 
-⚠ RANKED FIRST. The gap has grown two sessions running.
+⚠ RANKED FIRST. ⚠ MINTY DOES THIS IN THE APP. Claude watches
+  the stored rows after each step.
 
 ```
-WHAT THIS IS, IN PLAIN WORDS
-  Five display fixes are proven on dev and have never reached
-  Glutenull. Each one changes HOW a number is worked out, not what
-  the number is: the screen used to divide a weight to rediscover
-  a unit count the app already stores. Same answer, correct route,
-  and no ugly decimals on awkward weights.
+WHY, IN PLAIN WORDS
+  Dev carries old test rows with wrong numbers baked in from a
+  bug fixed months ago — 50.004, 10.008, 1750.08. Twice in S99
+  and twice again in S100 a session minute went on deciding
+  whether an odd figure was a live defect or old residue.
+  A clean set means any odd figure from now on is REAL.
+  ▶ This also replaces the old P82f heal. Minty's ruling S100:
+    healing test data buys nothing, so build clean instead.
 
 ACTION
-  1  GitHub → Actions → build-frontend.yml → Run workflow →
-     target = prod.
-     ⚠ A PUSH ONLY BUILDS DEV. Prod needs this manual dispatch.
-  2  CLEAR ~/Downloads of old dist zips FIRST.
-     rm -f ~/Downloads/dist-prod-*.zip
-     ⚠ The browser cannot overwrite; it appends (1) and (2), which
-       makes the plain filename the OLDEST copy. RULES/CLOSE.
-  3  Download the dist-prod-<40-char-sha> artifact.
-  4  ls -lt ~/Downloads/dist-prod-*.zip   — confirm ONE file,
-     and that the sha matches the artifact page.
-  5  On the MAC:  ~/promote.sh <that zip> prod
-     ⚠ It will require typing 'yes'.
-  6  READ THE ROLLBACK PATH OFF THE SCREEN. Do not write it from
-     the build label.
-  7  Cmd+Q the browser before looking.
+  1  Create company 260804 on DEV.
+  2  Create ONE product at 1.39 Kg per unit.
+     ⚠ NOT a round weight and NOT 1:1. A ratio of 1 makes a
+       division invisible — it has already produced a confident
+       wrong conclusion that stood for a session (TRAPS 9).
+  3  One MO through the full cycle: create → release → receive
+     → close.
+  4  One SO through the full cycle: create → dispatch → ship
+     → close.
+  ⚠ WRITE DOWN EVERY NUMBER AS ENTERED. After each step Claude
+    reads the stored row. Entered and stored must agree at
+    every hop. That is what makes this a reference set rather
+    than just more test data.
+  5  Record the company, product, MO and SO numbers in NOW as
+    THE standing test set.
 
-MATERIAL
-  Nothing to paste. Build from main HEAD 2e22e0a1.
-  ⚠ The revert sitting on top is a NO-OP. The code equals
-    770d3c4f. Building from main is correct and safe.
-
-ANALYSIS — DONE, DO NOT REDERIVE
-  THE FIVE COMMITS
-    a52e4bfc  Products list stock on hand
-    b8e7248b  Add-MLO warehouse stock
-    824e0e6d  Closed MOs planned/completed qty + Excel export
-    9b9cf05d  Closed-SOs status dot                    (S99)
-    770d3c4f  P82 fix 5, Edit Closed MO received figure (S99)
-
-  ⚠ NO CLIENT SYMPTOM ON ANY OF THEM. Measured on prod S98:
-    formulations.inventory and inventory_units AGREE on all 27
-    Glutenull products (FO-0019 560 Kg / 1750 units at 0.32;
-    FO-0022 192.48 / 802 at 0.24; the other 25 are zero).
-  ⚠ SO THE VERIFICATION IS NOT "the number is right" — it already
-    is. WHAT MUST BE CHECKED IS THAT NOTHING BLANKS.
-
-VERIFY on prod, as Glutenull — EVERY LINE, NOT A SAMPLE
-  Products list      FO-0019 must read 1750# (560 Kg)
-                     FO-0022 must read 802# (192.48 Kg)
-                     ⚠ If either reads 0, inventory_units is not
-                       reaching that screen. ROLL BACK.
-  Closed MOs         Planned and Completed both units-first.
-                     ⚠ Compare one MO against MLO-Management for
-                       the same product — they must agree.
-  Closed SOs         ⚠ Glutenull has NO SALES ORDERS, so this
-                     screen will be EMPTY. That is expected and it
-                     is not a failure. Say so out loud.
-  Edit Closed MO     open one of Glutenull's two MOs and confirm
-                     the WDU line shows a unit count and a Kg
-                     figure, neither blank.
-  Add-MLO            only if Glutenull has a product with an
-                     intermediate. If not, this screen cannot be
-                     checked on prod and that is fine — say so.
-  ▶ Rollback: the path printed by promote.sh, read off the box.
-```
-
----
-
-## JOB C · BUILD THE CLEAN FIXTURE SET
-
-⚠ RANKED SECOND, after Job B. Minty's ruling S99.
-
-```
-WHY
-  Dev carries old rows with wrong numbers baked in (50.004,
-  10.008, 1750.08) from a bug fixed months ago. Twice in S99 a
-  session minute went on deciding whether an odd figure was a live
-  defect or residue. A clean set means any odd figure is real.
-
-ACTION
-  A product at 1.39 Kg/unit — non-1:1, so divisions cannot hide.
-  One MO through the full cycle: create, release, receive, close.
-  One SO through the full cycle: create, dispatch, ship, close.
-  ⚠ Note every number AS ENTERED, and read the stored row after
-    each step. Entered and stored must agree at every hop.
-  ⚠ Record the MO and SO numbers in NOW as THE standing test set.
   ⚠ THE OLD ROWS STAY. Not deleted, just not used. Deleting MOs
     risks orphaning lot codes, receipts and traceability links.
-  ⚠ DECIDE FIRST: company 464 alongside the old data, or a fresh
-    company. Claude's inclination is 464, clearly labelled — dev
-    already carries two unaccounted companies (P100).
-```
-
----
-
-## VERIFY BEFORE TRUSTING ANY QUEUE ENTRY
-
-⚠ MINTY'S RULING S99. Applies to every job below and every queue
-  item worked from here on.
-
-```
-Open the screen FIRST. See what it does today. Only then decide
-whether the recorded diagnosis still holds.
-
-WHY  Entries were written in S91, S95, S97. Since then the anchor
-     flip landed and five fixes went in. An entry can be stale in
-     TWO directions — already fixed by something else, or still
-     broken for a different reason than recorded. Neither shows up
-     in a code read.
-
-⚠ TAKE THE BEFORE-READING AND WRITE THE NUMBER DOWN. S99's whole
-  tangle was having no before-reading for /Edit-Mlc.
-⚠ NAME THE URL, NOT THE DESCRIPTION. /Edit-Mlc and /Edit-MLO cost
-  an hour.
-⚠ If the diagnosis has drifted, REWRITE THE ENTRY before patching.
-```
-
----
-
-## FIX 7 · PRODUCT TRACEABILITY  (P82)
-
-⚠ RANKED THIRD. ⚠ FRONTEND — edit on the MAC.
-
-```
-WHAT THIS IS, IN PLAIN WORDS
-  Two lines rebuild a produced-unit count by dividing the weight
-  received by the weight of one unit. The app already stores that
-  unit count. Same fault as fix 5 and fix 6.
-
-⚠ DO THE GATE BEFORE THE PATCH. FIX 6 FAILED FOR EXACTLY THIS
-  REASON AND HAD TO BE REVERTED.
-
-  THE GATE: prove received_units actually REACHES this component.
-  A column existing in the database does NOT mean every screen
-  receives it. Fix 5's screen gets it; /Edit-Mlc does not.
-  ▶ HOW: grep the backend route that serves /Product-Traceability
-    and confirm received_units is returned. If it is served by a
-    STORED PROC, the proc must SELECT it explicitly.
-  ▶ WHAT DISTINGUISHES: if the column is not in the returned
-    object, the frontend patch will render 0 and this becomes a
-    backend job. STOP AND SAY SO rather than patching.
-
-FILE  app/Layouts/admin-dashboard/traceability/
-      product-traceability/product-traceability.component.ts
-      lines 109 AND 161
-NOW   wduRec = Math.round((item.received_qty / ...wgt_kgs_per_unit)...)
-FIX   read received_units.
-⚠ LINES 107 AND 159 ARE CORRECT and sit two lines away — they
-  MULTIPLY item.qty to derive Kg. DO NOT TOUCH THEM.
 
 VERIFY
-  ⚠ NAME THE ROUTE: /Product-Traceability, then a product, then
-    its details. S95 asked for "product traceability" and got a
-    different screen.
-  ⚠ USE test1.39 (1.39 Kg/unit). NEVER a 1:1 product — a ratio of
-    1 makes the division invisible.
-  ⚠ TAKE A BEFORE-READING. Note what the field shows BEFORE the
-    promote. Without it, an after-reading proves nothing. This is
-    the S99 lesson and it cost an hour.
+  Every stored figure a whole, clean number. No 10.008. No
+  15.290000000000001.
 ```
 
 ---
 
-## P82c · THE MISC RELEASE UNITS COLUMN
+## JOB B · P82c · THE MISC RELEASE UNITS COLUMN
 
-⚠ RANKED FOURTH. ⚠ MUCH SMALLER THAN THE OLD RECORD SAYS.
+⚠ RANKED SECOND. ⚠ THE LAST ACTIVE JOB IN P82.
 
 ```
 WHAT THIS IS, IN PLAIN WORDS
-  When stock is released for miscellaneous reasons, the app stores
-  the weight but not the unit count. The column does not exist.
-  Adding it is a precondition for fixing stock on hand later.
+  When stock is released for miscellaneous reasons, the app
+  saves the weight. It does not save how many units. There is
+  nowhere to put it — the column does not exist.
+
+⚠ TWO STEPS, AND BOTH ARE NEEDED. TRAPS 3.
+  Step one: add the column to the database.
+  Step two: tell the app the column exists, in the model.
+  If only step one is done, the app carries on as though the
+  column is not there. It saves nothing into it and gives NO
+  ERROR. This has already happened once — received_units banked
+  zero silently until it was declared.
 
 ACTION
-  1  ALTER TABLE rejectmaterialandproduct ADD COLUMN <units> double
-     DEFAULT 0;
+  1  ALTER TABLE rejectmaterialandproduct ADD COLUMN <units>
+     double DEFAULT 0;
      ⚠ ON EACH BOX SEPARATELY, against `abletracelab_live`.
        There is NO promote path for a schema change.
+     ⚠ Gate each box separately. Dev first, proven, then prod.
   2  Declare it in RejectMaterialAndProduct.js attributes.
      ⚠ WITHOUT THIS THE WRITE VANISHES SILENTLY. TRAPS 3.
-       This is not theoretical — received_units banked 0 silently
-       until it was declared, and food_safety_enabled still does.
   3  Change the write path so the unit count is captured.
-  4  Back the column up and log it in Section 5's JR block IN THE
-     SAME BREATH. JR is the only record these exist.
+  4  Back the column up and log it in Section 5's JR block IN
+     THE SAME BREATH. JR is the only record these exist.
 
 MATERIAL
   Section 5 — the JR block. NOT OPTIONAL, the job writes to it.
@@ -229,16 +112,112 @@ ANALYSIS — DONE, DO NOT REDERIVE
   ⚠ NO BACKFILL IS NEEDED. Measured on prod S98:
       SELECT company_id, COUNT(*) FROM rejectmaterialandproduct
       GROUP BY company_id;  →  464 only, 4 rows. GLUTENULL ZERO.
-    There is no live client data to heal. That was the risky half
-    of this job and it is gone.
-  ⚠ ADDING THE COLUMN DOES NOT FIX SOH. SOH is computed by
-    Trace_ProductHeaderView, and that is P82a. This column is a
-    PRECONDITION, not the fix.
-  ⚠ Dev's four rows in 464 are the test fixture for the write path.
+    There is no live client data to heal. That was the risky
+    half of this job and it is gone.
+  ⚠ Dev's four rows in 464 are the test fixture for the write
+    path. Company 260804 gives a clean one.
+  ⚠ ADDING THE COLUMN DOES NOT FIX SOH. That is JOB C.
 
 VERIFY
-  Make a misc release on dev, then read the row. The unit count
-  must be stored, not zero. ⚠ Read the ROW, not the toast.
+  Make a misc release on dev in company 260804, then READ THE
+  ROW. The unit count must be stored, not zero.
+  ⚠ Read the ROW, not the toast. A toast proves the click,
+    not the write.
+  ⚠ Then read it again on the SCREEN.
+```
+
+---
+
+## JOB C · P82b · STOCK ON HAND
+
+⚠ RANKED THIRD. ⚠ ONLY AFTER JOB B. It is blocked behind the
+  column existing.
+
+```
+WHAT THIS IS, IN PLAIN WORDS
+  Stock on Hand is worked out inside a piece of database code
+  called Trace_ProductHeaderView. It takes the weight produced,
+  subtracts everything that left, then divides by the weight of
+  one unit to get a unit count. The app already stores most of
+  those counts.
+
+⚠ THE TRAP, IN PLAIN WORDS. TRAPS 10.
+  Inside that database code, someone gave a WEIGHT figure the
+  name "qty_shipped". There is also a real column in the
+  database called "qty_shipped" that holds a UNIT COUNT.
+  Same name. One is weight, one is units, a few lines apart.
+  ▶ If anything is swapped by NAME, a weight lands where units
+    belong. The arithmetic will look sensible and be wrong.
+  ▶ RESOLVE EVERY NAME TO ITS DEFINITION BEFORE TRUSTING IT.
+    An alias is not a column and a CTE is not a table.
+
+ANALYSIS — DONE IN S100, DO NOT REDERIVE
+  ⚠ THE VIEW HAS BEEN READ. 5756 bytes, from dev. Seven
+    divisions by fop.wgt_kgs_per_unit:
+      qty_produced_su      ✓ ALREADY REPOINTED ON DEV (S100)
+      qty_shipped_su       ⚠ CTE sums do.qty_to_ship = KG.
+                             The units column is do.qty_shipped.
+                             Measured: never NULL, 26 active rows.
+      qty_packing_slip_su  ⚠ same CTE, same Kg source
+      qty_do_su            ⚠ same CTE, same Kg source
+      intermediate_prd_su  sums mpr.qty_allocated (Kg — P93)
+      qty_misc_release_su  ▶ THIS IS WHAT JOB B UNBLOCKS
+      SOH_su               the whole subtraction, divided
+  ⚠ 0.5 IS A VALID SHIPPING UNIT. Minty's ruling S100. A
+    fractional figure in a units column is NOT a divided weight.
+    Claude got this wrong in S100. Do not re-raise it.
+
+⚠ PROD'S COPY OF THE VIEW HAS NEVER BEEN READ.
+  ▶ SHOW CREATE VIEW on PROD before changing anything there.
+    Do not assume the two boxes hold the same definition.
+
+⚠ MINTY'S RULE, S100: if this turns out not to be straight-
+  forward, it goes to P135 and we stop. It is a view change on
+  a live client's database with no build and no promote path.
+  A wrong figure has never been seen on this screen.
+
+VERIFY
+  ⚠ TAKE THE BEFORE-READING FIRST and write the numbers down.
+    On dev today, company 464, test1.39, Pdt-260718-1:
+      Qty Produced   51# (70.89 Kg)
+      Stock on Hand  41# (56.99 Kg)
+      Qty in PS       2# (2.78 Kg)
+      Shipped         7# (9.73 Kg)
+      Qty Misc Rel    1# (1.39 Kg)
+    ▶ These MUST NOT MOVE unless we intend them to.
+  ⚠ Then the same on company 260804, which will be clean.
+```
+
+---
+
+## HOW TO REACH THE DATABASE FROM A SCRIPT
+
+⚠ LEARNED S100 THE HARD WAY. Saves twenty minutes.
+
+```
+dotenvx IS NOT AVAILABLE AS A COMMAND ON DEV. `npx dotenvx`
+tries to fetch from the network and fails. node_modules/.bin
+has no dotenvx.
+
+THE DRIVER IS  node_modules/mysql   — NOT mysql2.
+
+▶ THE METHOD THAT WORKS: a script file that reads .env itself.
+  Write it as a FILE and scp it. Do NOT paste long blocks into
+  the terminal — two pastes truncated mid-heredoc in S100 and
+  ran a half-written file.
+
+  const fs = require('fs');
+  const base = '/home/ubuntu/abletrace-lab-backend';
+  const l = fs.readFileSync(base + '/.env','utf8').split('\n')
+    .find(function(x){ return x.indexOf('DATABASE_URL') === 0; });
+  const u = new URL(l.slice(l.indexOf('=')+1).trim()
+    .replace(/^["']/,'').replace(/["']$/,''));
+  const mysql = require(base + '/node_modules/mysql');
+
+⚠ ALWAYS PRINT THE DATABASE NAME the script connected to.
+  P134: a query against the wrong database RETURNS ROWS, not
+  an error.
+⚠ NO SECRET REACHES THE SCREEN with this method.
 ```
 
 ---
@@ -246,75 +225,63 @@ VERIFY
 ## NOT IN THIS SESSION
 
 ```
-FIX 6  ⚠ BIGGER THAN IT LOOKED. The frontend line is correct; the
-       BACKEND ROUTE serving /Edit-Mlc does not return
-       received_units. Needs a backend change first, then the
-       frontend line, then a before-and-after on the same screen.
-       ▶ The reverted patch is in history at 34e99c3e. Read it
-         rather than rewriting it.
-       ⚠ /Edit-Mlc and /Edit-MLO ARE DIFFERENT SCREENS with nearly
-         the same name, both showing MO details. This tangled S99
-         badly. Name the URL every time.
-
-P82a   Trace_ProductHeaderView repoint. ⚠ THE VIEW HAS NOT BEEN
-       READ. Needs SHOW CREATE VIEW on BOTH boxes first.
-       ⚠ TRAPS 10 protects this job and retires when it lands.
-P82b   SOH. Blocked behind P82a and P82c.
-P82e   Trace_ProductProdLotView selects mm.qty twice. Not read.
-P82f   received_qty stores float garbage. ⚠ CONFIRMED BY ROW in
-       S99 — MO-0009 holds 15.290000000000001. Still unfixed.
-P82g   /Dispatch-orders shows 0# on shipped DOs. ⚠ THE TEMPLATE
-       IS CORRECT — proven with cat -A in S97. ▶ Needs a ROW read
-       on packingslips / packingslipdos, NOT another code read.
-P102   THE REBOOT. Its own sitting. ⚠ VERIFY PM2 STARTS ON BOOT
-       FIRST, and remember prod runs a different OS so dev does
-       not rehearse it. ⚠ MISSED FOUR DAYS RUNNING NOW.
+P111   QUICKBOOKS. ⚠ MINTY RAISED THIS AS IMPORTANT AT THE S100
+       CLOSE, alongside food safety records. Planning session
+       only, NO CODE. Its own sitting. ⚠ It needs a new column,
+       so TRAPS 3 will bite there.
+FOOD SAFETY RECORDS. ⚠ Raised by Minty S100 as important.
+       Not yet scoped. Needs its own sitting to define what is
+       actually wanted before any work.
+P135   The acrobatics watch item. ⚠ DO NOT OPEN IT. It exists
+       so that when a wrong figure appears, the answer is
+       already written down.
+P102   THE REBOOT. Own sitting. ⚠ VERIFY PM2 STARTS ON BOOT
+       FIRST, and prod runs a different OS so dev does not
+       rehearse it. ⚠ MISSED FOUR DAYS RUNNING.
+P119   Back up the database's own code into the repo.
+       ⚠ MORE URGENT NOW — a view differs between boxes and
+         there is no record of it in git.
 P108   Retire the J-entries. ⚠ KEEP JR. Own sitting, with Minty.
-P111   QUICKBOOKS. Planning only, no code.
-P131/132/133/134  New in S99. Not yet ranked.
+P131/132/133/134/136  Not ranked.
 ```
 
 ---
 
-## OPEN QUESTIONS CARRIED FORWARD
-
-```
-✓ CLOSED: the dev restart-count question. ↺ held at 129 all day
-  in S99 with two deploys and a rollback. Not investigated
-  further, and no longer needs to be.
-
-⚠ /Edit-Mlc showed 0# for Completed Quantity under fix 6 and 51#
-  without it. The frontend patch causes it. But WHY that component
-  lacks received_units — plain Waterline find vs stored proc — was
-  never established. One grep of its backend route settles it and
-  it is the first step of the fix 6 rework.
-```
-
----
-
-## THE LESSONS S99 EARNED
+## THE LESSONS S100 EARNED
 
 ⚠ Kept here deliberately rather than added to RULES. If they
   recur, Claude proposes a rule; the default is still NO.
 
 ```
-1  A STORED COLUMN IS NOT AVAILABLE TO EVERY SCREEN.
-   Fix 5 worked and fix 6 failed on the SAME column, because the
-   two components load by different routes. Prove the column
-   reaches the component BEFORE patching the display.
+1  CHECK THE PROMPT BEFORE EVERY BLOCK. THREE blocks ran on the
+   wrong box in S100 — two health checks on dev instead of
+   prod, and an rm on PROD instead of the Mac. All harmless,
+   all read-only or no-match. The promote was not. RULES
+   section 2 already says this. It was not followed. Again.
 
-2  AN AFTER-READING WITHOUT A BEFORE-READING PROVES NOTHING.
-   Claude called a 0 a regression having never seen the field
-   before the patch. It happened to be right, but only the second
-   check established that.
+2  DO NOT PASTE LONG BLOCKS INTO THE TERMINAL. Two heredocs
+   truncated mid-file and ran as half-written scripts. RULES
+   5.2 already says anything long goes as a FILE. Claude did
+   not follow its own rule until it had failed twice.
 
-3  TWO SCREENS WITH NEARLY THE SAME NAME WILL BE CONFUSED.
-   /Edit-Mlc and /Edit-MLO. /Closed-SO and /SO-Management.
-   Name the URL, not the description.
+3  ASK WHAT THE BUSINESS RULE IS BEFORE CALLING SOMETHING A
+   DEFECT. Claude read 0.5 in a units column as a divided
+   weight and nearly logged a queue item for it. Half a
+   shipping unit is legitimate. Claude also nearly kept P82g
+   open — a packing slip means ready to ship, not shipped.
+   ▶ BOTH WERE ANSWERED BY ONE QUESTION TO MINTY.
+   ▶ The screen and the row are two arbiters. The BUSINESS
+     RULE is a third, and Claude does not hold it.
 
-4  CHECK THE PROMPT COLOUR. A frontend patch ran on DEV in S99
-   and had to be undone and redone on the MAC. RULES section 2
-   already says this. It was not followed.
+4  A FIX WITH NO VISIBLE SYMPTOM STILL NEEDS A BEFORE-READING.
+   Fix 7 changed no number anywhere. The before-reading is the
+   only thing that made "unchanged" mean something.
+
+5  NAME WHICH SCREEN A ROUTE SERVES BEFORE CLAIMING IT IS
+   BLOCKED. Claude declared fix 7 blocked behind P82a having
+   assumed the wrong view served it. One grep of the route
+   showed a different view entirely, which carried the column.
+   ▶ Cost: a near-miss deferral of a job that was ready to do.
 ```
 
 ---
@@ -323,6 +290,6 @@ P131/132/133/134  New in S99. Not yet ranked.
 
 ```
 RULES.md · NOW.md · TRAPS.md · PLAN.md
-PLUS Section 5's JR block — ONLY IF P82c IS SCHEDULED.
+PLUS Section 5's JR block — JOB B WRITES TO IT. NOT OPTIONAL.
 NOTHING ELSE.
 ```

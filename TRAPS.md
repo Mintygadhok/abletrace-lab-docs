@@ -183,7 +183,8 @@ reconciles perfectly whether the code divides or reads the stored value.
 
 ## 10 · A NAME INSIDE A VIEW CAN MEAN THE OPPOSITE OF THE REAL COLUMN
 
-⚠ RETIRES WHEN P82a IS DONE. Kept only because it protects that job.
+⚠ RETIRES WHEN P135 IS DONE. Kept only because it protects that job
+  — and P82b (S101 Job C) touches this same view.
 
 Inside `Trace_ProductHeaderView`, the do_products CTE defines:
 
@@ -277,5 +278,5 @@ CUT ENTIRELY — nothing broken, fixed long ago, or a one-off nuisance
    sits in another repo the tidier is not reading. (→ P118)
 4  IF IT IS A CLIENT SYMPTOM, IT BELONGS IN THE CLIENT GUIDE.
 5  ⚠ AN ENTRY THAT PROTECTS A JOB RETIRES WHEN THE JOB IS DONE.
-   Entry 10 goes when P82a lands.
+   Entry 10 goes when P135 lands.
 ```

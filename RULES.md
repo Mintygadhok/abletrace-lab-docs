@@ -270,7 +270,7 @@ THE CLOSE PRODUCES THE PLAN. Every job in it carries:
 
 ---
 
-## THE FIVE FILES
+## THE FOUR FILES
 
 ```
 RULES.md   how we work. Rarely edited.
@@ -280,7 +280,7 @@ TRAPS.md   what fails SILENTLY. Ten entries. Cut deliberately.
 PLAN.md    the next session's work. Rewritten whole.
 
 ⚠ Every one carries its stamp on the FIRST lines. At session open
-  read all five against the session being opened. If they lag,
+  read all four against the session being opened. If they lag,
   THE BOXES ARE THE ARBITER.
 ⚠ Anything worth keeping must NOT live in NOW or PLAN. Both are
   rewritten whole.
