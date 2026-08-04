@@ -102,9 +102,60 @@ VERIFY on prod, as Glutenull — EVERY LINE, NOT A SAMPLE
 
 ---
 
+## JOB C · BUILD THE CLEAN FIXTURE SET
+
+⚠ RANKED SECOND, after Job B. Minty's ruling S99.
+
+```
+WHY
+  Dev carries old rows with wrong numbers baked in (50.004,
+  10.008, 1750.08) from a bug fixed months ago. Twice in S99 a
+  session minute went on deciding whether an odd figure was a live
+  defect or residue. A clean set means any odd figure is real.
+
+ACTION
+  A product at 1.39 Kg/unit — non-1:1, so divisions cannot hide.
+  One MO through the full cycle: create, release, receive, close.
+  One SO through the full cycle: create, dispatch, ship, close.
+  ⚠ Note every number AS ENTERED, and read the stored row after
+    each step. Entered and stored must agree at every hop.
+  ⚠ Record the MO and SO numbers in NOW as THE standing test set.
+  ⚠ THE OLD ROWS STAY. Not deleted, just not used. Deleting MOs
+    risks orphaning lot codes, receipts and traceability links.
+  ⚠ DECIDE FIRST: company 464 alongside the old data, or a fresh
+    company. Claude's inclination is 464, clearly labelled — dev
+    already carries two unaccounted companies (P100).
+```
+
+---
+
+## VERIFY BEFORE TRUSTING ANY QUEUE ENTRY
+
+⚠ MINTY'S RULING S99. Applies to every job below and every queue
+  item worked from here on.
+
+```
+Open the screen FIRST. See what it does today. Only then decide
+whether the recorded diagnosis still holds.
+
+WHY  Entries were written in S91, S95, S97. Since then the anchor
+     flip landed and five fixes went in. An entry can be stale in
+     TWO directions — already fixed by something else, or still
+     broken for a different reason than recorded. Neither shows up
+     in a code read.
+
+⚠ TAKE THE BEFORE-READING AND WRITE THE NUMBER DOWN. S99's whole
+  tangle was having no before-reading for /Edit-Mlc.
+⚠ NAME THE URL, NOT THE DESCRIPTION. /Edit-Mlc and /Edit-MLO cost
+  an hour.
+⚠ If the diagnosis has drifted, REWRITE THE ENTRY before patching.
+```
+
+---
+
 ## FIX 7 · PRODUCT TRACEABILITY  (P82)
 
-⚠ RANKED SECOND. ⚠ FRONTEND — edit on the MAC.
+⚠ RANKED THIRD. ⚠ FRONTEND — edit on the MAC.
 
 ```
 WHAT THIS IS, IN PLAIN WORDS
@@ -148,7 +199,7 @@ VERIFY
 
 ## P82c · THE MISC RELEASE UNITS COLUMN
 
-⚠ RANKED THIRD. ⚠ MUCH SMALLER THAN THE OLD RECORD SAYS.
+⚠ RANKED FOURTH. ⚠ MUCH SMALLER THAN THE OLD RECORD SAYS.
 
 ```
 WHAT THIS IS, IN PLAIN WORDS
