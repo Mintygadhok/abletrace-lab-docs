@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J113 — ⚠ the next one is J114, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Last appended: S95, Jul 30 2026.
+number. Highest is J115 — ⚠ the next one is J116, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Last appended: S103, Aug 4 2026.
 ══════════════════════════════════════════════════════════════════════
 
 TRAPS
@@ -229,6 +229,26 @@ JR14. On-box / off-git scripts and config  [J-S61, J-S66, J-S66b]
      - config/bootstrap.js dev-safety guard IS in git (b70ba10) — carries forward.
      - .github/workflows/build-frontend.yml IS in git — carries forward.
      Restore from Drive Master Brief.
+
+JR15. rejectmaterialandproduct.qty_rejected_units  [J116, S103]
+     ALTER TABLE rejectmaterialandproduct
+       ADD COLUMN qty_rejected_units double DEFAULT 0;
+     Stores the operator's typed shipping-unit count on the MR
+     (Miscellaneous Release) product screen. Previously only the Kg
+     figure was stored and the count was derived by division on read.
+     The last product write path that stored Kg and reconstructed units.
+     DOUBLE, NOT INT - fractional shipping units are permitted (J88).
+     Declared in RejectMaterialAndProduct.js attributes, commit 05f786c,
+       alongside the REJPRODOBJ write (JT2).
+     REJMATOBJ deliberately untouched - material reject is Kg-measured
+       by design. Adding units there would be a defect.
+     Backups: /home/ubuntu/rejectmaterialandproduct-before-S103.sql (dev)
+              /home/ubuntu/rejectmaterialandproduct-before-S103-PROD.sql
+     Prod mysqldump needs --single-transaction --skip-lock-tables
+       --set-gtid-purged=OFF. Without skip-lock-tables RDS denies FLUSH
+       TABLES WITH READ LOCK and writes a header-only file that LOOKS
+       like a backup. Check grep -c "INSERT INTO" before trusting it.
+     Applied to BOTH boxes 4 Aug 2026.
 
 ──────────────────────────────────────────────────────────────────────
 ⚠ ───────────────────────────────────────────────────────────────────────
