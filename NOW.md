@@ -1,49 +1,61 @@
 # NOW
 
-Last rewritten: S103, 4 August 2026.
+Last rewritten: S104, 5 August 2026.
 State, pending promotion, and the queue. Rewritten whole every session.
 
-⚠ S103 CHANGED BOTH BOXES. Schema, backend and frontend. Everything
-  below was verified at the row or on the screen before close.
+⚠ S104 CHANGED BOTH BOXES — a DATABASE OBJECT and the FRONTEND.
+  Everything below was verified at the row, on the box, or on the
+  screen before close. Nothing is recorded from memory.
 
 ---
 
 ## STATE
 
-⚠ VERIFIED THROUGH S103. Both boxes moved this session.
+⚠ READ OFF BOTH BOXES AT S104 CLOSE.
 
 ```
 DEV       16.55.10.205 · pm2 abletrace-dev ↺130 · 200
-          frontend SERVING dev-125014a3ab26
+          frontend SERVING dev-0ad1f77cee1d
           frontend checkout c2a52d8e — stale, harmless
           backend HEAD 05f786c · both repos clean
           Ubuntu 24.04.4 · 172.31.1.196
           ⚠ 12 updates pending · restart required
-          ⚠ ↺ MOVED 129 → 130 IN S103. Ours, the model restart.
-            It had held four sessions before that.
+          ⚠ ↺ DID NOT MOVE IN S104. Held at 130. This session changed
+            a database object and the frontend. SAILS WAS NEVER
+            RESTARTED AND NEVER NEEDED TO BE.
 
 PROD      15.157.38.101 · pm2 abletrace-backend ↺338 · 200
-          Glutenull live · SERVING prod-125014a3ab26
+          Glutenull live · SERVING prod-0ad1f77cee1d
           backend HEAD 05f786c · both repos clean
           ⚠ frontend checkout reads 9bce0238 — stale BY DESIGN (P8)
           Ubuntu 26.04 · 172.31.3.156
-          ⚠ 43 updates pending · restart required
-            ⚠ WAS 29 AT S102. It has grown on its own. → P102
-          ⚠ ↺ MOVED 337 → 338 IN S103. Ours, the git-pull restart.
+          ⚠ 43 updates pending · restart required → P102
+          ⚠ ↺ DID NOT MOVE IN S104. Held at 338.
 
-✓ BACKENDS MATCH.  05f786c on both.
-✓ FRONTENDS MATCH. 125014a3ab26 on both.
-✓ DATABASES MATCH. qty_rejected_units added to BOTH (S103, JR15).
+✓ BACKENDS MATCH.  05f786c on both. UNTOUCHED THIS SESSION.
+✓ FRONTENDS MATCH. 0ad1f77cee1d on both.
+✓ DATABASES MATCH. qty_rejected_units on both (JR15, S103) AND
+                   WhC_GetAllRejectedList_SP returns it on both
+                   (JR16, S104).
 
-GITHUB    frontend main = 125014a3 (P82c create-screen write)
-          backend  main = 05f786c  (P82c attribute + REJPRODOBJ)
-          docs     main = eb5312c  (JR15 + Section 5 header fix)
+GITHUB    frontend main = 0ad1f77c (P143 brackets)
+          backend  main = 05f786c  (unchanged since S103)
+          docs     main = eab4b59  (JR16)
 
-ROLLBACK  dev   /home/ubuntu/www-html.bak-dev-125014a3ab26
-          prod  /home/ubuntu/www-html.bak-prod-125014a3ab26
-          ⚠ BOTH HOLD f53986ca — a backup dir holds the build it
+ROLLBACK  dev   /home/ubuntu/www-html.bak-dev-0ad1f77cee1d
+          prod  /home/ubuntu/www-html.bak-prod-0ad1f77cee1d
+          ⚠ BOTH HOLD 125014a3ab26 — a backup dir holds the build it
             REPLACED, not the one it is named after.
-          DB backups, S103, before the ALTER:
+          ⚠ READ OFF BOTH BOXES AT CLOSE, not written from the label.
+
+          PROCEDURE BACKUPS, S104, before the change — KEEP THESE:
+            dev  /home/ubuntu/WhC_GetAllRejectedList_SP.bak-S104-DEV.txt
+            prod /home/ubuntu/WhC_GetAllRejectedList_SP.bak-S104-PROD.txt
+          Both 3414 bytes. Both verified by grep, not by file size.
+          ⚠ THEY ARE `SHOW CREATE` TEXT, NOT RUNNABLE SCRIPTS. To
+            restore, take the body and add the DELIMITER $$ wrapper.
+
+          COLUMN BACKUPS, S103 — still on the boxes:
             dev  /home/ubuntu/rejectmaterialandproduct-before-S103.sql
             prod /home/ubuntu/rejectmaterialandproduct-before-S103-PROD.sql
 
@@ -55,115 +67,114 @@ INSTANCES dev  i-098e2cc59844d9ef3  t3.small
 
 COMPANIES GLUTENULL is 471 on prod. Sandbox is 464 and 465.
           ⚠ 474 = test260805@ ON DEV. THE CLEAN REFERENCE SET.
+          ⚠ test260703@ IS A SANDBOX COMPANY ON PROD and it carries
+            FOUR MR ROWS including a MATERIAL one. S104 gated the
+            prod screen there. ▶ USE IT INSTEAD OF GLUTENULL for any
+            prod screen check. NO CLIENT DATA IS TOUCHED.
           ⚠ dev also carries 466, 469, 470, 472, 473 — unaccounted.
             → P100 IS BIGGER THAN RECORDED. Five, not two.
 
 DATABASES ⚠ THE LIVE DB ON BOTH BOXES IS `abletracelab_live`.
           Dev ALSO carries `abletrace-dev` — DEAD, name backwards.
           Plus the dormant `abletrace` archive (P101, P109).
+          ⚠ THE ARCHIVE HOLDS ITS OWN COPY OF EVERY PROCEDURE AND IS
+            NOT MAINTAINED. NAME THE DATABASE ON EVERY mysql CALL.
+            A bare `mysql` lands in the wrong one.
           → P134
 
 ⚠ PROD IS REACHED FROM THE MAC — OR RUN LOCALLY ON A PROD TERMINAL.
-  S103 used BOTH successfully. NEVER ssh from dev.
+  NEVER ssh from dev.
   ▶ PUT `hostname -I` AT THE TOP OF ANY PROD BLOCK. Prod must
-    report 172.31.3.156. S103 ran it four times and it cost nothing.
+    report 172.31.3.156.
 ```
 
 ---
 
-## P82c — ⚠ DONE. BOTH BOXES. VERIFIED AT THE ROW.
+## P143 — ⚠ DONE. BOTH BOXES. VERIFIED ON SCREEN.
 
 ```
-THE FIX, IN FOUR PIECES — three built, one found unnecessary
+THE JOB: the MR unit count was stored (S103) and displayed nowhere.
 
-1  ALTER TABLE rejectmaterialandproduct
-     ADD COLUMN qty_rejected_units double DEFAULT 0;
-   BOTH BOXES. Recorded as JR15. ⚠ IN NO REPO — JR is the only copy.
+⚠ THE SIZING QUESTION FROM S103 IS ANSWERED, AND IT WAS THE
+  EXPENSIVE ANSWER. WhC_GetAllRejectedList_SP NAMES ITS COLUMNS ONE
+  BY ONE. qty_rejected_units was not among them. The screen could not
+  display what it never received.
 
-2  RejectMaterialAndProduct.js attributes — qty_rejected_units
-   declared. Commit 05f786c. ⚠ TRAPS 3. Without it the write is
-   discarded silently with a 200.
+⚠⚠ AND BOTH SCREENS DEPEND ON THAT ONE PROCEDURE.
+   PLAN treated the list and the details screen as two independent
+   pieces of work. THEY ARE ONE PIECE WITH TWO FACES:
+     edit-reject-product FETCHES NOTHING. It subscribes to a
+     BehaviorSubject in warehouse.service.ts. The only live caller of
+     changeEditRejectProd is rejected-materials.component.ts:84,
+     which hands over the row the LIST already had.
+   ▶ THERE WAS NEVER A FRONTEND-ONLY VERSION OF THIS JOB.
 
-3  reject-product.component.ts:300 — sends the TYPED units value:
-     qty_rejected_units: this.rejectProductForm.get('WDU').value
-   ⚠ THE CONTROL IS NAMED `WDU`. That was the unknown at S103 open.
-   Commit 125014a3. NOT line 347's maxWdu — that is a validator
-   ceiling built by DIVIDING Kg, and it is R2.
+THE FIX, IN FOUR PIECES — ALL BUILT, ALL ON BOTH BOXES
 
-4  edit-reject-product — ⚠ NOT NEEDED. NOT BUILT. See below.
+1  THE PROCEDURE — qty_rejected_units added to the SELECT list,
+   immediately after qty_rejected. NOTHING ELSE CHANGED. Same 11
+   joins, same WHERE, same ORDER BY. → JR16.
+   Applied dev then prod, each read back out of its own database.
 
-PROVEN ON DEV, company 474, FO-0001 at 8.34 Kg/case:
-  Screen: Shipping Units 3 → Quantity (Kg) 25.02. Correct.
-  ROW:  id 3361 · MR-0008 · qty_rejected 25.02 · qty_rejected_units 3
-  CONTRAST, same query, same screen, same product:
-        id 3360 · MR-0007 · 16.68 · units 0   ← before the fix
-        id 3359 · MR-0006 ·  1.39 · units 0   ← before the fix
+2  rejected-materials.component.html:63 — the list cell.
+   f92dc0ec, brackets in 0ad1f77c.
+   ⚠ GATED ON element.type === 'Product'. BOTH brackets carry their
+     own gate so a material row cannot pick up a stray ")".
 
-VERIFIED ON PROD, Glutenull, FO-0019 at 0.32 Kg/unit:
-  Shipping Units 10 → Quantity 3.2 Kg. Derivation correct on live
-  client data. ⚠ NOT SAVED — deliberately. No client row was created.
-  MINTY CONFIRMED 0.32 IS THE UNIT WEIGHT.
+3  edit-reject-product.component.html:25 — Quantity changed from a
+   NUMBER input to READ-ONLY TEXT. It now holds a formatted string.
+   f92dc0ec.
+
+4  edit-reject-product.component.ts — qty patched as
+     result.qty_rejected_units + '# (' + result.qty_rejected + ' Kg)'
+   with a THREE-LINE COMMENT IN THE CODE saying why (→ P118).
+   f92dc0ec.
+
+⚠ WHY 3 AND 4 ARE SAFE: the save handler at line 123 writes
+  qty_rejected from the `returnedqty` control, NOT from `qty`. The
+  formatted string is never written back.
+  ⚠ THAT IS LUCK, NOT DESIGN. `readonly` was added as a second
+    guard. IF P142 IS EVER ACTIONED, RE-READ THIS FIRST.
+
+GATED ON DEV, company 474 — SEEN ON SCREEN:
+  list     MR-0008  3# (25.020 Kg)
+           MR-0007  0# (16.680 Kg)
+  details  MR-0008  Quantity(kgs) = 3# (25.02 Kg)
+
+GATED ON PROD, company test260703@ — SEEN ON SCREEN:
+  MR-0004  0# (20.000 Kg)   product, pre-column row
+  MR-0003  0# (80.000 Kg)   product, pre-column row
+  MR-0002  1.000 Kg         ⚠⚠ MATERIAL — NO # FIGURE AT ALL
+  MR-0001  0# (20.000 Kg)   product, pre-column row
+
+⚠⚠ MR-0002 IS THE PROOF THE TYPE GATE FIRES CORRECTLY. Dev could
+   not provide it — 474 holds no material MR. Prod's sandbox did.
+   A material row sitting between product rows in the SAME table,
+   showing weight alone. THE GATE IS LOAD-BEARING AND IT WORKS.
+
+⚠ 0# IS CORRECT ON PRE-COLUMN ROWS. Minty's ruling: no fallback, no
+  division, show the stored value as-is. Those rows have no count.
+
+RE-READ AFTER THE DEV DEPLOY — NOTHING MOVED:
+  3361 · 25.02 · 3   3360 · 16.68 · 0   3359 · 1.39 · 0
+  ▶ THE SCREENS ARE READS AND THEY BEHAVED LIKE READS.
+
+⚠ NOTHING WAS WRITTEN ON EITHER BOX IN S104. No rows created, no
+  rows edited. A procedure and three template files, nothing else.
 ```
 
-### ⚠ WHAT S103 FOUND THAT PLAN HAD WRONG
+### ⚠ ONE THING LEFT OPEN
 
 ```
-⚠ PLAN's STEP 4b WAS WRONG ON BOTH COUNTS. It said editing an MR
-  silently blanks the count, and named edit-reject-product:123 as
-  the fix site. Neither holds:
-
-  1  THE UPDATE HANDLER ONLY WRITES WHAT IT IS SENT.
-     RejectMaterialAndProduct.js:222
-       const updateObj = req.body.updates
-     handed straight to .set(). The edit screen sends five named
-     fields; qty_rejected_units is not among them and is never
-     touched. NO ERASURE.
-
-  2  THERE IS NO EDIT BUTTON ON THE SCREEN AT ALL.
-     edit-reject-product.component.html lines 49-56 — the Save,
-     Return and Edit buttons are ALL INSIDE AN HTML COMMENT.
-     ⚠ SO THE SCREEN IS READ-ONLY BY SOMEONE'S DELIBERATE CHOICE,
-       NOT BY DESIGN OF THE DATA PATH.
-     ⚠ THIS IS A LANDMINE. Uncomment that block and saving works
-       again — and THEN the erasure concern becomes real, because
-       the form carries no units field to send. → P142
-
-  ▶ THIS IS THE THIRD CODE-READ OVERTURNED BY THE SCREEN IN TWO
-    SESSIONS. S102 had two. See THE LESSONS below.
-```
-
----
-
-## ⚠ THE COUNT IS STORED AND SHOWN NOWHERE. → P143. S104's JOB.
-
-```
-MINTY RAISED THIS AT S103 CLOSE AND HE IS RIGHT. The column holds
-the number and not one screen displays it.
-
-  MR list    /Rejected-material/product — "Qty Released" shows Kg only
-  MR details /Edit-reject-product       — "Quantity(kgs)" shows Kg only
-
-▶ MINTY'S RULING S103: build it, in the format  2# (16.68 Kg)
-▶ MINTY'S RULING S103 ON OLD ROWS: NO FALLBACK, NO DIVISION. Show
-  the stored count as-is. Glutenull has ZERO MR rows, so the only
-  rows that can ever read 0# are the two dev fixtures.
-  ⚠ THIS DECISION IS SAFE BECAUSE THE CLIENT TABLE IS EMPTY. Any
-    new client creates rows AFTER the column exists.
-
-⚠ ONE QUESTION IS UNRESOLVED AND IT SIZES THE JOB. See PLAN.
-  The list is fed by WhC_GetAllRejectedList_SP. If that proc does
-  not SELECT the new column, the screen cannot display what it
-  never receives — and the fix becomes a DATABASE OBJECT on both
-  boxes, gated separately, with no promote path.
-  ⚠ TWO READ ATTEMPTS IN S103 BOTH RETURNED EMPTY. read-rows.js
-    printed a blank row for SHOW CREATE PROCEDURE and again for
-    information_schema.ROUTINES.ROUTINE_DEFINITION. The proc body
-    is STILL UNREAD. → PLAN STEP 1.
+THE TWO SCREENS DISAGREE ON DECIMAL PLACES.
+  list     3# (25.020 Kg)   — applies toFixed(decimalPlaces)
+  details  3# (25.02 Kg)    — prints the stored value raw
+Both honest. Neither wrong. NOT RULED ON. → P146
 ```
 
 ---
 
-## THE S101/S102/S103 FIXTURE — THE STANDING REFERENCE SET
+## THE FIXTURE — THE STANDING REFERENCE SET
 
 ⚠ EVERY FIGURE BELOW WAS READ FROM THE ROW OR THE SCREEN.
 ⚠ USE THIS INSTEAD OF COMPANY 464. It is clean; 464 is not.
@@ -206,14 +217,22 @@ THE CYCLE THAT WAS RUN, all on FO-0001
     soproducts 6920  quantity 33.36  FO-0001    (4 cases)
     soproducts 6919  quantity 7.68   FO-0002-2  (4 cases)
   DO-0001 · PS-0001 · shipped 1# (8.34 Kg)
-  MR-0007   rejectmaterialandproduct.id 3360  qty_rejected 16.68
-            units 0 — THE BEFORE-ROW. 2 cases entered, count lost.
-  MR-0008   rejectmaterialandproduct.id 3361  qty_rejected 25.02
-            units 3 — ⚠ THE AFTER-ROW, S103. THE PROOF.
+  MR-0006   id 3359  qty_rejected 1.39   units 0 — before the fix
+  MR-0007   id 3360  qty_rejected 16.68  units 0 — THE BEFORE-ROW
+  MR-0008   id 3361  qty_rejected 25.02  units 3 — ⚠ THE AFTER-ROW
 
-⚠ MR-0008 SHIFTS THE TRACEABILITY ARITHMETIC. 3 more cases are
-  now released against MO-0001. Anyone re-reading the old
-  7 − 1 − 2 = 4 line will not reconcile. RE-READ THE SCREEN.
+⚠ ALL THREE MR ROWS IN 474 ARE type='Product'. THERE IS NO MATERIAL
+  MR ON DEV. That is why S104's type gate had to be proven on prod's
+  sandbox instead. ▶ MAKING ONE ON DEV IS STILL WORTH DOING. → P147
+
+⚠ THE `status` COLUMN HOLDS THE WORD `Active`, NOT 1.
+  ⚠ S104 CALLED THE PROCEDURE WITH '1' AND GOT AN EMPTY RESULT THAT
+    LOOKED EXACTLY LIKE A BROKEN PROCEDURE.
+  ▶ WhC_GetAllRejectedList_SP('474','Active') IS THE WORKING CALL.
+
+⚠ MR-0008 SHIFTS THE TRACEABILITY ARITHMETIC. 3 more cases are now
+  released against MO-0001. Anyone re-reading the old 7 − 1 − 2 = 4
+  line will not reconcile. RE-READ THE SCREEN.
 ```
 
 ---
@@ -249,57 +268,38 @@ rejectmaterialandproduct createdAt · updatedAt · id · internalCode ·
                          status · user_id · company_id · material_id ·
                          recievedlot_id · formula_id ·
                          receiveProduct_id · mlc_id ·
-                         qty_rejected_units  ⚠ NEW S103, JR15
+                         qty_rejected_units  ⚠ JR15, S103
                          ⚠ FULL COLUMN LIST, read off the box S103.
+                         ⚠ `type` RETURNS THE LITERAL WORD 'Product'.
+                         ⚠ `status` RETURNS 'Active', NOT A NUMBER.
 ```
 
 ---
 
-## P82 — WHERE IT STANDS AFTER S103
-
-⚠ MINTY'S RULING S101: EVERYTHING QUANTITY-RELATED STAYS UNDER P82.
-⚠ THE ARITHMETIC IS CLOSED. THE STORAGE IS NOW CLOSED TOO. What
-  remains is DISPLAY — P143 and P135 — and one screen, P140.
+## DATABASE OBJECTS — WHAT S104 LEARNED ABOUT READING THEM
 
 ```
-R2  ACROBATICS. Reconstructing a unit count by DIVIDING a stored
-    weight. ▶ MEASURED CLEAN S101 against a non-1:1 fixture.
-    Still present, still low priority. → P135
-R3  ROUND-TRIP. ▶ MEASURED, RULED ON, CLOSED S102.
-      INGREDIENTS 58.397 vs 58.38 — MINTY: not of concern.
-      PACKAGING   42 and 7. EXACT. NO DEFECT.
-      GLUTENULL   one MO affected by 0.005%. NO HEAL.
-P82c STORAGE. ▶ DONE S103, both boxes.
-```
+⚠ DEV CAN READ ROUTINE BODIES NOW. It always could — it was missing
+  a credentials file, not a tool.
+    /usr/bin/mysql was installed the whole time.
+    /home/ubuntu/.my.cnf built in S104 from .env, chmod 600.
+  ▶ mysql abletracelab_live -e "SHOW CREATE PROCEDURE <name>\G"
+  ⚠ NAME THE DATABASE. ⚠ USE \G, NOT ; — a table render truncates.
 
-### DONE, all on PROD, all verified on screen
+⚠ ~/.my.cnf NOW EXISTS ON BOTH BOXES. NOT IN GIT, NOT BACKED UP.
+  A box rebuild loses it. The rebuild step is: parse DATABASE_URL
+  out of .env and write host/port/user/password/database. → P119
 
-```
-fix 1  SOManagement.js:182-206              2ae869c   (S98)
-fix 2  admin-formulation.component.ts:878   a52e4bfc  (S98)
-fix 3  add-mlo.component.html:87            b8e7248b  (S98)
-fix 4  closed-mlcs.component.html:79/84     824e0e6d  (S98)
-fix 5  edit-closed-mlcs.component.ts:126/136 770d3c4f (S99)
-fix 7  product-traceability.component.ts:109,161
-                                            f53986ca  (S100)
-P82c   column + attribute + create write    05f786c / 125014a3 (S103)
-CLOSED S100: P82e no defect · P82f absorbed · P82g stale
-CLOSED S102: R3 packaging — NO DEFECT · R3 ingredients — ACCEPTED
-CLOSED S103: P82c storage — DONE, both boxes
-```
-
-⚠ FIX 7 LINE 161 IS STILL NOT PROVEN ON SCREEN. The lot-code search
-  table has NO Completed Qty column. Deployed and safe, unproven.
-  UNCHANGED SINCE S100. Do not record it as resolved.
-
----
-
-## PENDING PROMOTION TO PROD
-
-```
-BACKEND    nothing pending. Both on 05f786c.
-FRONTEND   nothing pending. Both on 125014a3ab26.
-DATABASE   nothing pending. qty_rejected_units on both.
+WhC_GetAllRejectedList_SP — CHANGED S104, BOTH BOXES. → JR16.
+  Takes (companyId VARCHAR, statusVal VARCHAR).
+  14 columns off rejectmaterialandproduct (13 before S104), plus
+  joined titles, and ELEVEN left outer joins.
+  ⚠ ELEVEN, NOT TWELVE. Confirmed by diff against the backup.
+  ⚠ IT ALREADY RETURNED fopackaging.wgt_kgs_per_unit BEFORE S104.
+    The ingredients for an R2 division are being served to this
+    screen. NOT A DEFECT. Worth knowing. → P135
+  ⚠ THE OBJECT WAS IDENTICAL ON BOTH BOXES — CONFIRMED by reading
+    both, not assumed. DO NOT ASSUME IT FOR THE NEXT OBJECT.
 ```
 
 ---
@@ -316,16 +316,60 @@ PRINTS THE DATABASE NAME EVERY RUN (P134).
   node /home/ubuntu/read-rows.js cols rejectmaterialandproduct
   node /home/ubuntu/read-rows.js sql "SELECT ..."
 
-⚠ IT CANNOT PRINT A ROUTINE BODY. S103 tried twice — SHOW CREATE
-  PROCEDURE and information_schema ROUTINE_DEFINITION — and BOTH
-  printed an EMPTY ROW. Cause not established: either it truncates
-  long text or it cannot render a multi-column SHOW result.
-  ▶ USE PROD's mysql CLI for routine reads, or fix the reader. → P144
-
-⚠ NOT ON PROD. Prod has ~/.my.cnf, so `mysql abletracelab_live -e`
-  works there.
-⚠ DEV HAS NO ~/.my.cnf. Build one from .env, or use read-rows.js.
+⚠ IT STILL CANNOT PRINT A ROUTINE BODY. Unchanged, and now
+  IRRELEVANT — use the mysql client for routines. → P144, LOW.
 ⚠ IT SURVIVES A REBOOT (not in /tmp).
+⚠ IT IS NOT ON PROD. Prod uses mysql directly.
+```
+
+---
+
+## P82 — WHERE IT STANDS AFTER S104
+
+⚠ MINTY'S RULING S101: EVERYTHING QUANTITY-RELATED STAYS UNDER P82.
+⚠ ARITHMETIC CLOSED. STORAGE CLOSED. DISPLAY IS NEARLY CLOSED.
+
+```
+R2  ACROBATICS. ▶ MEASURED CLEAN S101 against a non-1:1 fixture.
+    Still present, still low priority. → P135
+R3  ROUND-TRIP. ▶ MEASURED, RULED ON, CLOSED S102.
+P82c STORAGE. ▶ DONE S103, both boxes.
+P143 DISPLAY.  ▶ DONE S104, both boxes, gated on screen.
+▶ WHAT REMAINS UNDER P82: P135 (the watch item, low) and P140
+  (the yield screen). NOTHING ELSE.
+```
+
+### DONE, all on PROD, all verified on screen
+
+```
+fix 1  SOManagement.js:182-206              2ae869c   (S98)
+fix 2  admin-formulation.component.ts:878   a52e4bfc  (S98)
+fix 3  add-mlo.component.html:87            b8e7248b  (S98)
+fix 4  closed-mlcs.component.html:79/84     824e0e6d  (S98)
+fix 5  edit-closed-mlcs.component.ts:126/136 770d3c4f (S99)
+fix 7  product-traceability.component.ts:109,161
+                                            f53986ca  (S100)
+P82c   column + attribute + create write    05f786c / 125014a3 (S103)
+P143   proc + both screens        JR16 / f92dc0ec / 0ad1f77c (S104)
+CLOSED S100: P82e no defect · P82f absorbed · P82g stale
+CLOSED S102: R3 packaging — NO DEFECT · R3 ingredients — ACCEPTED
+CLOSED S103: P82c storage — DONE, both boxes
+CLOSED S104: P143 display — DONE, both boxes, type gate PROVEN
+```
+
+⚠ FIX 7 LINE 161 IS STILL NOT PROVEN ON SCREEN. The lot-code search
+  table has NO Completed Qty column. Deployed and safe, unproven.
+  UNCHANGED SINCE S100. Do not record it as resolved.
+
+---
+
+## PENDING PROMOTION TO PROD
+
+```
+BACKEND    nothing pending. Both on 05f786c.
+FRONTEND   nothing pending. Both on 0ad1f77cee1d.
+DATABASE   nothing pending. Column AND procedure on both.
+DOCS       nothing pending. main = eab4b59.
 ```
 
 ---
@@ -344,8 +388,9 @@ P62   qty_shipped must never be NULL. ⚠ MEASURED S100 — it never is.
 P64   Product label prints "null" for Ext ID twice, on prod.
       ⚠ ALSO packing slip, Closed MOs Excel, Closed MOs screen.
 P65   promote.sh runs plain scp and ssh with no -4.
+      ⚠ RAN CLEAN THREE TIMES IN S104. LOW.
 P66   3B.4 rollback points stale. ▶ DELETE them.
-      ⚠ STILL SAYS 275c025039d7. TWO DEPLOYS STALER AFTER S103.
+      ⚠ STILL SAYS 275c025039d7. THREE DEPLOYS STALER AFTER S104.
 P84   Zebra guide into the app.
 P85   Windows printer guide.
 P86   Cold boot blindness, untested.
@@ -357,37 +402,47 @@ P100  Dev carries UNACCOUNTED COMPANIES. FIVE — 466, 469, 470,
 P101  3B.3 records the dormant `abletrace` archive on PROD only.
       ⚠ DEV HAS ONE TOO.
 P102  ⚠ SECURITY. Both boxes report *** System restart required ***.
-      ⚠ PROD IS NOW 43 UPDATES, WAS 29 AT S102. Dev 12.
+      ⚠ PROD 43 UPDATES. Dev 12.
       ⚠ VERIFY PM2 STARTS ON BOOT FIRST. Dev first — but prod runs
         a DIFFERENT OS and dev does not rehearse it.
-      ⚠ MISSED 1 THROUGH 8 AUG. RESCHEDULE.
+      ⚠ MISSED 1 THROUGH 9 AUG. NINE DAYS RUNNING. RESCHEDULE.
 P104  No intermediate fixture on dev. 474 has none. S45 UNTESTED.
 P106  acrobatics-map-S91.txt — keep or delete.
 P108  Review the J-entries WITH MINTY. KEEP JR. Own sitting.
-      ⚠ PROMOTED BY S103. Section_5.md is 2770+ lines and its
-        header has now gone stale TWICE (S85 fixed it at J93/S81,
-        S103 fixed it at J113/S95). A file that drifts twice is
-        too big to maintain by append. The JR block — the only
-        record of what is not in git — is buried in it.
+      ⚠ Section_5.md IS NOW 3451 LINES. The queue recorded 2770 as
+        recently as S103. IT HAS GROWN 680 LINES AND THE NOTE SAYING
+        IT IS TOO BIG IS ITSELF OUT OF DATE.
+      ⚠ TWO JR ENTRIES IN TWO SESSIONS (JR15, JR16). The block that
+        is the only record of what is not in git keeps growing, and
+        it is buried inside session history.
+      ▶ PROMOTED AGAIN. It protects the rebuild path.
 P109  Retire the dormant `abletrace` archive, both boxes.
       ⚠ IRREVERSIBLE. Dump off-box first. Own sitting.
+      ⚠ IT IS A LIVE HAZARD, NOT CLUTTER — every mysql call now has
+        to name the database explicitly to avoid landing in it.
 P111  QUICKBOOKS — one full planning session first. NO CODE.
       ▶ MINTY S101: STARTS AFTER P82 CLOSES.
-      ⚠ P82's ARITHMETIC AND STORAGE ARE NOW CLOSED. Only display
-        work remains (P143, P135, P140).
-      ⚠ IT NEEDS A NEW COLUMN. S103 IS THE REHEARSAL — the exact
-        sequence is JR15 plus PLAN's STEP 2.
+      ⚠ ONLY P135 AND P140 REMAIN IN P82.
+      ⚠ IT NEEDS A NEW COLUMN *AND* PROBABLY A PROCEDURE CHANGE.
+        S103 REHEARSED THE COLUMN (JR15). S104 REHEARSED THE
+        PROCEDURE (JR16). ▶ BOTH SEQUENCES ARE WRITTEN DOWN NOW.
 P114  Does a closed MO still count as in progress anywhere?
 P115  DELETE THE DEAD CODE SIBLINGS.
         so-management.component.ts:170 · closed-so.component.ts:165
         edit-mlc:295 · edit-mlo:245 · start-mlc:151
         add-dispatch.component.ts:72
+      ⚠ ADD: rejected-materials.component.ts:65 — a commented-out
+        changeEditRejectProd call beside the live one at :84.
 P116  Fix the JSON file-list reads properly.
 P117  File too large must say so.
 P118  MARK THE DELIBERATE CODE IN THE CODE.
-      ⚠ PROMOTED AGAIN BY S103 — see P142, a commented-out button
-        block with no note saying why.
+      ✓ S104 DID IT ONCE — a three-line comment on the P143 patch in
+        edit-reject-product.component.ts explaining why `qty` holds a
+        string. ▶ THE PATTERN WORKS. Keep doing it.
+      ⚠ P142's commented-out button block still has no note.
 P119  Back up the database's own code into the repo.
+      ⚠ ADD ~/.my.cnf's DERIVATION to the rebuild record. The file
+        must never be committed; the method must be.
 P120  Material label barcode needs the product-label fix.
 P121  Say what the "java" process is, in the client guide.
 P122  Put the whole printing setup into the client guide, in order.
@@ -408,74 +463,86 @@ P135  ⚠ THE ACROBATICS WATCH ITEM (R2). LOW PRIORITY.
       than rewriting) and six header-view divisions:
         qty_shipped_su · qty_packing_slip_su · qty_do_su
         qty_misc_release_su · intermediate_prd_su · SOH_su
-      ⚠ P82c HAS NOW UNBLOCKED qty_misc_release_su. There is a
-        stored column to point at. ▶ PAIRS WITH P143.
+      ⚠ P82c AND P143 HAVE FULLY UNBLOCKED qty_misc_release_su.
+        There is a stored column AND a proc that returns it.
       ⚠ TRAPS 10 STAYS UNTIL THIS LANDS.
 P136  Trace_ProductHeaderView RETURNS DUPLICATE ROWS. Pre-existing.
 P137  MR NUMBERING IS GLOBAL, NOT PER-COMPANY.
       ⚠ CAUSE FOUND S102 — DO NOT RE-INVESTIGATE.
         RejectMaterialAndProduct.js:51 counts with company_id, but
-        the callers at :63 and :78 PASS NO ARGUMENT, so it is
-        undefined and the count is app-wide.
+        the callers at :63 and :78 PASS NO ARGUMENT.
       ▶ ONE-LINE FIX. ⚠ ASK MINTY FIRST — renumbering changes how
         MRs read to a client. Business question, not a tidy-up.
-      ⚠ SAME FILE AS P82c AND P143. SEPARATE COMMIT.
 P138  soproducts STORES NO UNIT COUNT — Kg only. R2 by construction.
       ⚠ READS CORRECTLY TODAY. Logged, not scheduled.
-P139  ⚠ add-mlo:150 AND :228 LOOK LIKE DEFECTS AND THE ROWS SAY
-      THEY ARE NOT. Both read
-        data.quantity * mloForm.get("batches").value
-      yet mprrecievelots holds 42 and 7, EXACT.
-      ▶ THE REAL PACKAGING WRITE PATH WAS NOT FOUND. Find it and
-        mark BOTH sites, live or dead. → feeds P118 and P115.
+P139  ⚠ add-mlo:150 AND :228 LOOK LIKE DEFECTS AND THE ROWS SAY THEY
+      ARE NOT. ▶ THE REAL PACKAGING WRITE PATH WAS NOT FOUND.
       ⚠ DO NOT "FIX" THESE LINES. The output is correct. LOW.
 P140  THE YIELD SCREEN IS WRONG ON ITS OWN.
-      ⚠ NOT REACHED IN S103. SPEC CARRIED FORWARD UNCHANGED IN PLAN.
+      ⚠⚠ NOT REACHED IN S103. NOT REACHED IN S104. THE SPEC HAS BEEN
+        CARRIED FORWARD TWICE, UNTOUCHED, BOTH TIMES DISPLACED BY
+        P143.
+      ⚠ MINTY ASKED FOR IT EXPLICITLY AT S103 CLOSE: "carry over the
+        yield actions into next session so we dont loose focus on
+        that". ▶ IT GOES FIRST IN S105. P143 IS NO LONGER THERE TO
+        DISPLACE IT.
       S101 blamed the numbers beneath it. S102 measured those and
-      they are RIGHT (42 and 7). So the screen computes rather
-      than reads.
+      they are RIGHT (42 and 7). So the screen COMPUTES rather than
+      READS. A different bug from the one recorded, possibly smaller.
       ⚠ NOT ACTIVATED FOR GLUTENULL. No client exposure.
       ⚠ NO HEAL EVER NEEDED — a display fault corrects itself.
       MEDIUM. It reports a discrepancy that did not occur.
-P141  SECTION 5's HEADER. ✓ DONE S103, commit eb5312c.
-      Now reads J115 / next J116 / last appended S103.
-      ⚠ KEPT IN THE QUEUE AS A CLOSED ITEM FOR ONE SESSION so the
-        S104 reader does not re-raise it. Delete at S105 close.
-```
-
-```
-NEW IN S103
-
+P141  SECTION 5's HEADER. ✓ DONE S103. ⚠ DELETE THIS LINE AT S105
+      CLOSE — it has served its one session.
 P142  ⚠ THE EDIT/SAVE/RETURN BUTTONS ON /Edit-reject-product ARE
       COMMENTED OUT, WITH NO NOTE SAYING WHY.
-      edit-reject-product.component.html lines 49-56. The screen is
-      read-only because of that comment block, not by design.
-      ⚠ IT IS A LANDMINE. Uncomment it and saving works again — and
-        the form carries NO units field, so a save would then write
-        qty_rejected_units back to its 0 default and DESTROY a
-        correctly stored count. Silently.
-      ▶ EITHER mark it in the code saying why it is disabled
-        (→ P118), OR build the units field first so it is safe to
-        re-enable. ⚠ ASK MINTY — it is a screen question.
+      edit-reject-product.component.html lines 49-56.
+      ⚠ S104 CHANGED WHAT RE-ENABLING WOULD DO. `qty` now holds a
+        FORMATTED STRING. A save could write that string back, or
+        write returnedqty over the released quantity, or both.
+        ▶ `readonly` WAS ADDED AS A GUARD. IT IS NOT A FIX.
+      ⚠ P145 IS A PRECONDITION OF THIS, NOT A FOLLOW-UP.
+      ▶ ⚠ ASK MINTY — should MR editing be restored at all?
       MEDIUM. Nothing is wrong today. It is wrong the moment
       someone tidies it.
-
-P143  ⚠ THE MR UNIT COUNT IS STORED AND DISPLAYED NOWHERE.
-      MINTY RAISED IT AT S103 CLOSE. → THIS IS S104's JOB, SPECIFIED
-      IN FULL IN PLAN.
-      FORMAT RULED BY MINTY: 2# (16.68 Kg)
-      OLD ROWS RULED BY MINTY: no fallback, no division, show the
-      stored value as-is. Safe because Glutenull has zero MR rows.
-      HIGH — it is the visible half of work already paid for.
-
+P143  ⚠ THE MR UNIT COUNT DISPLAY. ✓ DONE S104. BOTH BOXES. GATED ON
+      SCREEN ON BOTH, INCLUDING THE TYPE GATE PROVEN NEGATIVE ON A
+      REAL MATERIAL ROW.
+      ⚠ KEPT AS A CLOSED ITEM FOR ONE SESSION. Delete at S105 close.
 P144  read-rows.js CANNOT PRINT A ROUTINE BODY.
-      Two methods tried in S103, both returned an EMPTY ROW:
-        SHOW CREATE PROCEDURE WhC_GetAllRejectedList_SP
-        SELECT ROUTINE_DEFINITION FROM information_schema.ROUTINES
-      ⚠ THIS BLOCKED S103 FROM SIZING P143. It is not cosmetic —
-        every proc question on dev runs into it.
-      ▶ Cause unknown: truncation, or multi-column SHOW results.
+      ⚠ THE S103 BLOCKAGE IS GONE. Cause found S104: dev had no
+        ~/.my.cnf. The mysql client was installed all along.
+      ▶ THE READER ITSELF IS STILL BLIND. Nothing depends on it.
+      LOW.
+```
+
+```
+NEW IN S104
+
+P145  ⚠ /Edit-reject-product SHOWS THE SAME NUMBER TWICE, UNDER TWO
+      DIFFERENT LABELS. "Quantity(kgs)" (line 24) and "Returned
+      Quantity(kgs)" (line 46) are BOTH patched from
+      result.qty_rejected.
+      ⚠ AND THE SAVE HANDLER AT :123 WRITES qty_rejected FROM
+        returnedqty. So the "Returned" box is the one that would
+        overwrite the released quantity.
+      ▶ WHAT SHOULD "Returned Quantity" MEAN? A DOMAIN QUESTION.
+        ⚠ ASK MINTY BEFORE READING ANY CODE.
+      ⚠ HARMLESS TODAY — the screen is read-only (P142).
+      ⚠ BECOMES A DATA-CORRUPTION RISK IF P142 IS ACTIONED FIRST.
       MEDIUM.
+
+P146  THE TWO MR SCREENS DISAGREE ON DECIMAL PLACES.
+      list     3# (25.020 Kg)  — toFixed(decimalPlaces)
+      details  3# (25.02 Kg)   — the stored value, raw
+      ▶ Both honest. ⚠ ASK MINTY whether they should match.
+      A screen question, not a technical one. LOW.
+
+P147  NO MATERIAL MR ON DEV. Company 474 holds three product MRs and
+      no material one, so S104 could not prove the type gate
+      negative on dev and had to use prod's sandbox company.
+      ▶ CREATE ONE. It costs a minute and completes the fixture.
+      LOW.
 ```
 
 ---
@@ -484,13 +551,14 @@ P144  read-rows.js CANNOT PRINT A ROUTINE BODY.
 
 ```
 ⚠ COMPANY 474 IS THE REFERENCE SET. 464 IS RESIDUE.
-⚠ THE OLD ROWS STAY. Not deleted, just not used. Deleting MOs
-  risks orphaning lot codes, receipts and traceability links.
+⚠ THE OLD ROWS STAY. Not deleted, just not used. Deleting MOs risks
+  orphaning lot codes, receipts and traceability links.
 
-NEW IN S103, company 474 — ⚠ DELIBERATE, KEEP IT
+⚠ NOTHING WAS CREATED ON EITHER BOX IN S104.
+
+company 474 — ⚠ DELIBERATE, KEEP IT
   MR-0008 (id 3361) qty_rejected 25.02 · qty_rejected_units 3
-  ⚠ THIS IS THE P82c PROOF ROW. Do not delete it. It is the only
-    stored evidence that the fix works.
+  ⚠ THE P82c PROOF ROW AND THE P143 PROOF ROW. Do not delete.
   ⚠ It changes MO-0001's release arithmetic. See the fixture block.
 
 company 464 — CORRUPTED PLANNED QUANTITIES, NOT BEING HEALED
@@ -504,7 +572,23 @@ company 464 — CORRUPTED PLANNED QUANTITIES, NOT BEING HEALED
 
 ⚠ 50.04 IS NOT 50.004. FO-0001's batch really is 6 × 8.34 = 50.04.
   Coincidence of digits with the old corruption. DO NOT CONFUSE.
+```
 
-⚠ NOTHING WAS CREATED ON PROD IN S103. The Glutenull screen check
-  was deliberately NOT SAVED.
+---
+
+## PROD FIXTURE — NEW RECORD, S104
+
+```
+⚠ test260703@ IS A SANDBOX COMPANY ON PROD, NOT GLUTENULL.
+  It carries FOUR MR ROWS, all pre-dating the S103 column:
+    MR-0004  product  20.000 Kg   units 0
+    MR-0003  product  80.000 Kg   units 0
+    MR-0002  MATERIAL  1.000 Kg   ⚠ NO UNIT COUNT, BY DESIGN
+    MR-0001  product  20.000 Kg   units 0
+  ▶ USE IT FOR PROD SCREEN CHECKS. No client data is touched.
+  ⚠ IT IS THE ONLY MATERIAL MR EITHER BOX HAS. It is what proved
+    P143's type gate. DO NOT DELETE IT.
+
+⚠ GLUTENULL (471) STILL HAS ZERO MR ROWS. Unchanged. Nothing was
+  created for it in S103 or S104.
 ```
