@@ -249,6 +249,44 @@ JR15. rejectmaterialandproduct.qty_rejected_units  [J116, S103]
        TABLES WITH READ LOCK and writes a header-only file that LOOKS
        like a backup. Check grep -c "INSERT INTO" before trusting it.
      Applied to BOTH boxes 4 Aug 2026.
+JR16. WhC_GetAllRejectedList_SP - returns qty_rejected_units  [S104]
+     The proc names its columns ONE BY ONE. Adding the column in JR15
+     did NOT make it reach any screen. qty_rejected_units added to the
+     SELECT list, immediately after qty_rejected. NOTHING ELSE CHANGED
+     - same 11 joins, same WHERE, same ORDER BY.
+     IF MISSED: the MR unit count is stored and displays NOWHERE. No
+     error, no blank - the Kg figure shows alone and reads correct.
+     BOTH MR SCREENS DEPEND ON THIS ONE PROC. edit-reject-product
+       FETCHES NOTHING of its own - it subscribes to a BehaviorSubject
+       in warehouse.service.ts, fed by rejected-materials.component.ts
+       line 84 handing over the row the LIST already had. So a rebuild
+       that misses this column breaks the list AND the details screen.
+     Backups: /home/ubuntu/WhC_GetAllRejectedList_SP.bak-S104-DEV.txt
+              /home/ubuntu/WhC_GetAllRejectedList_SP.bak-S104-PROD.txt
+     Those are SHOW CREATE text, NOT runnable. To restore, take the
+       body and add the DELIMITER $$ wrapper. Same shape as JR7c.
+     Recreated WITHOUT the DEFINER clause - RDS can refuse an explicit
+       definer on recreate.
+     METHOD - DO NOT PASTE A PROC BODY INTO A TERMINAL. S104's first
+       attempt was a 35-line heredoc with one line over 1000 chars. The
+       SSH input buffer overflowed and DISCARDED the overflow. The file
+       existed, had a plausible size, and was missing four lines and a
+       join. Running it would have DROPped the proc and failed to
+       recreate it, killing the MR list.
+       BUILD THE NEW OBJECT ON THE BOX FROM ITS OWN BACKUP with a short
+       node script, then diff the join list against that backup before
+       applying. The long text never travels, and the result is
+       guaranteed identical to what is running.
+     ⚠ THE PROC ALREADY RETURNED fopackaging.wgt_kgs_per_unit before
+       S104. The ingredients for an R2 division are served to this
+       screen. Not a defect. Worth knowing. See P135.
+     ⚠ status IS THE WORD 'Active', NOT A NUMBER. Calling the proc with
+       '1' returns an EMPTY RESULT that looks exactly like a broken
+       object. CALL WhC_GetAllRejectedList_SP('<company>','Active').
+     Applied to BOTH boxes 5 Aug 2026.
+     ⚠ db-definitions-S93.txt DOES NOT REFLECT THIS CHANGE. That
+       snapshot is now stale on TWO objects: JR7e's view and this proc.
+
 
 ──────────────────────────────────────────────────────────────────────
 ⚠ ───────────────────────────────────────────────────────────────────────
