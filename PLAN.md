@@ -1,18 +1,21 @@
 # PLAN
 
-Written at close of: S102 · for S103.
+Written at close of: S103 · for S104.
 Disposable. Rewritten whole at every close.
 
-⚠ MINTY'S RULINGS, S102 CLOSE:
-  "small rounding changes not of concern - go ahead with your changes
-   without worrying about glutenul, data"
-  "material yield not yet activated with glutenull"
-  "batch is automatically calculated in create mo - operator can change
-   the no of shipping units but not how many batches"
+⚠ MINTY'S RULINGS, S103 CLOSE:
+  "2# (16.68 Kg)" — the display format for the MR unit count.
+  "glutenull only live client - no data so far in mr" — therefore
+    NO FALLBACK AND NO DIVISION for old rows. Show the stored value.
+  "carry over the yield actions into next session so we dont
+    loose focus on that" — P140 is carried forward INTACT below.
+  "jr 15 approved"
 
-⚠ S103 HAS ONE JOB: P82c — THE MR UNITS COLUMN.
-  ⚠ EVERY FILE, LINE AND VALUE IS BELOW. NOTHING TO REDERIVE.
-  ⚠ NO INVESTIGATION BRANCHES. The finding work is DONE.
+⚠ S104 HAS TWO JOBS, IN THIS ORDER:
+  A · P143 — THE MR UNIT COUNT DISPLAY. Two screens.
+  B · P140 — THE YIELD SCREEN. Carried from S102, never reached.
+  ⚠ B IS A MEASUREMENT SPEC, NOT A FIX SPEC. Do not start it until
+    A is verified on dev.
 
 ---
 
@@ -20,287 +23,205 @@ Disposable. Rewritten whole at every close.
 
 ```
 1  Health check both boxes. RULES → OPEN.
-   EXPECT  dev  backend 2ae869c · frontend checkout c2a52d8e · clean
-                pm2 abletrace-dev ↺129 · 200
-           prod backend 2ae869c · frontend checkout 9bce0238 · clean
-                pm2 abletrace-backend ↺337 · 200
-                served build f53986ca39e9
-   ⚠ NOTHING CHANGED IN S102. No commits, no deploys, no schema.
-     If anything differs, STOP.
-   ⚠ ↺129 ON DEV HAS NOW HELD FOUR SESSIONS.
+   EXPECT  dev  backend 05f786c · frontend checkout c2a52d8e · clean
+                pm2 abletrace-dev ↺130 · 200
+           prod backend 05f786c · frontend checkout 9bce0238 · clean
+                pm2 abletrace-backend ↺338 · 200
+                served build prod-125014a3ab26
+   ⚠ BOTH BOXES MOVED IN S103. These are NOT S102's numbers.
+     Backends 2ae869c → 05f786c. Frontends f53986ca → 125014a3ab26.
+     pm2 dev 129 → 130, prod 337 → 338.
+     If anything differs from the ABOVE, STOP.
 
-   ⚠ PROD IS REACHED FROM THE MAC — BUT S102 PROVED THE SAFE FORM.
-     Minty was already ON a prod terminal and ran the check LOCALLY.
-     That is fine and is the simplest path. An ssh FROM DEV is what
-     fails silently (three occurrences S99-S101).
-     ▶ EITHER be on the prod terminal and run the block bare, OR
-       ssh from the MAC. Never ssh from dev.
+   ⚠ PROD: be on the prod terminal and run the block bare, OR ssh
+     from the MAC. Never ssh from dev.
      ▶ PUT `hostname -I` AT THE TOP OF THE PROD BLOCK. Prod must
-       report 172.31.3.156. This caught nothing in S102 only because
-       it was there.
+       report 172.31.3.156. S103 ran this four times without
+       incident — it works, keep doing it.
 
-2  Then STEP 1. No measuring first — STEP 0 was done in S102.
+2  Then STEP 1. ⚠ STEP 1 IS A READ AND IT DECIDES THE SIZE OF THE
+   WHOLE JOB. Do not write any Angular before it comes back.
 ```
 
 ---
 
-## STEP 0 · ALREADY DONE IN S102. DO NOT RE-RUN.
+## JOB A · P143 · THE MR UNIT COUNT DISPLAY
+
+⚠ THE WHOLE POINT: S103 added the column, the write path, and
+  deployed both boxes. THE NUMBER IS STORED AND NOT ONE SCREEN
+  SHOWS IT. Minty raised this at close and it is the visible half
+  of work already paid for.
+
+### ⚠ STEP 1 · THE ONE UNRESOLVED QUESTION. READ FIRST, CODE NEVER BEFORE.
 
 ```
-GLUTENULL EXPOSURE — MEASURED ON PROD, company 471
-  MO-0001  qty 1750 · batch_qty 240 · batches_stored 7.292
-           true 7.291667 · inflated by 0.0000046 (~0.005%)
-  MO-0002  qty 802 · batch_qty 400 · batches_stored 2.005
-           true 2.005 — EXACT. Nothing lost. Terminates at 3 dp.
-  ⚠ FRACTIONAL IS NOT THE TEST. NON-TERMINATING IS. The S102 query
-    was wider than the defect and caught MO-0002 harmlessly.
+DOES THE LIST'S STORED PROC RETURN THE NEW COLUMN?
 
-MINTY'S RULING S102: no heal, no prod data work, yield screen not
-activated for Glutenull. ▶ THE HEALING QUESTION IS CLOSED. Do not
-re-open it.
+The MR list is fed by WhC_GetAllRejectedList_SP, called at
+RejectMaterialAndProduct.js:205 via sendNativeQuery.
 
-MR BACKFILL — none needed. Measured prod S98: company 464 only,
-4 rows, GLUTENULL ZERO.
+▶ DISTINGUISHES:
+  If the proc SELECTs r.* or the whole table, the column already
+    flows through → THE JOB IS FRONTEND ONLY. Two template edits,
+    one build, one deploy each side. Half a session.
+  If it names columns explicitly and qty_rejected_units is absent,
+    the screen CANNOT display what it never receives → THE JOB
+    BECOMES A DATABASE OBJECT on BOTH boxes, gated separately,
+    NO PROMOTE PATH, backup first. That is its own sitting and
+    the frontend work waits.
+
+⚠ TWO READ METHODS FAILED IN S103. Both returned an EMPTY ROW from
+  read-rows.js on dev:
+    SHOW CREATE PROCEDURE WhC_GetAllRejectedList_SP
+    SELECT ROUTINE_DEFINITION FROM information_schema.ROUTINES ...
+  ⚠ DO NOT SIMPLY RETRY THEM ON DEV. That is the third attempt at
+    a method that has failed twice. → P144
+
+▶ USE PROD'S mysql CLIENT INSTEAD. Prod has ~/.my.cnf and S102/S103
+  both used `mysql abletracelab_live -e "..."` there successfully.
+  The proc is the same object on both boxes.
+
+  ON PROD:
+    hostname -I
+    mysql abletracelab_live -e "SHOW CREATE PROCEDURE WhC_GetAllRejectedList_SP\G"
+
+  ⚠ NAME abletracelab_live EXPLICITLY. A bare mysql on prod lands
+    in the dormant `abletrace` archive, which carries its own copy
+    of this proc and is NOT maintained.
+  ⚠ \G not ; — the definition is long and a table render truncates.
+
+  IF THAT ALSO COMES BACK EMPTY, the fallback is:
+    mysql abletracelab_live -e "SELECT ROUTINE_DEFINITION FROM
+      information_schema.ROUTINES WHERE
+      ROUTINE_NAME='WhC_GetAllRejectedList_SP' AND
+      ROUTINE_SCHEMA='abletracelab_live'\G"
+  ⚠ SCHEMA-SCOPED. Without the clause it matches the archive copy.
+
+⚠ ALSO CHECK THE DETAILS SCREEN'S SOURCE, which is DIFFERENT.
+  edit-reject-product loads from warehouseService.getRejectProduct,
+  not from the list proc. Grep for what populates it:
+    grep -rn "getRejectProduct" ~/abletrace-lab-frontend/src
+  ▶ If it is a Waterline find rather than a proc, the column comes
+    through automatically and only the template needs changing.
 ```
 
----
-
-## STEP 1 · THE DATABASE COLUMN — DEV FIRST
+### STEP 2 · THE LIST SCREEN — ONE LINE
 
 ```
-⚠ RUN AGAINST abletracelab_live EXPLICITLY. Both boxes carry a
-  dormant `abletrace` archive and a bare `mysql` lands in it (J43).
-⚠ DEV HAS NO ~/.my.cnf. Build it from .env, or use read-rows.js to
-  VERIFY (it is read-only — it cannot run the ALTER).
+FILE  src/app/Layouts/admin-dashboard/warehouse/rejected-materials/
+      rejected-materials.component.html
+      ⚠ FRONTEND IS EDITED ON THE MAC. RULES 2.
 
-THE STATEMENT
-  ALTER TABLE rejectmaterialandproduct
-    ADD COLUMN qty_rejected_units double DEFAULT 0;
+LINE 63 AS IT STANDS — read in S103, exact:
+    <td mat-cell *matCellDef="let element">
+      {{_Number(element.qty_rejected).toFixed(decimalPlaces)}} Kg</td>
 
-WHY double, not int — fractional shipping units are PERMITTED BY
-DESIGN (J88, Minty S80). packing_units 0.5 exists on dev today.
-An int column would silently truncate.
+THE TARGET FORMAT — MINTY'S RULING S103:
+    2# (16.68 Kg)
 
-WHY THIS NAME — it sits beside qty_rejected so the pair reads
-obviously. Minty to confirm at open if he wants another.
+⚠⚠ THIS SCREEN SHOWS MATERIAL AND PRODUCT MRs TOGETHER. The `type`
+   column is rendered at line 29, so both kinds are in one table.
+   ▶ THE UNIT COUNT MUST APPEAR ON PRODUCT ROWS ONLY.
+   ⚠ MATERIAL REJECT IS Kg-MEASURED BY DESIGN — weighing a rejected
+     ingredient IS the physical act. It has no unit count and never
+     will. Showing 0# against every material row would be a NEW
+     DEFECT, introduced by a display fix.
+   ▶ GATE ON  element.type === 'Product'.
 
-VERIFY
-  node /home/ubuntu/read-rows.js cols rejectmaterialandproduct
-  EXPECT a line: qty_rejected_units  double
+⚠ NO FALLBACK. NO DIVISION. Minty's ruling: show the stored value
+  as-is. Do NOT compute units from Kg for old rows. That is the R2
+  acrobatics pattern this whole campaign removed.
+  ⚠ THE RULING IS SAFE BECAUSE GLUTENULL HAS ZERO MR ROWS. The only
+    rows that can read 0# are dev fixtures MR-0006 and MR-0007.
+    ▶ IF A SECOND CLIENT IS EVER ONBOARDED BEFORE THIS SHIPS,
+      RE-ASK MINTY. The ruling depends on the table being empty.
 ```
 
----
-
-## STEP 2 · THE MODEL DECLARATION — ⚠ WITHOUT THIS THE WRITE VANISHES
+### STEP 3 · THE DETAILS SCREEN
 
 ```
-FILE  ~/abletrace-lab-backend/api/models/RejectMaterialAndProduct.js
-      ⚠ BACKEND IS EDITED ON DEV. No build step. RULES 2.
+FILE  .../rejected-materials/edit-reject-product/
+      edit-reject-product.component.html   (template)
+      edit-reject-product.component.ts     (form + load)
 
-THE ATTRIBUTES BLOCK — READ IN FULL, S102. This is what is there:
-    internalCode: { type: 'string' },
-    user_id: { model: 'User' },
-    company_id: { model: 'Company' },
-    type: { type: 'string' },
-    material_id: { model: "Materials" },
-    recievedlot_id: { model: "RecievedLots" },
-    formula_id: { model: "Formulations" },
-    receiveProduct_id: { model: "ReceiveProducts" },
-    mlc_id: { model: "MLOManagement" },
-    qty_rejected: { type: "number" },          ← ANCHOR HERE
-    remarks_reasons: { model: "MiscellaneousReason" },
-    disposition: { type: "string" },
-    disposition_authorized_by: { model: "User" },
-    status: { type: "string" }
+TEMPLATE AS IT STANDS — read in S103, lines 23-26:
+    <mat-form-field>
+      <mat-label>Quantity(kgs)</mat-label>
+        <input matInput type="number" pattern="[0-9]*"
+               formControlName="qty" required appInputDecimalPlace>
+    </mat-form-field>
 
-THE EDIT — one line, directly after qty_rejected:
-    qty_rejected_units: { type: "number" },
+THE .ts AS IT STANDS:
+  line 44-53  the form declaration — controls are product, qty, mlo,
+              remarks, disposition, authorizedBy, returnedqty
+  line 54     this.rejectProdForm.disable()  ← the whole form
+  line 61-69  patchValue from the loaded record. Note qty AND
+              returnedqty BOTH read result.qty_rejected.
 
-⚠ TRAPS 3. THIS IS NOT OPTIONAL AND IT IS NOT A BUG FIX. Sails
-  DISCARDS any value whose column is not declared here, with NO
-  ERROR and a 200 response. PROVEN TWICE:
-    received_units banked 0 silently until declared (J20)
-    food_safety_enabled HAS the column and NOT the attribute TO
-    THIS DAY — that toggle write vanishes right now (P129)
-⚠ SO THE ORDER IS: column, THEN declaration, THEN write path.
-  Skipping step 2 produces a clean-looking success and an empty
-  column.
+▶ ADD a control and a field for the unit count, patched from
+  result.qty_rejected_units.
+⚠ MINTY DECIDES THE SHAPE: a separate "Shipping Units" field above
+  Quantity (mirroring the CREATE screen), or the count folded into
+  the existing label as 2# (16.68 Kg). ASK. It is a screen question.
 
-⚠ pm2 restart abletrace-dev, then sleep 8, then curl. Never "all".
+⚠⚠ DO NOT UNCOMMENT LINES 49-56. The Save, Return and Edit buttons
+   are inside an HTML comment block. THAT IS WHAT MAKES THIS SCREEN
+   READ-ONLY. → P142.
+   ⚠ IF THEY ARE EVER RE-ENABLED, THE FORM MUST CARRY THE UNITS
+     VALUE FIRST — otherwise a save writes qty_rejected_units back
+     to 0 and destroys a correctly stored count, silently.
+   ▶ If Minty wants editing restored, THAT IS A SEPARATE JOB and
+     the units field is its precondition.
 ```
 
----
-
-## STEP 3 · THE BACKEND WRITE OBJECT
+### STEP 4 · VERIFY — WHAT DONE LOOKS LIKE
 
 ```
-SAME FILE. There are TWO object builders sharing ONE function:
+⚠ Cmd+Q THE BROWSER after the deploy. A hard reload does not clear
+  lazy chunks.
 
-  create_Rejected_Mat      ~line 58   builds REJMATOBJ
-  create_Rejected_Product  ~line 76   builds REJPRODOBJ   ← THIS ONE
-  createNewRecord          ~line 95   the shared writer
+ON DEV, company 474, MR list:
+  MR-0008  must read  3# (25.020 Kg)
+  MR-0007  must read  0# (16.680 Kg)   ← correct. No count stored.
+  ⚠ ANY MATERIAL MR ROW must read Kg ONLY, with no # figure.
+    If a material row shows 0#, the type gate is missing.
 
-REJPRODOBJ AS IT STANDS (read S102):
-    internalCode: await RejectMaterialAndProduct.getInternalCode(),
-    company_id: req.body.company_id,
-    user_id: req.body.user_id,
-    receiveProduct_id: req.body.receiveProduct_id,
-    formula_id: req.body.formula_id,
-    type: "Product",
-    qty_rejected: req.body.qty_rejected,        ← ANCHOR HERE
-    disposition: req.body.disposition,
-    disposition_authorized_by: req.body.disposition_authorized_by,
-    remarks_reasons: req.body.remarks_reasons,
-    status: "Active",
-    mlc_id: req.body.mlc_id,
+ON DEV, MR-0008 details screen:
+  the unit count 3 visible, in whatever shape Minty chose.
 
-THE EDIT — one line after qty_rejected:
-    qty_rejected_units: req.body.qty_rejected_units,
+⚠ THEN RE-READ THE ROW AND CONFIRM NOTHING MOVED:
+  node /home/ubuntu/read-rows.js sql "SELECT id, internalCode,
+    qty_rejected, qty_rejected_units FROM rejectmaterialandproduct
+    ORDER BY id DESC LIMIT 3;"
+  EXPECT 3361 · 25.02 · 3   UNCHANGED. These screens are READS.
+  If any figure moved, something writes that should not — STOP.
 
-⚠⚠ DO NOT TOUCH REJMATOBJ. Material reject is Kg-MEASURED by
-  design — weighing a rejected ingredient IS the physical act. This
-  is the ingredient side of the two-layer rule and it is CORRECT.
-  Adding units there would be a defect, not a fix.
+⚠ GATE DEV, THEN PROMOTE, THEN GATE PROD SEPARATELY.
+⚠ PROD HAS ZERO MR ROWS, so the prod gate is: the list renders,
+  it is empty, nothing else broke. DO NOT CREATE A CLIENT ROW to
+  test. S103 checked the prod screen WITHOUT SAVING and that is
+  the right shape.
 ```
 
----
-
-## STEP 4 · THE FRONTEND — TWO SCREENS, NOT ONE
-
-⚠ FRONTEND IS EDITED ON THE MAC. Dev's checkout is stale at
-  c2a52d8e and is overwritten by the next deploy. RULES 2.
-⚠ MAC edit → push → GitHub build → deploy dev → verify → SEPARATE
-  manual dispatch for prod.
-
-### 4a · THE CREATE SCREEN — the count is already in the form
+### ⚠ WHAT WOULD MAKE JOB A BIGGER THAN HALF A SESSION
 
 ```
-SCREEN  /Reject-products     ⚠ NOTE THE PLURAL. /Reject-product
-        (singular) IS A DIFFERENT PAGE. So is /Return-material,
-        which is Return Material/Product and NOT this.
-        Route: left rail → Miscellaneous Release → new MR.
-
-FILE    src/app/Layouts/admin-dashboard/warehouse/
-        rejected-materials/reject-product/reject-product.component.ts
-
-MEASURED ON SCREEN S102 — this is why the fix is small:
-    Shipping Units*   1      ← TYPED. Underlined, spinner, focused.
-    Quantity (Kg)*    8.34   ← DERIVED, greyed, no spinner. 1 × 8.34.
-  ▶ THE UNIT COUNT IS THE OPERATOR'S INPUT. It exists in the form.
-    The app derives Kg, saves the Kg, and DISCARDS the count.
-
-THE WRITE, line 299 as it stands:
-    qty_rejected: this.rejectProductForm.get('qty').value,
-
-▶ THE FIX: add the units value alongside it.
-  ⚠ THE CONTROL NAME IS NOT YET KNOWN. `qty` is the Kg box. The
-    Shipping Units box has its own control and S102 did not read
-    its name. ▶ FIRST ACTION IN 4a: read the form declaration and
-    the template, find the Shipping Units formControlName, THEN
-    patch. One read, on the MAC:
-      grep -n "FormControl\|formControlName\|Shipping" <ts> <html>
-
-⚠ LINE 347 IS NOT THE FIX SITE AND MUST NOT BE COPIED:
-    maxWdu = Math.round((this.qty_rejected / wduUnits) * 10^3) / 10^3
-  That is a VALIDATOR CEILING built by dividing Kg. It is R2. It is
-  not what the operator typed. ▶ SEND THE TYPED CONTROL VALUE, never
-  a derived one. R1 only.
-```
-
-### 4b · THE EDIT SCREEN — ⚠ EASY TO MISS, AND IT SILENTLY ERASES
-
-```
-SCREEN  /Edit-reject-product
-FILE    .../rejected-materials/edit-reject-product/
-        edit-reject-product.component.ts
-
-MEASURED ON SCREEN S102 — the form carries KG ONLY:
-    Quantity(kgs)*          16.68
-    Returned Quantity(kgs)* 16.68
-  NO units box anywhere on it.
-
-THE WRITE, line 123:
-    qty_rejected: this.rejectProdForm.get('returnedqty').value,
-
-⚠⚠ IF THIS SCREEN IS LEFT ALONE, EDITING AN MR BLANKS THE COUNT.
-  The record is written with no qty_rejected_units, so the column
-  reverts to its 0 default and the stored count is lost — silently,
-  on a record that already had it.
-  ▶ THE EDIT SCREEN NEEDS THE FIELD TOO. Minimum: carry the existing
-    value through untouched. Better: a Shipping Units box mirroring
-    create, with Kg derived.
-  ⚠ MINTY DECIDES which. It is a screen-design question, not a
-    code one. ASK BEFORE BUILDING.
-
-ALSO ON THIS SCREEN, lines 57-68: it loads `qty` and `returnedqty`
-BOTH from result.qty_rejected. Whatever is built must load the units
-value the same way.
+▶ If STEP 1 finds the proc does not return the column, the fix is
+  a DATABASE OBJECT on both boxes (a new JR entry), gated
+  separately, with no promote path, backup first. THAT IS ITS OWN
+  SITTING and the frontend work waits behind it.
+▶ If Minty wants editing restored on the details screen (P142),
+  that is a third job and NOT part of P143.
 ```
 
 ---
 
-## STEP 5 · VERIFY — WHAT DONE LOOKS LIKE
+## JOB B · P140 · THE YIELD SCREEN
 
-```
-⚠ READ THE ROW, NOT THE TOAST. A green success message proves
-  nothing when the failure mode is a silent discard (JT12).
-
-ON DEV, company 474, product FO-0001 (8.34 Kg per case):
-  1  Create a NEW misc release. Enter Shipping Units = 3.
-     Screen must derive Quantity 25.02 Kg.
-  2  READ THE ROW:
-       node /home/ubuntu/read-rows.js sql "SELECT id, internalCode,
-         qty_rejected, qty_rejected_units FROM
-         rejectmaterialandproduct ORDER BY id DESC LIMIT 3;"
-     EXPECT  qty_rejected 25.02 · qty_rejected_units 3
-     ⚠ A ZERO IN THE UNITS COLUMN MEANS STEP 2 WAS MISSED. That is
-       the exact signature of the undeclared-attribute trap.
-  3  EDIT that MR, change nothing, save. READ THE ROW AGAIN.
-     qty_rejected_units MUST STILL BE 3. If it is 0, step 4b failed.
-  4  Traceability page: Misc Rel must still read correctly.
-
-THE BEFORE-READING — S101/S102, company 474:
-  rejectmaterialandproduct id 3360 · MR-0007
-  entered 2 cases · qty_rejected 16.68 · units DISCARDED
-  ⚠ THIS ROW STAYS AS IT IS. It is the evidence. No backfill.
-
-⚠ NOTHING IS DONE UNTIL IT IS VERIFIED ON THE SCREEN AND IN THE ROW.
-⚠ Gate dev, then promote, then gate prod SEPARATELY. A schema change
-  has NO PROMOTE PATH — run the ALTER on prod directly.
-```
-
----
-
-## STEP 6 · THE RECORD — ⚠ DO NOT SKIP. JR IS THE ONLY COPY.
-
-```
-⚠ A COLUMN ADDED BY HAND EXISTS IN THE DATABASE AND NOWHERE ELSE.
-  If a box is rebuilt from git, it does not come back, and every
-  read silently reverts to dividing. JR exists for exactly this.
-
-JR15 — rejectmaterialandproduct.qty_rejected_units  [J116, S103]
-  ALTER TABLE rejectmaterialandproduct
-    ADD COLUMN qty_rejected_units double DEFAULT 0;
-  ⚠ ALSO declare in RejectMaterialAndProduct.js attributes or the
-    write silently drops (TRAPS 3).
-  Backup: take one BEFORE the ALTER, both boxes.
-
-J116 — the session entry.
-  ⚠ SECTION 5's HEADER IS WRONG AND HAS BEEN FOR THREE SESSIONS.
-    It says "Highest is J113 — the next one is J114" and "Last
-    appended: S95". BOTH J114 AND J115 EXIST (S97 append).
-    ▶ THE NEXT FREE NUMBER IS J116. Highest trap is JT27.
-    ▶ FIX THE HEADER IN THE SAME COMMIT. S85, S86 and S95 all
-      asked and it was not done.
-
-MATERIAL  Section 5 — the JR block. ⚠ ASK MINTY FOR IT BY NAME.
-```
-
----
-
-## THEN · P140 · THE YIELD SCREEN
-
-⚠ ONLY AFTER P82c IS VERIFIED ON DEV. Otherwise it is S104.
+⚠ CARRIED FORWARD FROM S102 AT MINTY'S EXPLICIT REQUEST, S103 CLOSE:
+  "carry over the yield actions into next session so we dont loose
+   focus on that". NEVER REACHED IN S103.
+⚠ ONLY AFTER P143 IS VERIFIED ON DEV. Otherwise it is S105.
 ⚠ THIS IS A MEASUREMENT SPEC, NOT A FIX SPEC. Claude cannot write
   the fix yet, and saying so is the point. The screen has not been
   read and the file has not been located. What IS specified is
@@ -319,8 +240,8 @@ BECAUSE THE NUMBERS BENEATH IT WERE WRONG.
 ▶ SO THE SCREEN IS WRONG ON ITS OWN. It COMPUTES where it should
   READ. That is a different bug from the one recorded, and quite
   possibly a smaller one.
-⚠ TWO OF S101's FOUR FAULTS ARE NOW DOUBTFUL AS WRITTEN. Do not
-  carry them forward as findings:
+⚠ TWO OF S101's FOUR FAULTS ARE DOUBTFUL AS WRITTEN. Do not carry
+  them forward as findings:
     R3-b "planned 7.002 on both lines"  — mechanism UNKNOWN
     R3-c "pack-level multiplier MISSING" — it WORKS. 42 IS 7 × 6.
 ```
@@ -357,9 +278,9 @@ THE KNOWN-CORRECT COMPARISON SET — from the row, S101/S102:
 ```
 ⚠ NEITHER THE ROUTE NOR THE COMPONENT PATH HAS BEEN READ. S101 and
   S102 both worked from the screen only. DO NOT GUESS THE FILE —
-  S102 lost time twice on plausible-looking wrong files, and J89
-  records the same on release-mat-details (five levels deep, two
-  wrong guesses).
+  S102 lost time twice on plausible-looking wrong files, S103 lost
+  two rounds on the wrong MR screens, and J89 records the same on
+  release-mat-details (five levels deep, two wrong guesses).
 
 ON THE MAC:
   grep -rn "Check Material Yield" ~/abletrace-lab-frontend/src
@@ -370,12 +291,14 @@ ON THE MAC:
 ⚠ ALSO GREP THE BACKEND. The figures may arrive pre-computed from
   a controller or a stored proc, as SO status did (J114). If so
   the frontend is innocent and the fix is elsewhere entirely.
+  ⚠ IF IT IS A PROC, READ IT FROM PROD's mysql CLIENT. read-rows.js
+    cannot print a routine body (P144, proven twice in S103).
 ```
 
 ### STEP Y3 · THE FOUR QUESTIONS
 
 ⚠ RULES 1. Before running any check, state what result would
-  distinguish the two answers. They are stated here.
+distinguish the two answers. They are stated here.
 
 ```
 Q1  WHERE DOES `PLANNED` COME FROM?
@@ -397,8 +320,8 @@ Q2  WHY DO POUCH AND CASE SHOW THE SAME NUMBER?
         WhC_GetFormulaPackagingMaterials stops returning whd_flag
         and pack_level. THAT FALLBACK PRODUCES EXACTLY THIS
         SYMPTOM — every level showing one figure.
-    ▶ CHECK THE PROC FIRST, on dev:
-        SHOW CREATE PROCEDURE WhC_GetFormulaPackagingMaterials
+    ▶ CHECK THE PROC FIRST, from PROD's mysql client:
+        SHOW CREATE PROCEDURE WhC_GetFormulaPackagingMaterials\G
       EXPECT whd_flag and pack_level in the SELECT. If absent,
       the cause is JR6 and the fix is a DATABASE object, not code.
       ⚠ THAT WOULD ALSO MEAN PROD IS AFFECTED. Check both boxes.
@@ -460,7 +383,7 @@ ON DEV, company 474, MO-0001:
   there is no urgency to promote — gate dev properly first.
 ```
 
-### ⚠ WHAT WOULD MAKE THIS BIGGER THAN A SESSION
+### ⚠ WHAT WOULD MAKE JOB B BIGGER THAN A SESSION
 
 ```
 ▶ If Q2 finds the proc is missing whd_flag / pack_level, the fix is
@@ -475,74 +398,96 @@ ON DEV, company 474, MO-0001:
 
 ---
 
-## NOT IN S103 — AND WHY
+## NOT IN S104 — AND WHY
 
 ```
+P142  THE COMMENTED-OUT EDIT BUTTONS on /Edit-reject-product.
+      ⚠ TOUCHED BY JOB A's STEP 3 — read it, DO NOT change it.
+      Re-enabling editing is a separate job with the units field
+      as its precondition. ⚠ ASK MINTY whether he wants MR editing
+      restored at all. It may be disabled deliberately.
+
 P137  getInternalCode COUNTS GLOBALLY. ⚠ CAUSE FOUND S102, do not
       re-investigate: RejectMaterialAndProduct.js:51 reads
         count({ company_id: company_id })
-      but the callers at :63 and :78 pass NO ARGUMENT, so
-      company_id is undefined and the count is app-wide. That is
-      why a brand-new company produced MR-0007.
-      ▶ SAME FILE AS S103's JOB. DELIBERATELY SEPARATE COMMIT —
-        two changes to one file in one sitting makes a rollback
-        ambiguous. Do it after, or next session.
-      ⚠ AND ASK MINTY FIRST: renumbering affects how MRs read to a
-        client. It is a business question, not a tidy-up.
+      but the callers at :63 and :78 pass NO ARGUMENT.
+      ▶ SAME FILE FAMILY AS JOB A. DELIBERATELY SEPARATE COMMIT.
+      ⚠ ASK MINTY FIRST — renumbering affects how MRs read to a
+        client. Business question, not a tidy-up.
 
-P140  THE YIELD SCREEN. ⚠ NOW SPECIFIED — see "THEN · P140" above.
-      Reached ONLY if P82c is verified on dev with room to spare.
-      Otherwise it is S104 and the spec carries forward unchanged.
+P144  read-rows.js cannot print a routine body. ⚠ JOB A's STEP 1
+      WORKS AROUND IT by using prod's mysql client. Fixing the
+      reader itself is separate. ▶ If the workaround also fails,
+      this becomes urgent.
 
-P102  THE REBOOT. Own sitting. ⚠ MISSED SIX DAYS RUNNING.
-P111  QUICKBOOKS. ⚠ P82's ARITHMETIC IS EFFECTIVELY CLOSED (see
-      NOW). Once P82c lands, this is next. PLANNING ONLY, NO CODE.
-      ⚠ IT NEEDS A NEW COLUMN — TRAPS 3 will bite there too, and
-        S103 is the rehearsal for it.
+P102  THE REBOOT. Own sitting. ⚠ MISSED EIGHT DAYS RUNNING.
+      ⚠ PROD IS NOW 43 UPDATES, UP FROM 29 AT S102.
+
+P108  REVIEW THE J-ENTRIES WITH MINTY. ⚠ PROMOTED BY S103.
+      Section_5.md is 2770+ lines and its header has now gone
+      stale TWICE. The JR block is the only record of what is not
+      in git and it is buried inside session history.
+      Own sitting. NOT a tidy-up — it protects the rebuild path.
+
+P111  QUICKBOOKS. ⚠ P82's ARITHMETIC AND STORAGE ARE BOTH CLOSED.
+      Only display work stands between (P143, P135, P140).
+      PLANNING ONLY, NO CODE.
+      ⚠ IT NEEDS A NEW COLUMN — S103 IS THE REHEARSAL. The exact
+        sequence that worked: backup → ALTER → declare in the model
+        → write path → restart → READ THE ROW.
 ```
 
 ---
 
-## THE LESSONS S102 EARNED
+## THE LESSONS S103 EARNED
 
 ⚠ Kept here rather than added to RULES. If they recur, Claude
 proposes a rule; the default is still NO.
 
 ```
-1  THE SCREEN OVERTURNED THE CODE READ, TWICE IN ONE SESSION.
-   Claude read add-mlo:150 as multiplying packaging by the rounded
-   batches figure and called it a defect. The ROW said 42 and 7,
-   exact. Claude read fopackaging's whd_flag filter as proving the
-   pouch was never recorded. The RELEASE held both pouch and case.
-   ▶ BOTH WERE CONFIDENT CODE READS AND BOTH WERE WRONG. Minty
-     read the screen and was right both times.
-   ▶ REACHING THE ROW IS CHEAP. Do it before naming a defect.
+1  THE SCREEN OVERTURNED THE CODE READ FOR THE THIRD TIME IN TWO
+   SESSIONS. PLAN stated as fact that editing an MR erases the
+   count, and named the fix site. Both halves were wrong: the
+   handler only writes what it is sent, AND there is no edit
+   button because someone commented it out.
+   ▶ PLAN'S CONFIDENCE IS NOT EVIDENCE. A close writes down what
+     it believes; the next session still has to check.
+   ▶ REACHING THE ROW — OR THE SCREEN — IS CHEAP.
 
-2  MINTY'S DISTINCTION WAS SHARPER THAN CLAUDE'S. Claude was
-   scoping one fix across nine multiplication sites. Minty split
-   it: ingredients legitimately scale by batches; packaging must
-   scale by shipping units and never round-trip. That is the
-   correct domain line and it made the job smaller AND revealed
-   the code was already doing it.
-   ▶ ASK WHAT THE NUMBER MEANS BEFORE ASKING IF IT IS RIGHT.
+2  AN ASSERT THAT FIRES IS THE PATCH WORKING, NOT FAILING.
+   The first model patch stopped with "found 3" because
+   `qty_rejected:` appears in the attributes block AND in BOTH
+   object builders. One of those was REJMATOBJ — the material
+   side, which must never gain a units field.
+   ▶ THE LOOSE PATTERN WOULD HAVE PATCHED THE WRONG BUILDER AND
+     LOOKED FINE. Anchor on the full declaration form, not a
+     prefix.
 
-3  A WRONG SCREEN ANSWERS A DIFFERENT QUESTION. Two rounds of
-   screenshots came from /Edit-reject-product and /Return-material
-   before /Reject-products. Both looked plausible and neither
-   could settle the question asked.
-   ▶ NAME THE ROUTE AND THE URL, not just the feature. Same
-     family as JT25 — name things the way Minty sees them.
+3  A BACKUP THAT LOOKS LIKE A BACKUP. Prod's first mysqldump wrote
+   842 bytes — a header and no data — because RDS denies FLUSH
+   TABLES WITH READ LOCK and --single-transaction alone does not
+   suppress it. The file EXISTED and had a plausible size.
+   ▶ CHECK grep -c "INSERT INTO" BEFORE TRUSTING A DUMP. File size
+     is not evidence.
+   ▶ AND THE GUARD WORKED BECAUSE IT RAN BEFORE THE ALTER.
 
-4  A FAILURE THAT ANNOUNCES ITSELF IS A GOOD FAILURE. The prod ssh
-   refused loudly because the pem was not on the box — the fourth
-   encounter with this and the FIRST that did not silently run on
-   dev. The block was written to fail rather than fall through.
-   ▶ PREFER THE COMMAND SHAPE THAT CANNOT SUCCEED WRONGLY.
+4  NAME THE ROUTE AND THE URL, NOT THE FEATURE. Two rounds of
+   screenshots came from /Rejected-material/product and
+   /Edit-reject-product before /Reject-products. Same lesson as
+   S102 lesson 3, second occurrence.
+   ▶ IF IT RECURS A THIRD TIME IT IS A RULE. Say so then.
 
-5  FRACTIONAL IS NOT THE SAME AS NON-TERMINATING. The Glutenull
-   exposure query caught two rows and only one had lost anything.
-   802 / 400 = 2.005 exactly. A test built on "is it fractional"
-   is wider than the defect and produces false alarms.
+5  A TOOL THAT FAILS SILENTLY COSTS A JOB. read-rows.js printed an
+   EMPTY ROW for two different routine-body queries. Not an error,
+   not "no rows" — a blank. That blocked S103 from sizing P143 and
+   is why Job A opens with a read rather than a patch.
+   ▶ WHEN A TOOL RETURNS NOTHING, ESTABLISH WHETHER IT FAILED OR
+     THE ANSWER IS EMPTY. They are different.
+
+6  THE JOB WAS FOUR PIECES AND ONE WAS UNNECESSARY. Step 4b was a
+   quarter of the planned work and did not exist as a problem.
+   ▶ A SCOPE THAT SHRINKS ON CONTACT IS A GOOD OUTCOME. Say it
+     plainly rather than building the piece anyway.
 ```
 
 ---
@@ -551,6 +496,7 @@ proposes a rule; the default is still NO.
 
 ```
 RULES.md · NOW.md · TRAPS.md · PLAN.md
-⚠ Section 5's JR block — NEEDED THIS SESSION, at STEP 6.
-NOTHING ELSE.
+⚠ NOTHING ELSE NEEDED FOR JOB A.
+⚠ FOR JOB B: Section 5's J5 and J24 entries — ASK MINTY FOR THEM
+  BY NAME at STEP Y3, not at open.
 ```
