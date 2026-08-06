@@ -270,6 +270,46 @@ THE CLOSE PRODUCES THE PLAN. Every job in it carries:
 
 ---
 
+## 7 · QUANTITY
+
+```
+ONE UNIT WEIGHT. The Level 1 unit weight in the product formulation.
+Every higher-level weight cascades from it. Never entered separately.
+
+UNITS TO WEIGHT is fine, wherever required.
+WEIGHT TO UNITS IS NEVER DONE. A unit count is never obtained by
+dividing a weight.
+
+EVERY UNIT FIGURE ON EVERY SCREEN comes from one of three places:
+  THE FORMULATION    requirements, multiplied down the packing
+                     cascade from the MO quantity
+  CORE STOCK LINE    formulations.inventory_units
+  PRODUCED-TO-DATE   mlomanagement.received_units, and the release
+                     and receipt entries a person made
+
+A unit figure from none of those three is a defect.
+
+THE TWO RELEASE ROUTES
+  INGREDIENTS  recipe qty per batch x number of batches. Kg-anchored.
+               The physical release is a weighing.
+               ⚠ batches is stored ROUNDED. The resulting variance is
+                 ACCEPTED. Minty's ruling S105. Do not chase it.
+  PACKAGING    MO quantity x the packing cascade. Unit-anchored.
+               ⚠ batches plays NO part. Therefore NO rounding
+                 variance. A fractional variance on a packaging line
+                 is a defect, not rounding.
+
+⚠ THE TEST: for any unit figure on any screen, name which of the three
+  sources it came from. If the answer is "it was calculated from a
+  weight", that is the defect.
+⚠ THE DIVISION RETURNS A PLAUSIBLE NUMBER EVERY TIME and is invisible
+  at a 1:1 ratio (TRAPS 9). It does not announce itself.
+⚠ MINTY'S RULING S105, repeated across many sessions before it was
+  written down. Three places in the codebase still break it — P151.
+```
+
+---
+
 ## THE FOUR FILES
 
 ```
