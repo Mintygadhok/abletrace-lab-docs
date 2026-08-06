@@ -1,10 +1,12 @@
 # RULES
 
-Last revised: S98.
-⚠ REWRITTEN WHOLE THIS SESSION. Nineteen rules cut to SIX.
+Last revised: S106.
+⚠ S98 REWROTE THIS FILE WHOLE. Nineteen rules cut to SIX.
   MINTY, S98: "our principles have to be sound. So our rules have to be
   very sound." The old file had grown until the method was buried in
   the history that earned it. The lessons are kept; the stories are not.
+⚠ S105 ADDED RULE 7 · QUANTITY. Committed at 5b2cb9e.
+⚠ S106 CHANGED ONE LINE in RULE 2 — the browser reload. Minty's ruling.
 ⚠ A NEW RULE IS ADDED ONLY WHEN A REAL FAILURE SHOWS SOMETHING MISSING,
   AND ONLY WITH MINTY'S APPROVAL. The default answer is NO.
 
@@ -133,11 +135,13 @@ PROD    The client. Only proven code, only deliberately. Own
 ⚠ pm2 restart <NAME>, never "all". dev=abletrace-dev,
   prod=abletrace-backend. Then sleep 8, then curl.
 ⚠ git add <named files>, never ".". No "!" in commit messages.
-⚠ After a frontend deploy, Cmd+Q the browser. A hard reload does
-  not clear lazy chunks.
+⚠ After a frontend deploy, Shift+Cmd+R in Chrome. Minty's ruling S106.
 ⚠ READ THE ROLLBACK PATH OFF THE BOX, never write it from the
   build label. It is the one thing that must be right before it
   is needed.
+⚠ A RESTART PROVES NOTHING ABOUT A PULL. Read HEAD after every
+  pull, before restarting. S106: prod restarted clean, returned
+  200, and was still running the old commit.
 ```
 
 ---
@@ -159,6 +163,10 @@ A wrong value already STORED stays wrong until someone changes it.
   and say out loud that it is a live write.
 ⚠ Zero wrong rows is the common answer and it ends the question.
   Query before assuming either way.
+⚠ A FIGURE THAT RECORDS WHAT PHYSICALLY HAPPENED IS NOT A WRONG
+  ROW. Minty's ruling S106 on the 0.08 clamshell over-release:
+  the release figure is the true record of what was picked, even
+  though the instruction that produced it was wrong.
 ```
 
 ---
@@ -180,9 +188,9 @@ ON THE BOXES — .env, each box, never in git
   SMTP_PASSWORD     ⚠ actually the IAM secret
   ⚠ dotenvx loads at runtime — `pm2 env` does NOT list them.
 
-ON PROD ONLY
+ON BOTH BOXES
   ~/.my.cnf         DB password, chmod 600.
-                    ⚠ Dev has none — build it from .env.
+                    ⚠ Dev's was built from .env by Node script.
 
 ON THE MAC
   SSH KEY           ~/.ssh/abletrace-lab-key.pem
@@ -216,6 +224,9 @@ ELSEWHERE
 1  FENCE — every command in its own fenced block. Nothing else
    inside it: no step numbers, no prose, no placeholders.
    ⚠ Copy only from a fence, never from terminal output.
+   ⚠ PASTING TERMINAL OUTPUT BACK IN RUNS IT AS COMMANDS. S106:
+     it produced a burst of "command not found" AND SILENTLY ATE
+     A git pull. The pull never ran and nothing said so.
 
 2  FILE — anything long goes as a downloadable file, never a
    paste. Claude writes the file and presents it.
@@ -266,6 +277,9 @@ THE CLOSE PRODUCES THE PLAN. Every job in it carries:
   all three. Minty's ruling S99.
 ⚠ Do not start work that cannot be recorded.
 ⚠ Claude raises the close; Minty decides.
+⚠ WRITE THE STATE BLOCK FROM THE BOXES AT CLOSE, AND WRITE THE
+  GITHUB LINE FROM GITHUB. S106 opened with NOW claiming a docs
+  commit was pending that had in fact been pushed.
 ```
 
 ---
@@ -304,8 +318,12 @@ THE TWO RELEASE ROUTES
   weight", that is the defect.
 ⚠ THE DIVISION RETURNS A PLAUSIBLE NUMBER EVERY TIME and is invisible
   at a 1:1 ratio (TRAPS 9). It does not announce itself.
+⚠ A STORED COUNT THAT IS NOT SERVED IS THE USUAL CAUSE. Three times
+  now — P143, P149, and every division in P135/P151. Before repairing
+  arithmetic, ask whether the real number simply is not in the SELECT
+  list. → P150.
 ⚠ MINTY'S RULING S105, repeated across many sessions before it was
-  written down. Three places in the codebase still break it — P151.
+  written down.
 ```
 
 ---
