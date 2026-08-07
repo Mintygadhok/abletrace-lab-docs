@@ -287,43 +287,85 @@ THE CLOSE PRODUCES THE PLAN. Every job in it carries:
 ## 7 · QUANTITY
 
 ```
-ONE UNIT WEIGHT. The Level 1 unit weight in the product formulation.
-Every higher-level weight cascades from it. Never entered separately.
+EVERY UNIT FIGURE ON EVERY SCREEN COMES FROM ONE OF FOUR PLACES.
+A UNIT FIGURE FROM NONE OF THEM IS A DEFECT.
 
-UNITS TO WEIGHT is fine, wherever required.
-WEIGHT TO UNITS IS NEVER DONE. A unit count is never obtained by
-dividing a weight.
+1  ING-REQ · THE RECIPE REQUIREMENT
+   What an MO needs of an ingredient or an intermediate.
+       quantity per batch x (MO shipping units / shipping units per batch)
+   Computed LIVE, every time.
+   ⚠ NEVER READ mlomanagement.batches. It is this same sum, already
+     rounded and stored.
+   ⚠ Quantity per batch takes the basis of the thing being consumed —
+     UNITS for an intermediate, Kg for an ingredient. The scaling
+     factor is always shipping units over shipping units, so it never
+     changes the basis.
+   LIVES IN  subrecipematerials.qty · subrecipeformulation.ship_qty
 
-EVERY UNIT FIGURE ON EVERY SCREEN comes from one of three places:
-  THE FORMULATION    requirements, multiplied down the packing
-                     cascade from the MO quantity
-  CORE STOCK LINE    formulations.inventory_units
-  PRODUCED-TO-DATE   mlomanagement.received_units, and the release
-                     and receipt entries a person made
+2  PK-CASCADE · THE PACKAGING FIGURES
+       MO shipping units x the pack ratio at each level
+   Level 1 is the single unit and it carries the unit weight. THAT IS
+   THE ONE PLACE A UNIT WEIGHT IS HELD ANYWHERE IN THE SYSTEM.
+   ⚠ batches plays NO part, so there is NO rounding variance. A
+     fractional packaging figure is a defect, not rounding.
+   LIVES IN  fopackaging.quantity · pack_level · whd_flag ·
+             wgt_kgs_per_unit
 
-A unit figure from none of those three is a defect.
+3  STOCK ON HAND · THE WAREHOUSE BALANCE
+   Two balances, kept separately.
+     PRODUCTS AND INTERMEDIATES  formulations.inventory_units, units
+       UP    MO completed and received · returned from an MO ·
+             a dispatch order cancelled
+       DOWN  allocated to a DO · miscellaneous release ·
+             released into another product's recipe
+     MATERIALS  materials.inventory, Kg
+       UP    received from the vendor · returned from an MO
+       DOWN  released to an MO · miscellaneous release
+   ⚠ STOCK MOVES ONLY AT THE DO, IN BOTH DIRECTIONS.
+     stock on hand -> DO                 MOVES
+     DO -> packing slip -> shipped       no move
+     packing slip -> DO                  no move
+     DO cancelled -> stock on hand       MOVES
+     Once allocated it is spoken for and a planner must not count it
+     as available, even though it is still in the building.
 
-THE TWO RELEASE ROUTES
-  INGREDIENTS  recipe qty per batch x number of batches. Kg-anchored.
-               The physical release is a weighing.
-               ⚠ batches is stored ROUNDED. The resulting variance is
-                 ACCEPTED. Minty's ruling S105. Do not chase it.
-  PACKAGING    MO quantity x the packing cascade. Unit-anchored.
-               ⚠ batches plays NO part. Therefore NO rounding
-                 variance. A fractional variance on a packaging line
-                 is a defect, not rounding.
+4  PRD-TO-DATE · PRODUCTION TO DATE
+   The completed quantity for an MO. mlomanagement.received_units.
+   Manufacturing may deliver several times against one MO. Each
+   delivery is a received lot, entered IN SHIPPING UNITS with the
+   weight derived. NEVER THE REVERSE.
+   The completed quantity is the sum of those lots, in shipping units.
+   Received lots are internal to the MO. ONE MO, ONE PRODUCT LOT.
+   Only ever goes up.
+   ⚠ mlomanagement.received_units IS THE MO TOTAL.
+     receiveproducts.qty IS ONE RECEIPT. NOT INTERCHANGEABLE — a
+     per-receipt row must show its own count.
 
-⚠ THE TEST: for any unit figure on any screen, name which of the three
-  sources it came from. If the answer is "it was calculated from a
-  weight", that is the defect.
+THE TEST
+  Point at any unit number on any screen and say which of the four it
+  came from. If the answer is "we divided a weight", THAT IS THE BUG.
+
+WEIGHT IS ALWAYS WORKED OUT FROM UNITS.
+UNITS ARE NEVER WORKED OUT FROM WEIGHT.
+
+DISPLAY  three decimal places.
+  ⚠ ROUND FOR DISPLAY ONLY. Full precision in the calculation and in
+    the database. A rounded figure that is then multiplied carries its
+    error forward — which is exactly what the stored batches column
+    does.
+
 ⚠ THE DIVISION RETURNS A PLAUSIBLE NUMBER EVERY TIME and is invisible
-  at a 1:1 ratio (TRAPS 9). It does not announce itself.
-⚠ A STORED COUNT THAT IS NOT SERVED IS THE USUAL CAUSE. Three times
-  now — P143, P149, and every division in P135/P151. Before repairing
-  arithmetic, ask whether the real number simply is not in the SELECT
-  list. → P150.
-⚠ MINTY'S RULING S105, repeated across many sessions before it was
-  written down.
+  at a round ratio (TRAPS 9). It does not announce itself.
+⚠ A STORED COUNT THAT IS NOT SERVED IS THE USUAL CAUSE. Before
+  repairing arithmetic, ask whether the real number is simply not in
+  the SELECT list.
+
+⚠ THE FULL MAP — every site that produces a unit figure, aligned and
+  misaligned, with its address — IS THE UNITS BIBLE.
+  ▶ UNITS-BIBLE.txt in the docs repo. Minty's document.
+
+⚠ MINTY'S RULINGS, S108. THIS SUPERSEDES THE S105 RULING THAT THE
+  INGREDIENT ROUNDING VARIANCE IS ACCEPTED.
 ```
 
 ---

@@ -1,322 +1,159 @@
 # NOW
 
-Last rewritten: S107, 6 August 2026. State, pending promotion, and the queue.
+Last rewritten: S108, 7 August 2026. State, pending promotion, and the queue.
 Rewritten whole every session.
 
-⚠⚠ S107 CHANGED BOTH BOXES. The database view AND the frontend.
-  ✓ FOR THE FIRST TIME SINCE THE P140 WORK BEGAN, DEV AND PROD ARE
-    ALIGNED ON BACKEND, FRONTEND, VIEW AND PROCEDURE.
+⚠⚠ S108 SHIPPED NO CODE. Both boxes are exactly as S107 left them.
+  It was a survey session and the survey is COMPLETE — database,
+  schema and frontend. 47 sites mapped.
 
-⚠⚠ A SECOND LIVE CLIENT WAS FOUND. HAGENSBORG, COMPANY 469 ON PROD.
-  Every "the client is Glutenull" line in these files was incomplete.
-  → P156. READ IT BEFORE PLANNING ANY WRITE TO CLIENT DATA.
+⚠⚠ THERE IS A NEW DOCUMENT. UNITS-BIBLE.txt / .xlsx in the docs repo.
+  ▶ IT IS MINTY'S. Part 1 changes only on his instruction.
+  ▶ IT REPLACES GUESSING ABOUT WHERE A UNIT FIGURE COMES FROM.
 
 ---
 
 ## STATE
-⚠ READ OFF BOTH BOXES AT S107 CLOSE.
+⚠ READ OFF BOTH BOXES AT S108 CLOSE.
 
 ```
 DEV       16.55.10.205 · pm2 abletrace-dev ↺260 · 200
-          frontend SERVING dev-a94f39c3b2bf      ← NEW IN S107
+          frontend SERVING dev-a94f39c3b2bf
           frontend checkout c2a52d8e — stale, harmless
           backend HEAD 51e9f4e · both repos clean
           Ubuntu 24.04.4 · 172.31.1.196
-          ⚠ 12 updates pending · restart required
-          ✓ ↺ HELD AT 260 THROUGH S106 AND S107. Nothing restarted.
+          ⚠ 8 updates pending · restart required
+          ✓ ↺ HELD AT 260 THROUGH S106, S107 AND S108.
 
 PROD      15.157.38.101 · pm2 abletrace-backend ↺340 · 200
-          TWO LIVE CLIENTS · SERVING prod-a94f39c3b2bf  ← NEW IN S107
+          TWO LIVE CLIENTS · SERVING prod-a94f39c3b2bf
           backend HEAD 51e9f4e · both repos clean
           ⚠ frontend checkout reads 9bce0238 — stale BY DESIGN (P8)
           Ubuntu 26.04 · 172.31.3.156
-          ⚠ 42 updates pending · restart required → P102
-          ⚠ ↺ HELD AT 340. No restart in S107 — a frontend deploy
-            does not touch pm2.
+          ⚠ 28 updates pending — NOT 42. CORRECTED S108. → P102
+          ⚠ ↺ HELD AT 340.
 ```
 
 ```
 ✓ BACKENDS MATCH     dev 51e9f4e        prod 51e9f4e
 ✓ FRONTENDS MATCH    dev a94f39c3b2bf   prod a94f39c3b2bf
 ✓ THE VIEW MATCHES   3 divisions on each box
-✓ THE PROC MATCHES   received_units served on each box
-⚠ THIS IS PARITY OF THE APPLICATION STACK, NOT THE MACHINES.
-  J84: the two boxes run DIFFERENT OPERATING SYSTEMS. Dev is a twin
-  of the APP, never of the HOST.
+⚠ THIS IS PARITY OF THE APPLICATION STACK, NOT THE MACHINES. J84.
 ```
 
 ```
 GITHUB    frontend main = a94f39c3   ✓ BUILT AND DEPLOYED BOTH BOXES
-          backend  main = 51e9f4e    (live on both boxes)
-          docs     main = ⚠ WRITE THIS FROM GITHUB AT THE NEXT OPEN,
-                             NOT FROM THIS LINE. → RULES 6.
-
-          ⚠ RUN #56 (30b2ddd4) IS STILL QUEUED ON GITHUB AND WILL
-            NOT CANCEL — "Failed to cancel workflow", twice.
-          ⚠⚠ IF IT EVER COMPLETES, ITS ARTIFACT REMOVES THE UNIT
-            COUNT FROM QTY Completed. IT IS SUPERSEDED BY a94f39c3.
-          ▶ NEVER DEPLOY A dist-*-30b2ddd* ZIP. Read the commit
-            stamp in the filename, not the position in an ls.
+          backend  main = 51e9f4e
+          docs     main = ⚠ WRITE THIS FROM GITHUB AT THE NEXT OPEN.
+          ⚠ RUN #56 (30b2ddd4) MAY STILL BE QUEUED AND IS SUPERSEDED.
+            ▶ NEVER DEPLOY A dist-*-30b2ddd* ZIP. Read the commit stamp
+              in the filename, not the position in an ls. → J117.
 ```
 
 ```
 ROLLBACK  dev   /home/ubuntu/www-html.bak-dev-a94f39c3b2bf
           prod  /home/ubuntu/www-html.bak-prod-a94f39c3b2bf
-          ⚠ EACH HOLDS THE BUILD IT REPLACED, NOT THE ONE IT IS
-            NAMED AFTER. Dev's holds 8fa2ed14179d. Prod's holds
-            0ad1f77cee1d.
-          ⚠ READ OFF THE BOX AT CLOSE, never from the label.
+          ⚠ EACH HOLDS THE BUILD IT REPLACED, NOT THE ONE IT IS NAMED
+            AFTER. ⚠ READ OFF THE BOX AT CLOSE, never from the label.
 
-          DATABASE BACKUPS, S107, in /home/ubuntu on each box:
-            DEV   Trace_ProductHeaderView.bak-S107-DEV.txt
-            PROD  Trace_ProductHeaderView.bak-S107-PROD.txt
-          ⚠ BOTH VERIFIED BEFORE USE — 5932 bytes, 6 slashes,
-            22 joins, 5 selects. The two boxes were BYTE-IDENTICAL.
-          ⚠ SHOW CREATE text, NOT runnable as-is. Strip the banner
-            and the trailing charset lines, add CREATE OR REPLACE.
-            The S107 node script did exactly that; its shape is JR18.
-
-          S106 DATABASE BACKUPS still on both boxes:
-            WhC_GetMoDetails_SP.bak-S106-{DEV,PROD}.txt  KEEP
-            WhC_GetMoDetails_SP.after-S106-{DEV,PROD}.txt KEEP
-
-          BACKEND BACKUP still on DEV:
-            MLOManagement.js.bak-S105-P140-attempt2   keep, it is live
-          ⚠⚠ NEVER PUT A BACKUP IN api/models/. TRAPS/P153.
+          DATABASE BACKUPS on each box — ⚠⚠ KEEP ALL OF THESE:
+            Trace_ProductHeaderView.bak-S107-{DEV,PROD}.txt
+            WhC_GetMoDetails_SP.bak-S106-{DEV,PROD}.txt (+ .after-)
+          ⚠ THE S107 VIEW BACKUPS HOLD THE SIX-DIVISION VERSION. The
+            live object has three. RE-CAPTURE BEFORE THE NEXT EDIT.
 ```
 
 ```
 SECURITY  DEV   sg-0301330fdca5ee36f · 22 · 443 · 80 all 0.0.0.0/0
           PROD  sg-034c010b5b20ccf78 · 22 · 443 · 80 all 0.0.0.0/0
 CERTS     trace expires 17 Oct 2026 · dev 9 Oct 2026.
-INSTANCES dev  i-098e2cc59844d9ef3  t3.small
-          prod i-0b54ae374250348e0  t3.small
+INSTANCES dev  i-098e2cc59844d9ef3  · prod i-0b54ae374250348e0 · t3.small
 ```
 
 ```
-COMPANIES ⚠⚠ THERE ARE TWO LIVE CLIENTS ON PROD, NOT ONE.
-            471  GLUTENULL1   producing. 2 MOs, both complete.
-            469  HAGENSBORG   ⚠ NEW TO THE RECORD, S107.
-                              7 MOs CREATED, NONE RUN.
-                              24 MR rows. ZERO release allocations.
-          ⚠ 464 test260703@ and 465 test260704b@ are SANDBOXES on
-            prod. 464 has FOUR MR ROWS including a MATERIAL one.
-            ▶ USE 464 FOR PROD SCREEN CHECKS. No client data touched.
-          ⚠ 474 = test260805@ ON DEV. THE CLEAN REFERENCE SET.
-          ⚠ 464 ON DEV is the older, dirty fixture set — and it is
-            the ONLY dev company with dispatch orders in all three
-            states. Login test260703.
-          ⚠ dev also carries 466, 469, 470, 472, 473 → P100
-            ⚠ P100 SAID "dev". 469 IS A REAL CLIENT ON PROD. The
-              unaccounted-company problem is not dev-only. → P156.
+COMPANIES ⚠⚠ TWO LIVE CLIENTS ON PROD.
+            471  GLUTENULL1   2 MOs, both complete. 26 release rows.
+                              ZERO MR rows.
+            469  HAGENSBORG   7 MOs created, none run. ZERO release
+                              rows. 24 MR rows, ALL MATERIAL.
+                              ⚠ Their MOs carry NO intermediates.
+          ⚠ 464 test260703@ and 465 test260704b@ are SANDBOXES on prod.
+            ▶ USE 464 FOR PROD SCREEN CHECKS.
+
+⚠⚠ NEW IN S108 — THE TWO BOXES DO NOT SHARE A COMPANY-ID NAMESPACE.
+  DEV 469 = test260710@.  PROD 469 = HAGENSBORG.
+  Dev also carries 466 "Test Glutenul", which is NOT Glutenull.
+  ▶ NO COMPANY ID CAN BE REASONED ABOUT WITHOUT NAMING THE BOX. → P156
 
 DATABASES ⚠ THE LIVE DB ON BOTH BOXES IS `abletracelab_live`.
-          Dev ALSO carries `abletrace-dev` — DEAD, name backwards.
-          Plus the dormant `abletrace` archive (P101, P109).
+          Plus the dormant `abletrace` archive on each (P101, P109).
           ⚠ NAME THE DATABASE ON EVERY mysql CALL. → P134
 
-⚠ PROD IS REACHED FROM THE MAC — OR RUN LOCALLY ON A PROD TERMINAL.
-  NEVER ssh from dev.
-  ▶ PUT `hostname -I` AT THE TOP OF ANY PROD BLOCK. Prod must
-    report 172.31.3.156.
-  ⚠ S107 ISSUED ONE BLOCK WITHOUT IT AND IT RAN ON THE WRONG BOX.
-    Harmless — it was a read — but it wrote a file named `-DEV`
-    onto PROD. Renamed. → LESSON 5.
+⚠ PROD IS REACHED FROM THE MAC. NEVER ssh from dev.
+  ▶ PUT `hostname -I` AT THE TOP OF ANY BLOCK. It caught TWO
+    wrong-box runs in S108, both harmless, both read-only.
 ```
 
 ---
 
-## P135 rows 3, 4, 5 — ✓ CLOSED S107. BOTH BOXES. SCREEN-PROVEN.
+## THE FIXTURES — ⚠ BUILT IN S108. DO NOT DISTURB.
+
+### COMPANY 474 · test260805@ · on DEV — THE INTERMEDIATE FIXTURE
 
 ```
-WHAT IT WAS: Trace_ProductHeaderView derived three unit counts by
-dividing a Kg figure by wgt_kgs_per_unit. The stored counts were
-sitting on the very rows the view's own CTE was already reading —
-just never selected. FOURTH instance of the pattern.
+⚠⚠ NEW IN S108 AND IT IS THE ONLY ONE OF ITS KIND ON EITHER BOX.
 
-THE CHANGE: three unit sums ADDED to the do_products CTE, three
-divisions DELETED. Nothing else. Same 22 joins, same WHERE, same
-GROUP BY, same outer SELECT, same aliases and positions.
+IP-0.37      FO-0004   0.37 Kg/unit   19 shipping units per batch
+             Single level, Internal container. Recipe: Ginger Powder.
+Parent-0.53  FO-0005   0.53 Kg/unit   13 shipping units per batch
+             Pouch / Carton 3 / Case 7 / Pallet 9
+             Recipe: Ginger Powder 1302.21 Kg + IP-0.37 9 units
 
-  qty_shipped_u       ← do.qty_shipped     ⚠ ACTUALLY SHIPPED
-  qty_packing_slip_u  ← do.packing_units   ⚠ authorised
-  qty_do_u            ← do.packing_units   ⚠ authorised
+MO-0003  IP-0.37, 41 units, COMPLETE, lot Pdt-260807-1
+         ⚠ Released 15.171 Kg of Ginger Powder against a true
+           requirement of 15.170. THE OVER-RELEASE IS BANKED and is
+           evidence for the calculation fix.
+MO-0004  Parent-0.53, 23 pallets, CREATED, NOT RELEASED
+         ⚠⚠ LEAVE IT ALONE. IT IS THE BEFORE PICTURE.
 
-⚠ THE SHIPPED BUCKET TAKES qty_shipped, NOT packing_units. A DO can
-  ship more or less than authorised — Minty's ruling S97, J114. They
-  are not interchangeable and merging them is a defect wearing a fix.
+⚠ 19 AND 13 ARE BOTH PRIME AND SHARE NO FACTORS, so nearly any MO
+  quantity produces a repeating decimal. TRAPS 9: a round ratio hides
+  a division entirely. THAT IS WHY THESE NUMBERS.
 
-⚠ ALIASES UNCHANGED, SO NO FRONTEND CHANGE RODE WITH IT. Same shape
-  as JR7e. No build was involved in this half of the work.
+THREE PROOFS VISIBLE ON MO-0004 TODAY, BEFORE ANY CODE CHANGE:
+  1  Plan Quantity        23.000# (2303.910 Kg)
+     Ginger Powder req.            2303.609 Kg
+     ⚠ 0.301 Kg APART ON THE SAME PAGE. Same recipe, one uses the MO,
+       the other uses the rounded batches 1.769. True factor 23/13.
+  2  IP-0.37 required     5.891 Kg  ⚠ Kg under a units header.
+                                      True: 9 × 23/13 = 15.923 units.
+  3  WH Stock in # (UOM)  15.170 Kg ⚠ Kg. The warehouse holds 41 units.
 
-METHOD — JR16's, on each box separately, from that box's OWN backup:
-  1  SHOW CREATE to a .bak file. Verify 5932 bytes, 6 slashes,
-     22 joins, 5 selects.
-  2  Build the new object ON THE BOX by node script, four anchors,
-     each asserted to appear EXACTLY ONCE.
-  3  diff old against new. Join count must hold at 22.
-  4  Apply. Read the slash count back OUT OF THE DATABASE.
-  5  Query the fixture and compare against the baseline.
+⚠⚠ THE CONTROL — Pouch 4347.000 Ea = 23 × 9 × 7 × 3, from the MO
+  quantity. IT MUST NOT MOVE AT ANY STEP. If a packaging figure
+  shifts, THE FIX IS WRONG, NOT THE DATA.
 
-PROVEN, DEV, company 464, MO-0007, test1.39 at 1.39 Kg/unit:
-  BEFORE  qty_shipped_su 7.000000000000001
-  AFTER   qty_shipped_su 7
-  qty_do_su 1 · qty_packing_slip_su 2 · SOH_su 40 — ALL UNCHANGED
-  ON SCREEN: Qty in DO 1# (1.39 Kg) · Qty in PS 2# (2.78 Kg) ·
-             Shipped to Customer 7# (9.73 Kg)
-
-PROVEN, PROD: every figure IDENTICAL to baseline, both MOs.
-  ⚠ THAT WAS THE EXPECTED RESULT AND IT IS THE PROOF. Prod's two
-    fixtures sit on ROUND ratios (20 and 5 Kg/unit) where the
-    division happened to land exactly. The route changed; the
-    values could not.
-  ⚠ Glutenull's traceability screen renders 0# (0 Kg) cleanly on
-    all three repointed cells. JR7e's *ngIf gate does NOT blank
-    them at zero — measured, not assumed.
-
-⚠ THE Kg COLUMNS WERE THE CONTROL AND THEY DID NOT MOVE. That is
-  what makes this evidence rather than hope. → S106 LESSON 6.
+⚠ 474 STILL HAS NO MATERIAL MR. → P147, one minute.
+⚠ 474 HAS NO MULTI-RECEIPT MO. Step 4a cannot be proven without one.
 ```
 
-## P151 — HALF CLOSED S107. THE YIELD DIALOG. → a94f39c3
+### COMPANY 464 · test260703 · on DEV — THE OLDER FIXTURES
 
 ```
-⚠⚠ THIS WAS NOT THE JOB PLAN DESCRIBED. IT WAS A REGRESSION CAUGHT
-  IN THE QUEUE, AND PLAN'S OWN FIRST-THREE-ACTIONS WOULD HAVE
-  SHIPPED IT. → LESSON 1.
-
-WHAT WAS FOUND: 30b2ddd4 — pushed 10:29 AM, unbuilt all day — was
-titled "round the Planned weight and DROP THE UNIT COUNT FROM
-COMPLETED". It removed the count because WhC_GetMoDetails_SP did
-not serve received_units and the box printed `undefined#`.
-S106 FIXED THE PROCEDURE THAT AFTERNOON, WHICH MADE THE REMOVAL
-OBSOLETE BEFORE IT WAS EVER BUILT.
-⚠ The deployed build 8fa2ed14 had been showing 7# (58.38 Kg)
-  correctly on dev ever since — from the OLDER commit.
-▶ DEPLOYING 30b2ddd4 AS QUEUED WOULD HAVE TAKEN A WORKING FIGURE
-  OFF THE SCREEN. The Actions outage is the only reason it hadn't.
-
-THE FIX (a94f39c3, one file, +9 −8):
-  const completedUnits = this.data.mlcDetails.received_units
-  qtyCompleted: `${completedUnits}# (${completedKg} ${this.uom})`
-⚠ qtyPlanned UNTOUCHED — 30b2ddd4's rounding fix survives intact.
-
-PROVEN ON DEV after Shift+Cmd+R, company 474, MO-0001:
-  QTY Planned    7# (58.38 Kg)   ⚠ not 58.379999999999995
-  QTY Completed  7# (58.38 Kg)   ⚠ the restored count
-PROVEN ON PROD, Glutenull MO-0001:
-  Plan Quantity 1750.000# (560.000 Kg)
-  Completed Quantity 1750.000# (560.000 Kg)
-  ⚠ THE (Kg)-OVER-A-CASE-COUNT LABELS ARE GONE. That was
-    30b2ddd4's contribution and it is why prod was promoted.
-
-⚠ THE COMMENT IN THE CODE PAID FOR ITSELF A SECOND SESSION RUNNING.
-  Lines 97-104 named the exact string to restore. Nothing had to be
-  re-derived. → P118. THE NEW COMMENT RECORDS WHY IT CAME BACK, so
-  nobody re-drops it reading 30b2ddd4's message.
-```
-
-## P151 — WHAT IS STILL OPEN, AND IT IS NOT WHAT PLAN SAID
-
-```
-⚠⚠ PLAN SAID "THE BLOCKER IS GONE" FOR ALL THREE SITES. IT WAS GONE
-  FOR ONE. Measured in S107 by reading the files.
-
-:295  lotReceived      ⚠ DEAD. Consumer at :311 is commented out
-                         (J114). NOT P151's. → P115. DO NOT PATCH.
-:298  completeUnit     ✓ LIVE, consumed at :310. received_units is
-                         served. ▶ REPOINTABLE. NOT YET WRITTEN.
-:354  getWdu           ⚠ ONE LIVE CALLER ONLY — html:258. The call
-      + html:258         at :309 is commented out. SO THESE ARE ONE
-                         SITE, NOT TWO. Fixing html:258 makes getWdu
-                         dead → delete it in the same pass (P115).
-                       ⚠⚠ BLOCKED. It is a PER-RECEIPT row, not the
-                         MO total. Using mlcDetails.received_units
-                         here would put the WHOLE MO's figure on
-                         EVERY receipt row.
-                       ▶ IT NEEDS receiveproducts.qty, and
-                         WhC_GetMoProductReceivingDetails_SP DOES
-                         NOT SERVE IT. MEASURED S107 — it selects
-                         id, internalCode, mlc_id, mlc_packaging_id,
-                         received_at, recieved_qty. NO unit count.
-                       ▶ FIFTH INSTANCE OF THE PATTERN. It is a
-                         PROCEDURE change, not a frontend one. → S108.
-```
-
----
-
-## THE FIXTURE — THE STANDING REFERENCE SET
-⚠ EVERY FIGURE BELOW WAS READ FROM THE ROW OR THE SCREEN.
-
-### COMPANY 474 · test260805@ · on DEV — THE CLEAN SET
-
-```
-FO-0003-3  testpdt4lvl   formulations.id 3695   batch_qty 5
-  fopackaging 5748  Pouch   quantity 1  wgt 0.73   whd 0  Level 1 Pack
-  fopackaging 5749  Carton  quantity 4  wgt 2.92   whd 0  Level 1 Pack
-  fopackaging 5750  Case    quantity 3  wgt 8.76   whd 0  Level 2 Pack
-  fopackaging 5751  Pallet  quantity 7  wgt 61.32  whd 0  Level 3 Pack
-  fopackaging 5752  Label   quantity 1  wgt 61.32  whd 1  Level 4 Pack
-  batch = 5 pallets = 306.60 Kg
-  ⚠ TWO ROWS SHARE "Level 1 Pack". Numbering runs 1,1,2,3,4.
-  ⚠ WHY THIS FIXTURE WORKS: ratios 4/3/7/1 are all different and
-    NONE equals batch_qty 5. Base weight 0.73 is not round.
-  ⚠ PALLET AND LABEL STILL COINCIDE with the broken arithmetic at
-    every MO quantity. LEVELS 1-3 ARE THE ONLY DISCRIMINATORS.
-
-MO-0002  mlomanagement.id 11810
-  qty 2 · received_qty 122.64 · received_units 2 · batches 0.4
-  lotCode Pdt-260806-1 · Rec-260806-1
-  RELEASED: Ginger Powder 122.640 Kg · Pouch 168 · Carton 42
-            Case 14 · Pallet 2 · Label 2
-
-FO-0001  testpdt1.39   formulations.id 3690   batch_qty 6
-  fopackaging 5732  pouch  quantity 1  wgt 1.39  whd_flag 0
-  fopackaging 5733  case   quantity 6  wgt 8.34  whd_flag 1
-  ⚠⚠ CANNOT PROVE A PACKAGING FIX. batch_qty is 6 AND there are six
-    pouches per case. USE FO-0003-3.
-
-MO-0001  mlomanagement.id 11809
-  qty 7 · received_qty 58.38 · received_units 7 · batches 1.167
-  ⚠ 7 x 8.34 = 58.379999999999995 IN FLOATING POINT. a94f39c3
-    rounds it. VERIFIED ON SCREEN S107.
-```
-
-### COMPANY 464 · test260703 · on DEV — THE DISPATCH-BUCKET FIXTURE
-
-```
-⚠⚠ NEW IN S107 AND IT IS THE ONLY ONE OF ITS KIND ON EITHER BOX.
-  FO-0004 / test1.39 / 1.39 Kg per unit / MO-0007.
+FO-0004 / test1.39 / 1.39 Kg per unit / MO-0007
   DISPATCH ORDERS IN ALL THREE BUCKET STATES:
+    DO-0007  shipped · DO-0010, DO-0011  on packing slip · DO-0016  DO only
+  ⚠ DO NOT DELETE DO-0016.
+  ⚠ DO-0008 and DO-0009 carry packing_units 0.5 — THE FRACTIONAL
+    FIXTURE. Step 3 needs them.
 
-    DO-0007   9.73 Kg   units 7   shipped_flag 1     SHIPPED
-    DO-0010   1.39 Kg   units 1   shipped_flag 0     ON PACKING SLIP
-    DO-0011   1.39 Kg   units 1   shipped_flag 0     ON PACKING SLIP
-    DO-0016   1.39 Kg   units 1   shipped_flag NULL  DO ONLY
-                                  ⚠ CREATED IN S107 FOR THIS PURPOSE
+MO-0011  ⚠ NEW IN S108. A 2 Kg GINGER POWDER RETURN.
+  Ginger Powder 9294.861 → 9296.861 Kg. The material return path is
+  PROVEN CORRECT by this.
+  ▶ IT IS THE FIXTURE FOR STEP 1, THE returnSum BUG. DO NOT CLEAR IT.
 
-  MO-0007 header view figures, post-fix:
-    qty_produced_su 51 · qty_do_su 1 · qty_packing_slip_su 2
-    qty_shipped_su 7 · qty_misc_release_su 1
-    intermediate_prd_su 0 · SOH_su 40
-    ⚠ RECONCILES EXACTLY: 51 − 1 − 2 − 7 − 1 − 0 = 40
-
-⚠ DO NOT DELETE DO-0016. It is the only DO-only row at a non-round
-  weight, and the next view change needs the same three buckets.
-⚠ 464 IS A DIRTY BASELINE for other purposes — MAT-6 missing its
-  Sesame (S73), MAT-5 carrying Eggs (S78), FO-0005 fork residue
-  (S77). NONE of it touches dispatch orders.
-```
-
-### THE MR FIXTURE — AND WHY IT BLOCKED A ROW
-
-```
-DEV, MO-0007:  rejectmaterialandproduct id 3358
-               qty_rejected 1.39 · qty_rejected_units 0
-⚠⚠ THE COLUMN EXISTS (JR15, S103) AND HOLDS ZERO. The row predates
-  the column. Repointing qty_misc_release_su today would turn a
-  right-looking 1 into a wrong 0.
-▶ THAT IS WHY ROW 1 DID NOT SHIP IN S107. → S108.
+⚠ 464 IS A DIRTY BASELINE — MAT-6 missing its Sesame (S73), MAT-5
+  carrying Eggs (S78), FO-0005 fork residue (S77).
 ```
 
 ---
@@ -324,72 +161,41 @@ DEV, MO-0007:  rejectmaterialandproduct id 3358
 ## SCHEMA FACTS — DO NOT REDERIVE
 
 ```
-company                  company_name  ← NOT `name`
-fopackaging              formulation_id · material_id ·
-                         wgt_kgs_per_unit · quantity · whd_flag ·
-                         pack_level
-                         ⚠ whd_flag=1 IS THE SHIPPING UNIT ROW.
-                           Declared BOOLEAN, stored TINYINT.
-                           Test truthiness, never === 1.
-                         ⚠ quantity = how many of the level BELOW.
-                         ⚠ pack_level IS POPULATED. → P152
-dispatchorders           qty_to_ship (KG) · qty_shipped (UNITS) ·
-                         packing_units (UNITS) · packing_id ·
-                         status · do_status
-                         ⚠⚠ THREE QUANTITY COLUMNS, TWO BASES, ONE
-                           ROW. TRAPS 1.
-                         ⚠ qty_shipped = ACTUALLY SHIPPED.
-                           packing_units = AUTHORISED. Not the same
-                           question. Minty's ruling S97.
-                         ✓ BOTH NOW SERVED by Trace_ProductHeaderView.
-mlomanagement            qty · received_qty · received_units ·
-                         batches · company_id · formula_id ·
-                         mlc_status · close_status · lotCode
-                         ⚠ batches IS A STORED double holding the
-                           ROUNDED figure.
-                         ✓ received_units STORED, CORRECT, SERVED.
-receiveproducts          qty (UNITS, per receipt) · recieved_qty (KG)
-                         · received_at · mlc_id · mlc_packaging_id
-                         ⚠⚠ qty IS THE PER-RECEIPT UNIT COUNT and it
-                           is NOT SERVED by
-                           WhC_GetMoProductReceivingDetails_SP.
-                           → P151 site 3, S108.
-mlcpackaging             quantity · status · mlc_id · pack_level_id
-                         ⚠ ONE ROW PER MO. NOT a per-level table.
-formulations             company_id · batch_qty · inventory ·
-                         inventory_units · SOH_actual · status_id
-mprrecievelots           MPR_id · qty_allocated (KG) · Rec_Lot_id ·
-                         Rec_Product_id · material_id
-                         ⚠ Capital MPR_id.
-                         ⚠⚠ NO UNIT COLUMN. Confirmed S95, still true
-                           S107. This is the P135 schema change.
-rejectmaterialandproduct qty_rejected (KG) · qty_rejected_units
-                         ⚠ THE UNITS COLUMN EXISTS AND IS EMPTY ON
-                           EVERY PRE-S103 ROW. 28 of 28 on prod.
-                         ⚠ `type` returns 'Product'. `status`
-                           returns 'Active', NOT a number.
-soproducts               quantity (KG) · SO_id · formula_id
-                         ⚠ NO company_id. ⚠ NO UNIT COUNT. → P138
-```
+⚠⚠ THE FULL PICTURE IS NOW IN UNITS-BIBLE.txt PART 1. What follows is
+  only what the bible does not cover.
 
----
+mprrecievelots       qty_allocated (KG) · MPR_id · Rec_Lot_id ·
+                     material_id · Rec_Product_id · formula_id
+                     ⚠⚠ TWO PARALLEL FK PAIRS ON ONE ROW, AND WHICH
+                       PAIR IS POPULATED ENCODES THE RELEASE TYPE.
+                       material_id + Rec_Lot_id  = MATERIAL
+                       formula_id  + Rec_Product_id = PRODUCT
+                       Dev: 95 material, 14 product, NO overlaps.
+                     ⚠ NO UNIT COLUMN. → STEP 6.
 
-## THE TWO RELEASE ROUTES — SETTLED S105, PROVEN ON PROD S106
+returnmpreceivelots  ⚠⚠ AN EXACT TWIN OF THE ABOVE, column for column.
+                     qty_return (KG) · ReturnMP_id · same four FKs.
+                     ⚠ IN NO DOCUMENT UNTIL S108. Twenty sessions of
+                       quantity work never named it.
+                     ⚠ ONE ROW ON EACH BOX. Both material. NO PRODUCT
+                       RETURN HAS EVER BEEN RECORDED ANYWHERE.
 
-```
-INGREDIENTS   recipe quantity per batch × number of batches
-              Kg-anchored. The physical release is a weighing.
-              ⚠ batches is STORED ROUNDED. Variance ACCEPTED.
+rejectmaterialandproduct  qty_rejected (KG) · qty_rejected_units
+                     ⚠ `type` returns 'Product' or 'Material'.
+                     ⚠ `status` returns 'Active', NOT a number.
+                     ⚠⚠ MATERIAL MRs CARRY NO mlc_id. PRODUCT MRs
+                       ALWAYS DO. Clean across both prod companies.
 
-PACKAGING     MO quantity × the packing cascade
-              Unit-anchored. NO weight at any step.
-              ⚠ batches PLAYS NO PART. THEREFORE NO ROUNDING VARIANCE.
+rejectedmaterial · rejectedproduct
+                     ⚠ EMPTY ON BOTH BOXES. The pre-merge design,
+                       superseded by rejectmaterialandproduct.
+                     ▶ RETIREMENT QUESTION WITH P109. Not campaign work.
 
-⚠ A FRACTIONAL *PLANNED* PACKAGING FIGURE IS A DEFECT.
-⚠ A FRACTIONAL *CONSUMED* PACKAGING FIGURE MAY BE HISTORY.
-  ⚠ SEEN AGAIN ON PROD IN S107: Glutenull MO-0001 released
-    Clamshell320 1750.080 Ea. ▶ MINTY'S RULING S106 STANDS: LEAVE IT.
-    It records what was physically picked. DO NOT RE-RAISE.
+⚠ THREE TABLES STILL UNCOUNTED — do_receive_products.qty_to_dispatch ·
+  mlodetails.rcp_qty · forecastsales.quantity. Row counts, minutes.
+
+company              company_name  ← NOT `name`
+soproducts           quantity (KG) · NO company_id · NO UNIT COUNT → P138
 ```
 
 ---
@@ -397,56 +203,36 @@ PACKAGING     MO quantity × the packing cascade
 ## DATABASE OBJECTS
 
 ```
-⚠ BOTH BOXES CAN READ ROUTINE BODIES. ~/.my.cnf on both, chmod 600.
+⚠ BOTH BOXES CAN READ ROUTINE BODIES. ~/.my.cnf, chmod 600.
   ▶ mysql abletracelab_live -e "SHOW CREATE VIEW <name>\G"
-  ⚠ NAME THE DATABASE. ⚠ USE \G, NOT ;.
 
-Trace_ProductHeaderView   ✓ CHANGED S107, BOTH BOXES. → JR18.
-  ⚠ 5932 bytes before, ONE LINE. 22 joins. 5 selects.
-  ⚠ THREE DIVISIONS REMAIN, all correct arithmetic:
-      qty_misc_release_su · intermediate_prd_su · SOH_su
-  ⚠ SEVEN _su FIELDS. qty_produced_su was repointed in S100 and
-    already reads mm.received_units — the model for the rest.
-  ⚠⚠ TRAPS 10 LIVES HERE AND IT PAID FOR ITSELF IN S107. The
-    do_products CTE defines its own alias `qty_shipped` which sums
-    do.qty_to_ship and is KG. The real column is UNITS. Reading the
-    name instead of the definition wires Kg into a units field.
-    ▶ RESOLVED TO ITS DEFINITION BEFORE THE EDIT. Keep TRAPS 10
-      until the last three divisions go.
-  ⚠ P136: it returns DUPLICATE ROWS. Pre-existing, unchanged.
-  ⚠ ONE CONSUMER ONLY: product-traceability-details.component.ts
-    and api/models/Traceability.js.
+⚠⚠ THE FULL SURVEY IS IN QUANTITY-SURVEY-S108.md. 35 procedures and
+  9 views inventoried. 11 touch a per-unit weight. 12 read in full.
+  THREE DIVIDE:
+    Trace_ProductHeaderView              3 cells   → STEP 2.9 + STEP 6
+    Trace_ProductOneStepBackwardIP_SP    ⚠⚠ NEW S108 → STEP 6
+    Trace_ProductOneStepForwardIP_SP     ⚠⚠ NEW S108 → STEP 6
 
-WhC_GetMoDetails_SP    ⚠ FEEDS Edit-Mlc AND the yield dialog.
-  ✓ CHANGED S106, BOTH BOXES. Selects received_units. → JR17.
-  ⚠ 28 lines. ONE select. Eight left outer joins. No branches.
+Trace_ProductHeaderView   ⚠ THREE DIVISIONS REMAIN.
+  ⚠⚠ TRAPS 10 LIVES HERE AND IT IS LIVE. The do_products CTE defines
+    its own alias `qty_shipped` summing do.qty_to_ship — KG. The real
+    column is UNITS. RESOLVE EVERY NAME TO ITS DEFINITION.
+  ⚠ P136: it returns DUPLICATE ROWS. Pre-existing.
+    ⚠ MAY SHARE A CAUSE with the missing whd_flag filters found S108 —
+      THREE objects join fopackaging without picking the shipping-unit
+      row. NOT PROVEN. Do not write it up as fact.
+  ⚠ ONE CONSUMER: product-traceability-details.component.ts.
 
-WhC_GetMoProductReceivingDetails_SP
-  ⚠⚠ MEASURED S107. Selects id · internalCode · mlc_id ·
-    mlc_packaging_id · received_at · recieved_qty. NO UNIT COUNT.
-  ▶ THE `2.000#` ON THAT PANEL IS DERIVED BY DIVIDING. → P151 site 3.
+Trace_ProductOneStepBackwardIP_SP  ⚠⚠ TWO DEFECTS IN ONE OBJECT.
+  Divides qty_allocated, AND joins fopackaging with NO whd_flag filter.
+  ✓ ITS SIBLING CARRIES THE FILTER, WITH A COMMENT. Copy it.
+  ⚠ @formulationId is SET and NEVER USED.
 
-WhC_GetMoPackagingConfiguration_SP
-  Feeds mlcDetails.packagingConfiguration. ⚠ NOT INSPECTED IN FULL.
+WhC_GetMoDetails_SP  ✓ received_units PRESENT. JR17 CONFIRMED S108.
+WhC_GetMoPackagingConfiguration_SP  ✓ READ IN FULL S108. CLEAN.
+  ⚠ NOW PREVIOUSLY SAID "NEVER INSPECTED IN FULL". CORRECTED.
 
-WhC_GetAllRejectedList_SP — CHANGED S104, BOTH BOXES. → JR16.
-  ⚠ WhC_GetAllRejectedList_SP('474','Active') IS THE WORKING CALL.
-
-⚠ db-definitions-S93.txt IS NOW STALE ON FOUR OBJECTS:
-  JR7e's view, JR16's proc, JR17's proc, and JR18's view. → P119.
-```
-
----
-
-## THE ROW READER
-
-```
-/home/ubuntu/read-rows.js on DEV. Built S101. READ-ONLY.
-⚠⚠ IT SILENTLY DROPS COMPUTED COLUMNS AND ALIASES. → P152
-  ▶ FOR ANYTHING COMPUTED OR ALIASED, USE THE mysql CLIENT.
-  ⚠ Trace_ProductHeaderView IS NOTHING BUT COMPUTED COLUMNS.
-    S107 USED THE mysql CLIENT THROUGHOUT.
-⚠ IT SURVIVES A REBOOT. ⚠ IT IS NOT ON PROD.
+⚠ db-definitions-S93.txt IS STALE ON FOUR OBJECTS. → P119.
 ```
 
 ---
@@ -455,13 +241,15 @@ WhC_GetAllRejectedList_SP — CHANGED S104, BOTH BOXES. → JR16.
 
 ```
 BACKEND    ✓ NOTHING PENDING. 51e9f4e on both boxes.
-FRONTEND   ✓ NOTHING PENDING. a94f39c3 built, deployed and
-             SCREEN-PROVEN on both boxes.
-           ⚠ RUN #56 (30b2ddd4) IS STILL QUEUED AND SUPERSEDED.
-             NEVER DEPLOY ITS ARTIFACT. See GITHUB above.
-DATABASE   ✓ NOTHING PENDING. Both boxes changed in S107.
-DOCS       ⚠ S107's four files pending commit at close, plus JR17,
-             JR18, J117 and the Section 5 header correction.
+FRONTEND   ✓ NOTHING PENDING. a94f39c3 on both boxes.
+DATABASE   ✓ NOTHING PENDING.
+DOCS       ⚠ S108's OUTPUT PENDING COMMIT:
+             UNITS-BIBLE.txt + .xlsx        ⚠ NEW FILES
+             QUANTITY-SURVEY-S108.md        the evidence
+             CORRECTION-PLAN.md             the phase reasoning
+             RULES.md                       ⚠ RULE 7 REWRITE
+             NOW.md · PLAN.md               rewritten whole
+             Section_5.md                   J118
 ```
 
 ---
@@ -473,194 +261,170 @@ renumbers. Ranking is Minty's.
 ```
 P8    Prod's frontend checkout lags the served build.
 P17   Two old-account IAM keys still valid, deliberately.
-P20   Delete pre-S72 Section J file.
-P22   Delete old Section A file.
+P20   Delete pre-S72 Section J file.  P22  Delete old Section A file.
 P62   qty_shipped must never be NULL. ⚠ MEASURED S100 — it never is.
 P64   Product label prints "null" for Ext ID twice, on prod.
+      ⚠ SEEN TWICE AGAIN IN S108. → P10 family.
 P65   promote.sh runs plain scp and ssh with no -4.
-      ⚠ RAN TWICE IN S107, both boxes, no trouble.
 P66   3B.4 rollback points stale. ▶ DELETE them.
-P84   Zebra guide into the app.
-P85   Windows printer guide.
+P84   Zebra guide into the app.  P85  Windows printer guide.
 P86   Cold boot blindness, untested.
 P88   Grep Section 5 for J81 / "Fix A" dead pointers.
 P90   Strike two false claims in 3A.5 row 7 and 3A.6.
 P94   Move or delete /home/ubuntu/mo-0001-before-heal-S93.txt on prod.
 P100  Dev carries UNACCOUNTED COMPANIES — 466, 469, 470, 472, 473.
-      ⚠⚠ SUPERSEDED IN PART BY P156. 469 IS A REAL CLIENT ON PROD.
-        The problem is not dev-only and the item understates it.
-P101  3B.3 records the dormant `abletrace` archive on PROD only.
-      ⚠ DEV HAS ONE TOO.
+      ⚠⚠ SUPERSEDED BY P156.
+P101  Both boxes carry a dormant `abletrace` archive.
 P102  ⚠ SECURITY. Both boxes report *** System restart required ***.
-      ⚠ PROD 42 UPDATES. Dev 12.
+      ⚠ PROD 28 UPDATES — CORRECTED S108, was recorded as 42. Dev 8.
       ⚠ VERIFY PM2 STARTS ON BOOT FIRST.
       ⚠⚠ S105 PROVED DEV CAN FAIL TO BOOT AND CRASH-LOOP SILENTLY.
-      ⚠⚠ TWELVE DAYS RUNNING. AND THERE ARE NOW TWO CLIENTS ON PROD.
-P104  No intermediate fixture on dev. S45 UNTESTED.
-      ⚠ THIS IS NOW A BLOCKER, NOT A NICETY. S108 cannot prove
-        intermediate_prd_su without one. → see PLAN.
+      ⚠⚠ FOURTEEN DAYS RUNNING. TWO CLIENTS ON PROD.
+P104  ⚠ CORRECTED S108. It said NO INTERMEDIATE FIXTURE EXISTS ON DEV.
+      FOURTEEN LINKS EXIST. What was missing was a USABLE one — and
+      474 NOW HAS ONE. ▶ THIS ITEM IS CLOSED.
 P106  acrobatics-map-S91.txt — keep or delete.
 P108  Review the J-entries WITH MINTY. KEEP JR. Own sitting.
 P109  Retire the dormant `abletrace` archive, both boxes.
-      ⚠ IRREVERSIBLE. Dump off-box first. Own sitting.
+      ⚠ ALSO rejectedmaterial and rejectedproduct — empty on both.
 P111  QUICKBOOKS — one full planning session first. NO CODE.
-      ▶ MINTY S101: STARTS AFTER P82 CLOSES.
-      ⚠ ONLY P135 REMAINS IN P82, AND ONLY THREE CELLS OF IT.
-      ⚠ NEEDS A NEW COLUMN. TRAPS 3 WILL BITE THERE.
+      ⚠ FOUR THINGS WILL MEET IT: TRAPS 3 on the new column · J97's
+        multiple invoices pointing at a child table · P138 · P137.
 P114  Does a closed MO still count as in progress anywhere?
-P115  DELETE THE DEAD CODE SIBLINGS.
-        so-management.component.ts:170 · closed-so.component.ts:165
-        edit-mlc:295 · edit-mlo:245 · start-mlc:151
-        add-dispatch.component.ts:72
-        rejected-materials.component.ts:65
-        start-mlc.component.html:361 — commented-out yield button
-      ⚠ ADD getWdu (edit-mlc:354) ONCE html:258 IS REPOINTED. Its
-        only live caller is that line. Confirmed S107 by grep.
+P115  DELETE THE DEAD CODE SIBLINGS. ⚠ ADD getWdu once html:258 goes.
+      ⚠ ADD PopUps/add-dispatch (v1) — whole component, never opened.
 P116  Fix the JSON file-list reads properly.
 P117  File too large must say so.
-P118  MARK THE DELIBERATE CODE IN THE CODE.
-      ✓ PAID FOR ITSELF TWICE NOW — S106 and again in S107, where
-        the comment in check-mat-yield named the exact string to
-        restore and nothing had to be re-derived.
-      ▶ THE PATTERN WORKS. Keep doing it.
-P119  Back up the database's own code into the repo.
-      ⚠ db-definitions-S93.txt NOW STALE ON FOUR OBJECTS.
+P118  MARK THE DELIBERATE CODE IN THE CODE. ✓ PAID FOR ITSELF TWICE.
+P119  Back up the database's own code into the repo. ⚠ STALE ON FOUR.
 P120  Material label barcode needs the product-label fix.
 P121  Say what the "java" process is, in the client guide.
 P122  Put the whole printing setup into the client guide, in order.
 P123  "Not Secure" troubleshooting into the client guide.
-P129  FOOD SAFETY TOGGLE — column present, Waterline attribute
-      absent. ⚠ TRAPS 3 LIVE.
+P129  FOOD SAFETY TOGGLE — column present, attribute absent. ⚠ TRAPS 3.
 P130  EXCEL EXPORTS — Closed MOs fixed S98. Others UNCHECKED.
 P131  EDIT CLOSED MO LINE 133 — unit count with a WEIGHT label.
-      ⚠ COVERED BY RULES 7. ⚠ Needs a build — which now works.
 P132  THREE DEAD STATUS COLUMNS ON THE SO TABLES.
 P133  do_status NEVER ADVANCES. ⚠ TRAPS 8 RETAINED UNTIL FIXED.
 P134  THREE DATABASES ON DEV AND THE NAMES ARE BACKWARDS.
 P135  ⚠ THE LAST P82 ITEM. THREE CELLS LEFT OF SIX.
-      ✓ qty_shipped_su · qty_packing_slip_su · qty_do_su — DONE S107.
-      ⚠ qty_misc_release_su — column exists, EVERY ROW HOLDS 0.
-      ⚠ intermediate_prd_su — NO COLUMN AT ALL. Schema change.
-      ⚠ SOH_su — DEPENDENT. Cannot move until the intermediate does.
-      ⚠ TRAPS 10 STAYS UNTIL ALL THREE LAND.
-      ▶ S108. ⚠ ONE RULING FROM MINTY GATES ALL THREE.
-P136  Trace_ProductHeaderView RETURNS DUPLICATE ROWS. Pre-existing.
-P137  MR NUMBERING IS GLOBAL, NOT PER-COMPANY.
-      ▶ ONE-LINE FIX. ⚠ ASK MINTY FIRST.
-      ⚠ MORE URGENT NOW — TWO CLIENTS SHARE THE NUMBERING.
-P138  soproducts STORES NO UNIT COUNT — Kg only.
-P139  add-mlo:150 AND :228 LOOK LIKE DEFECTS AND THE ROWS SAY THEY
-      ARE NOT. ⚠ DO NOT "FIX" THESE LINES.
-P142  ⚠ THE EDIT/SAVE/RETURN BUTTONS ON /Edit-reject-product ARE
+      ⚠ SCOPE CORRECTED S108: qty_misc_release_su is a straight
+        repoint plus a type guard — NOT a backfill. The backfill
+        question is CLOSED by measurement.
+      ▶ PLAN STEPS 2.9 AND 6.
+P136  Trace_ProductHeaderView RETURNS DUPLICATE ROWS.
+P137  MR NUMBERING IS GLOBAL, NOT PER-COMPANY. ⚠ ASK MINTY FIRST.
+      ⚠ TWO CLIENTS SHARE ONE SEQUENCE, and P111 will read those
+        numbers.
+P138  soproducts STORES NO UNIT COUNT — Kg only, no company_id.
+P139  add-mlo:150 AND :228 LOOK LIKE DEFECTS AND ARE NOT.
+      ⚠⚠ DO NOT "FIX" THESE LINES.
+P142  ⚠⚠ EDIT/SAVE/RETURN BUTTONS ON /Edit-reject-product ARE
       COMMENTED OUT. ⚠ P145 IS A PRECONDITION. ⚠ ASK MINTY.
-P144  read-rows.js CANNOT PRINT A ROUTINE BODY. ⚠ SUPERSEDED BY P152.
+      ▶ FOURTH INSTANCE of a screen that looks operable with no
+        working path behind it — J86, J92, PLAN step 7a, this.
 P145  /Edit-reject-product SHOWS THE SAME NUMBER TWICE.
-      ⚠ ASK MINTY WHAT "Returned Quantity" MEANS BEFORE READING CODE.
-P146  THE TWO MR SCREENS DISAGREE ON DECIMAL PLACES.
-      list 25.020 · details 25.02. ⚠ ASK MINTY. LOW.
-P147  NO MATERIAL MR ON DEV. ▶ CREATE ONE. One minute. LOW.
-P148  ⚠ WITHDRAWN S105 on a misread. NARROW RESIDUAL only. LOW.
-P150  ⚠⚠ THE PROCEDURE SURVEY. MINTY'S PROPOSAL, S105.
-      Read every stored procedure's SELECT list and ask: does the
-      screen it feeds need a unit column, and is it served?
-      ⚠ 35 routines and 9 views.
-      ⚠⚠ FIVE CONFIRMED INSTANCES NOW — P143, P149, the three header
-        divisions, and WhC_GetMoProductReceivingDetails_SP.
-        THE PATTERN IS ESTABLISHED BEYOND ARGUMENT.
-      ▶ THE P135 SUBSET IS NEARLY DONE. THE FULL SURVEY IS ITS OWN
-        SITTING, POSSIBLY TWO. MEDIUM.
+      ⚠⚠ ASK MINTY WHAT "Returned Quantity" MEANS BEFORE READING CODE.
+P146  THE TWO MR SCREENS DISAGREE ON DECIMAL PLACES. ⚠ ASK MINTY. LOW.
+P147  NO MATERIAL MR ON DEV COMPANY 474. ▶ CREATE ONE. One minute.
+P148  ⚠ WITHDRAWN S105. NARROW RESIDUAL only. LOW.
+P150  ⚠⚠ THE SURVEY. ✓ DONE S108 — DATABASE, SCHEMA AND FRONTEND.
+      ▶ THE OUTPUT IS UNITS-BIBLE.txt AND QUANTITY-SURVEY-S108.md.
+      ▶ THIS ITEM IS CLOSED.
 P151  EDIT-MLC AND THE YIELD DIALOG.
-      ✓ THE YIELD DIALOG — DONE S107, a94f39c3, BOTH BOXES.
-      ⚠ :298 completeUnit — LIVE, repointable, NOT WRITTEN.
-      ⚠ html:258 + getWdu — BLOCKED on the receiving procedure.
-      ⚠ :295 lotReceived is DEAD. → P115, not here.
-      ▶ S108, WITH P135. MEDIUM.
+      ✓ THE YIELD DIALOG — DONE S107.
+      ⚠ :298 completeUnit → PLAN STEP 2.2
+      ⚠ html:258 + getWdu → PLAN STEP 4a
+      ⚠ :295 lotReceived is DEAD. → P115.
 P152  ⚠⚠ read-rows.js SILENTLY DROPS COMPUTED COLUMNS AND ALIASES.
-      ▶ EITHER FIX THE READER OR PUT A WARNING IN ITS OWN OUTPUT.
-      ⚠ SUPERSEDES P144. MEDIUM — it corrupts evidence.
+      ▶ FIX IT OR WARN IN ITS OWN OUTPUT. ⚠ IT CORRUPTS EVIDENCE.
 P153  A BACKUP FILE INSIDE api/models/ TAKES SAILS DOWN. LOW.
-P154  ⚠ NO SECOND ROUTE TO A FRONTEND BUILD.
-      ⚠ ACTIONS RETURNED IN S107 AFTER ~13 HOURS. Runs #57 and the
-        manual prod dispatch both completed normally.
-      ⚠ THE OUTAGE COST NOTHING IN THE END — AND IT ACCIDENTALLY
-        PREVENTED A REGRESSION. See LESSON 1.
-      ▶ STILL WORTH ASKING. ⚠ ASK MINTY. LOW.
-P155  ⚠ A COMMIT PUSHED FROM THE MAC DOES NOT UPDATE PROD'S IDEA OF
-      origin/main UNTIL SOMETHING FETCHES.
-      ▶ `git fetch origin` FIRST, ALWAYS. LOW.
-```
-
-### NEW IN S107
-
-```
-P156  ⚠⚠ HAGENSBORG IS A SECOND LIVE CLIENT AND THESE DOCUMENTS
-      NAMED ONLY ONE.
-      Company 469 on PROD. SEVEN MOs CREATED, NONE RUN. 24 MR rows.
-      ZERO release allocations. Real products — Milk Peanut Butter
-      Bars, Dark Bars, Milk Cashew Bars, HP Milk Hazelnut and more.
-      ⚠ NOW's COMPANIES block named Glutenull as "the client" and
-        listed 469 among DEV's unaccounted companies (P100). It is
-        a CLIENT ON PROD.
-      ⚠ EVERY PIECE OF REASONING THAT SIZED CLIENT EXPOSURE AGAINST
-        GLUTENULL ALONE WAS INCOMPLETE — including S107's own, until
-        the query was run.
-      ▶ WHAT IT CHANGES: the S108 backfill is 28 MR rows across TWO
-        clients, not "Glutenull's two MOs". And P137 (global MR
-        numbering) now affects two clients sharing one sequence.
-      ▶ ACTIONS: correct 3B / the companies record; re-scope P100;
-        confirm there is no THIRD company nobody has named.
-      ⚠ ASK MINTY whether Hagensborg needs anything else recorded —
-        onboarding state, licence status, contact. HIGH.
-
+P154  ⚠ NO SECOND ROUTE TO A FRONTEND BUILD. ⚠ ASK MINTY. LOW.
+P155  A Mac push does not update prod's origin/main until something
+      fetches. ▶ `git fetch origin` FIRST, ALWAYS. LOW.
+P156  ⚠⚠ HAGENSBORG IS A SECOND LIVE CLIENT.
+      ⚠⚠ WIDENED S108: THE TWO BOXES DO NOT SHARE A COMPANY-ID
+        NAMESPACE. Dev 469 = test260710@. Prod 469 = HAGENSBORG. Dev
+        466 = "Test Glutenul", which is not Glutenull.
+      ▶ NO COMPANY ID CAN BE REASONED ABOUT WITHOUT NAMING THE BOX.
+      ▶ ACTIONS: correct 3B, re-scope P100, confirm no third company.
 P157  ⚠ WhC_GetMoProductReceivingDetails_SP SERVES NO UNIT COUNT.
-      receiveproducts.qty is the stored per-receipt unit figure
-      (3A.5 row 5, J19) and the procedure does not select it, so
-      edit-mlc html:258 divides recieved_qty by a weight to rebuild
-      it. FIFTH instance of the P143/P149 pattern.
-      ▶ ONE COLUMN ADDED TO A SELECT LIST, JR16 method, both boxes.
-      ⚠ IT UNBLOCKS P151's LAST SITE. ▶ S108. MEDIUM.
+      ▶ PLAN STEP 4a. ⚠ NEEDS A MULTI-RECEIPT MO TO PROVE.
 ```
 
-### ✓ CLOSED IN S107 — DELETE THESE LINES AT S108 CLOSE
+### NEW IN S108
 
 ```
-P140  ✓ DONE S106. (Was marked for deletion at S107 close.)
-P143  ✓ DONE S104, BOTH BOXES. (Same.)
-P149  ✓ DONE S106, BOTH BOXES. (Same.)
-P135  ⚠ PARTIAL — three of six cells. STAYS OPEN.
-P151  ⚠ PARTIAL — the yield dialog only. STAYS OPEN.
+P158  ⚠⚠ Trace_ProductOneStepBackwardIP_SP — DIVIDES qty_allocated,
+      AND joins fopackaging with NO whd_flag filter. On a multi-level
+      product it divides by an ARBITRARY packaging row and returns
+      DUPLICATE ROWS. ✓ Its sibling carries the filter WITH A COMMENT.
+      ⚠ @formulationId SET and NEVER USED.
+      ▶ PLAN STEP 6c. MEDIUM.
+
+P159  ⚠ Trace_ProductOneStepForwardIP_SP — divides qty_allocated while
+      selecting receiveproducts.qty THREE LINES AWAY.
+      ⚠ Four wildcard expansions (f.*, mpr.*, rp.*, mpr1.*). Column
+        names will collide. Recorded, not urgent.
+      ▶ PLAN STEP 6c. MEDIUM.
+
+P160  ⚠ WhC_GetMoIntermediateProducts_SP AND
+      WhC_GetFormulaIntermediateProducts serve Kg only. ship_qty and
+      inventory_units SIT UNSELECTED.
+      ⚠⚠ THE Edit-Mlc SCREEN SHOWS THE INTERMEDIATE TWICE FROM TWO
+        CODE PATHS — these procedures AND the JS cascade. FIXING ONE
+        LEAVES THE SCREEN DISAGREEING WITH ITSELF.
+      ✓ NO SCHEMA CHANGE. Both columns exist and hold correct data.
+      ▶ PLAN STEP 4b/4c/4d. MEDIUM.
+
+P161  ⚠ THREE UNCOUNTED QUANTITY TABLES — do_receive_products ·
+      mlodetails · forecastsales. ▶ Row counts. Minutes. LOW.
+
+P162  ⚠⚠ THE INGREDIENT REQUIREMENT MULTIPLIES BY THE STORED ROUNDED
+      `batches` COLUMN. Minty's ruling S108: compute it live.
+      ⚠⚠ SUPERSEDES THE S105 RULING. RULES 7 MUST BE REWRITTEN.
+      ⚠⚠ IT MOVES NUMBERS ON A SCREEN BOTH CLIENTS USE DAILY.
+        OWN SESSION, OWN GATE. ▶ PLAN STEP 5. HIGH.
+
+P163  ⚠⚠ THE PRODUCT-RETURN LOT PICKER IS EMPTY. PROVEN ON DEV.
+      3.32 Kg demonstrably in store; the picker offered nothing.
+      ▶ THE PATH HAS NEVER RUN BECAUSE IT CANNOT BE RUN.
+      ▶ PLAN STEP 7a. ⚠ ONE GREP CONFIRMS THE CANDIDATE. MEDIUM.
+
+P164  ⚠⚠ Formulations.js ADDS RETURNS INTO THE RELEASED TOTAL.
+      Three branches. returnSum declared and never assigned.
+      ▶ RETURNING MATERIAL MAKES THE SCREEN SHOW MORE RELEASED.
+      ⚠⚠ LIVE ON BOTH CLIENTS TODAY. ✓ MLOManagement.js does the same
+        job correctly — copy it. ▶ PLAN STEP 1. HIGH.
+
+P165  ⚠ ReturnMaterialProduct.js — TWO DEFECTS, SEPARATE COMMITS.
+      (a) :68 adds a product return back to formulations.inventory
+          (Kg) and NEVER TOUCHES inventory_units. The unit balance
+          would only ever DECREASE. ⚠ UNTESTED — a code reading.
+      (b) `status` is written and NEVER DECLARED in the model, then
+          FILTERED ON. ⚠ SECOND LIVE INSTANCE OF TRAPS 3.
+      ▶ PLAN STEP 7b/7c. MEDIUM.
+
+P166  ⚠ do-details.component.ts:30,54 — a form field NAMED ship_qty
+      holds qty_to_ship, WHICH IS Kg. The name says units, the content
+      is weight. Same shape as TRAPS 10, in the frontend.
+      ⚠ MAY ONLY EVER DISPLAY. ▶ REVIEW, not a confirmed defect. LOW.
+
+P167  ⚠⚠ THE SEVEN-COPY MO QUANTITY HELPER. (qty/batch) × (batch/wgt)
+      in SEVEN files.
+      ⚠⚠ NOT A BULK REPOINT. Each caller passes a DIFFERENT source and
+        SOME DIVISIONS ARE CORRECT. J114: closed-mlcs.html:84 is right
+        while :79 is wrong, same helper, adjacent lines.
+      ▶ OWN SITTING. Read all seven callers, decide each, then edit.
+      MEDIUM.
 ```
 
----
-
-## THE MEASUREMENTS TAKEN FOR S108
-⚠ TAKEN IN S107 SO S108 DOES NOT HAVE TO STOP AND TAKE THEM.
+### ✓ CLOSED IN S108 — DELETE THESE LINES AT S109 CLOSE
 
 ```
-MR ROWS, PROD, by company — rejectmaterialandproduct
-  469  Hagensborg    24 rows   ⚠ ALL 24 NEED A BACKFILL
-  464  test260703@    4 rows   sandbox
-  471  Glutenull1     0 rows   ✓ NO CLIENT EXPOSURE HERE
-  TOTAL 28, and 28 of 28 hold qty_rejected_units 0 or NULL.
-
-RELEASE ALLOCATIONS, PROD, by company — mprrecievelots
-  471  Glutenull1    26 rows
-  464  test260703@   24 rows
-  465  test260704b@  18 rows
-  469  Hagensborg     0 rows   ⚠ nothing released yet
-  ⚠ THIS IS THE UPPER BOUND, NOT THE BACKFILL SIZE. It counts every
-    allocation — ingredients, packaging, everything. The
-    INTERMEDIATE subset is what intermediate_prd_su reads and it
-    has NOT been measured. It may be zero.
-
-⚠ STILL TO MEASURE AT THE TOP OF S108, both quick:
-  1  How many of those allocation rows are INTERMEDIATES — i.e.
-     released rows whose material is itself a formulation.
-     ▶ IF ZERO FOR BOTH CLIENTS, the intermediate backfill touches
-       NO client data and the ruling gets much easier.
-  2  Whether a dev intermediate fixture exists at all. P104 says
-     no. ⚠ IF NOT, ONE MUST BE BUILT BEFORE THE FIX CAN BE PROVEN —
-     TRAPS 9 governs, and that is a job, not a check.
+P104  ✓ CORRECTED AND CLOSED. 474 now has a usable fixture.
+P150  ✓ THE SURVEY IS DONE. Output is the UNITS BIBLE.
+P140 · P143 · P149   ✓ done in earlier sessions, still listed.
 ```
 
 ---
@@ -668,30 +432,19 @@ RELEASE ALLOCATIONS, PROD, by company — mprrecievelots
 ## TIDY AT THE NEXT CLOSE — NOT BEFORE
 
 ```
-DEV    /tmp/*-S107.js, /tmp/*-readable.txt   gone on reboot, ignore
-       ~/Trace_ProductHeaderView-S107-DEV.txt          working copy,
-                                                       delete S108
-       ~/Trace_ProductHeaderView-S107-DEV-readable.txt same
-       ~/Trace_ProductHeaderView.bak-S107-DEV.txt      ⚠⚠ KEEP.
-                                                       ROLLBACK.
-       ~/fix-modetails-S106.sql                        delete S108
-       ~/WhC_GetMoDetails_SP.*-S106-DEV.txt            KEEP BOTH.
-       ~/MLOManagement.js.bak-S105-P140                delete S108
+DEV    ~/Trace_ProductHeaderView-S107-DEV*.txt         delete
+       ~/fix-modetails-S106.sql                        delete
+       ~/MLOManagement.js.bak-S105-P140                delete
+       ~/Trace_ProductHeaderView.bak-S107-DEV.txt      ⚠⚠ KEEP
+       ~/WhC_GetMoDetails_SP.*-S106-DEV.txt            KEEP BOTH
        ~/MLOManagement.js.bak-S105-P140-attempt2       keep, live
-PROD   ~/Trace_ProductHeaderView.bak-S107-PROD.txt     ⚠⚠ KEEP.
-                                                       ROLLBACK.
-       ~/fix-modetails-S106.sql                        delete S108
-       ~/WhC_GetMoDetails_SP.*-S106-PROD.txt           KEEP BOTH.
-MAC    ~/Downloads/dist-dev-a94f39c3*.zip              delete S108
-       ~/Downloads/dist-prod-a94f39c3*.zip             delete S108
-       ~/Downloads/patch-P140-headers-fix.py           ✓ DELETE NOW,
-                                                       30b2ddd4 shipped
-       ~/Downloads/RULES.md PLAN.md NOW.md             delete S108
-       /tmp/patch-P151-yield.py                        gone on reboot
-       ~/check-mat-yield.component.*.bak-S105-P140*    delete S108
+PROD   ~/Trace_ProductHeaderView.bak-S107-PROD.txt     ⚠⚠ KEEP
+       ~/fix-modetails-S106.sql                        delete
+       ~/WhC_GetMoDetails_SP.*-S106-PROD.txt           KEEP BOTH
+MAC    ~/Downloads/dist-*-a94f39c3*.zip                delete
+       ~/Downloads/RULES.md PLAN.md NOW.md             delete
 
 ⚠ RULES 6: tidy at the close and ONLY at the close.
 ⚠⚠ DO NOT DELETE THE S106 OR S107 .bak FILES. They are the only
-  rollback for database objects on a LIVE CLIENT DATABASE SERVING
-  TWO CLIENTS.
+  rollback for database objects on a LIVE CLIENT DATABASE.
 ```

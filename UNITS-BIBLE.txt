@@ -1,0 +1,308 @@
+══════════════════════════════════════════════════════════════════════
+UNITS BIBLE
+The four sources of every unit figure in AbleTrace, and the state of
+every site that produces one.
+══════════════════════════════════════════════════════════════════════
+
+AUTHOR      Minty. The rules in PART 1 are his rulings.
+CHANGES     ⚠⚠ PART 1 IS CHANGED ONLY ON MINTY'S EXPRESS INSTRUCTION.
+            Claude may READ it freely and may PROPOSE changes.
+            CLAUDE NEVER EDITS PART 1.
+            → RULES 5.4. The default answer is NO.
+PART 2      The working record. Status changes as sites are fixed.
+            That is the document doing its job, not an edit to it.
+STATUS      ⚠ NOT EXHAUSTIVE, AND IT SAYS SO DELIBERATELY. S108's first
+            sweep found 49 files; a wider one found 56; a third pass
+            found 19 aligned sites the first two missed entirely.
+            SOMETHING ELSE WILL TURN UP. Add a row when it does.
+TWIN        UNITS-BIBLE.xlsx is the readable copy. THIS FILE IS THE ONE
+            GIT CAN DIFF. If they disagree, this one is the record.
+
+CREATED     S108, 7 August 2026
+CHANGE LOG  S108 — created. Four sources ruled by Minty. 47 sites mapped.
+
+══════════════════════════════════════════════════════════════════════
+PART 1 — THE RULE.  ⚠ MINTY'S RULINGS. DO NOT EDIT.
+══════════════════════════════════════════════════════════════════════
+
+EVERY UNIT FIGURE ON EVERY SCREEN COMES FROM ONE OF FOUR PLACES.
+
+──────────────────────────────────────────────────────────────────────
+1 · ING-REQ — THE RECIPE REQUIREMENT
+──────────────────────────────────────────────────────────────────────
+What an MO needs of an ingredient or an intermediate.
+
+    quantity per batch × (MO shipping units ÷ shipping units per batch)
+
+Work it out fresh every time.
+⚠ NEVER use the stored `batches` number. That is this same sum,
+  already rounded.
+
+QUANTITY PER BATCH takes the basis of the thing being consumed —
+  UNITS for an intermediate, Kg for an ingredient.
+THE SCALING FACTOR IS ALWAYS SHIPPING UNITS OVER SHIPPING UNITS.
+  Dimensionless. It never changes the basis.
+
+WORKED EXAMPLE (Minty, S108): a batch needs 0.5 units of the
+intermediate and makes 6 shipping units. The MO is for 7.
+    7 ÷ 6 × 0.5 = 0.5833 units
+▶ THE MO IS A SCALED-UP BATCH. SCALE THE REQUIREMENT BY THE SAME FACTOR.
+
+LIVES IN   subrecipematerials.qty          ingredients, Kg per batch
+           subrecipeformulation.ship_qty   intermediates, units per batch
+⚠ subrecipeformulation ALSO holds `qty` in Kg. ING-REQ is ship_qty.
+  Reading qty gives a right-looking number in the wrong basis.
+
+──────────────────────────────────────────────────────────────────────
+2 · PK-CASCADE — THE PACKAGING FIGURES
+──────────────────────────────────────────────────────────────────────
+How many pouches, cartons, cases an MO needs.
+
+    MO shipping units × the pack ratio at each level
+
+Level 1 is the single unit and it carries the unit weight. THAT IS THE
+ONE PLACE A UNIT WEIGHT IS HELD ANYWHERE IN THE SYSTEM. Every higher
+level's weight follows from it through the same ratios.
+
+⚠ batches plays NO part, therefore there is NO rounding variance.
+  A fractional packaging figure is a defect, not rounding.
+
+LIVES IN   fopackaging.quantity           how many of the level below
+           fopackaging.pack_level         the order of the levels
+           fopackaging.whd_flag           marks the shipping unit row
+           fopackaging.wgt_kgs_per_unit   THE UNIT WEIGHT, Level 1 row
+
+──────────────────────────────────────────────────────────────────────
+3 · STOCK ON HAND — THE WAREHOUSE BALANCE
+──────────────────────────────────────────────────────────────────────
+What is in the warehouse right now. TWO BALANCES, KEPT SEPARATELY.
+
+PRODUCTS AND INTERMEDIATES — formulations.inventory_units, in units.
+  UP    an MO is completed and production received
+        stock is returned from an MO it was released to
+        a dispatch order is cancelled
+  DOWN  allocated to a dispatch order
+        written off through a miscellaneous release
+        released into another product's recipe as an intermediate
+
+MATERIALS — materials.inventory, in kilograms.
+  UP    received from the vendor
+        returned from an MO it was released to
+  DOWN  released to an MO
+        written off through a miscellaneous release
+
+HOW STOCK MOVES OUT
+  Stock on hand → DO            ⚠ STOCK MOVES
+  DO → packing slip             no move
+  Packing slip → shipped        no move
+  Packing slip → DO             no move
+  DO cancelled → stock on hand  ⚠ STOCK MOVES
+
+  IT MOVES ONLY AT THE DO, IN BOTH DIRECTIONS. Once allocated, that
+  stock is spoken for and a planner must not count it as available —
+  even though it is still in the building.
+
+──────────────────────────────────────────────────────────────────────
+4 · PRD-TO-DATE — PRODUCTION TO DATE
+──────────────────────────────────────────────────────────────────────
+The completed quantity for an MO. mlomanagement.received_units.
+
+Manufacturing may deliver into the warehouse several times against one
+MO. Each delivery is entered as a received lot, IN SHIPPING UNITS. The
+weight is derived from it. NEVER THE REVERSE.
+
+The completed quantity is the sum of those received lots, in shipping
+units (weight derived).
+
+Received lots are INTERNAL TO THE MO and are never referenced outside
+it. Wherever the app shows completed quantity, it is that sum.
+
+ONE MO, ONE PRODUCT LOT. Only ever goes up.
+
+LIVES IN   mlomanagement.received_units   the MO total
+           receiveproducts.qty            one receipt
+⚠ NOT INTERCHANGEABLE. A per-receipt row must show the receipt's own
+  count. Putting the MO total on every receipt row is wrong.
+
+──────────────────────────────────────────────────────────────────────
+THE TEST
+──────────────────────────────────────────────────────────────────────
+Point at any unit number on any screen and say which of the four it
+came from.
+
+If the answer is "we divided a weight", THAT IS THE BUG.
+
+WEIGHT IS ALWAYS WORKED OUT FROM UNITS.
+UNITS ARE NEVER WORKED OUT FROM WEIGHT.
+
+DISPLAY   three decimal places.
+          ⚠ ROUND FOR DISPLAY ONLY. Keep the full number in the
+            calculation and in the database. A rounded figure that is
+            then multiplied carries its error forward — which is
+            exactly what the stored `batches` column does.
+
+──────────────────────────────────────────────────────────────────────
+DISPATCH COLUMNS — NOT A FIFTH SOURCE, BUT UNIT-STORED
+──────────────────────────────────────────────────────────────────────
+  dispatchorders.packing_units   what was AUTHORISED on the DO
+  dispatchorders.qty_shipped     what ACTUALLY shipped
+  packingslipdos.shipped_qty     units on a packing slip line
+⚠ packing_units AND qty_shipped ARE NOT INTERCHANGEABLE. A DO can ship
+  more or less than authorised. Minty's ruling S97.
+⚠ dispatchorders.qty_to_ship IS Kg AND SITS BESIDE THEM. TRAPS 1.
+
+══════════════════════════════════════════════════════════════════════
+PART 2 — THE MAP.  Working record. Status changes as sites are fixed.
+══════════════════════════════════════════════════════════════════════
+
+LEGEND   OK = reads a stored count, follows the rule
+         XX = calculates instead
+         ?? = to review, not a defect
+
+──── ALIGNED — 19 ───────────────────────────────────────────────────
+OK  1  Stock info popup — In Store      stock-info.ts:188
+       inventory_units, × weight for Kg          ▶ THE MODEL. COPY IT.
+OK  2  Stock info popup — Produced      stock-info.html:36
+OK  3  Stock info popup — DO/PS buckets stock-info.ts:79-135
+OK  4  Stock info popup — progress bar  stock-info.ts:160,166
+OK  5  Edit-formulation stock buckets   formulation-edit-stock-info.ts:143-243
+OK  6  MO progress chart, 5 screens     mo-progress-chart.ts:26,33
+OK  7  Formulation intermediate lines   edit-formulation.html:187,209,254
+OK  8  Add formulation intermediate     add-new-formulation.html:106
+OK  9  Formulation save / version fork  edit-formulation.ts:948-1397
+OK 10  Intermediate qty popup           edit-quantity-info.ts:31
+OK 11  Add intermediate popup           other-formulations.ts:47-110
+OK 12  Receive product — WRITE          receive-product.ts:148
+OK 13  Dispatch orders list — shipped   dispatch-orders.html:116,117
+OK 14  Create packing slip rows         create-packslips.ts:212-270
+OK 15  Edit packing slip rows           edit-packslips.ts:279-576
+OK 16  Traceability one-step-forward    product-traceability-details:335
+OK 17  Sales order shipped to date      edit-sales-order.ts:426,427
+OK 18  Sales order product popup        products-for-sales-order.ts:43
+OK 19  Packaging cascade                Formulations.js cascade
+
+──── MISALIGNED — 24 ────────────────────────────────────────────────
+XX 20  Release screen Released Qty      Formulations.js :1108,:1141,:1189
+       Returns ADDED into the released total. ⚠ LIVE, BOTH CLIENTS.
+                                                          → STEP 1
+XX 21  MR product list + details        rejected-materials.ts:154
+XX 22  MO detail Completed              edit-mlc.ts:298
+XX 23  MO detail Completed              edit-mlo.ts:251     ⚠ UNRECORDED
+XX 24  Start MO Completed               start-mlc.ts:155    ⚠ UNRECORDED
+XX 25  MO list Completed Qty            mfg-lot-codes.html:69
+XX 26  Traceability list produced       product-traceability.ts:109
+XX 27  Products list Stock On Hand      admin-formulation.ts:878
+XX 28  Edit-formulation In Store        formulation-edit-stock-info.ts:269
+XX 29  Traceability view misc release   Trace_ProductHeaderView
+                                                          → STEP 2
+XX 30  Dispatch order — WRITES units    add-dispatch-v2.ts:194
+       ⚠⚠ DIVIDES, ROUNDS, AND STORES packing_units. The only site in
+         this list that WRITES a wrong number rather than showing one.
+                                                          → STEP 3
+XX 31  MO detail receiving panel        edit-mlc.html:258 + getWdu:354
+XX 32  MO detail intermediate qty       WhC_GetMoIntermediateProducts_SP
+XX 33  MO detail intermediate stock     WhC_GetFormulaIntermediateProducts
+XX 34  MO detail Batch Materials        Formulations.js cascade
+       ⚠⚠ 32/33 AND 34 FEED THE SAME SCREEN FROM DIFFERENT CODE PATHS.
+         Fixing one leaves the screen disagreeing with itself.
+                                                          → STEP 4
+XX 35  Ingredient requirement           Formulations.js
+XX 36  Intermediate requirement         Formulations.js
+       Both multiply by the ROUNDED batches column.        → STEP 5
+XX 37  Traceability view intermediate   Trace_ProductHeaderView
+XX 38  Traceability view SOH            Trace_ProductHeaderView SOH_su
+XX 39  IP trace backward                Trace_ProductOneStepBackwardIP_SP
+XX 40  IP trace forward                 Trace_ProductOneStepForwardIP_SP
+XX 41  Release details screen           ...ReleaseDetails_SP
+       All need mprrecievelots.qty_allocated_units, which does not
+       exist yet.                                          → STEP 6
+XX 42  Return details screen            ...ReturnDetails_SP
+XX 43  Product return stock balance     ReturnMaterialProduct.js:68
+                                                          → STEP 7
+
+──── TO REVIEW — 4. NOT DEFECTS. ────────────────────────────────────
+?? 44  DO details field named ship_qty  do-details.ts:30,54
+       Holds qty_to_ship, which is Kg. THE NAME SAYS UNITS, THE
+       CONTENT IS WEIGHT. Same shape as TRAPS 10, in the frontend.
+?? 45  Material traceability            material-traceability-details:169,170
+       Materials are Kg-anchored BY DESIGN, so this may be correct.
+       ⚠ VERIFY AGAINST THE RULE. Do not touch on suspicion.
+?? 46  Seven-copy MO qty helper         7 files, same sum
+       ⚠⚠ NOT A BULK REPOINT. Each caller passes a DIFFERENT source
+         and SOME DIVISIONS ARE CORRECT. J114: closed-mlcs.html:84 is
+         right while :79 is wrong, same helper, adjacent lines.
+       ▶ OWN SITTING. Read all seven callers first.
+?? 47  Add dispatch v1 popup            PopUps/add-dispatch
+       Dead component, never opened. J87 / P36. ▶ DELETE.
+
+══════════════════════════════════════════════════════════════════════
+PART 3 — THE SCOREBOARD
+══════════════════════════════════════════════════════════════════════
+
+  AFTER    FIXES                              GREEN  RED  REVIEW
+  today    19 already follow the rule            19   24     4
+  step 1   the returnSum bug                     20   23     4
+  step 2   nine one-line repoints, one build     29   14     4
+  step 3   the dispatch write path               30   13     4
+  step 4   four procedure changes                34    9     4
+  step 5   the requirement calculation           36    7     4
+  step 6   the schema  ▶ P82 CLOSES              41    2     4
+  step 7   the return path                       43    0     4
+
+══════════════════════════════════════════════════════════════════════
+PART 4 — HOW TO PROVE A FIX
+══════════════════════════════════════════════════════════════════════
+
+THE FIXTURE — company 474 on dev, built S108.
+  IP-0.37      FO-0004   0.37 Kg/unit   19 units per batch
+  Parent-0.53  FO-0005   0.53 Kg/unit   13 units per batch
+               Pouch / Carton 3 / Case 7 / Pallet 9
+               Recipe: Ginger Powder 1302.21 Kg + IP-0.37 9 units
+  MO-0003  IP-0.37, 41 units, COMPLETE, lot Pdt-260807-1
+  MO-0004  Parent-0.53, 23 pallets, CREATED, NOT RELEASED
+           ⚠⚠ LEAVE IT ALONE. IT IS THE BEFORE PICTURE.
+
+⚠ 19 AND 13 ARE BOTH PRIME AND SHARE NO FACTORS, so nearly any MO
+  quantity produces a repeating decimal. That is what makes the
+  rounding visible. TRAPS 9: a round ratio hides a division entirely.
+
+THE THREE PROOFS VISIBLE ON MO-0004 TODAY
+  1  Plan Quantity        23.000# (2303.910 Kg)
+     Ginger Powder req.            2303.609 Kg
+     ⚠ 0.301 Kg APART ON THE SAME PAGE. The recipe is one batch of
+       Ginger Powder per batch of product, so they must be identical.
+       Plan uses the MO; Ginger Powder uses the rounded batches 1.769.
+       True factor 23 ÷ 13 = 1.769230769...
+  2  IP-0.37 required     5.891 Kg
+     ⚠ Kg under a header reading "Qty required - # (UOM)".
+       True figure: 9 × 23/13 = 15.923 units.
+  3  WH Stock in # (UOM)  15.170 Kg
+     ⚠ Kg again. The warehouse holds 41 units.
+
+⚠⚠ THE CONTROL — Pouch 4347.000 Ea = 23 × 9 × 7 × 3, taken from the MO
+  quantity. IT MUST NOT MOVE AT ANY STEP. If a packaging figure shifts,
+  THE FIX IS WRONG, NOT THE DATA.
+
+⚠ ON A REPOINT, A CHANGED VALUE IS A FAILURE. Rows 21-29 all return
+  the arithmetically right number today. The Kg column is the control
+  and must not move. → S106 LESSON 6.
+
+══════════════════════════════════════════════════════════════════════
+PART 5 — WHAT THIS RETIRES
+══════════════════════════════════════════════════════════════════════
+
+Four TRAPS entries exist because nobody could tell which figure was
+which. A complete map answers that for every unit number in the app.
+
+  TRAPS 1   the DO row mixes units and Kg side by side
+  TRAPS 2   shipped quantity is a unit count — misread three times
+  TRAPS 9   never verify a conversion on a 1:1 product
+  TRAPS 10  a name inside a view can mean the opposite of the column
+
+⚠ THEY DO NOT RETIRE ON THE STRENGTH OF THIS DOCUMENT. They retire
+  when the sites they protect are green. TRAPS 10 goes when
+  Trace_ProductHeaderView returns zero divisions — the same gate as P82.
+
+══════════════════════════════════════════════════════════════════════
+END
+══════════════════════════════════════════════════════════════════════

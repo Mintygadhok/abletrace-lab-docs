@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J116 — ⚠ the next one is J117, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR18. Last appended: S107, Aug 6 2026.
+number. Highest is J118 — ⚠ the next one is J119, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR18. Last appended: S108, Aug 7 2026.
 ⚠ J116 IS NOT A STANDALONE ENTRY. It was assigned inside JR15 and is easily
 missed by anyone scanning for J-headings. That is why this header said J115 for
 four sessions. S85 and S86 both asked for it to be corrected; S107 did it.
@@ -3732,3 +3732,176 @@ a disposable planning file is not where a measurement lives:
   not have to include company_name and did. -> P156.
 
 END S107 APPEND
+
+S108 - APPENDED 7 AUG 2026
+NUMBERING: highest existing entry is J117. This is J118. Highest JR is
+still JR18 - S108 changed no database object. No JT entry.
+
+
+J118 - THE UNITS SURVEY. THE FIRST SYSTEMATIC ONE, AND IT FOUND WHAT
+TWENTY SESSIONS OF ACCIDENTS DID NOT. STATUS: SURVEY COMPLETE, NO CODE
+SHIPPED. Both boxes closed exactly as S107 left them.
+
+⚠⚠ THE OUTPUT IS NOT IN THIS ENTRY. IT IS UNITS-BIBLE.txt IN THIS
+  REPO - the four sources of every unit figure, and the state of all
+  47 sites that produce one. THIS ENTRY RECORDS THE MEASUREMENTS AND
+  POINTS AT IT. Two homes for one fact is what rotted Section A.
+
+WHAT WAS SURVEYED
+  DATABASE  35 procedures and 9 views listed from information_schema.
+    11 touch a per-unit weight. 12 candidate objects read in full.
+    THREE DIVIDE - Trace_ProductHeaderView (3 cells, known) and BOTH
+    intermediate-product trace procedures (NEW, in no document).
+  SCHEMA  every table holding a quantity column, listed from the
+    schema itself rather than from code. 27 found.
+  FRONTEND  56 files, 185 references. Swept for direct divisions AND
+    for helper functions called from templates.
+  ONE LIVE TEST on dev - a material return on company 464 MO-0011.
+
+⚠ THE SWEEP HAD TO BE RUN TWICE. The first pattern required whitespace
+  after the slash and missed `qty_allocated/fo2.wgt_kgs_per_unit`. It
+  reported a DIVIDING object as CLEAN.
+  ⚠⚠ AND THE CONTROL PASSED ANYWAY. A known three-division view
+    returned 1 under both patterns, because the pattern matched what
+    it was built on.
+  ▶ A CONTROL PROVES A PATTERN MATCHES WHAT ITS AUTHOR IMAGINED. IT
+    PROVES NOTHING ABOUT SHAPES HE DID NOT. OVER-REPORT BY DESIGN - a
+    false hit costs one read, a false clean costs a defect.
+  ⚠ THREE SWEEPS GAVE THREE ANSWERS: 49 files, then 56 with two more
+    spellings, then 19 aligned sites that mention no weight at all and
+    were invisible to both. SAY WHAT A SWEEP CANNOT SEE, IN THE SAME
+    BREATH AS ITS RESULT.
+
+MEASUREMENTS - ALL READ-ONLY, AND THEY CLOSED THREE OPEN QUESTIONS
+  1  PRODUCT-SIDE ALLOCATIONS ON PROD, by company:
+       471 Glutenull 0 · 469 Hagensborg 0 · sandboxes 5.
+     ▶ THE INTERMEDIATE BACKFILL TOUCHES NO CLIENT DATA.
+  2  MR ROWS ON PROD, by type:
+       469 Hagensborg 24 rows, ALL MATERIAL, 216,969 Kg.
+       464 sandbox 1 material + 3 product. 471 Glutenull ZERO.
+     ⚠⚠ MINTY, S108: "hagensborg rows are materials returns only."
+       CONFIRMED BY QUERY.
+     ▶ THEREFORE THE MR BACKFILL MUST NOT HAPPEN. JR15 already ruled
+       it - material reject is Kg-measured BY DESIGN and adding units
+       there is a defect. THE RIGHT VALUE FOR ALL 24 IS ZERO AND ZERO
+       IS WHAT THEY HOLD.
+     ⚠ CLAUDE'S S107 POSITION PAPER SIZED THIS AS "28 ROWS ACROSS TWO
+       CLIENTS" AND TREATED THEM AS ONE KIND OF THING. THEY ARE NOT.
+       THE RECOMMENDATION BUILT ON THAT FRAMING WAS WRONG.
+  3  PRODUCT RETURNS: ONE ROW ON EACH BOX, BOTH MATERIAL.
+     ▶ NO PRODUCT RETURN HAS EVER BEEN RECORDED ANYWHERE.
+  ▶ THREE RULINGS DISSOLVED BY MEASUREMENT RATHER THAN DECIDED.
+    MEASURE BEFORE ARGUING. A ruling that measurement can dissolve
+    should never reach Minty as a ruling.
+
+⚠⚠ mprrecievelots HAS TWO PARALLEL FK PAIRS ON ONE ROW, AND WHICH PAIR
+  IS POPULATED ENCODES THE RELEASE TYPE.
+    material_id + Rec_Lot_id      = MATERIAL
+    formula_id  + Rec_Product_id  = PRODUCT
+  Dev: 95 material, 14 product, NO overlaps and no orphans. Nothing in
+  the column names says so.
+  ⚠ CLAUDE'S FIRST MEASUREMENT OF THIS RETURNED ZERO INTERMEDIATES ON
+    EVERY COMPANY - because it joined on material_id, which is NULL on
+    every intermediate row. THE QUERY COULD NOT HAVE RETURNED A
+    NON-ZERO. It was caught only because J80 TEST 2 records an
+    intermediate release on 464 in S73. THE LOG DISPROVED THE QUERY.
+  ▶ RULES 1: a check that cannot return a true pass is not a check.
+
+⚠⚠ returnmpreceivelots IS AN EXACT TWIN OF mprrecievelots, COLUMN FOR
+  COLUMN, AND IT IS IN NO DOCUMENT. Twenty sessions of quantity work
+  never named it. It surfaced only because the return procedure
+  happened to be read.
+  ▶ A ROUTINE SURVEY FINDS ONLY WHAT A PROCEDURE REFERENCES. THAT IS
+    WHY THE SCHEMA PASS EXISTS. It found five more unnamed tables.
+  ⚠ TWO OF THOSE FIVE - rejectedmaterial and rejectedproduct - ARE
+    EMPTY ON BOTH BOXES. The pre-merge design, superseded by
+    rejectmaterialandproduct. Retirement question with P109, not
+    campaign work.
+  ⚠ JR15 ALREADY NAMED BOTH WRITE OBJECTS - REJPRODOBJ and REJMATOBJ -
+    AND NEVER NAMED THE TABLES THEY LAND IN. A DOCUMENT CAN NAME A
+    THING AND STILL LEAVE IT UNFINDABLE.
+
+⚠⚠ THE TWO WORST FINDINGS CAME FROM ONE TEST, NOT FROM READING.
+  A ten-minute material return on dev produced both:
+  (a) THE PRODUCT-RETURN LOT PICKER IS EMPTY. 3.32 Kg demonstrably in
+      store on receiveproducts row 11425; the picker offered nothing.
+      ▶ THE PRODUCT-RETURN PATH HAS NEVER RUN BECAUSE IT CANNOT BE
+        RUN. Not "nobody did one". -> P163.
+      ⚠ FOURTH INSTANCE OF THIS SHAPE - J86's commented-out Add-DO
+        button, J92's Remove button that removed nothing, P142's
+        commented-out MR buttons, and this.
+  (b) Formulations.js ADDS THE RETURN INTO THE RELEASED TOTAL, in all
+      three branches. returnSum is declared and never assigned, so
+      Returned Qty always reads 0.
+      ▶ RETURNING MATERIAL MAKES THE SCREEN SHOW MORE RELEASED.
+      ⚠⚠ LIVE ON BOTH CLIENTS TODAY. -> P164.
+      ✓ MLOManagement.js does the identical job CORRECTLY. THE PROOF
+        IT IS WRONG IS IN THE OTHER FILE.
+  ▶ RULES 1 IS RIGHT. REPRODUCE FIRST. J109 cost four hours learning
+    this; S108 earned it back in ten minutes.
+  ✓ THE MATERIAL RETURN PATH ITSELF IS PROVEN CORRECT - Ginger Powder
+    9294.861 -> 9296.861 Kg, +2 exactly.
+
+THE FIXTURE, BUILT BY MINTY, COMPANY 474 ON DEV
+  IP-0.37      FO-0004  0.37 Kg/unit  19 shipping units per batch
+  Parent-0.53  FO-0005  0.53 Kg/unit  13 shipping units per batch
+               Pouch / Carton 3 / Case 7 / Pallet 9
+               Recipe: Ginger Powder 1302.21 Kg + IP-0.37 9 units
+  MO-0003  41 units, COMPLETE.  MO-0004  23 pallets, NOT RELEASED.
+  ⚠ 19 AND 13 ARE BOTH PRIME AND SHARE NO FACTORS, so nearly any MO
+    quantity produces a repeating decimal. TRAPS 9: a round ratio
+    hides a division entirely. THAT IS WHY THOSE NUMBERS.
+  ⚠⚠ IT EXPOSED THE BUG BEFORE ANY CODE CHANGED. On MO-0004:
+      Plan Quantity      23.000# (2303.910 Kg)
+      Ginger Powder req.          2303.609 Kg
+    0.301 Kg APART, ON THE SAME PAGE, FROM THE SAME RECIPE. One uses
+    the MO quantity; the other uses the stored rounded batches 1.769.
+    True factor 23/13 = 1.769230769...
+  ⚠ AND MO-0003 ALREADY BANKED ONE: released 15.171 Kg against a true
+    requirement of 15.170.
+  ⚠⚠ THE CONTROL - Pouch 4347.000 Ea = 23 x 9 x 7 x 3, from the MO
+    quantity. IT MUST NOT MOVE AT ANY STEP OF THE FIX. If a packaging
+    figure shifts, THE FIX IS WRONG, NOT THE DATA.
+  ▶ MO-0004 IS THE BEFORE PICTURE. DO NOT RELEASE IT.
+
+MINTY'S RULINGS, S108 - BOTH CHANGE RULES 7
+  1  THE FOUR SOURCES. ING-REQ · PK-CASCADE · STOCK ON HAND ·
+     PRD-TO-DATE. The old rule had THREE and its first source fused a
+     recipe requirement with the packing cascade - which describes
+     packaging correctly and a recipe requirement not at all.
+     ▶ THAT FUSION IS WHY THE INTERMEDIATE ROUTE HAD TO BE DERIVED
+       FROM SCRATCH IN S108 INSTEAD OF READ OFF THE RULE.
+  2  THE REQUIREMENT IS COMPUTED LIVE:
+       quantity per batch x (MO shipping units / units per batch)
+     ⚠ NEVER mlomanagement.batches - that sum, already rounded.
+     ⚠ WORKED EXAMPLE, MINTY: a batch needs 0.5 units of the IP and
+       makes 6 shipping units. The MO is 7. 7/6 x 0.5 = 0.5833 units.
+       THE MO IS A SCALED-UP BATCH; SCALE BY THE SAME FACTOR.
+     ⚠ FRACTIONAL IS CORRECT. Round to three decimals FOR DISPLAY
+       ONLY - full precision in the calculation and in storage.
+     ⚠⚠ THIS APPLIES TO INGREDIENTS TOO AND THEREFORE SUPERSEDES THE
+       S105 RULING that the rounding variance is accepted. RULES 7
+       stated that ruling in plain words and was rewritten whole.
+     ⚠ PAST MOs WILL SHOW A REQUIREMENT DIFFERING SLIGHTLY FROM WHAT
+       WAS RELEASED. THE RELEASE ROWS STAND - Minty's S106 ruling, a
+       figure recording what physically happened is not a wrong row.
+       SOMEBODY WILL NOTICE AND ASK.
+
+⚠ CLAUDE DECIDED A SCOPE BOUNDARY THAT WAS MINTY'S TO DECIDE. After
+  the frontend file list came back Claude wrote "we do not need to
+  survey all 49" and moved on - on a day whose whole lesson was that
+  partial coverage is how things get missed. MINTY CAUGHT IT AND THE
+  SURVEY WAS FINISHED.
+  ▶ A BOUNDARY IS A RECOMMENDATION, NOT A STEP. PUT IT TO MINTY.
+
+RAISED BY THIS SURVEY: P158 P159 P160 P161 P162 P163 P164 P165 P166
+  P167. CLOSED BY IT: P104 (a usable fixture now exists on 474) and
+  P150 (the survey itself).
+BLAST RADIUS: none. No code, no prod touch, no schema change. Dev
+  fixture residue on 464 (a 2 Kg return, KEEP - it is P164's fixture)
+  and on 474 (the whole IP set, KEEP).
+========
+
+
+END S108 APPEND
+
