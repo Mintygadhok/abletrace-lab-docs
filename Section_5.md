@@ -6,7 +6,10 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J115 — ⚠ the next one is J116, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Last appended: S103, Aug 4 2026.
+number. Highest is J116 — ⚠ the next one is J117, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR18. Last appended: S107, Aug 6 2026.
+⚠ J116 IS NOT A STANDALONE ENTRY. It was assigned inside JR15 and is easily
+missed by anyone scanning for J-headings. That is why this header said J115 for
+four sessions. S85 and S86 both asked for it to be corrected; S107 did it.
 ══════════════════════════════════════════════════════════════════════
 
 TRAPS
@@ -286,6 +289,150 @@ JR16. WhC_GetAllRejectedList_SP - returns qty_rejected_units  [S104]
      Applied to BOTH boxes 5 Aug 2026.
      ⚠ db-definitions-S93.txt DOES NOT REFLECT THIS CHANGE. That
        snapshot is now stale on TWO objects: JR7e's view and this proc.
+
+JR17. WhC_GetMoDetails_SP - returns received_units  [P149, S106]
+     One column added to the SELECT list, immediately after
+     received_qty:  `mlomanagement`.`received_units`,
+     NOTHING ELSE. Same 8 joins, same WHERE, same signature.
+     IF MISSED: the yield dialog prints `undefined#` - the frontend
+     reads received_units and gets nothing. Edit-Mlc divides a weight
+     instead (P151). No error either way.
+     Backups, /home/ubuntu on each box:
+       WhC_GetMoDetails_SP.bak-S106-DEV.txt   / .after-S106-DEV.txt
+       WhC_GetMoDetails_SP.bak-S106-PROD.txt  / .after-S106-PROD.txt
+     SHOW CREATE text, NOT runnable. Add the DELIMITER wrapper.
+     Verified before use: 28 lines, BEGIN 1, END 1, joins 8.
+     Recreated WITHOUT the DEFINER clause. It was `admin`@`%`.
+     Per JR16 - RDS can refuse an explicit definer on recreate.
+     Confirmed callable afterwards on both boxes.
+     METHOD: JR16's. Built on each box from its own backup by node
+     script with four guards; two-line diff and join count verified
+     before applying; read back out of the database, then CALLed.
+     NO FRONTEND BUILD WAS INVOLVED. 8fa2ed14 was already deployed
+       and already reading the column.
+     db-definitions-S93.txt does NOT reflect this. -> P119.
+     Applied to BOTH boxes 6 Aug 2026.
+     ADDED TO THIS FILE S107 - see J117 for why the frontend removal
+       this obsoleted very nearly shipped anyway.
+
+JR18. Trace_ProductHeaderView - three _su fields read stored unit
+     counts instead of dividing  [P135, S107]
+
+     THE VIEW HAS SEVEN _su FIELDS. Before S100 all seven divided a Kg
+     figure by fopackaging.wgt_kgs_per_unit. S100 repointed
+     qty_produced_su to mm.received_units. S107 repointed three more.
+     THREE STILL DIVIDE - see the foot of this entry.
+
+     THE CHANGE, inside the `do_products` CTE - three unit sums ADDED
+     beside the three existing Kg sums, same case-when conditions,
+     different source column:
+
+       sum(case when ps.shipped_flag = true
+                then do.qty_shipped else 0 end)      AS qty_shipped_u
+       sum(case when ps.shipped_flag = false
+                 and ps.shippingdate is null
+                then do.packing_units else 0 end) AS qty_packing_slip_u
+       sum(case when ps.shipped_flag is null
+                then do.packing_units else 0 end)        AS qty_do_u
+
+     Then three divisions in final_results REPLACED:
+       qty_packing_slip_su = coalesce(do_products.qty_packing_slip_u,0)
+       qty_do_su           = coalesce(do_products.qty_do_u,0)
+       qty_shipped_su      = coalesce(do_products.qty_shipped_u,0)
+
+     THE SHIPPED BUCKET TAKES dispatchorders.qty_shipped. THE OTHER
+       TWO TAKE packing_units. THEY ARE NOT INTERCHANGEABLE.
+       packing_units is what was AUTHORISED; qty_shipped is what
+       ACTUALLY SHIPPED, and a DO can ship more or less than
+       authorised (Minty's ruling S97, J114). Using packing_units for
+       the shipped bucket reports the authorisation as the shipment.
+
+     TRAPS 10 SITS INSIDE THIS OBJECT AND IT IS LIVE. The do_products
+       CTE defines its OWN alias `qty_shipped` which sums
+       do.qty_to_ship and is KG. The real column
+       dispatchorders.qty_shipped is UNITS. Same name, opposite basis,
+       a few lines apart. ANYONE REBUILDING THIS FROM THE NAMES ALONE
+       WILL WIRE Kg INTO A UNITS FIELD and it will look plausible at
+       every round-ratio fixture.
+       -> RESOLVE EVERY NAME TO ITS DEFINITION.
+
+     IF MISSED: qty_shipped_su, qty_packing_slip_su and qty_do_su
+     render float garbage on non-round unit weights -
+     7.000000000000001 for 7 was live on dev before this change. The
+     numbers are ARITHMETICALLY CORRECT; they are the right number
+     wearing garbage. Same class as JR7e. No error, no blank - just an
+     implausible figure on a client-facing traceability screen.
+
+     ALIASES AND COLUMN ORDER UNCHANGED, so NO frontend change rides
+     with this. Sole consumer is
+     product-traceability-details.component.ts via
+     api/models/Traceability.js.
+
+     Backups: /home/ubuntu/Trace_ProductHeaderView.bak-S107-DEV.txt
+              /home/ubuntu/Trace_ProductHeaderView.bak-S107-PROD.txt
+     SHOW CREATE text, NOT runnable. Strip the `1. row` banner, the
+       `View:` and `Create View:` labels and the two trailing charset
+       lines; prefix CREATE OR REPLACE; append a semicolon. The S107
+       node script did exactly that.
+     THE TWO BOXES WERE BYTE-IDENTICAL BEFORE THE CHANGE - 5932 bytes,
+       6 slashes, 22 joins, 5 selects, on each.
+     Recreated WITHOUT the DEFINER clause. It was `admin`@`%`.
+
+     METHOD - JR16's, on each box from its OWN backup:
+       1  SHOW CREATE to a .bak file. Verify bytes, slash count, join
+          count, select count.
+       2  Build the new object ON THE BOX by node script. FOUR
+          ANCHORS, each asserted to appear EXACTLY ONCE. Slash count
+          asserted 6 before and 3 after.
+       3  diff old against new on a comma-split readable copy. JOIN
+          COUNT MUST HOLD AT 22.
+       4  Apply with `mysql abletracelab_live < file`. Read the slash
+          count back OUT OF THE DATABASE, not off the file.
+       5  Query the fixture and compare against a baseline captured
+          BEFORE the write.
+     NO VIEW TEXT EVER TRAVELLED THROUGH SSH.
+
+     VERIFICATION IS ARITHMETIC AND IT IS THE WHOLE GATE:
+         mysql abletracelab_live -e "SHOW CREATE VIEW
+           Trace_ProductHeaderView\G" | grep -o "/" | wc -l
+       6 = pre-S107 . 3 = post-S107 . 0 = P135 complete.
+     grep -c COUNTS LINES AND THIS OBJECT IS ONE LINE. Use
+       grep -o "/" | wc -l for occurrences.
+
+     PROVEN, DEV, company 464, MO-0007, test1.39 at 1.39 Kg/unit, with
+     dispatch orders in ALL THREE bucket states:
+       BEFORE  qty_shipped_su 7.000000000000001
+       AFTER   qty_shipped_su 7
+       qty_do_su 1 . qty_packing_slip_su 2 . SOH_su 40 - UNCHANGED
+       Screen: Qty in DO 1# (1.39 Kg) . Qty in PS 2# (2.78 Kg) .
+               Shipped to Customer 7# (9.73 Kg)
+
+     PROVEN, PROD: every figure IDENTICAL to the baseline on both MOs,
+     exactly as predicted - prod's fixtures sit on ROUND ratios (20
+     and 5 Kg/unit) where the division landed exactly. Glutenull's
+     traceability screen renders 0# (0 Kg) cleanly on all three
+     repointed cells; the *ngIf gate does not blank them at zero.
+     MEASURED, not assumed.
+     THE Kg COLUMNS WERE THE CONTROL AND DID NOT MOVE.
+
+     STILL DIVIDING AFTER S107 - three fields, each blocked for a
+       different reason:
+         qty_misc_release_su  the mr CTE sums rmp.qty_rejected.
+                              rejectmaterialandproduct.qty_rejected_units
+                              EXISTS (JR15) but every pre-S103 row
+                              holds 0 - 28 of 28 on prod. Repointing
+                              without a backfill turns a right-looking
+                              figure into a wrong one.
+         intermediate_prd_su  mprrecievelots has NO unit column at
+                              all. Needs a schema change, a Waterline
+                              attribute (TRAPS 3) and a write-path
+                              change.
+         SOH_su               subtracts five Kg terms then divides.
+                              DEPENDENT - cannot be units-anchored
+                              until the two above are.
+     P136: the view returns DUPLICATE ROWS. Pre-existing, not caused
+       by and not fixed by this change.
+     Applied to BOTH boxes 6 Aug 2026.
 
 
 ──────────────────────────────────────────────────────────────────────
@@ -3449,3 +3596,139 @@ MEASURED:
 
 
 END S97 APPEND
+
+S107 - APPENDED 6 AUG 2026
+NUMBERING: highest existing entry is J116, assigned inside JR15. This
+is J117. Highest JR is now JR18. No JT entry - TRAPS.md is the traps
+file and it is not extended by this session.
+
+
+J117 - A QUEUED COMMIT WOULD HAVE UNDONE THE PREVIOUS SESSION'S FIX,
+AND THE PLAN SAID TO DEPLOY IT. STATUS: CLOSED. Frontend commit
+a94f39c3, built as run #57, deployed and screen-proven on BOTH boxes.
+
+WHAT WAS QUEUED: 30b2ddd4, "P140: round the Planned weight and drop
+  the unit count from Completed". Pushed 10:29 AM 6 Aug. GitHub
+  Actions was in a major outage; run #56 queued and never started.
+
+WHY IT DROPPED THE COUNT - AND IT WAS RIGHT TO, AT THE TIME:
+  8fa2ed14 (S105) had folded a unit count and a weight into BOTH
+  yield-dialog header boxes, reading Completed from
+  mlcDetails.received_units. But WhC_GetMoDetails_SP did not SELECT
+  received_units, so the box printed `undefined#`. 30b2ddd4 removed
+  the count, leaving weight only, and left a comment naming the exact
+  string to restore when the procedure served the column.
+
+S106 FIXED THE PROCEDURE THAT SAME AFTERNOON (JR17), WHICH MADE THE
+  REMOVAL OBSOLETE BEFORE IT WAS EVER BUILT. The deployed build was
+  still 8fa2ed14 - the OLDER commit, the one that reads the count - so
+  the moment the column arrived, dev started rendering 7# (58.38 Kg)
+  correctly. S106 recorded that as screen proof and it was, but OF THE
+  OLD BUILD.
+
+SO THE QUEUED COMMIT HAD BECOME A REGRESSION SITTING IN A QUEUE.
+  PLAN's first-three-actions for S107 read: if Actions is back and #56
+  has gone green on 30b2ddd4, deploy it to dev, then consider prod.
+  FOLLOWING THAT INSTRUCTION WOULD HAVE TAKEN A WORKING FIGURE OFF THE
+  SCREEN, on dev and then on a live client box.
+  THE OUTAGE - the obstacle of the whole previous session - IS THE
+    ONLY REASON IT HAD NOT ALREADY HAPPENED.
+
+HOW IT WAS FOUND: not by reading the plan. Minty chose to do P151 in
+  S107 rather than defer it, which meant opening
+  check-mat-yield.component.ts to copy "the shape that is already
+  working". THERE WAS NO WORKING SHAPE IN THE FILE - the comment was
+  written in the future tense and the line under it rendered weight
+  only. That contradiction against NOW's screen proof is what exposed
+  the whole thing.
+  CLAUDE STOPPED AT THE CONTRADICTION RATHER THAN PATCHING THROUGH IT.
+    That is the only reason this is a near-miss and not an incident.
+
+THE FIX (a94f39c3, one file, +9 -8):
+    const completedUnits = this.data.mlcDetails.received_units
+    qtyCompleted: `${completedUnits}# (${completedKg} ${this.uom})`
+  qtyPlanned UNTOUCHED - 30b2ddd4's rounding fix survives intact. The
+  replacement comment records WHY the count came back, so a future
+  reader meeting 30b2ddd4's message does not re-drop it.
+
+PROVEN, DEV, company 474, MO-0001, after Shift+Cmd+R:
+    QTY Planned    7# (58.38 Kg)   not 58.379999999999995
+    QTY Completed  7# (58.38 Kg)   the restored count
+PROVEN, PROD, Glutenull MO-0001:
+    Plan Quantity      1750.000# (560.000 Kg)
+    Completed Quantity 1750.000# (560.000 Kg)
+  THE (Kg)-OVER-A-CASE-COUNT HEADER LABELS ARE GONE. That was
+    30b2ddd4's own contribution and it is what justified promoting to
+    prod the same night.
+
+RUN #56 IS STILL QUEUED ON GITHUB AND WOULD NOT CANCEL - "Failed to
+  cancel workflow", attempted twice. IF IT EVER COMPLETES ITS ARTIFACT
+  REMOVES THE COUNT AGAIN, and being newest it would win an
+  `ls -1t | head -1`.
+  S107 DEPLOYED BY TYPING THE FILENAME EXPLICITLY, not by taking the
+    newest. THE COMMIT STAMP IS IN THE ARTIFACT NAME -
+    dist-{dev,prod}-<sha>.zip. READ IT.
+  RULES 2's "read the filename off the ls" assumes the newest zip is
+    the right one. That assumption does not hold while a superseded
+    run is queued.
+
+THE COMMENT IN THE CODE PAID FOR ITSELF A SECOND SESSION RUNNING.
+  -> P118. S106 needed no re-derivation because of it; S107 found the
+  exact restore string sitting in the comment it was about to replace.
+  TWO SESSIONS, TWO PAYOFFS, ONE PRACTICE.
+
+THE TRANSFERABLE LESSON: A WORKAROUND BECOMES A DEFECT THE MOMENT THE
+  CAUSE IS FIXED, AND NOTHING ANNOUNCES THE CHANGEOVER. The commit
+  message is the warning label - 30b2ddd4 said "drop the unit count"
+  in plain words, and NOW described the commit only by its other,
+  useful half (the rounding, the prod labels). A commit carrying both
+  a fix and a workaround will be remembered for the fix.
+  -> BEFORE DEPLOYING ANY COMMIT WRITTEN BEFORE A FIX LANDED, READ
+    WHAT IT ACTUALLY DOES.
+
+BLAST RADIUS: none realised. Both boxes now serve a94f39c3 and both
+  were screen-proven. Rollbacks in place:
+  www-html.bak-dev-a94f39c3b2bf (holds 8fa2ed14179d) and
+  www-html.bak-prod-a94f39c3b2bf (holds 0ad1f77cee1d).
+========
+
+
+ALSO SETTLED IN S107, recorded here because they are measurements and
+a disposable planning file is not where a measurement lives:
+
+  P151 IS TWO SITES, NOT THREE. edit-mlc.component.ts:354 getWdu has
+  exactly ONE live caller - html:258. The call at :309 is commented
+  out. Fixing html:258 makes getWdu dead; delete it in the same pass
+  (P115). And :295 lotReceived is DEAD ALREADY (J114) - its consumer
+  at :311 is commented out. It is NOT a P151 site and must not be
+  patched.
+
+  html:258 CANNOT TAKE received_units. It renders a PER-RECEIPT row;
+  mlcDetails.received_units is the cumulative MO total. Repointing it
+  there would print the whole MO's figure on every receipt row - a
+  wrong number where a right-looking one stands now.
+  IT NEEDS receiveproducts.qty, and
+    WhC_GetMoProductReceivingDetails_SP DOES NOT SERVE IT. Measured
+    S107: it selects id, internalCode, mlc_id, mlc_packaging_id,
+    received_at, recieved_qty. FIFTH INSTANCE OF THE P143/P149
+    PATTERN. -> P157.
+
+  PLAN SAID "THE BLOCKER IS GONE" FOR ALL THREE P151 SITES. It was
+  gone for one. A confident scoping line, written when the fix landed,
+  aged into a wrong one in a single session.
+
+  S95's SIX-DIVISION SCOPING IS SUPERSEDED. It read "two repointable,
+  three leave, one needs a schema change". Measured S107: FOUR
+  repointable, one schema, one dependent. It aged because JR15 added
+  qty_rejected_units in S103, and because nobody had checked what else
+  sat on the dispatchorders row (TRAPS 1 named packing_units and
+  qty_shipped the whole time).
+  -> RE-ASK A SCOPE BEFORE BUILDING FROM IT.
+
+  HAGENSBORG IS A SECOND LIVE CLIENT ON PROD - company 469, seven MOs
+  created, none run, 24 MR rows, zero release allocations. The working
+  files named Glutenull as the client and listed 469 among DEV's
+  unaccounted companies (P100). Found by a routine group-by that did
+  not have to include company_name and did. -> P156.
+
+END S107 APPEND
