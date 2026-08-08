@@ -147,6 +147,12 @@ FO-0004 / test1.39 / 1.39 Kg per unit / MO-0007
   ⚠ DO-0008 and DO-0009 carry packing_units 0.5 — THE FRACTIONAL
     FIXTURE. Step 3 needs them.
 
+⚠⚠ MO-0002 ON 464 NOW CARRIES **TWO** 2 Kg GINGER POWDER RETURNS.
+  ▶ IT IS THE PROOF FOR P168 — two returns, one row displayed, the
+    release figure moved once. ⚠⚠ DO NOT CLEAR IT.
+  ⚠ Its five other materials held steady throughout, which is what
+    makes the isolation clean.
+
 MO-0011  ⚠ NEW IN S108. A 2 Kg GINGER POWDER RETURN.
   Ginger Powder 9294.861 → 9296.861 Kg. The material return path is
   PROVEN CORRECT by this.
@@ -311,7 +317,7 @@ P135  ⚠ THE LAST P82 ITEM. THREE CELLS LEFT OF SIX.
       ⚠ SCOPE CORRECTED S108: qty_misc_release_su is a straight
         repoint plus a type guard — NOT a backfill. The backfill
         question is CLOSED by measurement.
-      ▶ PLAN STEPS 2.9 AND 6.
+      ▶ PLAN STEPS 1.9 AND 5.
 P136  Trace_ProductHeaderView RETURNS DUPLICATE ROWS.
 P137  MR NUMBERING IS GLOBAL, NOT PER-COMPANY. ⚠ ASK MINTY FIRST.
       ⚠ TWO CLIENTS SHARE ONE SEQUENCE, and P111 will read those
@@ -333,8 +339,8 @@ P150  ⚠⚠ THE SURVEY. ✓ DONE S108 — DATABASE, SCHEMA AND FRONTEND.
       ▶ THIS ITEM IS CLOSED.
 P151  EDIT-MLC AND THE YIELD DIALOG.
       ✓ THE YIELD DIALOG — DONE S107.
-      ⚠ :298 completeUnit → PLAN STEP 2.2
-      ⚠ html:258 + getWdu → PLAN STEP 4a
+      ⚠ :298 completeUnit → PLAN STEP 1.2
+      ⚠ html:258 + getWdu → PLAN STEP 3a
       ⚠ :295 lotReceived is DEAD. → P115.
 P152  ⚠⚠ read-rows.js SILENTLY DROPS COMPUTED COLUMNS AND ALIASES.
       ▶ FIX IT OR WARN IN ITS OWN OUTPUT. ⚠ IT CORRUPTS EVIDENCE.
@@ -349,7 +355,7 @@ P156  ⚠⚠ HAGENSBORG IS A SECOND LIVE CLIENT.
       ▶ NO COMPANY ID CAN BE REASONED ABOUT WITHOUT NAMING THE BOX.
       ▶ ACTIONS: correct 3B, re-scope P100, confirm no third company.
 P157  ⚠ WhC_GetMoProductReceivingDetails_SP SERVES NO UNIT COUNT.
-      ▶ PLAN STEP 4a. ⚠ NEEDS A MULTI-RECEIPT MO TO PROVE.
+      ▶ PLAN STEP 3a. ⚠ NEEDS A MULTI-RECEIPT MO TO PROVE.
 ```
 
 ### NEW IN S108
@@ -360,13 +366,13 @@ P158  ⚠⚠ Trace_ProductOneStepBackwardIP_SP — DIVIDES qty_allocated,
       product it divides by an ARBITRARY packaging row and returns
       DUPLICATE ROWS. ✓ Its sibling carries the filter WITH A COMMENT.
       ⚠ @formulationId SET and NEVER USED.
-      ▶ PLAN STEP 6c. MEDIUM.
+      ▶ PLAN STEP 5c. MEDIUM.
 
 P159  ⚠ Trace_ProductOneStepForwardIP_SP — divides qty_allocated while
       selecting receiveproducts.qty THREE LINES AWAY.
       ⚠ Four wildcard expansions (f.*, mpr.*, rp.*, mpr1.*). Column
         names will collide. Recorded, not urgent.
-      ▶ PLAN STEP 6c. MEDIUM.
+      ▶ PLAN STEP 5c. MEDIUM.
 
 P160  ⚠ WhC_GetMoIntermediateProducts_SP AND
       WhC_GetFormulaIntermediateProducts serve Kg only. ship_qty and
@@ -375,7 +381,7 @@ P160  ⚠ WhC_GetMoIntermediateProducts_SP AND
         CODE PATHS — these procedures AND the JS cascade. FIXING ONE
         LEAVES THE SCREEN DISAGREEING WITH ITSELF.
       ✓ NO SCHEMA CHANGE. Both columns exist and hold correct data.
-      ▶ PLAN STEP 4b/4c/4d. MEDIUM.
+      ▶ PLAN STEP 3b/3c/3d. MEDIUM.
 
 P161  ⚠ THREE UNCOUNTED QUANTITY TABLES — do_receive_products ·
       mlodetails · forecastsales. ▶ Row counts. Minutes. LOW.
@@ -384,18 +390,27 @@ P162  ⚠⚠ THE INGREDIENT REQUIREMENT MULTIPLIES BY THE STORED ROUNDED
       `batches` COLUMN. Minty's ruling S108: compute it live.
       ⚠⚠ SUPERSEDES THE S105 RULING. RULES 7 MUST BE REWRITTEN.
       ⚠⚠ IT MOVES NUMBERS ON A SCREEN BOTH CLIENTS USE DAILY.
-        OWN SESSION, OWN GATE. ▶ PLAN STEP 5. HIGH.
+        OWN SESSION, OWN GATE. ▶ PLAN STEP 4. HIGH.
 
 P163  ⚠⚠ THE PRODUCT-RETURN LOT PICKER IS EMPTY. PROVEN ON DEV.
       3.32 Kg demonstrably in store; the picker offered nothing.
       ▶ THE PATH HAS NEVER RUN BECAUSE IT CANNOT BE RUN.
-      ▶ PLAN STEP 7a. ⚠ ONE GREP CONFIRMS THE CANDIDATE. MEDIUM.
+      ▶ PLAN STEP 6.3. ⚠ ONE GREP CONFIRMS THE CANDIDATE. MEDIUM.
 
 P164  ⚠⚠ Formulations.js ADDS RETURNS INTO THE RELEASED TOTAL.
       Three branches. returnSum declared and never assigned.
-      ▶ RETURNING MATERIAL MAKES THE SCREEN SHOW MORE RELEASED.
-      ⚠⚠ LIVE ON BOTH CLIENTS TODAY. ✓ MLOManagement.js does the same
-        job correctly — copy it. ▶ PLAN STEP 1. HIGH.
+      ⚠⚠ PROVEN ON DEV S108 WITH A CONTROL. 464 MO-0002: one 2 Kg
+        return moved Ginger Powder from 122.640/122.640 to
+        124.640/122.640 while FIVE OTHER MATERIALS HELD STEADY.
+        Released 122.640, returned 2, so 120.640 is in the batch —
+        THE SCREEN SAYS 124.640.
+      ▶ THE SIGN IS INVERTED. An operator 2 Kg SHORT is told they are
+        2 Kg OVER, on the screen where the release decision is made,
+        with the bar full green.
+      ⚠ LIVE ON BOTH CLIENTS. ✓ MLOManagement.js ~:1116 does the same
+        job correctly.
+      ▶ PLAN STEP 6 — ⚠ MINTY MOVED THIS TO THE RETURN CAMPAIGN. It is
+        NOT fixed early. See P168 for why a half-fix is worse.
 
 P165  ⚠ ReturnMaterialProduct.js — TWO DEFECTS, SEPARATE COMMITS.
       (a) :68 adds a product return back to formulations.inventory
@@ -403,7 +418,7 @@ P165  ⚠ ReturnMaterialProduct.js — TWO DEFECTS, SEPARATE COMMITS.
           would only ever DECREASE. ⚠ UNTESTED — a code reading.
       (b) `status` is written and NEVER DECLARED in the model, then
           FILTERED ON. ⚠ SECOND LIVE INSTANCE OF TRAPS 3.
-      ▶ PLAN STEP 7b/7c. MEDIUM.
+      ▶ PLAN STEP 6.4/6.5. MEDIUM.
 
 P166  ⚠ do-details.component.ts:30,54 — a form field NAMED ship_qty
       holds qty_to_ship, WHICH IS Kg. The name says units, the content
@@ -418,6 +433,27 @@ P167  ⚠⚠ THE SEVEN-COPY MO QUANTITY HELPER. (qty/batch) × (batch/wgt)
       ▶ OWN SITTING. Read all seven callers, decide each, then edit.
       MEDIUM.
 ```
+
+P168  ⚠⚠ ONLY ONE RETURN PER MATERIAL IS COUNTED. A SECOND RETURN
+      AGAINST THE SAME MATERIAL AND LOT MOVES STOCK, IS WRITTEN TO THE
+      DATABASE, AND NEVER APPEARS on the MO or in the release figure.
+      ▶ PROVEN ON DEV S108, AFTER A HARD REFRESH:
+        returnmpreceivelots 634 and 635, both 2 Kg, material 8119,
+        lot 11217, mlc_id 11810 — BOTH ROWS PRESENT. Stock moved
+        twice, 9807.792 → 9811.792. THE MO SHOWS ONE ROW AND THE
+        RELEASE FIGURE MOVED ONCE.
+      ⚠⚠ A MATERIAL MOVEMENT WITH NO TRACE ON THE MANUFACTURING ORDER
+        IS A TRACEABILITY GAP, IN A TRACEABILITY SYSTEM. On a recall
+        that 2 Kg cannot be accounted for.
+      ⚠ IT INTERACTS WITH P164 — the sign error is VISIBLE, this is
+        INVISIBLE. Anyone checking the numbers finds the first and
+        never suspects the second.
+      ⚠⚠ THIS IS WHY MINTY MOVED THE WHOLE RETURN PATH TO LAST. Fix
+        P164 alone and the screen reads 120.640 — closer to the truth
+        and STILL WRONG, because this return is not counted. IT WOULD
+        THEN LOOK CORRECT.
+      ⚠ THE CODE HAS NOT BEEN READ. CAUSE UNKNOWN.
+      ▶ PLAN STEP 6.2. HIGH, AND SURVEYED BEFORE TOUCHED.
 
 ### ✓ CLOSED IN S108 — DELETE THESE LINES AT S109 CLOSE
 

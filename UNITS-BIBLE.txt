@@ -20,6 +20,13 @@ TWIN        UNITS-BIBLE.xlsx is the readable copy. THIS FILE IS THE ONE
 
 CREATED     S108, 7 August 2026
 CHANGE LOG  S108 — created. Four sources ruled by Minty. 47 sites mapped.
+            S108 close — PART 2 pointers only: the four return-path
+              rows (20, 42, 43 and the return half of 22) now point at
+              STEP 6, which Minty ruled is a SURVEY, not a fix list.
+              ⚠ NO STATUS CHANGED. A site is misaligned or not
+              regardless of when it is scheduled. THE MAP DESCRIBES THE
+              APP; PLAN DESCRIBES THE WORK. Keeping those separate is
+              why this file does not need rework when the plan moves.
 
 ══════════════════════════════════════════════════════════════════════
 PART 1 — THE RULE.  ⚠ MINTY'S RULINGS. DO NOT EDIT.
@@ -184,7 +191,10 @@ OK 19  Packaging cascade                Formulations.js cascade
 ──── MISALIGNED — 24 ────────────────────────────────────────────────
 XX 20  Release screen Released Qty      Formulations.js :1108,:1141,:1189
        Returns ADDED into the released total. ⚠ LIVE, BOTH CLIENTS.
-                                                          → STEP 1
+       ⚠⚠ PROVEN ON DEV S108 WITH A CONTROL — 464 MO-0002, one return
+         of 2 Kg moved Ginger from 122.640 to 124.640 while five other
+         materials held. THE SIGN IS INVERTED.
+                                                → STEP 6, RETURN PATH
 XX 21  MR product list + details        rejected-materials.ts:154
 XX 22  MO detail Completed              edit-mlc.ts:298
 XX 23  MO detail Completed              edit-mlo.ts:251     ⚠ UNRECORDED
@@ -194,31 +204,31 @@ XX 26  Traceability list produced       product-traceability.ts:109
 XX 27  Products list Stock On Hand      admin-formulation.ts:878
 XX 28  Edit-formulation In Store        formulation-edit-stock-info.ts:269
 XX 29  Traceability view misc release   Trace_ProductHeaderView
-                                                          → STEP 2
+                                                          → STEP 1
 XX 30  Dispatch order — WRITES units    add-dispatch-v2.ts:194
        ⚠⚠ DIVIDES, ROUNDS, AND STORES packing_units. The only site in
          this list that WRITES a wrong number rather than showing one.
-                                                          → STEP 3
+                                                          → STEP 2
 XX 31  MO detail receiving panel        edit-mlc.html:258 + getWdu:354
 XX 32  MO detail intermediate qty       WhC_GetMoIntermediateProducts_SP
 XX 33  MO detail intermediate stock     WhC_GetFormulaIntermediateProducts
 XX 34  MO detail Batch Materials        Formulations.js cascade
        ⚠⚠ 32/33 AND 34 FEED THE SAME SCREEN FROM DIFFERENT CODE PATHS.
          Fixing one leaves the screen disagreeing with itself.
-                                                          → STEP 4
+                                                          → STEP 3
 XX 35  Ingredient requirement           Formulations.js
 XX 36  Intermediate requirement         Formulations.js
-       Both multiply by the ROUNDED batches column.        → STEP 5
+       Both multiply by the ROUNDED batches column.        → STEP 4
 XX 37  Traceability view intermediate   Trace_ProductHeaderView
 XX 38  Traceability view SOH            Trace_ProductHeaderView SOH_su
 XX 39  IP trace backward                Trace_ProductOneStepBackwardIP_SP
 XX 40  IP trace forward                 Trace_ProductOneStepForwardIP_SP
 XX 41  Release details screen           ...ReleaseDetails_SP
        All need mprrecievelots.qty_allocated_units, which does not
-       exist yet.                                          → STEP 6
+       exist yet.                                          → STEP 5
 XX 42  Return details screen            ...ReturnDetails_SP
 XX 43  Product return stock balance     ReturnMaterialProduct.js:68
-                                                          → STEP 7
+                                                → STEP 6, RETURN PATH
 
 ──── TO REVIEW — 4. NOT DEFECTS. ────────────────────────────────────
 ?? 44  DO details field named ship_qty  do-details.ts:30,54
@@ -241,13 +251,12 @@ PART 3 — THE SCOREBOARD
 
   AFTER    FIXES                              GREEN  RED  REVIEW
   today    19 already follow the rule            19   24     4
-  step 1   the returnSum bug                     20   23     4
-  step 2   nine one-line repoints, one build     29   14     4
-  step 3   the dispatch write path               30   13     4
-  step 4   four procedure changes                34    9     4
-  step 5   the requirement calculation           36    7     4
-  step 6   the schema  ▶ P82 CLOSES              41    2     4
-  step 7   the return path                       43    0     4
+  step 1   nine one-line repoints, one build     28   15     4
+  step 2   the dispatch write path               29   14     4
+  step 3   four procedure changes                33   10     4
+  step 4   the requirement calculation           35    8     4
+  step 5   the schema  ▶ P82 CLOSES              40    3     4
+  step 6   the return path  ⚠ SURVEY FIRST       43    0     4
 
 ══════════════════════════════════════════════════════════════════════
 PART 4 — HOW TO PROVE A FIX

@@ -12,8 +12,11 @@ Disposable. Rewritten whole at every close.
     batch), computed live. Fractional preserved. 3 decimals on display.
   INGREDIENT REQUIREMENT — same live computation. ⚠ SUPERSEDES S105.
 
-⚠⚠ S109 IS A BUILDING SESSION. The survey is finished; do not re-open
-  it. Steps 1 and 2 need nothing built first.
+  THE RETURN PATH IS ITS OWN CAMPAIGN AND GOES LAST — surveyed before
+    anything is touched. ⚠ SEE STEP 6.
+
+⚠⚠ S109 IS A BUILDING SESSION for steps 1-5. The units survey is
+  finished; do not re-open it. Step 1 needs nothing built first.
 
 ---
 
@@ -37,8 +40,8 @@ Disposable. Rewritten whole at every close.
    Everything in this plan is verified against MO-0004 on company 474.
    ⚠⚠ DO NOT RELEASE MO-0004. IT IS THE BEFORE PICTURE.
 
-3  Then STEP 1 below. It is the only item that is wrong on both live
-   clients today.
+3  Then STEP 1 below — the nine repoints. They need nothing built
+   first and they are the biggest single move on the scoreboard.
 ```
 ---
 
@@ -49,57 +52,19 @@ P82 CLOSES WHEN Trace_ProductHeaderView RETURNS ZERO DIVISIONS.
 IT RETURNS 3.
 
 SOH_su SUBTRACTS intermediate_prd_su. THE VIEW CANNOT REACH ZERO
-WITHOUT THE mprrecievelots COLUMN (STEP 6).
+WITHOUT THE mprrecievelots COLUMN (STEP 5).
 
-▶ EVERYTHING ELSE IS INDEPENDENT. Steps 1, 2, 3 and 5 stand alone and
-  can ship in any order. Step 4 needs its own fixture. Step 7 gates
-  nothing.
-⚠ SO STEP 6 IS THE ONLY THING BETWEEN HERE AND P82 CLOSING.
+▶ EVERYTHING ELSE IS INDEPENDENT. Steps 1, 2 and 4 stand alone and can
+  ship in any order. Step 3 needs its own fixture.
+⚠ SO STEP 5 IS THE ONLY THING BETWEEN HERE AND P82 CLOSING.
+⚠⚠ STEP 6, THE RETURN PATH, GATES NOTHING AND IS A SURVEY, NOT A FIX.
 ```
 
 ---
 
 # THE JOB · S109
 
-## STEP 1 · THE returnSum BUG. ⚠ LIVE ON BOTH CLIENTS.
-
-```
-FILE     api/models/Formulations.js — getFormulaByIdForReleaseMaterial
-SITES    three branches: materials ~:1108, intermediates ~:1141,
-         packaging ~:1189. IDENTICAL SHAPE IN ALL THREE.
-
-WHAT IT DOES
-    let sum = 0; let returnSum = 0;
-    ...release...  sum = sum + qty_allocated;
-    ...return...   sum = sum + qty_return;    ⚠⚠ ADDED TO sum
-    released_qty  = sum          ⚠ INCLUDES RETURNS
-    returned_qty  = returnSum    ⚠ DECLARED, NEVER ASSIGNED = 0
-    remaining_qty = sum - 0
-▶ RETURNING MATERIAL MAKES THE SCREEN SHOW MORE RELEASED, NOT LESS.
-
-THE FIX — COPY THE WORKING VERSION, DO NOT INVENT ONE
-    api/models/MLOManagement.js ~:1116 does the identical job:
-        returnSum = returnSum + data.qty_return;
-        item['consumed_qty'] = sum - returnSum;
-    ⚠ SAME TWO QUANTITIES, ONE FILE RIGHT AND ONE WRONG.
-
-⚠ BEFORE ANY PATCH — ONE GREP:
-    grep -rn "released_qty\|remaining_qty\|returned_qty" \
-      src/app --include=*.html
-  WHICH COMPONENT CONSUMES THESE? If an operator uses "remaining" to
-  decide how much more to release, this is worse than cosmetic.
-
-FIXTURE  ✓ ALREADY EXISTS. Company 464, MO-0011, the 2 Kg Ginger
-         Powder return created S108. ⚠ DO NOT CLEAR IT.
-VERIFY   Released Qty goes DOWN by 2 Kg, not up. Returned Qty shows 2.
-         ⚠ Check all THREE branches — material, intermediate, packaging.
-BACKEND  Edited, committed and pushed ON DEV. No build step.
-         ⚠ READ HEAD AFTER THE PULL, BEFORE RESTARTING. RULES 2.
-         ⚠ git fetch origin FIRST. → P155.
-         ⚠ pm2 restart abletrace-dev, then sleep 8, then curl.
-```
-
-## STEP 2 · NINE ONE-LINE REPOINTS. ONE BUILD. NO BACKEND CHANGE.
+## STEP 1 · NINE ONE-LINE REPOINTS. ONE BUILD. NO BACKEND CHANGE.
 
 ```
 ⚠ THE MODEL IS ALREADY IN THE CODEBASE:
@@ -167,7 +132,7 @@ VERIFY   ⚠⚠ EVERY FIGURE UNCHANGED IN VALUE AND FREE OF FLOAT GARBAGE.
          ▶ THE Kg COLUMN IS THE CONTROL. → S106 LESSON 6.
 ```
 
-## STEP 3 · THE DISPATCH WRITE. OWN GATE.
+## STEP 2 · THE DISPATCH WRITE. OWN GATE.
 
 ```
 add-dispatch-v2.component.ts:194
@@ -184,10 +149,10 @@ add-dispatch-v2.component.ts:194
 ⚠ OWN COMMIT. It can be reverted alone.
 ```
 
-## STEP 4 · FOUR PROCEDURE CHANGES.
+## STEP 3 · FOUR PROCEDURE CHANGES.
 
 ```
-4a  WhC_GetMoProductReceivingDetails_SP — ADD receiveproducts.qty
+3a  WhC_GetMoProductReceivingDetails_SP — ADD receiveproducts.qty
     THEN edit-mlc.component.html:258 + getWdu:354
     ⚠⚠ PER-RECEIPT, NOT THE MO TOTAL. Using received_units here puts
       the WHOLE MO's figure on EVERY receipt row.
@@ -199,10 +164,10 @@ add-dispatch-v2.component.ts:194
       474 MO-0003 has ONE receipt of 41. ▶ BUILD A SECOND MO WITH TWO
       RECEIPTS, or the fix cannot be distinguished from the bug.
 
-4b  WhC_GetMoIntermediateProducts_SP   — ADD subrecipeformulation.ship_qty
-4c  WhC_GetFormulaIntermediateProducts — ADD ship_qty AND inventory_units
-4d  Formulations.js JS cascade — serve the unit figure to matList
-    ⚠⚠ 4b/4c FEED THE Intermediate Products BLOCK. 4d FEEDS THE Batch
+3b  WhC_GetMoIntermediateProducts_SP   — ADD subrecipeformulation.ship_qty
+3c  WhC_GetFormulaIntermediateProducts — ADD ship_qty AND inventory_units
+3d  Formulations.js JS cascade — serve the unit figure to matList
+    ⚠⚠ 3b/3c FEED THE Intermediate Products BLOCK. 3d FEEDS THE Batch
       Materials BLOCK. SAME SCREEN, SAME PRODUCT, TWO CODE PATHS.
       FIXING ONE LEAVES THE SCREEN DISAGREEING WITH ITSELF, WHICH IS
       WORSE THAN LEAVING IT ALONE. ▶ ALL THREE TOGETHER.
@@ -226,7 +191,7 @@ VERIFY  MO-0004 must show IP-0.37 as 15.923# (5.892 Kg) and WH Stock
         as 41# (15.170 Kg). ⚠ AND BOTH BLOCKS MUST AGREE.
 ```
 
-## STEP 5 · THE REQUIREMENT CALCULATION. ⚠ OWN SESSION.
+## STEP 4 · THE REQUIREMENT CALCULATION. ⚠ OWN SESSION.
 
 ```
 Formulations.js — replace mlcDetails.batches with a live computation.
@@ -253,10 +218,10 @@ VERIFY  MO-0004's Ginger Powder must read 2303.910 Kg — IDENTICAL to
         the Plan Quantity. It reads 2303.609 today.
 ```
 
-## STEP 6 · THE SCHEMA. ▶ P82 CLOSES HERE.
+## STEP 5 · THE SCHEMA. ▶ P82 CLOSES HERE.
 
 ```
-6a  ALTER TABLE mprrecievelots      ADD qty_allocated_units double DEFAULT 0;
+5a  ALTER TABLE mprrecievelots      ADD qty_allocated_units double DEFAULT 0;
     ALTER TABLE returnmpreceivelots ADD qty_return_units    double DEFAULT 0;
     ⚠⚠ TRAPS 3 — DECLARE IN THE WATERLINE ATTRIBUTES IN THE SAME BREATH
       or every write is SILENTLY DROPPED. J18/J20: received_units
@@ -270,11 +235,11 @@ VERIFY  MO-0004's Ginger Powder must read 2303.910 Kg — IDENTICAL to
     ✓ NO BACKFILL. Zero product-side allocations on either live client,
       zero product returns on either box. MEASURED S108.
 
-6b  WRITE PATH — createReleaseMaterialProductsV2
+5b  WRITE PATH — createReleaseMaterialProductsV2
     ⚠⚠ V2 IS THE LIVE PATH. J12 / JT9. The older single function in the
       SAME FILE is an INVISIBLE NO-OP. It cost S46 real time.
 
-6c  THE READS
+5c  THE READS
     Trace_ProductOneStepBackwardIP_SP  repoint ⚠ AND COPY THE MISSING
       whd_flag FILTER FROM ITS SIBLING. Its packaging join has none, so
       on a multi-level product it divides by an arbitrary row AND
@@ -285,7 +250,7 @@ VERIFY  MO-0004's Ginger Powder must read 2303.910 Kg — IDENTICAL to
     ...ReleaseDetails_SP               add the column
     ...ReturnDetails_SP                add the column
 
-6d  Trace_ProductHeaderView
+5d  Trace_ProductHeaderView
     intermediate_prd_su → the new column
     SOH_su              → subtract the five UNIT terms. No division.
     ⚠⚠ TRAPS 10 LIVES IN THIS OBJECT. The do_products CTE defines its
@@ -302,40 +267,95 @@ VERIFY  MO-0004's Ginger Powder must read 2303.910 Kg — IDENTICAL to
 ▶ P135 CLOSES · P82 CLOSES · TRAPS 10 RETIRES · P111 UNBLOCKS.
 ```
 
-## STEP 7 · THE RETURN PATH. GATES NOTHING.
+## ⚠⚠ STEP 6 · THE RETURN PATH. SURVEY FIRST. NOT A FIX LIST.
 
 ```
-7a  ⚠⚠ THE PRODUCT-RETURN LOT PICKER IS EMPTY — PROVEN ON DEV S108.
-    3.32 Kg demonstrably in store on receiveproducts row 11425
-    (recieved_qty 20, prev_received_qty 16.68). Picker offered nothing.
-    ▶ THE PATH HAS NEVER RUN BECAUSE IT CANNOT BE RUN.
-    CANDIDATE  return-mat.component.ts — recProductList declared [];
-      getReceiveProductByFormulaIdSuccess IMPORTED at :17 and
-      apparently NEVER SUBSCRIBED, while getRecLotsByMaterialID IS
-      (:161, :248).
-    ⚠ NOT PROVEN. ONE GREP CONFIRMS:
-        grep -n "getReceiveProductByFormulaId\|recProductList" \
-          <path>/return-mat/return-mat.component.ts
-      IF recProductList IS NEVER ASSIGNED → the subscription is missing.
-      IF IT IS ASSIGNED → the defect is upstream, in the action, the
-        effect, or the backend. READ THAT CHAIN BEFORE PATCHING.
-    ✓ release-mat-details DOES release intermediates from lots, so a
-      WORKING REFERENCE EXISTS. Copy it rather than invent.
+⚠⚠ MINTY'S RULING, S108 CLOSE: THE RETURN PATH IS ITS OWN CAMPAIGN AND
+  IT GOES LAST. IT IS SURVEYED BEFORE ANYTHING IS TOUCHED.
 
-7b  ReturnMaterialProduct.js:68 — a product return adds back to
-    formulations.inventory (Kg) and NEVER TOUCHES inventory_units.
-    ▶ The unit balance would only ever DECREASE.
-    ⚠⚠ UNTESTED. A CODE READING. Prove it once 7a lands. The prediction
-      is on the record: inventory UP, inventory_units UNCHANGED.
+WHY. ONE EVENING ON THIS PATH PRODUCED FIVE FINDINGS, AND CLAUDE GOT
+TWO PREDICTIONS WRONG ALONG THE WAY. That is a subject nobody
+understands yet, not a fix waiting to be applied. Steps 1-5 are mapped,
+named and proven. THIS IS NOT.
+▶ TREATING A SURVEY AS A FIX IS HOW A SESSION GETS EATEN.
 
-7c  TRAPS 3 on the same file — `status` is written in RMPOBJ, the model
-    DECLARES NO status ATTRIBUTE, so Waterline discards it. Then
-    getReturnMaterialProducts FILTERS ON status:"Active".
-    ▶ A filter on a value the write never stores.
-    ⚠ SEPARATE COMMIT from 7b. Different subject. J96's ordering hazard.
+⚠⚠ AND A HALF-FIX HERE IS WORSE THAN THE VISIBLE BUG. Correct the sign
+  error alone and the screen moves from 124.640 to 120.640 — closer to
+  the truth and STILL WRONG, because the second return is not counted
+  at all. IT WOULD THEN LOOK CORRECT. Do not touch one defect while
+  another is unexplained.
 
-7d  The return form takes WEIGHTS ONLY — measured on screen S108,
-    Minty confirmed. Needs a FORM FIELD, not just a column.
+⚠ ACCEPTED RISK, RECORDED AS A CHOICE AND NOT A SIDE EFFECT:
+  THE SIGN ERROR STAYS LIVE ON BOTH CLIENTS UNTIL THIS CAMPAIGN RUNS.
+  Material returns are occasional and both clients are low-volume on
+  this path. MINTY'S CALL, MADE KNOWINGLY.
+
+WHAT IS KNOWN SO FAR — SIX FINDINGS, NONE SCHEDULED
+  6.1  ⚠⚠ THE SIGN ERROR. Formulations.js three branches (~:1108,
+       ~:1141, ~:1189) ADD the return into the released total.
+       returnSum is declared and never assigned, so Returned Qty is
+       always 0 and Remaining is wrong.
+       ▶ PROVEN ON DEV S108 WITH A CONTROL:
+           MO-0002 before   Ginger 122.640/122.640, five other
+                            materials all matching
+           after one return Ginger 124.640/122.640, THE OTHER FIVE
+                            UNCHANGED
+         The return was ADDED. Released 122.640, returned 2, so 120.640
+         is actually in the batch — THE SCREEN SAYS 124.640.
+         ⚠ THE SIGN IS INVERTED. An operator 2 Kg SHORT is told they
+           are 2 Kg OVER, and the bar is full green.
+       ✓ MLOManagement.js ~:1116 does the identical job CORRECTLY.
+
+  6.2  ⚠⚠ ONLY ONE RETURN PER MATERIAL IS COUNTED. A second return
+       against the same material and lot MOVES STOCK, IS WRITTEN TO
+       THE DATABASE, AND NEVER APPEARS on the MO or in the figure.
+       ▶ PROVEN S108, AFTER A HARD REFRESH:
+           returnmpreceivelots rows 634 and 635, both 2 Kg, material
+           8119, lot 11217, mlc_id 11810 — BOTH PRESENT.
+           Stock moved twice, 9807.792 → 9811.792.
+           MO Return Details shows ONE row. Release figure moved ONCE.
+       ⚠⚠ A MATERIAL MOVEMENT WITH NO TRACE ON THE MANUFACTURING ORDER
+         IS A TRACEABILITY GAP, IN A TRACEABILITY SYSTEM. On a recall
+         that 2 Kg cannot be accounted for.
+       ⚠ AND IT INTERACTS WITH 6.1 — the sign error is VISIBLE, this is
+         INVISIBLE. Anyone checking the numbers finds the first and
+         never suspects the second.
+       ⚠ THE CODE FOR THIS HAS NOT BEEN READ. Cause unknown.
+
+  6.3  ⚠⚠ THE PRODUCT-RETURN LOT PICKER IS EMPTY. 3.32 Kg demonstrably
+       in store on receiveproducts row 11425; the picker offered
+       nothing. ▶ THE PRODUCT-RETURN PATH HAS NEVER RUN BECAUSE IT
+       CANNOT BE RUN.
+       CANDIDATE: return-mat.component.ts — recProductList declared [];
+       getReceiveProductByFormulaIdSuccess imported at :17 and
+       apparently NEVER SUBSCRIBED, while getRecLotsByMaterialID IS
+       (:161, :248). ⚠ NOT PROVEN. One grep confirms.
+
+  6.4  ⚠ ReturnMaterialProduct.js:68 — a product return adds back to
+       formulations.inventory (Kg) and NEVER TOUCHES inventory_units.
+       ▶ The unit balance would only ever DECREASE.
+       ⚠ UNTESTED. A code reading. 6.3 blocks proving it.
+
+  6.5  ⚠ TRAPS 3 on the same file — `status` written in RMPOBJ, NOT
+       DECLARED in the model so Waterline discards it, then FILTERED ON
+       in getReturnMaterialProducts. A filter on a value the write
+       never stores.
+
+  6.6  ⚠ THE RETURN FORM TAKES WEIGHTS ONLY. The operator is never
+       asked for a unit count. Needs a FORM FIELD, not just a column.
+
+▶ HOW TO RUN THIS CAMPAIGN, WHEN IT COMES
+  1  SURVEY FIRST, NO CODE. Read the whole path end to end — the two
+     screens, the write model, the six read sites that sum qty_return,
+     and the procedures. Same method as S108: sweep, shortlist, read.
+  2  ⚠ MEASURE BEFORE ARGUING. S108 closed three questions by query
+     that reasoning had got wrong.
+  3  THEN a plan, THEN fixes. Not before.
+  ✓ THE FIXTURES ALREADY EXIST — 464 MO-0011 (one material return) and
+    464 MO-0002 (TWO returns on one material, which is 6.2's proof).
+    ⚠⚠ DO NOT CLEAR EITHER.
+
+⚠ THIS CAMPAIGN GATES NOTHING. P82 closes at STEP 5.
 ```
 
 ---
