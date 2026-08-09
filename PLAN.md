@@ -1,22 +1,20 @@
 # PLAN
 
-Written at close of: S108 · for S109.
+Written at close of: S109 · for S110.
 Disposable. Rewritten whole at every close.
 
-⚠ MINTY'S RULINGS, S108:
-  "full picture before any more fixing" — the survey ran. IT IS DONE.
-    Database, schema and frontend. 47 sites mapped.
-  THE FOUR SOURCES — ING-REQ · PK-CASCADE · STOCK ON HAND ·
-    PRD-TO-DATE. Now the UNITS BIBLE. ⚠ MINTY'S DOCUMENT.
-  INTERMEDIATE REQUIREMENT = qty per batch × (MO units ÷ units per
-    batch), computed live. Fractional preserved. 3 decimals on display.
-  INGREDIENT REQUIREMENT — same live computation. ⚠ SUPERSEDES S105.
+⚠ S109 SHIPPED THREE THINGS AND ALL THREE ARE ON BOTH BOXES.
+  281e8bd8  four repoints, frontend
+  f4c98e91  the dispatch write, frontend
+  JR20      Trace_ProductHeaderView, database, each box separately
+  ▶ NOTHING IS PENDING PROMOTION. The boxes are in step.
 
-  THE RETURN PATH IS ITS OWN CAMPAIGN AND GOES LAST — surveyed before
-    anything is touched. ⚠ SEE STEP 6.
+⚠⚠ THE SCOREBOARD: 28 GREEN · 16 RED · 4 REVIEW, of 48.
+  ▶ S110's TARGET IS STEP 3 — ROWS 31, 32, 33 AND 34. Minty's ranking.
+  ▶ IT TAKES THE BOARD TO 32 GREEN.
 
-⚠⚠ S109 IS A BUILDING SESSION for steps 1-5. The units survey is
-  finished; do not re-open it. Step 1 needs nothing built first.
+⚠⚠ THE PRECONDITION IS ALREADY BUILT. Do not spend the session making a
+  fixture. 474 MO-0005 has TWO RECEIPTS. See STEP 3 FIXTURE below.
 
 ---
 
@@ -24,385 +22,241 @@ Disposable. Rewritten whole at every close.
 
 ```
 1  Health check both boxes. RULES → OPEN.
-   EXPECT  dev  backend 51e9f4e · frontend checkout c2a52d8e · clean
-                pm2 abletrace-dev ↺260 · 200
-                served build dev-a94f39c3b2bf
-           prod backend 51e9f4e · frontend checkout 9bce0238 · clean
-                pm2 abletrace-backend ↺340 · 200
-                served build prod-a94f39c3b2bf
-   ⚠ ALSO the view at three divisions on EACH box:
+   ⚠ ALSO the view at TWO divisions on EACH box:
        mysql abletracelab_live -e "SHOW CREATE VIEW
          Trace_ProductHeaderView\G" | grep -o "/" | wc -l
-     Expect 3 on EACH. ⚠ Run on each separately.
+     Expect 2 on EACH. 3 means JR20 did not survive. 0 means P135 is
+     done, which it is not.
    ⚠ IF ANY LAYER DIFFERS, STOP AND RECONCILE THE RECORD FIRST.
 
-2  ⚠ READ THE UNITS BIBLE PART 4 — the fixture and the three proofs.
-   Everything in this plan is verified against MO-0004 on company 474.
-   ⚠⚠ DO NOT RELEASE MO-0004. IT IS THE BEFORE PICTURE.
+2  ⚠ CLOSE ROW 23. It is green in the map and NEVER SEEN ON A SCREEN.
+   edit-mlo.ts:251 shipped with the other three repoints.
+   ▶ Open 474 MO-0003 through the MLO-Management route and read
+     Completed Quantity. EXPECT 41.000# (15.170 Kg).
+   ⚠ /MLO-Management REDIRECTED to Mfg-lot-codes under test260805's
+     roles in S109. If it redirects again, try a different role, and if
+     it still will not open, RECORD IT AS UNREACHABLE AND STOP CHASING
+     IT. S109 spent four attempts on this. Ten minutes, then move on.
 
-3  Then STEP 1 below — the nine repoints. They need nothing built
-   first and they are the biggest single move on the scoreboard.
-```
----
-
-## ⚠ THE ONE DEPENDENCY THAT SHAPES THE ORDER
-
-```
-P82 CLOSES WHEN Trace_ProductHeaderView RETURNS ZERO DIVISIONS.
-IT RETURNS 3.
-
-SOH_su SUBTRACTS intermediate_prd_su. THE VIEW CANNOT REACH ZERO
-WITHOUT THE mprrecievelots COLUMN (STEP 5).
-
-▶ EVERYTHING ELSE IS INDEPENDENT. Steps 1, 2 and 4 stand alone and can
-  ship in any order. Step 3 needs its own fixture.
-⚠ SO STEP 5 IS THE ONLY THING BETWEEN HERE AND P82 CLOSING.
-⚠⚠ STEP 6, THE RETURN PATH, GATES NOTHING AND IS A SURVEY, NOT A FIX.
+3  Then STEP 3 below. All four rows together.
 ```
 
 ---
 
-# THE JOB · S109
-
-## STEP 1 · NINE ONE-LINE REPOINTS. ONE BUILD. NO BACKEND CHANGE.
+## ⚠ WHY STEP 3 IS FOUR ROWS AND NOT ONE
 
 ```
-⚠ THE MODEL IS ALREADY IN THE CODEBASE:
-    stock-info.component.ts:188
-      inventory_units                → the # count, READ STORED
-      inventory_units × wduKgPerUnit → the Kg, DERIVED
-  ▶ COPY THAT SHAPE. DO NOT INVENT A THIRD.
+32, 33 AND 34 FEED ONE SCREEN FROM DIFFERENT CODE PATHS.
+Edit-Mlc's Intermediate Products block is served by TWO STORED
+PROCEDURES; its Batch Materials block is served by a JS CASCADE.
+▶ FIXING ONE LEAVES THE SCREEN DISAGREEING WITH ITSELF, WHICH IS WORSE
+  THAN LEAVING IT ALONE.
+Row 31 is the receiving panel on the SAME screen. It belongs in the
+same sitting.
 
-  2.1  rejected-materials.component.ts:154   ⚠ THE MR SITE
-       qty_rejected / wgt → element.qty_rejected_units
-       ✓ SERVED BY WhC_GetAllRejectedList_SP SINCE S104. JR16.
-
-  2.2  edit-mlc.component.ts:298     received_qty / wgt
-  2.3  edit-mlo.component.ts:251     → mlcDetails.received_units
-  2.4  start-mlc.component.ts:155
-       ✓ SERVED BY WhC_GetMoDetails_SP SINCE S106. JR17.
-       ⚠ P151 RECORDS ONLY edit-mlc. 2.3 AND 2.4 ARE IN NO DOCUMENT —
-         found by the S108 survey.
-       ⚠ edit-mlc:295 lotReceived is DEAD (J114). DO NOT PATCH IT.
-
-  2.5  mfg-lot-codes.component.html:69
-       getWdu(element, received_qty) → element.received_units
-       ⚠ CONFIRM THE LIST PROC SERVES IT. One grep before writing.
-
-  2.6  product-traceability.component.ts:109
-       received_qty / wgt → item.received_units
-       ✓ Trace_ProductProdLotView SERVES IT. JR7d, S51.
-
-  2.7  admin-formulation.component.ts:878    ⚠ THE PRODUCTS LIST
-       inventory / wgt → inventory_units
-       ⚠ VERIFY THE READ PATH FIRST — this list comes through Waterline,
-         not a stored proc. inventory_units IS a declared attribute
-         (JR2) so it SHOULD ride the populate. CONFIRM, DO NOT ASSUME.
-
-  2.8  formulation-edit-stock-info.component.ts:269
-       (inventory/batchQty) × (batchQty/wduKgPerUnit) → inventory_units
-       ✓ ITS SIBLING stock-info.ts:188 IS CORRECT. COPY IT LINE FOR LINE.
-       ⚠ ONLY THE In Store LINE IS WRONG in that file. :143-243 are
-         already right. DO NOT TOUCH THEM.
-
-  2.9  Trace_ProductHeaderView — qty_misc_release_su
-       → rmp.qty_rejected_units, ⚠ AND ADD A TYPE GUARD
-       ⚠ The mr CTE has NO type filter. Material MRs carry no mlc_id so
-         they group out today — SAFE BY DATA, NOT BY CODE (J74).
-       ✓ NO BACKFILL. Hagensborg's 24 MR rows are ALL MATERIAL and must
-         stay at zero per JR15. MEASURED S108. QUESTION CLOSED.
-       ⚠ THIS ONE IS A DATABASE OBJECT — each box separately, JR16
-         method, own backup. It does NOT ride the frontend build.
-
-⚠⚠ NOT IN THIS STEP — the seven-copy helper (BIBLE #46). It looks like
-  a bulk repoint and is NOT. Each caller passes a different source and
-  SOME DIVISIONS ARE CORRECT. J114: closed-mlcs.html:84 is right while
-  :79 is wrong, same helper, adjacent lines. ▶ OWN SITTING.
-
-GATE     one build, deploy dev, verify, then prod.
-         ⚠ FRONTEND IS EDITED ON THE MAC. A push builds dev; prod needs
-           a manual dispatch. ⚠ Shift+Cmd+R after deploy.
-         ⚠ READ THE COMMIT STAMP IN THE ARTIFACT NAME, not the position
-           in an ls. → J117.
-FIXTURE  464 / test1.39 at 1.39 Kg/unit for the unit sites.
-         474 / MO-0003 and MO-0004 for the rest.
-VERIFY   ⚠⚠ EVERY FIGURE UNCHANGED IN VALUE AND FREE OF FLOAT GARBAGE.
-         A CHANGED VALUE IS A FAILURE, NOT A FIX — these all return the
-         arithmetically right number today.
-         ▶ THE Kg COLUMN IS THE CONTROL. → S106 LESSON 6.
+⚠ THIS IS NOT LIKE STEP 1. Those were four independent lines. These
+  four are one screen.
 ```
 
-## STEP 2 · THE DISPATCH WRITE. OWN GATE.
+---
+
+# THE JOB · S110
+
+## STEP 3 · FOUR ROWS. ONE SCREEN. ⚠ A FRONTEND BUILD RIDES WITH IT.
+
+### FIXTURE — ⚠ BUILT IN S109. DO NOT DISTURB.
 
 ```
-add-dispatch-v2.component.ts:194
-    packing_units: Math.round(((qtyToShip / batch_qty)
-                               × (batch_qty / wgt)) ...)
-▶ IT DIVIDES TO PRODUCE packing_units AND WRITES IT TO THE ROW.
-  EVERY OTHER SITE SHOWS A WRONG NUMBER. THIS ONE STORES ONE — and
-  Trace_ProductHeaderView reads that column for TWO cells (JR18).
-⚠ J88: clean today only because Math.round lands on the right integer.
-  A FRACTIONAL DO WOULD ROUND WRONG AND SILENTLY SHIP A DIFFERENT
-  QUANTITY THAN AUTHORISED. Fractional DOs are permitted by design.
-  ⚠ DO-0008 and DO-0009 on dev carry packing_units 0.5. USE THEM.
-⚠ IT IS A WRITE. Before-and-after ROW comparison, NOT a screen check.
-⚠ OWN COMMIT. It can be reverted alone.
+DEV COMPANY 474 · MO-0005 · IP-0.37 · 13 units · lot Pdt-260808-1
+  TWO RECEIPTS: 5 units (1.850 Kg) and 8 units (2.960 Kg)
+  receiveproducts.qty holds 5 and 8 ON SEPARATE ROWS.
+  mlomanagement.received_units totals 13.
+
+⚠⚠ THE TWO ARE UNEQUAL DELIBERATELY. If a fix wrongly serves the MO
+  TOTAL to each row, BOTH rows read 13 and the error is unmistakable.
+  If it serves the per-receipt count, they read 5 and 8.
+  ▶ THAT DISTINCTION IS THE WHOLE TEST AND IT DID NOT EXIST BEFORE S109.
+
+⚠ ROW 31 IS ARITHMETICALLY CORRECT ON THIS FIXTURE TODAY. getWdu
+  divides each receipt's OWN Kg — 1.850/0.37 = 5, 2.960/0.37 = 8.
+  ▶ THE DEFECT IS THE ROUTE, NOT THE NUMBER. DO NOT EXPECT THE SCREEN
+    TO LOOK BROKEN. A changed value here would be a FAILURE.
+
+⚠ Batches on MO-0005 reads 0.684 — fractional, because 13/19 does not
+  resolve. That is a SECOND STEP 4 FIXTURE, free. Leave it.
 ```
 
-## STEP 3 · FOUR PROCEDURE CHANGES.
+### 3a · ROW 31 — THE RECEIVING PANEL
 
 ```
-3a  WhC_GetMoProductReceivingDetails_SP — ADD receiveproducts.qty
-    THEN edit-mlc.component.html:258 + getWdu:354
-    ⚠⚠ PER-RECEIPT, NOT THE MO TOTAL. Using received_units here puts
-      the WHOLE MO's figure on EVERY receipt row.
-    ⚠ getWdu's ONLY live caller is html:258. Fixing it makes getWdu
-      DEAD → delete in the same pass. P115.
-    ⚠ MEASURED S107: the proc selects id, internalCode, mlc_id,
-      mlc_packaging_id, received_at, recieved_qty. NO unit count.
-    FIXTURE ⚠ NEEDS A MULTI-RECEIPT MO to prove per-receipt vs total.
-      474 MO-0003 has ONE receipt of 41. ▶ BUILD A SECOND MO WITH TWO
-      RECEIPTS, or the fix cannot be distinguished from the bug.
+WhC_GetMoProductReceivingDetails_SP — ADD receiveproducts.qty
+THEN edit-mlc.component.html:258, and DELETE getWdu:354.
 
-3b  WhC_GetMoIntermediateProducts_SP   — ADD subrecipeformulation.ship_qty
-3c  WhC_GetFormulaIntermediateProducts — ADD ship_qty AND inventory_units
-3d  Formulations.js JS cascade — serve the unit figure to matList
-    ⚠⚠ 3b/3c FEED THE Intermediate Products BLOCK. 3d FEEDS THE Batch
-      Materials BLOCK. SAME SCREEN, SAME PRODUCT, TWO CODE PATHS.
-      FIXING ONE LEAVES THE SCREEN DISAGREEING WITH ITSELF, WHICH IS
-      WORSE THAN LEAVING IT ALONE. ▶ ALL THREE TOGETHER.
-    ✓ BOTH COLUMNS ALREADY EXIST AND HOLD CORRECT DATA — ship_qty
-      since 2022 (J81), inventory_units since S46 (JR2).
-    ⚠ AN ALIAS CHANGE RIDES WITH THIS, so a FRONTEND BUILD is involved.
-      Unlike JR7e and JR18.
+⚠⚠ PER-RECEIPT, NOT THE MO TOTAL. mlcDetails.received_units is the
+  cumulative figure; putting it here prints the whole MO's number on
+  every receipt row. THAT IS WHY THE FIXTURE HAS TWO RECEIPTS.
+✓ MEASURED S107: the proc selects id, internalCode, mlc_id,
+  mlc_packaging_id, received_at, recieved_qty. NO UNIT COUNT. → P157.
+✓ MEASURED S109: receiveproducts.qty holds the per-receipt unit count.
+  It is the column to add.
+⚠ getWdu's ONLY live caller is html:258. Fixing it makes getWdu DEAD →
+  delete in the same pass. P115.
+  ⚠ getWdu at edit-mlc.ts:354 is a DIFFERENT function from
+    mfg-lot-codes.ts:124. Same name, two files. Do not confuse them.
+⚠ edit-mlc.ts:295 lotReceived is DEAD ALREADY (J114). DO NOT PATCH IT.
+```
 
-METHOD  JR16's, on each box from its OWN backup:
+### 3b · ROW 32 — WhC_GetMoIntermediateProducts_SP
+
+```
+⚠ READ IN FULL S109. NO GUESSWORK REMAINS.
+
+IT SERVES TODAY:
+  fosubrecipe.id, fosubrecipe.formulation_id
+  subrecipeformulation.formulation_id AS subrecipeformulation_formulation_id
+  subrecipeformulation.qty            AS subrecipeformulation_qty      ⚠ Kg
+  formulations.myCode / internalCode / title / uom
+  formulations.inventory              AS formulations_inventory        ⚠ Kg
+  unitmeasurement.unit_name           AS unit_name
+JOINS: fosubrecipe → subrecipeformulation → formulations → unitmeasurement
+WHERE: fosubrecipe.formulation_id = formulationId
+
+▶ ADD  subrecipeformulation.ship_qty AS subrecipeformulation_ship_qty
+✓ NO NEW JOIN. subrecipeformulation is already joined.
+✓ THE COLUMN ALREADY EXISTS AND HOLDS CORRECT DATA — ship_qty since
+  2022 (J81).
+⚠ THIS PROC ALIASES EVERYTHING. The new column needs an alias too, and
+  the frontend must read the NEW NAME. → A BUILD RIDES WITH THIS.
+⚠ DEFINER is `admin`@`%`. STRIP IT ON RECREATE (JR16).
+```
+
+### 3c · ROW 33 — WhC_GetFormulaIntermediateProducts
+
+```
+⚠ READ IN FULL S109. Near-twin of 3b — IDENTICAL joins, identical
+  WHERE, same parameter. ONE DIFFERENCE AND IT MATTERS.
+
+IT SERVES TODAY:
+  fosubrecipe.formulation_id AS fosubrecipe_formulation_id
+  subrecipeformulation.qty                      ⚠ Kg, AND UNALIASED
+  subrecipeformulation.formulation_id
+  formulations.title / internalCode / myCode / uom / allergen / status_id
+  formulations.inventory                        ⚠ Kg, AND UNALIASED
+  unitmeasurement.unit_name AS unit_name
+
+▶ ADD  formulations.inventory_units
+✓ NO NEW JOIN. NO ALIAS NEEDED — this proc selects bare, so the column
+  arrives under its own name. CLEANER THAN 3b.
+✓ inventory_units has existed since S46 (JR2).
+⚠⚠ THE TWO PROCS ALIAS DIFFERENTLY. 3b returns
+  `formulations_inventory`; 3c returns `inventory`. ANY FRONTEND CHANGE
+  MUST BE WRITTEN AGAINST THE RIGHT ONE. Confirm which component reads
+  which proc BEFORE editing the template.
+⚠ DEFINER is `admin`@`%`. STRIP IT ON RECREATE.
+```
+
+### 3d · ROW 34 — THE JS CASCADE
+
+```
+Formulations.js — serve the unit figure to matList for intermediate
+rows. ⚠ NOT READ IN S109. This is the one piece of Step 3 still to be
+surveyed. ▶ READ IT FIRST.
+
+⚠⚠ 3b/3c FEED THE Intermediate Products BLOCK. 3d FEEDS THE Batch
+  Materials BLOCK. SAME SCREEN, SAME PRODUCT, TWO CODE PATHS.
+  ▶ ALL FOUR TOGETHER OR NONE.
+```
+
+### METHOD AND GATE
+
+```
+DATABASE OBJECTS — JR16's method, on each box from its OWN backup:
   1  SHOW CREATE to a .bak file. Verify line and join counts.
   2  Build the new object ON THE BOX by node script. Anchors asserted
-     to appear EXACTLY ONCE.
-  3  diff old against new. Join count must hold.
+     to appear EXACTLY ONCE. Join count asserted to HOLD.
+  3  diff old against new.
   4  Apply. Read back OUT OF THE DATABASE, not off the file.
   5  CALL it, then check the screen.
-⚠ NEVER PASTE A PROC BODY INTO A TERMINAL. SSH input buffer overflow
-  discards the overflow SILENTLY. → JR16.
-⚠ Recreate WITHOUT the definer clause. RDS can refuse one.
+⚠ NEVER PASTE A PROC BODY INTO A TERMINAL. → JR16.
+⚠⚠ KEEP THE SCRIPT SHORT. S109's 35-line heredoc truncated in zsh and
+  left the shell hanging. The 12-line rewrite worked first time. Find
+  lines BY CONTENT rather than embedding long literals.
+⚠ Recreate WITHOUT the definer clause. ⚠ grep "DEFINER=" must return 0;
+  grep "DEFINER" returns 1 on a correct file because SQL SECURITY
+  DEFINER is a different clause and STAYS.
 
-VERIFY  MO-0004 must show IP-0.37 as 15.923# (5.892 Kg) and WH Stock
-        as 41# (15.170 Kg). ⚠ AND BOTH BLOCKS MUST AGREE.
-```
+FRONTEND — edited on the MAC. A push builds dev; prod needs a manual
+  dispatch. ⚠ Read the commit stamp in the artifact name. ⚠ Cmd+Q the
+  browser, not a hard reload — J66.
 
-## STEP 4 · THE REQUIREMENT CALCULATION. ⚠ OWN SESSION.
+GATE  Dev first, all four together, screen-proven. Then prod.
+      ⚠ THE PROCS AND THE BUILD MUST LAND TOGETHER ON EACH BOX. A proc
+        with a new alias and an old frontend shows nothing; an old proc
+        with a new frontend shows undefined.
 
-```
-Formulations.js — replace mlcDetails.batches with a live computation.
-    quantity per batch × (MO shipping units ÷ shipping units per batch)
-✓ PACKAGING ALREADY DOES THIS TEN LINES AWAY IN THE SAME FILE:
-    pack['final_qty'] = cascadeQty × mlcDetails.qty
-  ▶ THE PRECEDENT EXISTS. Materials and intermediates use batches;
-    packaging uses the MO. Make all three consistent.
-⚠ FRACTIONAL RESULTS ARE CORRECT. Round to three decimals FOR DISPLAY
-  ONLY. Full precision in the calculation and in storage.
-
-⚠⚠ THIS MOVES NUMBERS ON A SCREEN BOTH CLIENTS USE DAILY. Glutenull
-  has 26 live allocations. OWN SESSION, OWN GATE, OWN COMMIT.
-⚠⚠ IT REVERSES MINTY'S S105 RULING, AND RULES 7 STATES THAT RULING IN
-  PLAIN WORDS. RULES 7 MUST BE REWRITTEN, NOT ANNOTATED.
-  ▶ CLAUDE DRAFTS THE WORDING. MINTY READS IT BEFORE ANY EDIT.
-⚠ PAST MOs WILL SHOW A REQUIREMENT DIFFERING SLIGHTLY FROM WHAT WAS
-  RELEASED. THE RELEASE ROWS STAND — Minty's S106 ruling, a figure
-  recording what physically happened is not a wrong row.
-  ⚠ 474 MO-0003 ALREADY CARRIES ONE: released 15.171 Kg against a true
-    requirement of 15.170. SOMEBODY WILL NOTICE AND ASK.
-
-VERIFY  MO-0004's Ginger Powder must read 2303.910 Kg — IDENTICAL to
-        the Plan Quantity. It reads 2303.609 today.
-```
-
-## STEP 5 · THE SCHEMA. ▶ P82 CLOSES HERE.
-
-```
-5a  ALTER TABLE mprrecievelots      ADD qty_allocated_units double DEFAULT 0;
-    ALTER TABLE returnmpreceivelots ADD qty_return_units    double DEFAULT 0;
-    ⚠⚠ TRAPS 3 — DECLARE IN THE WATERLINE ATTRIBUTES IN THE SAME BREATH
-      or every write is SILENTLY DROPPED. J18/J20: received_units
-      banked 0 for sessions until declared.
-    ⚠ BOTH TABLES TOGETHER. Release unit-anchored + return Kg-only =
-      the two sides of one movement in different bases.
-    ⚠ DOUBLE, NOT INT. Fractional units are permitted. J88.
-    ⚠ OWN BACKUP PER BOX. Prod dump needs --single-transaction
-      --skip-lock-tables --set-gtid-purged=OFF, then
-      grep -c "INSERT INTO" BEFORE TRUSTING IT. JR15.
-    ✓ NO BACKFILL. Zero product-side allocations on either live client,
-      zero product returns on either box. MEASURED S108.
-
-5b  WRITE PATH — createReleaseMaterialProductsV2
-    ⚠⚠ V2 IS THE LIVE PATH. J12 / JT9. The older single function in the
-      SAME FILE is an INVISIBLE NO-OP. It cost S46 real time.
-
-5c  THE READS
-    Trace_ProductOneStepBackwardIP_SP  repoint ⚠ AND COPY THE MISSING
-      whd_flag FILTER FROM ITS SIBLING. Its packaging join has none, so
-      on a multi-level product it divides by an arbitrary row AND
-      returns duplicates. The forward proc carries the filter WITH A
-      COMMENT explaining it.
-      ⚠ @formulationId is SET and NEVER USED. Decide, do not leave.
-    Trace_ProductOneStepForwardIP_SP   repoint
-    ...ReleaseDetails_SP               add the column
-    ...ReturnDetails_SP                add the column
-
-5d  Trace_ProductHeaderView
-    intermediate_prd_su → the new column
-    SOH_su              → subtract the five UNIT terms. No division.
-    ⚠⚠ TRAPS 10 LIVES IN THIS OBJECT. The do_products CTE defines its
-      own alias `qty_shipped` summing do.qty_to_ship — KG. The real
-      column is UNITS. RESOLVE EVERY NAME TO ITS DEFINITION.
-    ⚠ RE-CAPTURE A FRESH BACKUP. The S107 .bak files hold the
-      SIX-division version; the live object has three.
-
-▶ ACCEPTANCE, AND IT IS THE WHOLE GATE:
-    mysql abletracelab_live -e "SHOW CREATE VIEW
-      Trace_ProductHeaderView\G" | grep -o "/" | wc -l
-  MUST RETURN 0 ON BOTH BOXES.
-  ⚠ grep -c COUNTS LINES AND THIS OBJECT IS ONE LINE.
-▶ P135 CLOSES · P82 CLOSES · TRAPS 10 RETIRES · P111 UNBLOCKS.
-```
-
-## ⚠⚠ STEP 6 · THE RETURN PATH. SURVEY FIRST. NOT A FIX LIST.
-
-```
-⚠⚠ MINTY'S RULING, S108 CLOSE: THE RETURN PATH IS ITS OWN CAMPAIGN AND
-  IT GOES LAST. IT IS SURVEYED BEFORE ANYTHING IS TOUCHED.
-
-WHY. ONE EVENING ON THIS PATH PRODUCED FIVE FINDINGS, AND CLAUDE GOT
-TWO PREDICTIONS WRONG ALONG THE WAY. That is a subject nobody
-understands yet, not a fix waiting to be applied. Steps 1-5 are mapped,
-named and proven. THIS IS NOT.
-▶ TREATING A SURVEY AS A FIX IS HOW A SESSION GETS EATEN.
-
-⚠⚠ AND A HALF-FIX HERE IS WORSE THAN THE VISIBLE BUG. Correct the sign
-  error alone and the screen moves from 124.640 to 120.640 — closer to
-  the truth and STILL WRONG, because the second return is not counted
-  at all. IT WOULD THEN LOOK CORRECT. Do not touch one defect while
-  another is unexplained.
-
-⚠ ACCEPTED RISK, RECORDED AS A CHOICE AND NOT A SIDE EFFECT:
-  THE SIGN ERROR STAYS LIVE ON BOTH CLIENTS UNTIL THIS CAMPAIGN RUNS.
-  Material returns are occasional and both clients are low-volume on
-  this path. MINTY'S CALL, MADE KNOWINGLY.
-
-WHAT IS KNOWN SO FAR — SIX FINDINGS, NONE SCHEDULED
-  6.1  ⚠⚠ THE SIGN ERROR. Formulations.js three branches (~:1108,
-       ~:1141, ~:1189) ADD the return into the released total.
-       returnSum is declared and never assigned, so Returned Qty is
-       always 0 and Remaining is wrong.
-       ▶ PROVEN ON DEV S108 WITH A CONTROL:
-           MO-0002 before   Ginger 122.640/122.640, five other
-                            materials all matching
-           after one return Ginger 124.640/122.640, THE OTHER FIVE
-                            UNCHANGED
-         The return was ADDED. Released 122.640, returned 2, so 120.640
-         is actually in the batch — THE SCREEN SAYS 124.640.
-         ⚠ THE SIGN IS INVERTED. An operator 2 Kg SHORT is told they
-           are 2 Kg OVER, and the bar is full green.
-       ✓ MLOManagement.js ~:1116 does the identical job CORRECTLY.
-
-  6.2  ⚠⚠ ONLY ONE RETURN PER MATERIAL IS COUNTED. A second return
-       against the same material and lot MOVES STOCK, IS WRITTEN TO
-       THE DATABASE, AND NEVER APPEARS on the MO or in the figure.
-       ▶ PROVEN S108, AFTER A HARD REFRESH:
-           returnmpreceivelots rows 634 and 635, both 2 Kg, material
-           8119, lot 11217, mlc_id 11810 — BOTH PRESENT.
-           Stock moved twice, 9807.792 → 9811.792.
-           MO Return Details shows ONE row. Release figure moved ONCE.
-       ⚠⚠ A MATERIAL MOVEMENT WITH NO TRACE ON THE MANUFACTURING ORDER
-         IS A TRACEABILITY GAP, IN A TRACEABILITY SYSTEM. On a recall
-         that 2 Kg cannot be accounted for.
-       ⚠ AND IT INTERACTS WITH 6.1 — the sign error is VISIBLE, this is
-         INVISIBLE. Anyone checking the numbers finds the first and
-         never suspects the second.
-       ⚠ THE CODE FOR THIS HAS NOT BEEN READ. Cause unknown.
-
-  6.3  ⚠⚠ THE PRODUCT-RETURN LOT PICKER IS EMPTY. 3.32 Kg demonstrably
-       in store on receiveproducts row 11425; the picker offered
-       nothing. ▶ THE PRODUCT-RETURN PATH HAS NEVER RUN BECAUSE IT
-       CANNOT BE RUN.
-       CANDIDATE: return-mat.component.ts — recProductList declared [];
-       getReceiveProductByFormulaIdSuccess imported at :17 and
-       apparently NEVER SUBSCRIBED, while getRecLotsByMaterialID IS
-       (:161, :248). ⚠ NOT PROVEN. One grep confirms.
-
-  6.4  ⚠ ReturnMaterialProduct.js:68 — a product return adds back to
-       formulations.inventory (Kg) and NEVER TOUCHES inventory_units.
-       ▶ The unit balance would only ever DECREASE.
-       ⚠ UNTESTED. A code reading. 6.3 blocks proving it.
-
-  6.5  ⚠ TRAPS 3 on the same file — `status` written in RMPOBJ, NOT
-       DECLARED in the model so Waterline discards it, then FILTERED ON
-       in getReturnMaterialProducts. A filter on a value the write
-       never stores.
-
-  6.6  ⚠ THE RETURN FORM TAKES WEIGHTS ONLY. The operator is never
-       asked for a unit count. Needs a FORM FIELD, not just a column.
-
-▶ HOW TO RUN THIS CAMPAIGN, WHEN IT COMES
-  1  SURVEY FIRST, NO CODE. Read the whole path end to end — the two
-     screens, the write model, the six read sites that sum qty_return,
-     and the procedures. Same method as S108: sweep, shortlist, read.
-  2  ⚠ MEASURE BEFORE ARGUING. S108 closed three questions by query
-     that reasoning had got wrong.
-  3  THEN a plan, THEN fixes. Not before.
-  ✓ THE FIXTURES ALREADY EXIST — 464 MO-0011 (one material return) and
-    464 MO-0002 (TWO returns on one material, which is 6.2's proof).
-    ⚠⚠ DO NOT CLEAR EITHER.
-
-⚠ THIS CAMPAIGN GATES NOTHING. P82 closes at STEP 5.
+VERIFY on 474 MO-0005 and MO-0004:
+  MO-0005  the two receipt rows read 5 and 8. ⚠ NOT 13 AND 13.
+  MO-0004  IP-0.37 required must read 15.923# — a UNIT COUNT under a
+           header that says "# (UOM)". It reads 5.891 Kg today.
+           WH Stock must read 41# — it reads 15.170 Kg today.
+  ⚠⚠ BOTH BLOCKS ON THE SCREEN MUST AGREE WITH EACH OTHER.
+  ⚠⚠ THE CONTROL — Pouch 4347.000 Ea on MO-0004 MUST NOT MOVE.
 ```
 
 ---
 
-## WHAT DONE LOOKS LIKE
+## AFTER STEP 3 — THE ORDER, AND THE REASONING
 
 ```
-UNITS BIBLE scoreboard moves 19 → 29 after step 2.
-Returning material makes Released Qty go DOWN.
-Both Edit-Mlc blocks show units# (Kg) AND AGREE WITH EACH OTHER.
-MO-0004's Ginger Powder reads 2303.910 Kg, matching Plan Quantity.
-Trace_ProductHeaderView returns ZERO divisions on BOTH boxes.
+STEP 4   the requirement calculation. TWO ROWS → 34 green.
+         ⚠ OWN SESSION, OWN GATE. It moves numbers on a screen BOTH
+           CLIENTS USE DAILY. Glutenull has 26 live allocations.
+         ⚠ IT REVERSES MINTY'S S105 RULING AND RULES 7 MUST BE
+           REWRITTEN, NOT ANNOTATED. Claude drafts; Minty reads first.
+         ✓ TWO FIXTURES NOW: 474 MO-0004 (batches 1.769) and MO-0005
+           (batches 0.684).
 
-⚠ THE CONTROL AT EVERY STEP: Pouch 4347.000 Ea on MO-0004 MUST NOT
-  MOVE. If a packaging figure shifts, THE FIX IS WRONG, NOT THE DATA.
+STEP 5   the schema. FIVE ROWS → 39 green. ▶ P82 CLOSES HERE.
+         ⚠ OPEN A SESSION ON IT. Do not arrive at it. Schema change on
+           a live client DB + Waterline attribute (TRAPS 3, or every
+           write vanishes) + write path + five read sites.
+         ✓ NO BACKFILL. Measured S108.
+
+STEP 6   the return path. THREE ROWS → 42 green.
+         ⚠⚠ SURVEY FIRST. NOT A FIX LIST. Minty's ruling, S108.
+         ⚠ THE SIGN ERROR STAYS LIVE ON BOTH CLIENTS UNTIL THEN.
+           Accepted knowingly. P164 / P168.
+
+ROW 46   the seven-copy helper → 43 green. Own sitting, all seven
+         callers read first. ⚠ ROW 25 IS ONE OF THEM.
+
+ROW 48   the transposed labels → 44 green. P169.
 ```
 
-## IF S109 CLOSES EARLY
+---
+
+## IF S110 CLOSES EARLY
 
 ```
-P147  CREATE A MATERIAL MR ON DEV COMPANY 474. One minute.
-P131  EDIT CLOSED MO LINE 133 — a unit count with a WEIGHT label.
-      ⚠ COVERED BY RULES 7. One line.
-NEW   Row counts on three uncounted tables — do_receive_products ·
-      mlodetails · forecastsales. Minutes.
-P152  PUT A WARNING IN read-rows.js's OWN OUTPUT. It corrupts evidence.
+P169  ⚠ RAISE IT PROPERLY FIRST — row 48 has no queue number yet.
+P171  Read what mlodetails.rcp_qty and do_receive_products.qty_to_dispatch
+      actually hold. 129 rows of the first are LIVE CLIENT DATA on prod
+      and appear in no map.
+P115  DELETE THE DEAD CODE. Three named in S109:
+        rejected-materials.ts:152-154 getShippingUnits — no caller
+        MLOManagement.js getMLCbyId (:648) and getMLCbyIdV2 (:424)
+      ⚠ V3 IS THE LIVE ONE. The controller proves it.
+P102  ⚠ THE REBOOT. Prod 28 updates, dev 8, restart required,
+      FIFTEEN DAYS, TWO LIVE CLIENTS. ⚠ S105 PROVED DEV CAN FAIL TO
+      BOOT SILENTLY. ▶ VERIFY PM2 STARTS ON BOOT FIRST.
 ```
 
-## NOT IN S109
+## NOT IN S110
 
 ```
-THE SEVEN-COPY HELPER  ⚠ own sitting. Read all seven callers first.
-P102 THE REBOOT        ⚠ own sitting. Prod 28 updates, dev 8, restart
-                         required, thirteen days, TWO LIVE CLIENTS.
-                       ⚠ S105 PROVED DEV CAN FAIL TO BOOT SILENTLY.
-                       ▶ WORTH DOING BEFORE P111.
-P156 HAGENSBORG        the documentation half.
-                       ⚠ S108 FOUND MORE: dev's 469 is test260710@,
-                         prod's 469 is HAGENSBORG. THE TWO BOXES DO NOT
-                         SHARE A COMPANY-ID NAMESPACE. No company id can
-                         be reasoned about without naming the box.
-P111 QUICKBOOKS        planning only, no code. ⚠ Four things will meet
-                       it: TRAPS 3 on the new column · J97's multiple
-                       invoices pointing at a child table · soproducts
-                       storing no unit count (P138) · MR numbering
-                       global across two clients (P137).
-                       ▶ WHEN IT STARTS IS MINTY'S CALL.
+STEP 4, STEP 5, STEP 6   each needs its own session. See above.
+THE SEVEN-COPY HELPER    own sitting.
+P111 QUICKBOOKS          planning only, and Minty's call when.
 ```
 
 ---
@@ -412,62 +266,49 @@ P111 QUICKBOOKS        planning only, no code. ⚠ Four things will meet
 ```
 RULES.md · NOW.md · TRAPS.md · PLAN.md
 ⚠⚠ UNITS-BIBLE.txt — PARTS 2 AND 4. The map and the fixture.
-⚠ ASK MINTY FOR JR15, JR16 and JR17 — steps 4 and 6 follow them exactly.
-⚠ ASK MINTY FOR SECTION 3A.5 rows 3, 11 and 12 before touching the
-  release write path.
-⚠ QUANTITY-SURVEY-S108.md holds the evidence behind every item here.
-  CORRECTION-PLAN.md holds the phase reasoning. Neither is needed to
-  execute; both are there if a finding is questioned.
+⚠ ASK MINTY FOR JR16 AND JR20. Step 3 follows JR16's method exactly,
+  and JR20 is the most recent worked example of it.
+⚠ ASK MINTY FOR J119 if a Step 3 finding is questioned — it holds the
+  procedure reads.
 ```
 
 ---
 
-## THE LESSONS S108 EARNED
+## THE LESSONS S109 EARNED
 
 ```
-1  ⚠⚠ THE SURVEY FOUND IN ONE DAY WHAT TWENTY SESSIONS OF ACCIDENTS
-   DID NOT. All six previous instances of this pattern were found while
-   working on something else. The first systematic sweep found two more
-   IN THE FIRST TWO OBJECTS IT OPENED.
-   ▶ THE SIX FIXED BEFORE S108 WERE NOT THE WHOLE PROBLEM. THEY WERE
-     THE ONES THAT HAPPENED TO BE IN FRONT OF SOMEONE.
+1  ⚠⚠ A SURVEY CAN BE WRONG IN BOTH DIRECTIONS. S108 warned the map
+   would MISS sites. It also MIS-MARKED THREE THAT WERE ALREADY FIXED —
+   one of them carrying a comment in the code saying so.
+   ▶ THREE OF NINE STEP 1 ITEMS NEEDED NO WORK. READ THE LINE BEFORE
+     PATCHING IT.
 
-2  ⚠⚠ THE TWO WORST FINDINGS CAME FROM ONE TEST, NOT FROM READING.
-   The unreachable picker and the returnSum bug both surfaced from a
-   ten-minute return on dev. Neither would have come from code reading.
-   ▶ RULES 1 IS RIGHT. REPRODUCE FIRST. J109 cost four hours learning
-     this; S108 earned it back in ten minutes.
+2  ⚠ AN ADDRESS IS A CLAIM. Row 21 named a dividing function that
+   NOTHING CALLS, while the live template three files away was already
+   correct AND type-gated. ▶ CONFIRM THE CALLER, NOT JUST THE CODE.
 
-3  ⚠ A SWEEP IS ONLY AS GOOD AS ITS PATTERN, AND A CONTROL CAN PASS
-   WHILE THE PATTERN IS WRONG.
-   The first division sweep required whitespace after the slash and
-   missed `qty_allocated/fo2.wgt_kgs_per_unit`. It reported a dividing
-   object as CLEAN. The control — a known 3-division view — PASSED
-   ANYWAY, because the pattern matched what it was built on.
-   ▶ A CONTROL PROVES THE PATTERN MATCHES WHAT ITS AUTHOR IMAGINED.
-     IT PROVES NOTHING ABOUT SHAPES HE DID NOT. OVER-REPORT BY DESIGN.
+3  ⚠⚠ "ONE-LINE REPOINT" DESCRIBES A CALL SITE AND SAYS NOTHING ABOUT
+   WHAT IT CALLS. Row 25 looked identical to three that were repoints.
+   It calls a helper that divides, with six other callers, some of which
+   pass it the right thing. ▶ READ THE FUNCTION BODY FIRST.
 
-4  ⚠ THREE SWEEPS, THREE DIFFERENT ANSWERS: 49 files, then 56, then 19
-   more that mention no weight at all. Each pass found what the last
-   one could not see.
-   ▶ SAY WHAT A SWEEP CANNOT SEE, IN THE SAME BREATH AS ITS RESULT.
+4  ⚠⚠ A ROUND-TRIP IS WORSE THAN A DIVISION AND LOOKS THE SAME.
+   Row 30's operator TYPES the unit count; the app derives Kg from it
+   correctly, then divides that Kg back to rebuild the count it was
+   already given. ▶ ASK WHERE THE NUMBER CAME FROM, NOT JUST WHAT THE
+   LINE DOES.
 
-5  ⚠⚠ CLAUDE DECIDED A SCOPE BOUNDARY THAT WAS MINTY'S TO DECIDE.
-   After the frontend file list came back Claude wrote "we do not need
-   to survey all 49" and moved on. MINTY CAUGHT IT.
-   ▶ A BOUNDARY IS A RECOMMENDATION, NOT A STEP. Put it to Minty.
+5  ⚠ A GATE THAT CANNOT SHOW THE THING IT IS GATING IS NOT A GATE.
+   The first prod MR query filtered to Product and would have hidden
+   Hagensborg — the entire reason for the gate. MINTY CAUGHT IT.
 
-6  ⚠ MEASUREMENT CLOSED THREE QUESTIONS THAT REASONING HAD GOT WRONG.
-   The MR backfill (Hagensborg's rows are ALL MATERIAL), the
-   intermediate backfill (zero client rows), and the product-return
-   backfill (zero rows anywhere). Claude's S107 position paper had
-   argued the first one at length and had it WRONG.
-   ▶ MEASURE BEFORE ARGUING. A ruling that measurement can dissolve
-     should never reach Minty as a ruling.
+6  ⚠ ON PROD, "NOTHING MOVED" WAS THE PASS CONDITION. Glutenull is
+   0.32 Kg per unit, so the old division landed exactly and a correct
+   fix is INVISIBLE there. The fixtures at 0.37 and 0.7 on dev are the
+   only reason any of it was provable. → TRAPS 9, earned again.
 
-7  A FIXTURE BUILT TO EXPOSE A BUG EXPOSED IT BEFORE ANY CODE CHANGED.
-   474's MO-0004 shows Plan Quantity 2303.910 Kg and Ginger Powder
-   2303.609 Kg — 0.301 apart, on the same page, from the same recipe.
-   ▶ 19 AND 13 ARE PRIME AND SHARE NO FACTORS. THAT IS WHY. Choose
-     fixture numbers that cannot resolve cleanly.
+7  ⚠ KEEP PASTED SCRIPTS SHORT. A 35-line heredoc truncated in zsh and
+   hung the shell. The 12-line rewrite worked first time. ⚠ THIS FAILED
+   LOUDLY; JR16's S104 version of the same thing failed SILENTLY and
+   nearly killed a stored procedure.
 ```

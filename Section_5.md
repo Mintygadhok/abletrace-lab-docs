@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J118 — ⚠ the next one is J119, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR18. Last appended: S108, Aug 7 2026.
+number. Highest is J119 — ⚠ the next one is J120, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR20. Last appended: S109, Aug 8 2026.
 ⚠ J116 IS NOT A STANDALONE ENTRY. It was assigned inside JR15 and is easily
 missed by anyone scanning for J-headings. That is why this header said J115 for
 four sessions. S85 and S86 both asked for it to be corrected; S107 did it.
@@ -3905,3 +3905,271 @@ BLAST RADIUS: none. No code, no prod touch, no schema change. Dev
 
 END S108 APPEND
 
+S109 - APPENDED 8 AUG 2026
+NUMBERING: highest existing entry is J118. This is J119. Highest JR was
+JR18; the view change below is JR20 - see the note. No JT entry.
+
+⚠ HEADER TO CORRECT IN THIS COMMIT: Section 5's own header reads
+"Highest is J118 ... Highest JR is JR18. Last appended: S108, Aug 7
+2026." After this commit it is J119 / JR20 / S109, Aug 8 2026.
+
+
+JR20. Trace_ProductHeaderView - qty_misc_release_su reads the stored
+     unit count, and the mr CTE gains a type guard  [P135, S109]
+
+     ⚠ NUMBERED JR20, NOT JR19. JR19 IS DELIBERATELY UNUSED. The next
+       reader will look for a JR19 and there is none - this note is why.
+       ⚠ IF A JR19 IS EVER WRITTEN IT MUST NOT BE THIS OBJECT.
+
+     THE VIEW HAD THREE DIVISIONS AFTER S107 (JR18). THIS REMOVES ONE.
+     TWO REMAIN - intermediate_prd_su and SOH_su - and both are blocked
+     on the STEP 5 schema change, not on anything here.
+
+     THE CHANGE, two parts, and they must land together:
+
+     1  The misc_release CTE gains a unit sum AND a type filter:
+          coalesce(sum(`rmp`.`qty_rejected`),0) AS `qty_misc_release`,
+          coalesce(sum(`rmp`.`qty_rejected_units`),0)
+            AS `qty_misc_release_units`
+          from `rejectmaterialandproduct` `rmp`
+          where (`rmp`.`type` = 'Product')
+          group by `rmp`.`mlc_id`
+
+     2  The final_results expression stops dividing:
+          coalesce(`mr`.`qty_misc_release_units`,0) AS `qty_misc_release_su`
+        WAS:
+          coalesce((`mr`.`qty_misc_release` / `fop`.`wgt_kgs_per_unit`),0)
+
+     ⚠ THE CTE READS `rejectmaterialandproduct` DIRECTLY WITH NO JOINS,
+       so qty_rejected_units (JR15) was already in scope. No new join.
+
+     ⚠ THE TYPE GUARD CHANGES NOTHING TODAY AND IS NOT DECORATION.
+       Material MRs carry NO mlc_id, so they group under NULL and the
+       outer `left join misc_release mr on mm.id = mr.mlc_id` never
+       matches them. They were excluded BY THE DATA, not by any filter -
+       the J74 shape. The guard makes the intent explicit so a future
+       reader cannot "tidy" the join and silently pull material weights
+       into a product unit figure.
+
+     ⚠⚠ WHAT THIS TRADED, AND IT IS THE PART TO READ BEFORE JUDGING A
+       FIGURE. The old division was ARITHMETICALLY CORRECT. It swaps
+       "derived but correct" for "stored but incomplete" on any MR row
+       written BEFORE JR15 landed in S103 - those rows never stored a
+       unit count, so they hold 0.
+       PROVEN ON DEV: MO-0001's 41.7 Kg cell went 5 -> 3. Two MR rows on
+         mlc_id 11809 - 16.68 Kg with units 0, and 25.02 Kg with units 3.
+         The true total is 5. THE VIEW NOW READS 3 AND IS WRONG THERE.
+       ⚠ THIS IS EXACTLY WHAT JR18 PREDICTED and it is why S107 left
+         this cell alone. It was shipped anyway because MEASUREMENT
+         showed no client row can be affected - see the gate below.
+       ⚠ THE SYMPTOM IS VISIBLE IN THE APP TOO: dev MR-0007 renders
+         "0# (16.680 Kg)" on the MR list. -> P170.
+
+     THE GATE, MEASURED ON PROD BEFORE ANY WRITE - and it is the whole
+     reason this was safe to ship:
+       471 GLUTENULL    ZERO MR rows of any type.
+       469 HAGENSBORG   24 rows, ALL Material, ALL with mlc_id NULL.
+                        Already 0 before, still 0 after.
+       464 sandbox      3 Product rows, all units 0. THE ONLY ROWS THAT
+                        MOVED, and Minty ruled sandbox accuracy does not
+                        matter.
+     ⚠ THE FIRST VERSION OF THAT QUERY FILTERED type='Product' AND WOULD
+       HAVE HIDDEN HAGENSBORG ENTIRELY. Minty caught it and asked for
+       both clients by name. A GATE THAT CANNOT SHOW THE THING IT IS
+       GATING IS NOT A GATE.
+
+     BACKUPS - ⚠ CAPTURED FRESH. The S107 .bak files hold the
+       SIX-division version and were useless here.
+         /home/ubuntu/Trace_ProductHeaderView.bak-S109-DEV.txt
+         /home/ubuntu/Trace_ProductHeaderView.bak-S109-PROD.txt
+       BOTH 6193 bytes, 3 slashes, 22 joins - BYTE-IDENTICAL, as JR18
+       recorded them before S107.
+     Applied via: /home/ubuntu/fix-header-view-S109.sql        (dev)
+                  /home/ubuntu/fix-header-view-S109-PROD.sql   (prod)
+     Recreated WITHOUT the DEFINER clause. It was `admin`@`%`.
+       ⚠ `SQL SECURITY DEFINER` IS A DIFFERENT CLAUSE AND STAYS. A grep
+         for "DEFINER" returns 1 on a correct file; grep for "DEFINER="
+         must return 0. S109 nearly stopped on that false alarm.
+
+     METHOD - JR16's, on each box from its OWN backup:
+       1  SHOW CREATE to a .bak file. Verify bytes, slashes, joins.
+       2  Build the new object ON THE BOX by node script. Both anchors
+          asserted to appear EXACTLY ONCE; slash count asserted to fall
+          by exactly one; join count asserted to HOLD at 22. The script
+          refuses to write if any assertion fails.
+       3  Apply with `mysql abletracelab_live < file`.
+       4  Read the slash and join counts back OUT OF THE DATABASE.
+       5  Query the fixture against a baseline captured BEFORE the write.
+     NO VIEW TEXT EVER TRAVELLED THROUGH SSH.
+
+     VERIFICATION IS ARITHMETIC AND IT IS THE WHOLE GATE:
+         mysql abletracelab_live -e "SHOW CREATE VIEW
+           Trace_ProductHeaderView\G" | grep -o "/" | wc -l
+       6 = pre-S107 . 3 = post-S107 . 2 = post-S109 . 0 = P135 complete.
+
+     PROVEN, PROD, GLUTENULL - and NOTHING MOVED, which is the pass
+       condition on a round ratio:
+         MO-0001  qty_produced_su 1750 . SOH_su 1750
+         MO-0002  qty_produced_su 802
+         qty_misc_release_su 0 on every client row, before and after.
+       Screen: Edit-Mlc and the yield dialog both read
+         1750.000# (560.000 Kg). Glutenull is 0.32 Kg per unit, so the
+         old division landed EXACTLY. ⚠ THE FIX IS INVISIBLE ON PROD BY
+         DESIGN. It was only provable on dev's 0.37 and 0.7 fixtures.
+
+     P136 STANDS: the view still returns DUPLICATE ROWS. Pre-existing,
+       not caused by and not fixed by this change.
+     Applied to BOTH boxes 8 Aug 2026.
+
+
+J119 - S109. FOUR REPOINTS, THE DISPATCH WRITE AND THE VIEW. AND THE
+SURVEY WAS WRONG IN BOTH DIRECTIONS. STATUS: CLOSED. Frontend commits
+281e8bd8 and f4c98e91, both on both boxes. Database change is JR20.
+
+⚠⚠ THE OUTPUT IS NOT IN THIS ENTRY. The map is UNITS-BIBLE.txt/.xlsx.
+  This entry records what was learned. 28 green, 16 red, 4 review, of 48.
+
+WHAT SHIPPED
+  281e8bd8  four one-line repoints, frontend
+              edit-mlc.ts:298, edit-mlo.ts:251, start-mlc.ts:155
+                -> mlcDetails.received_units
+              formulation-edit-stock-info.ts:269
+                -> formulation.inventory_units, UNITS HALF ONLY
+  f4c98e91  add-dispatch-v2.ts:183,194 - the dispatch write
+  JR20      Trace_ProductHeaderView, both boxes
+  ⚠ Prod carries all three. Deployed on a weekend, deliberately -
+    Minty's point that nobody is working.
+
+⚠⚠ THE SURVEY WAS WRONG IN BOTH DIRECTIONS, AND THAT IS THE LESSON.
+  S108 warned the map would MISS sites. It also MIS-MARKED THREE THAT
+  WERE ALREADY FIXED:
+    row 26  product-traceability.ts:113 - already reading received_units
+            AND CARRYING ITS OWN COMMENT SAYING SO. P118 again.
+    row 27  admin-formulation.ts:878 - already reading inventory_units.
+    row 21  ⚠ THE INSTRUCTIVE ONE. The map named
+            rejected-materials.ts:154 getShippingUnits, which DOES
+            divide - AND IS DEAD. Nothing calls it. The LIVE template at
+            rejected-materials.html:63 already reads qty_rejected_units
+            and is TYPE-GATED so material MRs correctly show Kg alone.
+            ▶ AN ADDRESS IS A CLAIM. Confirm the caller, not the code.
+  ▶ THREE OF NINE STEP 1 ITEMS NEEDED NO WORK AT ALL. Reading the lines
+    before patching them is what found that. Patching first would have
+    produced three commits that built clean, deployed clean, and changed
+    nothing - the J117 shape.
+
+⚠⚠ "ONE-LINE REPOINT" IS A CLAIM ABOUT A CALL SITE AND SAYS NOTHING
+  ABOUT WHAT IT CALLS. Row 25, mfg-lot-codes.html:69, looked identical
+  to rows 22-24. It calls getWdu, and getWdu DIVIDES:
+      (qty / batch) * (batch / wgt_kgs_per_unit)
+  Feeding it the stored count would have divided the COUNT and printed
+  a wrong number where a right one stands today. It has six other
+  callers and SOME PASS IT THE RIGHT THING (J114: closed-mlcs.html:84
+  right, :79 wrong, adjacent lines).
+  ✓ THE CORRECT SHAPE IS EIGHT LINES BELOW IT - getPlannedKg:133 takes
+    stored units and multiplies, with an S42 comment.
+  ▶ READ THE FUNCTION BODY BEFORE CALLING SOMETHING A REPOINT. -> P167.
+
+⚠⚠ ROW 30 WAS A ROUND-TRIP, NOT A DIVISION, AND THAT IS WORSE.
+  add-dispatch-v2: the operator TYPES the shipping-unit count into
+  qtyWdu - a REQUIRED form field. getQty:101 derives the Kg from it by
+  MULTIPLYING, which is correct. Then :194 DIVIDED THAT Kg BACK to
+  rebuild the count. The typed number was discarded and reconstructed
+  from its own derived weight, then STORED.
+  ▶ FIXED: sum qtyWdu across the lots. No division.
+  ▶ PROVEN IN THE ROW, NOT ON A SCREEN. Dev 474, IP-0.37 at 0.37 Kg per
+    unit: 7 units typed -> 2.59 Kg derived -> packing_units STORED AS 7.
+  ✓ PREVENTIVE ON PROD, NOT CORRECTIVE. NEITHER CLIENT HAS EVER CREATED
+    A DISPATCH ORDER - all nine on prod are sandbox, all on round ratios
+    (100/5, 20/1, 5/1) where the old division landed exactly. NOTHING TO
+    HEAL. Measured, not assumed.
+  ⚠ J88's FRACTIONAL HAZARD DID NOT APPLY HERE. This line rounds to
+    three decimals, not to an integer. The bare Math.round J88 describes
+    is create-packslips:246, a DIFFERENT site. PLAN had them conflated.
+
+⚠ THE ENDPOINT NAME LIED AND THE CONTROLLER TOLD THE TRUTH.
+  edit-mlo dispatches to `mlo/getMLCbyId`. MLOManagementController:38
+  routes that to getMLCbyIdV3 - the modern function - with the old
+  getMLCbyId call COMMENTED OUT at :39. The model still holds all three
+  versions (V3 at 386, V2 at 424, original at 648).
+  ▶ REASONING FROM THE ROUTE NAME WOULD HAVE GOT THIS WRONG. The
+    controller is the arbiter. -> P115 for the two dead siblings.
+
+⚠ ROW 23 IS GREEN AND UNPROVEN, AND IT IS RECORDED THAT WAY.
+  edit-mlo.ts:251 shipped with the other three and was NEVER SEEN ON A
+  SCREEN. /MLO-Management redirects to Mfg-lot-codes under this user's
+  roles. It shares getMLCbyIdV3 and WhC_GetMoDetails_SP with rows 22 and
+  24, both proven, so the risk is LOW. ⚠ LOW IS NOT PROVEN.
+  ▶ FIRST ITEM AT THE NEXT OPEN.
+
+⚠ A GATE THAT CANNOT SHOW THE THING IT IS GATING IS NOT A GATE.
+  The first prod MR query filtered type='Product' and would have hidden
+  HAGENSBORG - whose 24 rows are the whole reason the gate exists.
+  MINTY CAUGHT IT. The corrected query grouped by company AND type and
+  named both clients. Same family as RULES 1: a check that cannot return
+  the answer is not a check.
+
+⚠ THE LONG HEREDOC TRUNCATED AGAIN. A ~35-line patch script pasted into
+  zsh left the shell at `heredoc>` with the terminator lost. Nothing ran
+  and nothing was written - the failure was loud. The rewrite was 12
+  lines and worked first time. ⚠ SAME FAILURE AS JR16's S104 ATTEMPT,
+  which was silent and far worse. ▶ KEEP PASTED SCRIPTS SHORT. Find
+  lines by content rather than embedding long literals.
+
+⚠ TWO WRONG-BOX SSH ATTEMPTS, BOTH HARMLESS, BOTH CAUGHT BY THE SAME
+  THING: the pem does not exist on the boxes, so the attempt fails
+  instead of succeeding somewhere unintended. RULES 2 held.
+
+MEASUREMENTS TAKEN, ALL READ-ONLY
+  P161 CLOSED. Row counts on the three uncounted tables:
+                          DEV   PROD
+    do_receive_products     28      9
+    mlodetails              91    129
+    forecastsales            0      0
+  ▶ forecastsales IS EMPTY ON BOTH BOXES - not a quantity site, unbuilt
+    scope, consistent with J53's correction that the forecast explosion
+    was never built. IT COMES OFF THE LIST.
+  ⚠ mlodetails carries 129 rows on PROD - live client data in a table
+    with a quantity column (rcp_qty) that appears in NO map. -> P171.
+
+  THE BASELINE FOR THE REPOINTS, captured BY QUERY before any code was
+  written: 23 MOs across companies 464 and 474, received_units compared
+  against received_qty / wgt_kgs_per_unit. THEY AGREED ON EVERY ROW.
+  ▶ A REPOINT CANNOT BE VERIFIED AGAINST A MEMORY. Measure first.
+  ⚠ TWO ROWS IN THAT BASELINE ARE WHY THE WORK MATTERED:
+      464 MO-0009  received_qty STORED AS 15.290000000000001
+      464 MO-0015  7 / 0.7 = 9.999999999999998 in binary
+    Both printed correctly ONLY because every screen rounds to three
+    decimals. -> J114: A DISPLAY-ROUNDED SCREEN CANNOT REVEAL A DIVISION.
+
+PREWORK BANKED FOR S110 - ⚠ THIS IS THE POINT OF THE CLOSE
+  1  ⚠⚠ THE MULTI-RECEIPT FIXTURE EXISTS. Dev 474 MO-0005, IP-0.37,
+     13 units, lot Pdt-260808-1, TWO RECEIPTS of 5 and 8.
+     receiveproducts.qty holds 5 and 8 on separate rows; received_units
+     totals 13. ⚠ THE TWO ARE UNEQUAL DELIBERATELY - if a fix wrongly
+     serves the MO total, BOTH rows read 13 and the error is obvious.
+     ⚠⚠ WITHOUT THIS, STEP 3a CANNOT BE PROVEN AT ALL. 474 MO-0003 has
+       ONE receipt, so per-receipt and MO-total coincide and a correct
+       fix is indistinguishable from the live bug.
+     ⚠ Batches reads 0.684 - fractional, because 13/19 does not resolve.
+       A SECOND FIXTURE FOR STEP 4 arrived free.
+     ⚠ ROW 31 IS ARITHMETICALLY CORRECT ON THIS FIXTURE TODAY. getWdu
+       divides each receipt's OWN Kg: 1.850/0.37 = 5, 2.960/0.37 = 8.
+       THE DEFECT IS THE ROUTE, NOT THE NUMBER. Do not expect the screen
+       to look broken.
+  2  P147 CLOSED. Dev 474 MR-0009, Ginger Powder, 10 Kg, reason Sample.
+     Stock moved 9806.983 -> 9796.983 Kg, exactly 10 down.
+     ⚠ It renders as "10.000 Kg" with NO unit count - correct, because
+       it is a Material. The type gate on the MR list, working.
+  3  BOTH STEP 3 PROCEDURES READ IN FULL. -> see PLAN. Neither needs a
+     new join; both need columns added to a SELECT list only.
+
+FIXTURE RESIDUE ⚠ DEV ONLY, KEEP ALL OF IT:
+  474  MO-0005 (the multi-receipt fixture), MR-0009, DO-0002 (7 units,
+       the row 30 proof), and the whole IP set including MO-0004 which
+       MUST NOT BE RELEASED.
+  464  the two returns on MO-0002 and the one on MO-0011 (P164/P168).
+BLAST RADIUS: dev and prod both carry the frontend and the view. No
+  schema change. No data healed. No client figure moved.
+========
+
+END S109 APPEND
