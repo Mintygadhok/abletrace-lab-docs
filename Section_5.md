@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J119 — ⚠ the next one is J120, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR20. Last appended: S109, Aug 8 2026.
+number. Highest is J120 — ⚠ the next one is J121, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR21. Last appended: S110, Aug 9 2026.
 ⚠ J116 IS NOT A STANDALONE ENTRY. It was assigned inside JR15 and is easily
 missed by anyone scanning for J-headings. That is why this header said J115 for
 four sessions. S85 and S86 both asked for it to be corrected; S107 did it.
@@ -4173,3 +4173,275 @@ BLAST RADIUS: dev and prod both carry the frontend and the view. No
 ========
 
 END S109 APPEND
+S110 - APPENDED 9 AUG 2026
+NUMBERING: highest existing entry is J119. This is J120. Highest JR was JR20;
+the procedure change below is JR21. No JT entry - TRAPS.md is the traps file
+and it is not extended by this session.
+
+⚠ HEADER TO CORRECT IN THIS COMMIT: Section 5's own header reads
+"Highest is J119 ... Highest JR is JR20. Last appended: S109, Aug 8 2026."
+After this commit it is J120 / JR21 / S110, Aug 9 2026.
+
+
+JR21. WhC_GetMoProductReceivingDetails_SP - returns receiveproducts.qty,
+     the PER-RECEIPT unit count  [P157, S110]
+
+     ONE COLUMN ADDED TO THE SELECT LIST, immediately after recieved_qty:
+       `receiveproducts`.`qty`,
+     NOTHING ELSE. Same 2 joins, same WHERE, same signature, same
+     parameter (IN mlcId varchar(100)).
+
+     IF MISSED: the MO detail receiving panel has no unit count to read and
+     the frontend must divide recieved_qty by fopackaging.wgt_kgs_per_unit.
+     That division is ARITHMETICALLY CORRECT - it divides each receipt's
+     OWN Kg - so nothing looks broken. It is the ROUTE that is wrong.
+
+     ⚠ NOTE THE SCHEMA MISSPELLING. The Kg column is `recieved_qty`, not
+       `received_qty`. Any anchor must use the misspelling exactly.
+
+     ⚠ THE PROC STILL SELECTS fopackaging.wgt_kgs_per_unit. Left there
+       DELIBERATELY - minimum change, and removing it alters the row shape
+       for no benefit. The ingredients for the old division remain served;
+       nothing calls for them.
+
+     BACKUPS - captured fresh, BEFORE the write, on each box:
+       /home/ubuntu/WhC_GetMoProductReceivingDetails_SP.bak-S110-DEV.txt
+       /home/ubuntu/WhC_GetMoProductReceivingDetails_SP.bak-S110-PROD.txt
+     BOTH 956 bytes, 2 joins - BYTE-IDENTICAL across the two boxes, the
+       same as the view was before S107 and S109.
+     SHOW CREATE text, NOT runnable. Add the DELIMITER $$ wrapper to
+       restore. Same shape as JR16, JR17, JR18, JR20.
+     Applied via: /home/ubuntu/fix-recv-S110.sql        (dev)
+                  /home/ubuntu/fix-recv-S110-PROD.sql   (prod)
+     Recreated WITHOUT the DEFINER clause. It was `admin`@`%`.
+       ⚠ grep "DEFINER=" must return 0. grep "DEFINER" returns 1 on a
+         correct file because SQL SECURITY DEFINER is a different clause.
+
+     METHOD - JR16's, on each box from its OWN backup:
+       1  SHOW CREATE to a .bak file. Verify bytes and join count.
+       2  Build the new object ON THE BOX by a 14-line node script. The
+          anchor asserted to appear EXACTLY ONCE; join count asserted at 2
+          before AND after; DEFINER= asserted absent. The script refuses to
+          write if any assertion fails.
+       3  cat the built file and READ IT before applying.
+       4  Apply with `mysql abletracelab_live < file`.
+       5  Read the new column and the join count back OUT OF THE DATABASE.
+       6  CALL the proc against the fixture.
+     NO PROC TEXT EVER TRAVELLED THROUGH SSH.
+
+     VERIFICATION, out of the database on each box:
+       SHOW CREATE PROCEDURE ... | grep -o "receiveproducts\`.\`qty" | wc -l
+         → 1
+       ... | grep -o "join" | wc -l  → 2
+     ⚠ THE FIRST PATTERN CANNOT MATCH recieved_qty - that column is
+       `recieved_qty`, with the backtick in a different place. So 1 is the
+       new column, not a false hit.
+
+     PROVEN BY CALL, dev, mlc_id 11813 (474 MO-0005):
+       id 11450  recieved_qty 1.85  qty 5  wgt 0.37
+       id 11451  recieved_qty 2.96  qty 8  wgt 0.37
+     PROVEN ON SCREEN, dev 474:
+       MO-0005  two rows, 5.000# and 8.000#  ⚠⚠ NOT 13 AND 13
+       MO-0003  one row, 41.000#  - the single-receipt regression check
+     PROVEN ON SCREEN, PROD, THROUGH GLUTENULL'S OWN LOGIN:
+       MO-0001  Rec-260723-1  560.000 Kg  1750.000#
+       MO-0002  Rec-260723-2  192.480 Kg   802.000#
+     ⚠ NOTHING MOVED ON PROD, WHICH IS THE PASS CONDITION. Glutenull is
+       0.32 and 0.24 Kg per unit - round ratios where the old division
+       landed exactly. THE FIX IS INVISIBLE THERE BY DESIGN.
+
+     THE GATE, MEASURED ON PROD BEFORE THE BUILD WAS DEPLOYED:
+       Glutenull MO-0001  qty 1750, 560 ÷ 0.32 = 1750    AGREE
+       Glutenull MO-0002  qty  802, 192.48 ÷ 0.24 = 802  AGREE
+       Hagensborg         NO ROWS - 13 MOs, none run
+     ▶ No client row could move. No heal question arose.
+
+     Applied to BOTH boxes 9 Aug 2026.
+
+
+J120 - S110. ONE PROC, TWO FRONTEND COMMITS, ONE BACKEND COMMIT. THE BOARD
+MOVED BY TWO AND CLAUDE SAID FOUR. STATUS: CLOSED. Frontend 0dad104d and
+bc03b22d, backend 9230789, all on both boxes. Database change is JR21.
+
+⚠⚠ THE OUTPUT IS NOT IN THIS ENTRY. The map is UNITS-BIBLE.txt/.xlsx.
+  This entry records what was learned. 30 green, 3 part, 11 red, 4 review,
+  of 48. ⚠ 44 IS THE CEILING - four rows are review items that close as
+  decisions.
+
+WHAT SHIPPED
+  0dad104d  edit-mlc.component.html:258 reads item.qty; getWdu:355 DELETED
+            because that template line was its only live caller.
+            ⚠ THE FUNCTION WAS AT :355, NOT :354. Every document said 354.
+  bc03b22d  getFactor() added to edit-mlc, edit-mlo and start-mlc; three
+            template call sites swapped from mlcDetails.batches.
+  9230789   Formulations.js :1120 and :1150 - both final_qty lines compute
+            MO units ÷ batch_qty live, with a zero guard.
+  JR21      the receiving procedure, each box separately.
+
+⚠⚠ THE SCOPE WAS WRONG WHEN THE SESSION OPENED, AND READING FIXED IT THREE
+TIMES. PLAN called Step 3 four rows - 31, 32, 33, 34 - "one screen, all four
+together or none". Reading the code found:
+  · ROW 34's ADDRESS WAS WRONG. PLAN said "Formulations.js - serve matList".
+    matList is at :891, inside methodForCreateFormula - the create-and-fork
+    WRITE path (J81's territory). The real line is :1150, inside
+    getFormulaByIdForReleaseMaterial at :1079. ⚠ 450 LINES AWAY, DIFFERENT
+    FUNCTION, DIFFERENT PURPOSE. Patching where PLAN pointed would have
+    built clean, deployed clean and changed NOTHING - the J117 shape.
+  · ROWS 32, 34 AND 36 ARE THE SAME ARITHMETIC, and it is STEP 4's, not
+    STEP 3's. All three multiplied by the stored rounded `batches`.
+  · ROW 33 SITS ONE LINE BELOW ROW 32 in the same four templates - 172 and
+    173. Fixing 33 alone would leave the requirement wrong immediately above
+    a corrected stock figure.
+▶ STEP 3 SHIPPED AS ONE ROW. Rows 32/33/34/36 moved to their own session.
+⚠ CLAUDE RECOMMENDED FOUR SCOPES IN ONE SESSION - four rows, then three,
+  then two, then one. Each cut came from reading a line it had not read.
+  That is not indecision; it is what the survey being wrong looks like from
+  the inside.
+
+⚠⚠ CLAUDE OVERSTATED THE SCOREBOARD AND CAUGHT IT ONLY WHEN BUILDING THE
+SPREADSHEET. Mid-session it reported 32 green. Checking each row against
+PART 1 rather than against its own summary gave 30, with three rows PART:
+  ROW 35 IS GREEN. The ingredient requirement is Kg-anchored BY RULE
+    (RULES 7 source 1: quantity per batch takes the basis of the thing
+    consumed - Kg for an ingredient). Rounding was its only defect.
+  ROWS 32, 34, 36 ARE NOT. The intermediate requirement must take
+    subrecipeformulation.ship_qty in UNITS. It still reads .qty in Kg.
+    The screen shows 5.892 Kg under a header saying "# (UOM)".
+▶ A ROW IS GREEN WHEN IT SATISFIES THE RULE, NOT WHEN IT WAS TOUCHED.
+▶ A MOVING NUMBER IS NOT PROOF OF A CLOSED ROW. 5.891 became 5.892 - the
+  arithmetic improved and the basis stayed wrong.
+⚠ A NEW STATUS, "PART", WAS ADDED TO THE MAP for exactly this. Half a fix
+  recorded as whole is how J117 nearly shipped a regression.
+
+⚠⚠ A PROCEDURE'S ALIAS IS NOT ITS COLUMN NAME, AND THE DIFFERENCE IS
+SILENT. The live requirement needs shipping-units-per-batch, which is
+formulations.batch_qty. WhC_GetMoDetails_SP serves it as
+`formula_id__batch_qty` - aliased, like every other formulations column in
+that proc. Writing mlcDetails.batch_qty would have yielded undefined, and
+qty × undefined is NaN, written into a client-facing requirement figure.
+▶ SETTLED BY CALLING THE PROC AND READING THE HEADER ROW, not by reading
+  SHOW CREATE. SHOW CREATE says what the proc contains; the CALL says what
+  the columns are named on the wire.
+⚠ SAME FAMILY AS TRAPS 10. Resolve every name to its definition.
+
+⚠⚠ THE CORRECT SHAPE WAS EIGHT LINES AWAY, FOR THE THIRD TIME.
+  Formulations.js:1195 - the packaging cascade - already multiplies by
+  mlcDetails.qty, never by batches. That is WHY the Pouch control figure has
+  never moved through this whole campaign. The two broken lines sat 45 and
+  75 lines above a working example of what they should be.
+  ✓ Same pattern as getPlannedKg beside getWdu (S109) and stock-info beside
+    formulation-edit-stock-info (J83).
+
+MINTY'S RULINGS, S110
+  1  THE NUMBER CHANGE IS ACCEPTED. P162 moves requirement figures on
+     screens both clients use. Past MOs will show a requirement differing
+     slightly from what was released. THE RELEASE ROWS STAND as the record
+     of what physically happened - the S106 ruling, re-affirmed.
+  2  ⚠⚠ THE UNITS CAMPAIGN FINISHES BEFORE QUICKBOOKS, NOT IN PARALLEL.
+     THE REASON IS COMMERCIAL, NOT TECHNICAL: the clients are new and carry
+     almost no data, so schema and anchor changes are cheap NOW and get
+     harder as they build history. Step 5's column add touches ZERO client
+     rows today. Later it would mean dividing Kg to reconstruct units on
+     live rows - the exact round-trip the campaign exists to remove.
+     ▶ THIS ALSO RE-FRAMES P170. Healing the pre-JR15 MR rows is cheaper
+       now than later, for the same reason.
+
+⚠ RULES 7 NEEDED NO REWRITE. PLAN carried "RULES 7 MUST BE REWRITTEN, NOT
+  ANNOTATED" into this session as a precondition for Step 4. Reading RULES
+  showed the S108 version ALREADY states the live calculation and already
+  says never to read the stored batches column. The precondition had been
+  satisfied two sessions earlier and nobody had struck it.
+  ▶ A PRECONDITION THAT IS ALREADY MET IS A COST IF IT IS STILL LISTED.
+
+MEASUREMENTS TAKEN, ALL READ-ONLY
+  formulations.batch_qty IS THE SHIPPING-UNITS-PER-BATCH COLUMN.
+    dev 474: FO-0004 = 19, FO-0005 = 13, matching the fixture exactly.
+    prod: Glutenull 240 and 400. ⚠⚠ HAGENSBORG batch_qty = 1 ON ALL 13 MOs.
+    A 1:1 ratio, so THEIR MOs CAN NEVER DEMONSTRATE A QUANTITY FIX.
+    TRAPS 9, on a live client, permanently.
+  THE CLIENT EXPOSURE, MEASURED BEFORE THE WRITE:
+    Glutenull MO-0001  1750 ÷ 240 = 7.29166..., stored 7.292  ⚠ MOVES
+    Glutenull MO-0002   802 ÷ 400 = 2.005 exactly             EXACT
+    Hagensborg all 13   qty ÷ 1 = qty                         EXACT
+    ▶ ONE ROW OUT OF FIFTEEN MOVES, BY ~0.005%, DOWNWARD.
+  subrecipeformulation.ship_qty: ZERO null-or-zero rows on either box -
+    dev 15 rows, prod 10 rows. ▶ THE NEXT SESSION NEEDS NO HEAL.
+  ⚠⚠ HAGENSBORG HAS 13 MOs, NOT 7. NOW had said seven since S107. Six more
+    were created and nobody re-measured. Still none run.
+  ⚠ A QUERY SCOPED TO company_id IN (471,469) WAS RUN ON DEV BELIEVING IT
+    SHOWED THE CLIENT EXPOSURE. Dev 471/469 are different companies
+    entirely. Caught before it was acted on. → P156, and the rule stands:
+    NO COMPANY ID CAN BE REASONED ABOUT WITHOUT NAMING THE BOX.
+
+PROVEN ON SCREEN - THE HEADLINE
+  474 MO-0004, BEFORE: Plan Quantity 23.000# (2303.910 Kg) and the Ginger
+    Powder requirement 2303.609 Kg. 0.301 Kg APART ON THE SAME PAGE, from
+    the same recipe, because one used the MO quantity and the other used
+    the stored rounded batches 1.769.
+  AFTER: BOTH READ 2303.910 Kg. The gap is gone.
+  ⚠ MO-0003's banked over-release also resolved - Ginger Powder 15.171 Kg
+    became 15.170, matching what was received.
+  ⚠⚠ THE CONTROL HELD AT EVERY STEP. Pouch 4347.000 Ea, Carton 1449,
+    Case 207, Pallet 23 - unmoved on dev. On prod, Glutenull MO-0001's
+    Clamshell320 went 1750.080 → 1750.000 Ea, resolving EXACTLY to the MO
+    quantity, and MO-0002's Clamshell240 held at 802.000 with every one of
+    its ten ingredient lines identical to what was released.
+  ▶ MO-0002 IS THE BEST CONTROL ON PROD: 802 ÷ 400 = 2.005 exactly, so it
+    is ARITHMETICALLY INCAPABLE OF MOVING. It did not move.
+
+⚠⚠ FOUR WRONG-BOX COMMAND ATTEMPTS, ALL FAILED SAFELY, AND THAT IS LUCK OF
+ENVIRONMENT RATHER THAN A CONTROL:
+    a mysql command at the Mac prompt        - no mysql client
+    a second, with a `>` redirect            - ⚠ WROTE A 0-BYTE FILE NAMED
+                                               ...bak-S110-DEV.txt
+    ls ~/Downloads on prod                   - no such directory
+    cd ~/abletrace-lab-backend on the Mac    - repo lives only on dev
+  ⚠ THE 0-BYTE FILE IS THE ONE THAT MATTERS. It carried a -DEV name and
+    held nothing. If it had reached a box or the repo it would have looked
+    like a backup. Deleted immediately. Same family as S109's Downloads
+    lesson: a plausible filename with the wrong contents.
+  ▶ STEP 5's FIRST LIVE COMMAND IS AN ALTER ON THE CLIENTS' DATABASE. THAT
+    ONE WOULD NOT FAIL SAFELY.
+  ⚠ ALSO: terminal output and prose were pasted back into the shell twice,
+    producing "command not found" bursts. RULES 5.1's exact warning - S106
+    records the same thing SILENTLY EATING A git pull.
+
+⚠ A CHECK WHOSE PASS CONDITION WAS NEVER DEFINED IS NOT A CHECK. Claude
+  added `curl localhost` (port 80) to the deploy verification. It returned
+  404 and was read as a possible failure. RULES' own OPEN block curls
+  localhost:1337. The 404 was nginx having no vhost for Host: localhost -
+  a perfectly good deploy. The Host-header curl returns 301, certbot's
+  HTTPS redirect, on BOTH boxes. ▶ SAY WHAT A PASS LOOKS LIKE FIRST.
+
+⚠ 8 SECONDS WAS NOT ENOUGH AFTER THE PROD RESTART. curl returned 000 on a
+  healthy boot. The pm2 MEMORY figure settled it: 21.4mb at the curl,
+  158.1mb a moment later. ▶ READ THE MEMORY, NOT JUST THE STATUS. A booted
+  Sails on these boxes is ~150mb.
+
+⚠ THE DEPLOY PROCEDURE IS NOT FULLY WRITTEN DOWN. `unzip` IS NOT INSTALLED
+  ON DEV - the artifact had to be extracted with a python3 one-liner. JR14
+  records deploy-frontend.sh but not the extraction step, and the script
+  takes a DIRECTORY LABEL, not a zip. ⚠ HOW S109's BUILD WAS EXTRACTED IS
+  UNKNOWN. → P176.
+
+FOUR SMALL FINDINGS RAISED, NONE ACTED ON:
+  P172  receiveproducts.internalCode is NOT unique per receipt - MO-0005's
+        two receipts both read Rec-260809-1.
+  P173  the Intermediate Products block renders a nameless 0.000 row when a
+        product has no intermediates. Seen on dev AND on both prod clients.
+  P174  edit-mlc.component.ts:372 writes a form control back into
+        mlcDetails.batches - an operator-editable value overwriting a
+        derived stored figure on the object the screen reads.
+  P175  getFormulaByIdForReleaseMaterial:1092 gates on
+        `typeof x != undefined` - typeof returns a STRING, so the gate is
+        always true. A gate that cannot fail is not a gate.
+
+FIXTURE RESIDUE ⚠ DEV ONLY, KEEP ALL OF IT: 474's whole IP set including
+  MO-0004 which MUST NOT BE RELEASED, MO-0005's two receipts, MR-0009,
+  DO-0002. 464's three returns (P164/P168).
+BLAST RADIUS: both boxes carry one procedure change, two frontend commits
+  and one backend commit. No schema change. No data healed. ONE CLIENT MO's
+  requirement figures moved by ~0.005%, downward, knowingly and by ruling.
+========
+
+END S110 APPEND
