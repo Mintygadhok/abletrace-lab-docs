@@ -479,7 +479,15 @@ P175  ⚠ getFormulaByIdForReleaseMaterial :1092 gates on
 P176  ⚠ THE DEPLOY PROCEDURE IS NOT FULLY WRITTEN DOWN. `unzip` is absent
       from both boxes; S113 used the python3 one-liner twice more.
       ▶ RECORD IT IN 3B.4. MEDIUM.
-P178  ⚠ PROD CARRIES SIXTEEN OLD dist-prod-* FOLDERS. Dev similar.
+P178  ⚠⚠ COUNTED AT THE S113 CLOSE, AND BOTH FIGURES WERE
+      UNDERSTATED: PROD CARRIES 24 dist-prod-* FOLDERS AND DEV CARRIES
+      41, back to fa980dfd. NOW had said sixteen and "dev similar",
+      measured at S111.
+      ⚠ DEV ALSO CARRIES SIX www-html.bak-dev-* backups where the
+        rollback line implies two.
+      ▶ THIS NEEDS A RETENTION RULE, NOT AN AD-HOC SWEEP. Deleting 65
+        folders on a judgement call at the end of a session is how a
+        rollback goes missing. MINTY RULES THE RULE.
       ▶ DECIDE A RETENTION RULE — keep the last three. LOW.
 P179  ⚠ start-mlc.component.html:198 READS `formulations_myCodee` —
       THREE E's. Renders blank, silently. One-character fix. LOW.
