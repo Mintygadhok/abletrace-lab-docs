@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J120 — ⚠ the next one is J121, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR21. Last appended: S110, Aug 9 2026.
+number. Highest is J121 — ⚠ the next one is J122, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR22. Last appended: S111, Aug 9 2026.
 ⚠ J116 IS NOT A STANDALONE ENTRY. It was assigned inside JR15 and is easily
 missed by anyone scanning for J-headings. That is why this header said J115 for
 four sessions. S85 and S86 both asked for it to be corrected; S107 did it.
@@ -4445,3 +4445,386 @@ BLAST RADIUS: both boxes carry one procedure change, two frontend commits
 ========
 
 END S110 APPEND
+
+S111 - APPENDED 9 AUG 2026
+NUMBERING: highest existing entry is J120. This is J121. Highest JR was JR21;
+the two procedure changes below are ONE entry, JR22. No JT entry - TRAPS.md is
+the traps file and it is not extended by this session.
+
+⚠ HEADER TO CORRECT IN THIS COMMIT: Section 5's own header reads
+"Highest is J120 ... Highest JR is JR21. Last appended: S110, Aug 9 2026."
+After this commit it is J121 / JR22 / S111, Aug 9 2026.
+
+
+JR22. THE TWO INTERMEDIATE PROCEDURES - both now serve
+     subrecipeformulation.ship_qty AND formulations.inventory_units
+     [P160, S111]
+
+     ⚠⚠ ONE JR ENTRY, TWO OBJECTS, BECAUSE THEY MUST BE APPLIED TOGETHER.
+     They feed the two blocks of one screen. Applying one without the other
+     leaves the requirement in units above a stock figure in kilograms, or
+     the reverse, ONE BLOCK APART on a client-facing page.
+
+     THE TWO OBJECTS, AND THEY ARE NEARLY TWINS:
+       WhC_GetMoIntermediateProducts_SP     1279 -> 1408 bytes
+       WhC_GetFormulaIntermediateProducts   1149 -> 1236 bytes
+     SAME three tables, SAME three left outer joins, SAME WHERE, SAME
+     signature (IN formulationId varchar(100)). They differ ONLY in their
+     select lists and in their ALIASING.
+
+     ⚠⚠ AND THE ALIASING IS THE WHOLE TRAP. The Mo procedure ALIASES EVERY
+       COLUMN; the Formula procedure SELECTS BARE. So the same logical
+       column reaches the frontend under two different names:
+         Mo proc       `subrecipeformulation`.`ship_qty` as `subrecipeformulation_ship_qty`
+                       `formulations`.`inventory_units` as `formulations_inventory_units`
+         Formula proc  `subrecipeformulation`.`ship_qty`     (BARE)
+                       `formulations`.`inventory_units`      (BARE)
+       WRITING A TEMPLATE AGAINST THE WRONG CONVENTION RETURNS undefined,
+       WITH NO ERROR. Same family as TRAPS 10 and as S110's
+       formula_id__batch_qty.
+
+     NO NEW JOIN ON EITHER. subrecipeformulation and formulations were
+     already joined in both. The columns were reachable all along and simply
+     were not in the SELECT list. ⚠ SIXTH INSTANCE OF THAT PATTERN in this
+     campaign - see also JR16, JR17, JR20, JR21.
+
+     WHICH PROCEDURE FEEDS WHICH BLOCK - ⚠⚠ PROVEN, NOT REASONED, AND THE
+     ANSWER IS THE OPPOSITE OF WHAT EARLIER PLANS IMPLIED:
+       Mo proc      -> MLOManagement.js:393 -> mlcDetails.intermediateProducts
+                    -> THE INTERMEDIATE PRODUCTS BLOCK
+       Formula proc -> Formulations.js:1083, inside
+                       getFormulaByIdForReleaseMaterial
+                    -> matList / formulaList / packList
+                    -> THE BATCH MATERIALS BLOCK
+     ▶ SETTLED BY READING THE ngFor COLLECTION NAMES IN THE TEMPLATE AND
+       THE ALIASED PROPERTY NAMES BESIDE THEM, not by reading the callers.
+       A caller tells you which procedure runs; only the template tells you
+       which block renders the result.
+
+     IF MISSED: the intermediate requirement reads subrecipeformulation.qty
+     - KILOGRAMS - under a header saying "Qty required - # (UOM)", and the
+     stock reads formulations.inventory, also kilograms, under "WH Stock in
+     # (UOM)". BOTH ARE PLAUSIBLE NUMBERS. Nothing looks broken.
+     ⚠ ON dev 474 MO-0004 THE REQUIREMENT READ 5.892 Kg WHERE THE TRUE
+       FIGURE IS 15.923 UNITS, and the stock read 17.390 Kg where the
+       warehouse holds 47 units.
+
+     ⚠ THE Kg COLUMNS WERE DELIBERATELY LEFT IN BOTH SELECT LISTS. Removing
+       them would change the row shape for no benefit and the frontend no
+       longer reads them. Same reasoning as JR21's wgt_kgs_per_unit.
+
+     BACKUPS - captured fresh, BEFORE any write, on each box:
+       /home/ubuntu/WhC_GetMoIntermediateProducts_SP.bak-S111-{DEV,PROD}.txt
+       /home/ubuntu/WhC_GetFormulaIntermediateProducts.bak-S111-{DEV,PROD}.txt
+     BYTE-IDENTICAL ACROSS THE TWO BOXES BEFORE THE CHANGE - 1279 and 1149,
+       3 joins each. The same pre-condition JR18, JR20 and JR21 all record.
+     SHOW CREATE text, NOT runnable. Add the DELIMITER $$ wrapper to restore.
+     Applied via: fix-mo-inter-S111.sql / fix-formula-inter-S111.sql (dev)
+                  fix-mo-inter-S111-PROD.sql / fix-formula-inter-S111-PROD.sql
+     Recreated WITHOUT the DEFINER clause. It was `admin`@`%`.
+
+     ⚠⚠ AND HERE IS A CORRECTION TO HOW JR16's DEFINER RULE HAS BEEN READ.
+       JR16 says the object is "recreated WITHOUT the DEFINER clause" and
+       that `grep "DEFINER="` must return 0. THAT IS TRUE OF THE BUILT .sql
+       FILE AND FALSE OF THE LIVE OBJECT. MySQL ALWAYS records a definer on
+       CREATE; with no clause given it assigns the connecting account. So
+       SHOW CREATE on a correctly-built procedure returns DEFINER=`admin`@`%`
+       and always will.
+       ▶ S111 SET THE PASS CONDITION AT 0 AGAINST THE LIVE OBJECT AND IT
+         COULD NOT HAVE PASSED FOR ANY PROCEDURE THAT EXISTS. Caught on
+         reading the result, not before.
+       ▶ THE CHECK BELONGS ON THE FILE. On the database, read
+         information_schema.routines and confirm the object EXISTS with a
+         SANE definer - and SCOPE IT BY SCHEMA, or the dormant archive's
+         copy doubles every row.
+       ⚠ A CHECK COPIED FROM ONE LAYER TO ANOTHER STOPS BEING A CHECK.
+         Third instance this campaign, after JR7e's schema-less grep and
+         S110's bare `curl localhost`.
+
+     METHOD - JR16's, on each box from its OWN backup:
+       1  SHOW CREATE to a .bak file. Verify bytes and join count.
+       2  Build the new object ON THE BOX by a SHORT node script. Both
+          anchors asserted to appear EXACTLY ONCE; join count asserted at 3
+          before AND after; DEFINER= asserted absent FROM THE FILE. The
+          script refuses to write if any assertion fails.
+       3  cat the built file and READ IT before applying.
+       4  Apply with `mysql abletracelab_live < file`.
+       5  Read the new column and the join count back OUT OF THE DATABASE.
+       6  CALL the proc against the fixture and READ THE HEADER ROW.
+     NO PROC TEXT EVER TRAVELLED THROUGH SSH.
+
+     ⚠⚠ AN ASSERTION FIRED ON ITS OWN INSERTION - JT27, IN THE SESSION THAT
+       HAD JT27 IN FRONT OF IT. The first script demanded `ship_qty` appear
+       exactly once. The text being inserted -
+       `subrecipeformulation`.`ship_qty` as `subrecipeformulation_ship_qty` -
+       CONTAINS IT TWICE. The script threw `ship_qty 2` and REFUSED TO WRITE.
+       ✓ THE GUARD WORKED. Nothing was written.
+       ▶ ASSERT ON THE ALIAS, WHICH IS UNIQUE (`_ship_qty\``), NOT ON THE
+         COLUMN NAME.
+
+     ⚠ THE BACKTICKS ARE LOAD-BEARING IN THE ANCHORS. `formulations`.`inventory`
+       cannot match `formulations`.`inventory_units` BECAUSE OF THE CLOSING
+       BACKTICK. Without them the anchor would have matched the wrong column
+       and the assertion counts would have been meaningless.
+
+     VERIFICATION, out of the database on each box:
+       SHOW CREATE PROCEDURE WhC_GetMoIntermediateProducts_SP\G
+         | grep -c "subrecipeformulation_ship_qty"     -> 1
+       ... | grep -o "join" | wc -l                     -> 3   (both procs)
+       SELECT SPECIFIC_NAME, DEFINER FROM information_schema.routines
+         WHERE ROUTINE_SCHEMA='abletracelab_live' AND SPECIFIC_NAME IN (...)
+         -> TWO ROWS, both admin@%
+       ⚠ THE SCHEMA CLAUSE IS NOT OPTIONAL. Without it the dormant
+         `abletrace` archive's copies double the result - MEASURED S111 when
+         an unfiltered information_schema.parameters query returned every
+         routine twice. → P101.
+
+     PROVEN BY CALL, dev, formulationId 3697 (474 Parent-0.53):
+       Mo proc       subrecipeformulation_qty 3.33 · _ship_qty 9
+                     formulations_inventory 17.39 · _inventory_units 47
+       Formula proc  qty 3.33 · ship_qty 9 · inventory 17.39 ·
+                     inventory_units 47
+       ✓ ADDITIVE ON BOTH - every original column present and unmoved.
+
+     PROVEN ON SCREEN, dev 474 MO-0004, ON BOTH MO DETAIL SCREENS:
+       /Edit-MLO  (Sales Controller)      Intermediate Products 15.923 / 47.000
+       /Edit-Mlc  (Warehouse Controller)  same, AND Batch Materials 15.923 / 47.000
+       ⚠ 15.923 = 9 x 23/13, computed live. It read 5.892 Kg.
+       ⚠ 47.000, NOT 41 - stock moved in S109.
+
+     PROVEN ON PROD through GLUTENULL'S OWN LOGIN:
+       MO-0001 1750.000# (560.000 Kg) · MO-0002 802.000# (192.480 Kg)
+       Batch Materials: Agave 14.583 Kg, Almond Sliced 21.875 Kg, Baking Soda
+       2.188 Kg, Brown Rice Flour 72.917 Kg, Buckwheat Cereal 58.333 Kg,
+       Citric Acid 0.729 Kg - ALL UNMOVED. Clamshell320 unchanged.
+       ⚠⚠ NOTHING MOVED, WHICH IS THE PASS CONDITION. Neither client has any
+         intermediates, so both blocks are EMPTY on every client MO and the
+         change is INVISIBLE THERE BY DESIGN.
+       ▶ THE REAL PROD EVIDENCE IS THAT THE INTERMEDIATE PRODUCTS BLOCK
+         RENDERS CLEAN AND EMPTY. Those templates read two property names
+         that did not exist on that box an hour earlier. A clean empty block
+         is the only proof available that the procedure, the backend and the
+         build agree.
+
+     THE GATE, MEASURED IN S110 AND STILL HOLDING:
+       subrecipeformulation.ship_qty is populated on EVERY row of BOTH boxes
+       - dev 15 rows, prod 10 rows, ZERO null or zero. NO HEAL NEEDED.
+       ▶ AND NO TIME WAS SPENT PROVING IT AGAIN. A measurement recorded in
+         the right place is a session saved.
+
+     Applied to BOTH boxes 9 Aug 2026.
+     ⚠ db-definitions-S93.txt DOES NOT REFLECT THIS. It is now stale on
+       EIGHT objects. -> P119.
+
+
+J121 - S111. TWO PROCEDURES, TWO FRONTEND COMMITS, ONE BACKEND COMMIT. FOUR
+ROWS GREEN, THE "PART" STATUS RETIRED, AND A FIFTH SITE FOUND THAT NO ROW
+DESCRIBED. STATUS: CLOSED. Frontend 3b176720 and e8e8f572, backend fc78ce1,
+all on both boxes. Database change is JR22.
+
+⚠⚠ THE OUTPUT IS NOT IN THIS ENTRY. The map is UNITS-BIBLE.txt/.xlsx.
+  This entry records what was learned. 34 green, 0 part, 10 red, 4 review,
+  of 48 - plus row 49 awaiting Minty's ruling.
+
+WHAT SHIPPED
+  3b176720  six template repoints (edit-mlc, edit-mlo, start-mlc, lines
+            172/173 and 200/201) plus edit-mlo.component.ts:557-558, the
+            EXPORT. subrecipeformulation_qty -> _ship_qty and
+            formulations_inventory -> _inventory_units.
+  e8e8f572  three more template lines - the Batch Materials formulaList
+            stock cell. ⚠ THE SITE THAT WAS IN NO ROW.
+  fc78ce1   Formulations.js:1156 - final_qty scales
+            Number(formulation.ship_qty || 0), not formulation.qty.
+            Plus one comment line, approved by Minty. -> P118.
+  JR22      both procedures, each box separately.
+
+⚠⚠ SIX ADDRESSES WERE WRONG, AND FOUR OF THEM WERE WRONG BY ONE CAUSE.
+  Rows 19, 34, 35 and 36 of the bible all named lines that had DRIFTED DOWN
+  BY ABOUT SIX - because S110's OWN COMMIT inserted a comment and two const
+  lines above them. The documents were written before the code they describe
+  and nobody re-read them at that close.
+    RECORDED   :1120 ingredients · :1150 intermediates · :1195 packaging
+    ACTUAL     :1123 · :1156 · :1201
+  ⚠⚠ AND :1150 IS A REAL LINE DOING A REAL, DIFFERENT THING - the
+    beforeEditQty pencil-edit restore, which also assigns to
+    formulation.qty. PATCHING BY LINE NUMBER WOULD HAVE HIT IT and produced
+    a clean build that changed the wrong statement.
+  ▶ WHEN A COMMIT INSERTS LINES, EVERY ADDRESS BELOW IT IN EVERY DOCUMENT IS
+    STALE. Correct them in the same close.
+  ▶ ANCHOR ON TEXT, NEVER ON A LINE NUMBER. The anchor used was
+    `formulation.qty * __f`, verified UNIQUE across the file: :1123 uses
+    `mat.` and :1201 does not use __f at all.
+
+⚠⚠ AND PLAN'S TWO FRONTEND ADDRESSES WERE WRONG WITH A WRONG INSTRUCTION
+  ATTACHED, WHICH IS WORSE THAN A WRONG ADDRESS ALONE. PLAN said
+  edit-mlo.component.ts:551 reads `(d.batches || 0)` "where `d` is the FORM,
+  not the MO ... IT MUST READ this.mlcDetails".
+  READING IT: the line is :557, and `d` IS ALREADY the MO object -
+  d.packagingConfiguration and d.intermediateProducts both resolve on it.
+  The real defect was narrower and matched the templates exactly: it
+  multiplied by d.batches, the STORED ROUNDED column RULES 7 forbids.
+  ▶ FOLLOWING THE INSTRUCTION WOULD HAVE REWRITTEN A WORKING REFERENCE.
+  ▶ A WRONG REASON ATTACHED TO A REAL DEFECT IS THE MOST EXPENSIVE KIND OF
+    DOCUMENT ERROR - it is confident, actionable, and it stops anyone
+    looking. Same family as J85.
+
+⚠⚠ A ROW DESCRIBED ONE SITE AND THERE WERE TWO. THIS IS THE FINDING OF THE
+SESSION. Bible row 33 named "MO detail intermediate stock". The MO detail
+screen shows that figure TWICE - once in Intermediate Products (from the Mo
+procedure) and once in Batch Materials (from the Formula procedure, via the
+formulaList loop). ROW 33 DESCRIBED ONLY THE FIRST.
+  ▶ AFTER 3b176720 DEPLOYED, dev 474 MO-0004 READ:
+      Intermediate Products   IP-0.37   47.000
+      Batch Materials         IP-0.37   17.390 Kg
+    THE SAME PRODUCT'S STOCK, TWO DIFFERENT NUMBERS, ONE BLOCK APART.
+  ⚠⚠ THAT IS WORSE THAN THE ORIGINAL DEFECT, WHERE BOTH WERE CONSISTENTLY
+    WRONG. A client can act on a wrong number. Nobody can act on two that
+    disagree, and on a food traceability screen the disagreement is the
+    thing that destroys confidence in both.
+  ▶ MINTY'S CALL, MADE IN SESSION: fix it now rather than defer. The column
+    was already served by the procedure, the templates were already open,
+    and deferring would have promoted the contradiction to prod. RIGHT CALL.
+  ▶ THE ALTERNATIVE WAS ALSO CLEAN AND WAS OFFERED: stop, and DO NOT PROMOTE
+    - keeping the contradiction on dev only. An honest either/or beats a
+    silent half-ship.
+  -> BIBLE ROW 49, awaiting Minty's ruling on whether it stands as a row.
+
+⚠⚠ THREE LOOPS, IDENTICAL MARKUP, AND ONLY ONE OF THEM WRONG. The Batch
+Materials block renders matList, formulaList and packList with byte-identical
+templates. All three read {{getQty(item?.inventory)}}. FOR MATERIALS AND
+PACKAGING THAT IS CORRECT - materials are Kg-anchored BY RULE.
+  ▶ SO THE ANCHOR HAD TO BE THE BLOCK, NOT THE STRING. The patch split each
+    file on the formulaList and packList *ngFor declarations and replaced
+    only between them, asserting 3 occurrences in the file before, exactly 1
+    inside the block, and 2 in the file after.
+  ⚠ A NAIVE REPLACE WOULD HAVE REPOINTED MATERIALS TO A UNIT COLUMN THAT IS
+    ZERO FOR THEM. Silent, plausible, and a defect.
+  ▶ SAME FAMILY AS J114's closed-mlcs.html :79 wrong / :84 right, adjacent
+    lines, same helper.
+
+⚠⚠ AND THE PROOF WAS THE BRACKETING LINES, NOT THE COUNT. Ginger Powder's WH
+stock (9796.983 Kg, matList, the line DIRECTLY ABOVE) and Pouch (4347.000 Ea,
+packList, directly below) BOTH UNMOVED. They read the same property name from
+the same object shape.
+  ▶ WHEN A PATCH IS SCOPED TO A BLOCK, THE CONTROLS ARE THE LINES THAT
+    BRACKET IT. An assertion count proves a string changed; only the
+    neighbours prove it changed in the right place.
+
+⚠⚠ THE FRONTEND REPO EXISTS ON BOTH MACHINES, AND THAT IS THE ONE WRONG-BOX
+CASE ENVIRONMENT DOES NOT CATCH. A missed `exit` sent
+`cd ~/abletrace-lab-frontend && git status` to DEV instead of the Mac. It
+succeeded - dev has that repo, at the stale c2a52d8e checkout NOW records.
+  ⚠ READ-ONLY THAT TIME. A patch script would have edited files that the
+    NEXT DEPLOY OVERWRITES - no error, no warning, and the screen simply
+    never changes. The session would have been spent hunting a phantom.
+  ✓ THE OTHER WRONG-BOX ATTEMPT FAILED LOUDLY BECAUSE `hostname -I` IS NOT
+    VALID ON macOS. It errored, and the `cd` after it also failed - no
+    backend repo on the Mac.
+  ▶ `hostname -I` AT THE TOP OF EVERY BLOCK IS A TRIPWIRE THAT WORKS BY
+    FAILING. Keep it. S110 logged four wrong-box attempts that all failed
+    safely and called that luck of environment; S111 found the case where
+    the luck runs out.
+
+⚠⚠ TWO SUPERSEDED BUILD ARTIFACTS WERE DOWNLOADED IN GOOD FAITH AND ONE WAS
+OFFERED FOR DEPLOYMENT TO PROD. dist-prod-bc03b22d is a green, real,
+complete artifact - AND IT IS THAT MORNING'S BUILD, the code already live.
+  ⚠ DEPLOYING IT WOULD HAVE PUT THE OLD FRONTEND BACK while the procedures
+    and the backend had already moved forward. The old templates read
+    subrecipeformulation_qty, which the procedure still serves, SO NOTHING
+    WOULD HAVE BLANKED - but Batch Materials would have shown final_qty
+    computed from ship_qty under a Kg-only template. A silent mismatch on a
+    client box.
+  ▶ READING THE STAMP CAUGHT IT. And the RUN NUMBER is a free second signal:
+    31324660398 is lower than 31345895357, therefore older.
+  ⚠ J117's DEFENCE IS NOW EXERCISED THREE TIMES. It holds. There are now
+    THREE superseded-but-green artifacts in circulation (30b2ddd4, 3b176720,
+    dist-prod-bc03b22d) and the only defence is the stamp.
+
+⚠⚠ A CHECK COPIED FROM ONE LAYER TO ANOTHER STOPS BEING A CHECK - see JR22
+above for the DEFINER detail. Third instance this campaign.
+  ▶ SAY WHAT A PASS LOOKS LIKE BEFORE RUNNING THE CHECK, AND RE-ASK IT WHEN
+    THE LAYER CHANGES. Same family as RULES 1 and S110's LESSON 5.
+
+⚠ THE LONG-HEREDOC TRUNCATION HAPPENED A THIRD TIME IN THREE SESSIONS. A
+21-line script hung zsh at `heredoc>` with the terminator lost. Nothing ran
+and nothing was written - the failure was LOUD. The 11-line rewrite worked
+first time.
+  ⚠ AND A SEPARATE PASTE ARRIVED ONE CHARACTER SHORT (`--include=*.htm`),
+    which zsh refused to glob. Also loud, also harmless.
+  ▶ PLAN'S 12-LINE RULE IS NOT A STYLE PREFERENCE. JR16's S104 truncation
+    was SILENT and nearly killed a procedure; every one since has been loud,
+    and that is luck, not a control.
+
+✓ THE MEMORY FIGURE PROVED ITSELF TWICE IN ONE SESSION. Dev 26.1mb ->
+164.6mb and prod 21.4mb -> 156.8mb, both while pm2 reported "online".
+  ▶ 15 SECONDS, NOT 8. READ THE MEMORY, NOT THE STATUS. S110 earned this;
+    S111 confirms it on both boxes.
+
+⚠⚠ P102's OWN PRECONDITION HAD NEVER BEEN RUN, AND WHEN IT WAS RUN IT CAME
+BACK NEGATIVE. The queue item has said "VERIFY PM2 STARTS ON BOOT FIRST" for
+sessions. `systemctl is-enabled pm2-ubuntu` on dev returns `not-found`.
+  ⚠ THERE IS NO pm2 SYSTEMD UNIT. A reboot would take the app down and
+    nothing would bring it back. pm2 save was run and ~/.pm2/dump.pm2 is
+    current at 9931 bytes - but a dump is only read by a pm2 that something
+    has started.
+  ⚠⚠ PROD IS UNMEASURED. Assume the same until proven. A reboot there takes
+    TWO LIVE CLIENTS offline with no automatic return.
+  ⚠ THIS MAY BE THE MECHANISM BEHIND S105's "dev failed to boot silently".
+    ⚠ THAT IS A HYPOTHESIS AND IS RECORDED AS ONE. Do not write it up as
+      fact without evidence.
+  ▶ MINTY HAD ASKED FOR P102 TO BE DONE THE SAME EVENING AND DROPPED IT ON
+    THIS finding. RIGHT CALL - it is not a reboot job, it is a
+    startup-configuration job with a reboot at the end. -> P177.
+  ▶ A PRECONDITION WRITTEN DOWN AND NEVER RUN IS NOT A CONTROL. If a queue
+    item names a check, RUN THE CHECK BEFORE SCHEDULING THE WORK.
+
+MEASUREMENTS TAKEN, ALL READ-ONLY
+  THE DORMANT ARCHIVE HOLDS ITS OWN COPIES OF THE STORED PROCEDURES. An
+    information_schema.parameters query with no schema filter returned every
+    routine TWICE. Nothing was written to the archive. -> P101, and it
+    sharpens P134: name the SCHEMA in every information_schema query, not
+    just the database on the mysql call.
+  formulaList IS BUILT IN THE FRONTEND, NOT HANDED OVER WHOLE.
+    edit-mlc.component.ts:243 does `result.formulations.map(data =>
+    this.formulaList.push(data))` - no new object, no property reassignment.
+    THAT IS WHY final_qty from the backend and inventory_units from the
+    procedure both reach the template unchanged.
+  DEV'S PENDING UPDATES WENT 8 -> 12 between S110 and S111.
+  PROD CARRIES SIXTEEN OLD dist-prod-* FOLDERS, back to 2ae0b4ab, and only
+    TWO www-html.bak-*. -> P178.
+
+FOUR SMALL FINDINGS RAISED, NONE ACTED ON:
+  P179  start-mlc.component.html:198 reads `formulations_myCodee` - THREE
+        E's. Renders blank, silently. One-character fix.
+  P180  the build workflow warns Node.js 20 is deprecated and is being
+        forced onto Node.js 24. Builds succeed.
+  P181  start-mlc.component.html was patched in BOTH commits and was never
+        seen on a screen. Byte-identical to two proven templates, which is
+        an argument and not a proof. Same shape as S109's row 23.
+  P182  three more Intermediate Products controls exist and are in no
+        document - edit-mlc:223, edit-mlo:319, edit-closed-mlcs:77.
+  P183  the corrected unit figures carry a "Kg" suffix from the product's
+        UOM. The number is right and the label is wrong - the reverse of
+        where this campaign started.
+
+⚠ NOW's TIDY LIST WAS WRONG AT THE OPEN. S110's NOW named six Mac zips
+  including f4c98e91 and 0dad104d pairs to delete; there were THREE and both
+  stale pairs were already gone. Somebody tidied and did not record it.
+  ▶ READ THE DIRECTORY AT THE CLOSE. Do not copy the previous list forward.
+⚠ AND S110's NOW CONTRADICTED ITSELF: its GITHUB block said the docs commit
+  had landed while its PENDING PROMOTION block, forty lines lower, listed
+  the same files as pending. ▶ RULES 6 - write the GitHub line FROM GITHUB.
+
+FIXTURE RESIDUE ⚠ DEV ONLY, KEEP ALL OF IT: 474's whole IP set including
+  MO-0004 which MUST NOT BE RELEASED - Minty asked in S111 whether to run it
+  and the answer is no, because the Intermediate Products block renders on a
+  CREATED MO and running it would spend the before picture for nothing.
+  Also MO-0005's two receipts, MR-0009, DO-0002. 464's three returns
+  (P164/P168).
+BLAST RADIUS: both boxes carry two procedure changes, two frontend commits
+  and one backend commit. No schema change. No data healed. NO CLIENT FIGURE
+  MOVED - neither client has intermediates, so the change is invisible to
+  them by design.
+========
+
+END S111 APPEND

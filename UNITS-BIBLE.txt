@@ -17,6 +17,9 @@ STATUS      ⚠ NOT EXHAUSTIVE, AND IT SAYS SO DELIBERATELY. S108's first
             SOMETHING ELSE WILL TURN UP. Add a row when it does.
             ⚠⚠ S109 PROVED THE POINT IN THE OTHER DIRECTION TOO —
             THREE ROWS WERE MARKED RED AND WERE ALREADY GREEN.
+            ⚠⚠ S111 PROVED IT AGAIN IN THE FIRST DIRECTION. A SITE
+            THAT NO ROW DESCRIBED WAS FOUND BY READING A TEMPLATE
+            THAT WAS ALREADY OPEN. → ROW 49.
 TWIN        UNITS-BIBLE.xlsx is the readable copy. THIS FILE IS THE ONE
             GIT CAN DIFF. If they disagree, this one is the record.
 
@@ -43,21 +46,33 @@ CHANGE LOG  S108 — created. Four sources ruled by Minty. 47 sites mapped.
               ⚠ PART 1 UNTOUCHED.
             S110, 9 August 2026 — TWO ROWS TO OK, THREE TO A NEW STATUS.
               row 31 → OK. The receiving panel. Procedure JR21 on both
-                boxes plus commit 0dad104d. PROVEN on dev MO-0005's two
-                receipts (5 and 8, NOT 13 and 13) and on prod through
-                Glutenull's own login.
+                boxes plus commit 0dad104d.
               row 35 → OK. The ingredient requirement. Commit 9230789.
-                Ingredients are Kg-anchored BY RULE, so rounding was the
-                only defect and it is gone.
               rows 32, 34, 36 → PART. ⚠⚠ A NEW STATUS. The rounding half
-                is fixed; the BASIS half is not. They still read
-                subrecipeformulation.qty (Kg) where PART 1 source 1 says
-                ship_qty (units).
+                is fixed; the BASIS half is not.
               ⚠⚠ CLAUDE REPORTED 32 GREEN MID-SESSION. THE TRUE FIGURE IS
                 30. Checking each row against PART 1 rather than against
                 the session's own summary is what found it.
-              ▶ 44 IS THE CEILING, NOT 48. Rows 44/45/46/47 are review
-                items that close as DECISIONS, not fixes.
+              ⚠ PART 1 UNTOUCHED.
+            S111, 9 August 2026 — FOUR ROWS TO OK. ⚠⚠ THE "PART" STATUS
+              RETIRES — NO ROW WEARS IT.
+              rows 32, 34, 36 → OK. The basis half. Both procedures now
+                serve subrecipeformulation.ship_qty; the requirement
+                scales UNITS, not kilograms. Commits 3b176720 (frontend),
+                fc78ce1 (backend), JR22 (database, each box).
+                ▶ PROVEN dev 474 MO-0004: 15.923 where it read 5.892 Kg.
+              row 33 → OK. The intermediate stock. Both procedures now
+                serve formulations.inventory_units.
+                ▶ PROVEN 47.000 where it read 17.390 Kg.
+              ⚠⚠ ROW 49 ADDED. A Batch Materials stock site that NO ROW
+                DESCRIBED. Found by reading a template that was already
+                open, fixed in the same session, commit e8e8f572.
+                ▶ NEEDS MINTY'S RULING on whether it stands as a row —
+                  if it does, the board is 35 of 49 and the ceiling is 45.
+              ⚠⚠ SIX ADDRESSES CORRECTED. Rows 19, 34, 35 and 36 all
+                named lines that had moved; two frontend addresses in
+                PLAN were wrong, one of them with a wrong instruction
+                attached. → SEE "WHAT S111 TAUGHT THIS DOCUMENT".
               ⚠ PART 1 UNTOUCHED.
 
 ══════════════════════════════════════════════════════════════════════
@@ -176,9 +191,7 @@ UNITS ARE NEVER WORKED OUT FROM WEIGHT.
 
 DISPLAY   three decimal places.
           ⚠ ROUND FOR DISPLAY ONLY. Keep the full number in the
-            calculation and in the database. A rounded figure that is
-            then multiplied carries its error forward — which is
-            exactly what the stored `batches` column does.
+            calculation and in the database.
 
 ──────────────────────────────────────────────────────────────────────
 DISPATCH COLUMNS — NOT A FIFTH SOURCE, BUT UNIT-STORED
@@ -197,17 +210,19 @@ PART 2 — THE MAP.  Working record. Status changes as sites are fixed.
 LEGEND   OK = reads a stored count, follows the rule
          XX = calculates instead
          ?? = to review, not a defect
-         PART = partly fixed. The arithmetic improved and the row does
-                NOT yet satisfy PART 1. ⚠ A MOVING NUMBER IS NOT PROOF
-                OF A CLOSED ROW.
+         ⚠⚠ THE "PART" STATUS EXISTED FOR ONE SESSION AND IS NOW
+            RETIRED. No row wears it. It was created in S110 for three
+            rows whose arithmetic had improved and whose basis had not,
+            and S111 closed all three. ▶ KEEP THE DEFINITION HERE: a
+            half-fix recorded as whole is how J117 nearly shipped a
+            regression, and the next campaign will need the status again.
 
+         ✓S111 = moved by S111 and PROVEN ON SCREEN, both boxes
          ✓S110 = moved by S110 and PROVEN ON SCREEN, both boxes
-
          ✓S109 = moved to OK by commit 281e8bd8 and PROVEN on screen
-         ✓DEP  = moved to OK by commit 281e8bd8, DEPLOYED NOT PROVEN
          ✓WAS  = was ALREADY OK. The S108 survey recorded it wrongly.
 
-──── ALIGNED — 30 ──────────────────────────────────────────────────
+──── ALIGNED — 34 ──────────────────────────────────────────────────
 OK  1  Stock info popup — In Store      stock-info.ts:188
        inventory_units, × weight for Kg          ▶ THE MODEL. COPY IT.
 OK  2  Stock info popup — Produced      stock-info.html:36
@@ -227,202 +242,96 @@ OK 15  Edit packing slip rows           edit-packslips.ts:279-576
 OK 16  Traceability one-step-forward    product-traceability-details:335
 OK 17  Sales order shipped to date      edit-sales-order.ts:426,427
 OK 18  Sales order product popup        products-for-sales-order.ts:43
-OK 19  Packaging cascade                Formulations.js:1195
-       ⚠ ADDRESS ADDED S110. It multiplies by mlcDetails.qty, NEVER by
-         batches — which is WHY the Pouch control has never moved through
-         this whole campaign.
-       ✓ THE CORRECT SHAPE SAT 45 AND 75 LINES BELOW THE TWO BROKEN ONES.
-         Third time this campaign the right pattern was already in the
-         file. DO NOT TOUCH THIS LINE.
+OK 19  Packaging cascade                Formulations.js:1201
+       ⚠⚠ ADDRESS CORRECTED S111. Recorded as :1195 since S110. The line
+         moved when S110's own commit added a comment and two const
+         lines above it. It multiplies by mlcDetails.qty, NEVER by
+         batches — which is WHY the Pouch control has never moved.
+       ✓ DO NOT TOUCH THIS LINE. It is the control.
 
 ✓WAS 21  MR product list + details      rejected-materials.html:63
-       Reads qty_rejected_units AND IS TYPE-GATED — the unit count
-       renders only when type === 'Product', so material MRs correctly
-       show Kg alone. That is JR15's design, not an oversight.
-       ⚠⚠ THE SURVEY POINTED AT THE WRONG LINE. It named
-         rejected-materials.ts:154 getShippingUnits, which DOES divide
-         — and IS DEAD. No caller anywhere in the folder. Repointing it
-         would have built clean, deployed clean and changed NOTHING.
+       Reads qty_rejected_units AND IS TYPE-GATED.
        ▶ DELETE getShippingUnits:152-154. → P115.
 
 ✓S109 22  MO detail Completed           edit-mlc.ts:298
-       Now reads mlcDetails.received_units. Commit 281e8bd8.
-       ▶ PROVEN on dev 474 MO-0001 (7.000# / 58.380 Kg) and
-         474 MO-0003 (41.000# / 15.170 Kg, at 0.37 Kg per unit).
-
 ✓S110 23  MO detail Completed           edit-mlo.ts:251
-       Same line, same commit, same procedure.
-       ✓ PROVEN S110 on dev 474 MO-0003 — Completed Quantity
-         41.000# (15.170 Kg), through the SALES CONTROLLER route.
        ⚠⚠ THE "REDIRECT" WAS NEVER A DEFECT. /MLO-Management is the
-         SALES CONTROLLER's MO screen. Five attempts across S109 and
-         S110 clicked the WAREHOUSE tile and correctly got the
-         Warehouse screen, /Mfg-lot-codes.
-         ▶ MINTY, S110: MO Management is reached from three roles, each
-           for its own task. Sales CREATES the MO. Warehouse RELEASES
-           materials, RECEIVES product, yield and returns. Production
-           STARTS production and RELEASES the lot code.
-       ⚠ THERE IS NO "EDIT MO" OPERATION. MOs are created and closed;
-         fresh MOs are raised instead. The route names are URLs, not
-         tasks. DO NOT REASON ABOUT A SCREEN FROM ITS ROUTE NAME.
-
+         SALES CONTROLLER's MO screen.
 ✓S109 24  Start MO Completed            start-mlc.ts:155
-       Same line, same commit. ▶ PROVEN on dev 474 MO-0003.
-
 ✓WAS 26  Traceability list produced     product-traceability.ts:113
-       Reads item.received_units. ⚠ ALREADY FIXED BEFORE S108 — and it
-       CARRIES ITS OWN COMMENT saying so, naming P82 fix 7 and
-       Trace_ProductProdLotView.received_units.
-       ▶ P118 EARNED ITS KEEP AGAIN. The code told us its own history.
-
 ✓WAS 27  Products list Stock On Hand    admin-formulation.ts:878
-       Reads inventory_units; :885 derives Kg by MULTIPLYING.
-       ⚠ ALREADY FIXED BEFORE S108.
-       ▶ PROVEN on screen S109 — IP-0.37 shows 41# (15.17 Kg) at
-         0.37 Kg per unit. Not a round ratio, so a division would have
-         shown itself.
-
 ✓S109 28  Edit-formulation In Store     formulation-edit-stock-info.ts:269
-       Units now read inventory_units; the Kg half STILL READS
-       formulations.inventory and was deliberately left alone — the two
-       stock layers are separate by design.
-       ▶ PROVEN on dev — IP-0.37 Stock Information popup reads
-         In Store 41# (15.17 Kg).
-       ⚠ THE POPUP OPENS FROM A BUTTON LABELLED "Edit" ON
-         Edit-Formulation, via a function called changeStatus().
-         NEITHER NAME MENTIONS STOCK. Cost S109 four greps to find.
-
-
 ✓S109 29  Traceability view misc release  Trace_ProductHeaderView
-       Now reads rmp.qty_rejected_units, and the misc_release CTE
-       carries an explicit `type = 'Product'` guard.
-       ▶ APPLIED TO BOTH BOXES. Slashes 3 → 2, joins held at 22, read
-         back OUT OF THE DATABASE on each. Fresh backups captured first
-         — the S107 ones held the six-division version.
-       ⚠⚠ THIS ONE TRADED "DERIVED BUT CORRECT" FOR "STORED BUT
-         INCOMPLETE". Rows written before JR15 (S103) never stored a
-         count, so their cells now read 0 or low. ON DEV, MO-0001's
-         41.7 Kg row went 5 → 3: two MR rows, only one with a count.
-       ✓ MEASURED, NOT REASONED — NO CLIENT ROW MOVED. Glutenull has
-         ZERO MR rows. Hagensborg's 24 are ALL Material with no mlc_id,
-         so they never join and were already 0. The only product rows
-         on prod are three on sandbox 464.
-       ✓ PROVEN: Glutenull MO-0001 still 1750# (560 Kg), MO-0002 802#.
-         Nothing moved, which is the pass condition on a round ratio.
-
+       ⚠⚠ TRADED "DERIVED BUT CORRECT" FOR "STORED BUT INCOMPLETE" on
+         pre-JR15 rows. ✓ NO CLIENT ROW MOVED. → P170.
 ✓S109 30  Dispatch order — WRITES units   add-dispatch-v2.ts:183,194
-       Now sums the operator's TYPED qtyWdu across lots. No division.
-       ⚠⚠ IT WAS A ROUND-TRIP, AND THAT IS WORSE THAN A DIVISION. The
-         operator TYPES the unit count into qtyWdu (a required field);
-         getQty:101 derives the Kg from it by MULTIPLYING — correct —
-         and then :194 divided that Kg back to rebuild the count. The
-         typed number was thrown away and reconstructed from its own
-         derived weight.
-       ▶ PROVEN IN THE ROW ON DEV, not on a screen. 474 / IP-0.37 at
-         0.37 Kg per unit, 7 units typed → 2.59 Kg derived →
-         packing_units STORED AS 7.
-       ✓ PREVENTIVE ON PROD, NOT CORRECTIVE. Neither client has ever
-         created a dispatch order — all nine on prod are sandbox, all
-         on round ratios where the old division landed exactly.
-         NOTHING TO HEAL.
-       ⚠ J88's fractional hazard did NOT apply here. This line rounds
-         to three decimals, not to an integer; the bare Math.round was
-         create-packslips:246, a different site.
-
+       ⚠⚠ IT WAS A ROUND-TRIP, AND THAT IS WORSE THAN A DIVISION.
 ✓S110 31  MO detail receiving panel   edit-mlc.html:258 + JR21
-       Reads receiveproducts.qty — the PER-RECEIPT count. getWdu at
-       edit-mlc.component.ts:355 DELETED; html:258 was its only live
-       caller. ⚠ THE FUNCTION WAS AT :355. Every document said :354.
        ▶ PROVEN dev 474 MO-0005: two receipts, 5.000# and 8.000#.
-         ⚠⚠ NOT 13 AND 13 — the fixture existed only to make that
-         distinction visible, and without it the fix and the bug are
-         indistinguishable.
-       ▶ PROVEN dev 474 MO-0003: one receipt, 41.000#, unchanged. The
-         single-receipt regression check.
-       ▶ PROVEN PROD through Glutenull's own login: MO-0001 1750.000#
-         (560.000 Kg), MO-0002 802.000# (192.480 Kg). NOTHING MOVED,
-         which is the pass condition at 0.32 and 0.24 Kg per unit.
-       ⚠ Both MO-0005 receipts carry the SAME internalCode Rec-260809-1.
-         The receipt code is not unique per receipt. → P172.
-       ⚠⚠ THERE ARE TWO RECEIVING PANELS, ONE PER ROLE, AND THEY ARE
-         DIFFERENT TEMPLATES — the Sales Controller's carries a UOM
-         column the Warehouse one lacks. ✓ BOTH READ THE STORED COUNT:
-         5.000 and 8.000 on each, proven S110. ROW 31 WAS ONE SITE.
-       ⚠ ONLY edit-mlc.component.html:258 WAS PATCHED. The Sales panel
-         was already correct — it was never a getWdu caller.
+         ⚠⚠ NOT 13 AND 13.
 
-✓S110 35  Ingredient requirement       Formulations.js:1120
-       Now mat.qty × (MO units ÷ formula_id__batch_qty), computed live,
-       with a zero guard so a formulation carrying no batch size reads 0
-       rather than Infinity.
-       ✓ INGREDIENTS ARE Kg-ANCHORED BY RULE — PART 1 source 1: quantity
-         per batch takes the basis of the thing consumed. So the basis was
-         never wrong here and rounding was the whole defect.
-       ▶ PROVEN dev 474 MO-0004: Ginger Powder 2303.609 → 2303.910 Kg,
-         MATCHING Plan Quantity 23.000# (2303.910 Kg) ON THE SAME PAGE.
-         THAT 0.301 Kg GAP HAS BEEN THE CAMPAIGN'S CLEAREST VISIBLE
-         DEFECT SINCE S108 AND IT IS CLOSED.
-       ▶ PROVEN dev 474 MO-0003: 15.171 → 15.170 Kg, matching what was
-         received. The banked over-release resolved.
-       ▶ PROVEN PROD, Glutenull MO-0001: every ingredient down ~0.005%,
-         predicted BY QUERY before the write. MO-0002 EXACT and unmoved.
-       ⚠⚠ THE CONTROL HELD. Pouch 4347.000 Ea on dev; on prod
-         Clamshell320 went 1750.080 → 1750.000 Ea, resolving EXACTLY to
-         the MO quantity.
+✓S111 32  MO detail intermediate qty  3 templates + WhC_GetMoIntermediateProducts_SP
+       Now reads (item2?.subrecipeformulation_ship_qty || 0) * getFactor().
+       THE PROCEDURE gained subrecipeformulation.ship_qty AS
+       subrecipeformulation_ship_qty. JR22, both boxes. Commit 3b176720.
+       ▶ PROVEN dev 474 MO-0004: 15.923, a UNIT COUNT, where it read
+         5.892 Kg. True figure 9 × 23/13 = 15.923076...
+       ▶ PROVEN ON BOTH MO SCREENS — /Edit-MLO (Sales Controller) and
+         /Edit-Mlc (Warehouse Controller).
+       ✓ THE FOURTH SITE IS DONE. edit-mlo.component.ts:557 feeds the
+         EXPORT, not the screen, and it now calls this.getFactor().
+       ⚠⚠ PLAN'S ADDRESS AND ITS INSTRUCTION WERE BOTH WRONG. It said
+         :551 and said `d` is the FORM and must become this.mlcDetails.
+         READING IT: the line is :557 and `d` IS ALREADY the MO object —
+         d.packagingConfiguration and d.intermediateProducts both
+         resolve. The real defect was narrower: it multiplied by
+         d.batches, the stored rounded column.
 
-──── PART — 3. ROUNDING FIXED, BASIS NOT. ───────────────────────────
-PART 32  MO detail intermediate qty  3 templates + WhC_GetMoIntermediateProducts_SP
-       edit-mlc.html:172, edit-mlo.html:172 and start-mlc.html:200 now
-       call getFactor() instead of multiplying by the stored rounded
-       batches. Commit bc03b22d.
-       ⚠⚠ IT STILL READS subrecipeformulation_qty — KILOGRAMS — under a
-         header that says "Qty required - # (UOM)". On 474 MO-0004 it
-         shows 5.892 Kg. THE TRUE FIGURE IS 9 × 23/13 = 15.923 UNITS.
-       ▶ NEEDS subrecipeformulation.ship_qty ADDED TO THE PROC, aliased,
-         and the templates repointed at the new name.
-       ⚠ A FOURTH SITE IS UNTOUCHED: edit-mlo.component.ts:551 reads
-         (d.batches || 0) where `d` is the FORM, not the MO. It feeds the
-         EXPORT, not the screen. It must read this.mlcDetails.
-PART 34  MO detail Batch Materials     Formulations.js:1150
-       ⚠⚠ THE MAP'S ADDRESS FOR THIS ROW WAS WRONG. It said "serve the
-         unit figure to matList". matList is at :891, inside
-         methodForCreateFormula — the create-and-fork WRITE path. The
-         read path is getFormulaByIdForReleaseMaterial at :1079, and the
-         line is :1150. FOUR HUNDRED AND FIFTY LINES AWAY.
-       ▶ AN ADDRESS IS A CLAIM. Fourth time this campaign.
-PART 36  Intermediate requirement      Formulations.js:1150
-       Reads formulation.qty (Kg) where PART 1 source 1 says ship_qty.
-       ⚠ 34 AND 36 ARE THE SAME LINE wearing two row numbers. Closing one
-         closes the other.
-                                                    → S111, WITH ROW 33
+✓S111 33  MO detail intermediate stock   3 templates + both procedures
+       Now reads formulations_inventory_units.
+       ⚠⚠ IT SITS ONE LINE BELOW ROW 32 IN THE SAME THREE TEMPLATES —
+         172/173 in edit-mlc and edit-mlo, 200/201 in start-mlc. They
+         were scheduled together and shipped together.
+       ▶ PROVEN dev 474 MO-0004: 47.000 where it read 17.390 Kg.
+         ⚠ 47, NOT 41 — stock moved in S109.
+       ⚠⚠ THIS ROW DESCRIBED ONE FIGURE AND THERE WERE TWO. The Batch
+         Materials block showed the same product's stock from a
+         different loop. → ROW 49.
 
-──── MISALIGNED — 11 ────────────────────────────────────────────────
+✓S111 34  MO detail Batch Materials     Formulations.js:1156
+       Now scales Number(formulation.ship_qty || 0) by the live factor.
+       ⚠⚠ ADDRESS CORRECTED. Every document said :1150. THE REAL LINE IS
+         :1156, and :1150 is a DIFFERENT assignment to the same
+         property — the beforeEditQty pencil-edit restore. Patching by
+         line number would have hit the wrong statement.
+       ✓ THE ANCHOR WAS UNIQUE AND WAS CHECKED: `formulation.qty * __f`
+         appears exactly once in the file. :1123 uses `mat.` and :1201
+         does not use __f at all.
+       ⚠ A GUARD WAS ADDED: Number(x || 0). ship_qty is populated on
+         every row of both boxes TODAY, but undefined × number is NaN
+         written into a client-facing requirement — S110's near-miss.
+       ⚠ P164's INVERTED SIGN SITS THREE LINES BELOW, at :1157. NOT
+         TOUCHED. It is STEP 6 and it is a known accepted risk.
+
+✓S110 35  Ingredient requirement       Formulations.js:1123
+       ⚠ ADDRESS CORRECTED S111 — recorded as :1120. Same drift as row 19.
+       ✓ INGREDIENTS ARE Kg-ANCHORED BY RULE. DO NOT TOUCH.
+
+✓S111 36  Intermediate requirement      Formulations.js:1156
+       ⚠ 34 AND 36 ARE THE SAME LINE wearing two row numbers. Closing
+         one closed the other, exactly as recorded.
+
+──── MISALIGNED — 10 ────────────────────────────────────────────────
 XX 20  Release screen Released Qty      Formulations.js :1108,:1141,:1189
        Returns ADDED into the released total. ⚠ LIVE, BOTH CLIENTS.
-       ⚠⚠ PROVEN ON DEV S108 WITH A CONTROL — 464 MO-0002, one return
-         of 2 Kg moved Ginger from 122.640 to 124.640 while five other
-         materials held. THE SIGN IS INVERTED.
+       ⚠ SEEN AGAIN IN S111 while patching :1156 — `released_qty = sum`
+         is three lines below the changed line and `returnSum` is still
+         declared and never assigned. DELIBERATELY NOT TOUCHED.
                                                 → STEP 6, RETURN PATH
 
 XX 25  MO list Completed Qty            mfg-lot-codes.html:69
-       ⚠⚠ RE-SCOPED S109. THIS IS NOT A ONE-LINE REPOINT AND WAS
-         WRONGLY LISTED AS ONE. It calls getWdu(element, received_qty),
-         and getWdu at mfg-lot-codes.ts:124-131 DIVIDES:
-             (qty / batch) × (batch / wgt_kgs_per_unit)
-         Passing it received_units would make it divide the COUNT and
-         print a WRONG number where a right one stands today.
-       ✓ THE CORRECT SHAPE IS EIGHT LINES BELOW IT — getPlannedKg:133
-         takes stored units and multiplies. Carries an S42 comment.
-                                          → ROW 46, ITS OWN SITTING
+       Calls getWdu, which DIVIDES.      → ROW 46, ITS OWN SITTING
 
-XX 33  MO detail intermediate stock     WhC_GetFormulaIntermediateProducts
-       ⚠⚠ IT SITS ONE LINE BELOW ROW 32 IN THE SAME FOUR TEMPLATES — 172
-         and 173. Fixing 33 alone leaves the requirement right and the
-         stock wrong, one line apart, on one screen.
-       ▶ NEEDS formulations.inventory_units. NO NEW JOIN, NO ALIAS.
-       ⚠ On 474 MO-0004 it reads 17.390 Kg. The warehouse holds 47 units.
-         ⚠ 47, NOT 41 — stock moved in S109.
-                                                    → S111, WITH ROW 32
 XX 37  Traceability view intermediate   Trace_ProductHeaderView
 XX 38  Traceability view SOH            Trace_ProductHeaderView SOH_su
 XX 39  IP trace backward                Trace_ProductOneStepBackwardIP_SP
@@ -434,45 +343,58 @@ XX 42  Return details screen            ...ReturnDetails_SP
 XX 43  Product return stock balance     ReturnMaterialProduct.js:68
                                                 → STEP 6, RETURN PATH
 
-XX 48  ⚠⚠ NEW — FOUND S109. Stock Information popup, the downstream-MO
-       card. TRANSPOSED LABELS.
-       On 474 IP-0.37 the card reads:   15.170 (41.000 Kg)
-       15.170 IS THE KILOGRAMS. 41 IS THE UNIT COUNT. The bare number
-       is the weight and the unit count carries the Kg suffix — the
-       app's own convention everywhere else is units# (Kg).
-       ⚠ DISPLAY ONLY. Nothing is stored wrong. But it is a wrong
-         label on a stock figure, which is exactly what this map is
-         for. ▶ NEEDS A QUEUE NUMBER. ⚠ NOT YET RAISED.
-       ⚠ SAME POPUP shows "In Progress 23# (8.51 Kg)" on IP-0.37, and
-         23 is MO-0004's quantity — an MO for Parent-0.53, NOT for
-         IP-0.37. The popup lists DOWNSTREAM MOs by design (J114), so
-         this MAY BE CORRECT. ⚠ NOT PROVEN EITHER WAY. One query.
-         DO NOT WRITE IT UP AS A DEFECT UNTIL SOMEBODY LOOKS.
+XX 48  Stock Information popup, the downstream-MO card.
+       TRANSPOSED LABELS. ⚠ DISPLAY ONLY. → P169.
 
 ──── TO REVIEW — 4. NOT DEFECTS. ────────────────────────────────────
 ?? 44  DO details field named ship_qty  do-details.ts:30,54
-       Holds qty_to_ship, which is Kg. THE NAME SAYS UNITS, THE
-       CONTENT IS WEIGHT. Same shape as TRAPS 10, in the frontend.
 ?? 45  Material traceability            material-traceability-details:169,170
-       Materials are Kg-anchored BY DESIGN, so this may be correct.
-       ⚠ VERIFY AGAINST THE RULE. Do not touch on suspicion.
 ?? 46  Seven-copy MO qty helper         7 files, same sum
-       ⚠⚠ NOT A BULK REPOINT. Each caller passes a DIFFERENT source
-         and SOME DIVISIONS ARE CORRECT. J114: closed-mlcs.html:84 is
-         right while :79 is wrong, same helper, adjacent lines.
-       ⚠ ROW 25 IS ONE OF THE SEVEN CALLERS. Confirmed S109 by reading
-         getWdu's body. The helper divides whatever it is handed.
-       ▶ OWN SITTING. Read all seven callers first.
-?? 47  Add dispatch v1 popup            PopUps/add-dispatch
-       Dead component, never opened. J87 / P36. ▶ DELETE.
+?? 47  Add dispatch v1 popup            PopUps/add-dispatch  ▶ DELETE.
 
-══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+──── ⚠⚠ NEW, S111 — AWAITING MINTY'S RULING ─────────────────────────
+OK 49  Batch Materials WH stock, intermediates
+       edit-mlc.html:205 · edit-mlo.html:205 · start-mlc.html:233
+       THE formulaList LOOP ONLY.
+
+       ⚠⚠ THIS SITE WAS IN NO ROW OF THIS MAP. It was found by reading a
+         template that was already open for row 33, and it was fixed in
+         the same session — commit e8e8f572.
+
+       WHAT IT WAS: the Batch Materials block renders THREE loops —
+         matList, formulaList, packList — with IDENTICAL markup. All
+         three read {{getQty(item?.inventory)}}. For materials and
+         packaging that is CORRECT. For an intermediate it was the Kg
+         column, shown one block below a corrected unit figure.
+       ▶ ON dev 474 MO-0004 THE SCREEN CONTRADICTED ITSELF: Intermediate
+         Products read 47.000 and Batch Materials read 17.390, for the
+         same product, one block apart. ⚠ THAT IS WORSE THAN THE
+         ORIGINAL DEFECT, WHERE BOTH WERE CONSISTENTLY WRONG.
+
+       THE FIX: the formulaList loop reads inventory_units. Scoped by
+         splitting each file on the two loop declarations and replacing
+         ONLY between them. ⚠ THE TARGET STRING APPEARS THREE TIMES PER
+         FILE. A naive replace would have repointed MATERIALS, which are
+         Kg-anchored BY RULE — a defect, not a fix.
+       ✓ PROVEN dev 474 MO-0004: both blocks read 47.000. Ginger Powder
+         9796.983 Kg (matList, the line directly above) UNMOVED. Pouch
+         4347.000 Ea (packList, directly below) UNMOVED. The two
+         bracketing controls are what prove the scoping held.
+
+       ▶ MINTY'S DECISION: does this stand as row 49?
+         IF YES  the board is 35 GREEN of 49 and the ceiling is 45.
+         IF NO   fold it into row 33's text and the board stays 34 of 48.
+       ⚠ CLAUDE'S VIEW: keep it as its own row. It is a different block,
+         a different data path and a different loop, and row 33's text
+         does not describe it. A row that describes two sites is how an
+         address becomes wrong.
+
+══════════════════════════════════════════════════════════════════════
 PART 3 — THE SCOREBOARD
 ══════════════════════════════════════════════════════════════════════
 
   ⚠⚠ 44 IS THE CEILING, NOT 48. Rows 44, 45, 46 and 47 are REVIEW items.
-    They close as DECISIONS — 45 may be correct by design, 47 is dead code
-    to delete — not as fixes.
+    ⚠ IF ROW 49 IS ACCEPTED THE CEILING BECOMES 45 OF 49.
 
   AFTER      WHAT MOVED                      GREEN  PART  RED  REVIEW
   S108       as the survey recorded it          19     0    24      4
@@ -481,117 +403,100 @@ PART 3 — THE SCOREBOARD
              write, and the view                28     0    16      4
   S110       row 31 receiving panel,
              row 35 ingredient requirement      30     3    11      4
+  S111       rows 32, 33, 34, 36 —
+             THE INTERMEDIATE BASIS             34     0    10      4
 
-  ⚠⚠ CLAUDE REPORTED 32 GREEN MID-SESSION AND WAS WRONG BY TWO. Rows 32,
-    34 and 36 had their arithmetic improved and their BASIS left wrong.
-    ▶ A ROW IS GREEN WHEN IT SATISFIES PART 1, NOT WHEN IT WAS TOUCHED.
+  ⚠⚠ THE PART COLUMN IS BACK TO ZERO AND THAT IS THE POINT. The status
+    was created in S110 for three half-fixed rows and S111 closed all
+    three. ▶ THE DEFINITION STAYS IN THE LEGEND.
 
-  ▶ WHERE THE REMAINING 18 SIT
-    rows 32/33/34/36  two procs, two column adds, one build   4
-    step 5            the schema  ▶ P82 CLOSES                5
-    step 6            the return path  ⚠ SURVEY FIRST         3
-    row 25            the seven-copy helper caller            1
-    row 48            the transposed labels                   1
-    rows 44/45/46/47  REVIEW — decisions, not fixes           4
-                                                             ──
-                                                             18
+  ▶ WHERE THE REMAINING 14 SIT
+    step 5            the schema  ▶ P82's ARITHMETIC CLOSES          5
+    step 6            the return path  ⚠ SURVEY FIRST                3
+    row 25            the seven-copy helper caller                   1
+    row 48            the transposed labels                          1
+    rows 44/45/46/47  REVIEW — decisions, not fixes                  4
+                                                                    ──
+                                                                    14
 
   AFTER    REMAINING WORK                   GREEN  PART  RED  REVIEW
-  S111     rows 32/33/34/36                   34     0    10      4
   step 5   the schema  ▶ P82 CLOSES           39     0     5      4
   step 6   the return path                    42     0     2      4
   row 25   the seven-copy helper sitting      43     0     1      4
   row 48   the transposed labels              44     0     0      4
 
-  ⚠⚠ S111's PRECONDITION IS ALREADY MEASURED. subrecipeformulation.ship_qty
-    is populated on EVERY row of BOTH boxes — dev 15, prod 10, zero null or
-    zero. NO HEAL IS NEEDED. Do not spend the session proving it again.
+  ⚠⚠ S111's PRECONDITION WAS MEASURED IN S110 AND IT HELD.
+    subrecipeformulation.ship_qty is populated on EVERY row of BOTH
+    boxes — dev 15, prod 10, zero null or zero. NO HEAL WAS NEEDED, and
+    no time was spent proving it again.
 
 ══════════════════════════════════════════════════════════════════════
 PART 4 — HOW TO PROVE A FIX
 ══════════════════════════════════════════════════════════════════════
 
 THE FIXTURE — company 474 on dev, built S108.
-  IP-0.37      FO-0004  0.37 Kg/unit   19 units per batch
+  IP-0.37      FO-0004  0.37 Kg/unit   19 units per batch  inv_units 47
   Parent-0.53  FO-0005  0.53 Kg/unit   13 units per batch
                Pouch / Carton 3 / Case 7 / Pallet 9
                Recipe: Ginger Powder 1302.21 Kg + IP-0.37 9 units
-  MO-0003  IP-0.37, 41 units, COMPLETE, lot Pdt-260807-1
+               ⚠ subrecipeformulation id 1044: qty 3.33 Kg, ship_qty 9.
+                 BOTH POPULATED. Re-read S111 before the write.
+  MO-0003  IP-0.37, 41 units, COMPLETE, ONE receipt
   MO-0004  Parent-0.53, 23 pallets, CREATED, NOT RELEASED
            ⚠⚠ LEAVE IT ALONE. IT IS THE BEFORE PICTURE.
+           ⚠ S111 CONFIRMED IT DOES NOT NEED RUNNING. The Intermediate
+             Products block renders on a CREATED MO. Minty asked; the
+             answer is no, and spending the fixture would have cost the
+             next session its before picture.
+  MO-0005  IP-0.37, 13 units, TWO receipts of 5 and 8
 
 ⚠ 19 AND 13 ARE BOTH PRIME AND SHARE NO FACTORS, so nearly any MO
-  quantity produces a repeating decimal. That is what makes the
-  rounding visible. TRAPS 9: a round ratio hides a division entirely.
+  quantity produces a repeating decimal. TRAPS 9.
 
-THE THREE PROOFS VISIBLE ON MO-0004 TODAY
-  1  Plan Quantity        23.000# (2303.910 Kg)
-     Ginger Powder req.            2303.609 Kg
-     ⚠ 0.301 Kg APART ON THE SAME PAGE. The recipe is one batch of
-       Ginger Powder per batch of product, so they must be identical.
-       Plan uses the MO; Ginger Powder uses the rounded batches 1.769.
-       True factor 23 ÷ 13 = 1.769230769...
-  2  IP-0.37 required     5.891 Kg
-     ⚠ Kg under a header reading "Qty required - # (UOM)".
-       True figure: 9 × 23/13 = 15.923 units.
-  3  WH Stock in # (UOM)  15.170 Kg
-     ⚠ Kg again. The warehouse holds 41 units.
+⚠⚠ ALL THREE PROOFS ON MO-0004 ARE NOW CLOSED.
+  1  ✓ CLOSED S110. Plan Quantity 23.000# (2303.910 Kg) and the Ginger
+     Powder requirement both read 2303.910 Kg.
+  2  ✓ CLOSED S111. IP-0.37 Qty required reads 15.923 — a UNIT COUNT.
+     It read 5.892 Kg under a header saying "# (UOM)".
+  3  ✓ CLOSED S111. WH Stock reads 47.000 — a UNIT COUNT. It read
+     17.390 Kg.
+  ✓ AND THE TWO BLOCKS AGREE. Intermediate Products and Batch Materials
+    both read 47.000. Between the two S111 commits they disagreed —
+    47.000 and 17.390 — and that intermediate state is recorded here
+    because it is what row 49 exists to prevent recurring.
 
-⚠⚠ THE CONTROL — Pouch 4347.000 Ea = 23 × 9 × 7 × 3, taken from the MO
-  quantity. IT MUST NOT MOVE AT ANY STEP. If a packaging figure shifts,
-  THE FIX IS WRONG, NOT THE DATA.
+⚠⚠ THE CONTROL — Pouch 4347.000 Ea = 23 × 9 × 7 × 3. Carton 1449 ·
+  Case 207 · Pallet 23. IT MUST NOT MOVE AT ANY STEP.
+  ✓ HELD THROUGH BOTH S111 COMMITS.
 
-⚠ ON A REPOINT, A CHANGED VALUE IS A FAILURE. Rows 21-29 all return
-  the arithmetically right number today. The Kg column is the control
-  and must not move. → S106 LESSON 6.
+⚠⚠ S111 ADDED A SECOND CONTROL AND IT EARNED ITS PLACE. Ginger Powder's
+  WH Stock, 9796.983 Kg, is rendered by the matList loop — the line
+  DIRECTLY ABOVE the one row 49 changed, reading the SAME property name.
+  Pouch sits directly below. ▶ WHEN A PATCH IS SCOPED TO A BLOCK, THE
+  CONTROLS ARE THE LINES THAT BRACKET IT. A count proves the string
+  changed; the bracketing lines prove it changed in the right place.
 
-⚠⚠ THE S109 REPOINTS ALL HELD THAT LINE. Every figure identical before
-  and after; only the route changed. The baseline was captured BY QUERY
-  before any code was written — 23 MOs across companies 464 and 474,
-  received_units compared against received_qty ÷ wgt_kgs_per_unit, and
-  they agreed on every row. ▶ MEASURE THE BASELINE FIRST. A repoint
-  cannot be verified against a memory.
+⚠ ON A REPOINT, A CHANGED VALUE IS A FAILURE.
+⚠⚠ ON A RECALCULATION, A CHANGED VALUE IS EXPECTED — AND MUST BE
+  PREDICTED BY QUERY BEFORE THE WRITE.
 
-⚠⚠ TWO OF THE THREE PROOFS ON MO-0004 ARE NOW CLOSED (S110).
-  1  ✓ CLOSED. Plan Quantity and the Ginger Powder requirement both read
-     2303.910 Kg. The 0.301 Kg gap on one page is gone.
-  2  ⚠ STILL OPEN. IP-0.37 required reads 5.892 Kg — Kg under a units
-     header. True figure 15.923 units. ⚠ 5.892, NOT 5.891: the rounding
-     half was fixed and the basis was not.
-  3  ⚠ STILL OPEN. WH Stock reads 17.390 Kg. The warehouse holds 47 units.
+⚠⚠ HAGENSBORG CAN NEVER DEMONSTRATE A QUANTITY FIX. batch_qty is 1 on
+  all thirteen of their MOs. Glutenull is 0.32 and 0.24 Kg per unit,
+  both round.
+  ▶ THE DEV FIXTURES AT 0.37 AND 19/13 ARE THE ONLY REASON ANY OF THIS
+    IS PROVABLE. That is what they are for.
 
-⚠⚠ ON A RECALCULATION, UNLIKE A REPOINT, A CHANGED VALUE IS EXPECTED — AND
-  MUST BE PREDICTED BY QUERY BEFORE THE WRITE. S110 measured every client
-  row first:
-    Glutenull MO-0001  1750 ÷ 240 = 7.29166..., stored 7.292  ⚠ MOVES
-    Glutenull MO-0002   802 ÷ 400 = 2.005 exactly             EXACT
-    Hagensborg all 13   batch_qty = 1, so qty ÷ 1 = qty       EXACT
-  ▶ ONE ROW IN FIFTEEN MOVED, BY ~0.005%, DOWNWARD, KNOWINGLY.
-
-⚠⚠ HAGENSBORG CAN NEVER DEMONSTRATE A QUANTITY FIX. batch_qty is 1 on all
-  thirteen of their MOs — a 1:1 ratio, TRAPS 9 on a live client,
-  permanently. Glutenull is 0.32 and 0.24 Kg per unit, both round.
-  ▶ THE DEV FIXTURES AT 0.37 AND 19/13 ARE THE ONLY REASON ANY OF THIS IS
-    PROVABLE. That is what they are for.
-
-⚠ formulations.batch_qty IS THE SHIPPING-UNITS-PER-BATCH COLUMN, and
-  WhC_GetMoDetails_SP SERVES IT AS `formula_id__batch_qty` — ALIASED.
-  mlcDetails.batch_qty is undefined, and qty × undefined is NaN.
-  ▶ SETTLED BY CALLING THE PROC AND READING THE HEADER ROW, not by reading
-    SHOW CREATE. Same family as TRAPS 10.
-
-⚠ TWO ROWS IN THAT BASELINE ARE WHY THE WORK MATTERED
-    464 MO-0009  received_qty STORED AS 15.290000000000001
-    464 MO-0015  7 ÷ 0.7 = 9.999999999999998 in binary
-  Both printed correctly ONLY because every screen rounds to three
-  decimals. → J114: A DISPLAY-ROUNDED SCREEN CANNOT REVEAL A DIVISION.
+⚠⚠ AND ON PROD, NEITHER CLIENT HAS INTERMEDIATES, SO S111 IS INVISIBLE
+  THERE BY DESIGN. THE PASS CONDITION WAS THAT NOTHING MOVES AND THAT
+  THE INTERMEDIATE PRODUCTS BLOCK STILL RENDERS.
+  ▶ IT RENDERED CLEAN AND EMPTY ON GLUTENULL MO-0002. That empty block
+    is the only prod-side evidence that the procedure, the backend and
+    the build agree — the templates read two property names that did
+    not exist on that box an hour earlier.
 
 ══════════════════════════════════════════════════════════════════════
 PART 5 — WHAT THIS RETIRES
 ══════════════════════════════════════════════════════════════════════
-
-Four TRAPS entries exist because nobody could tell which figure was
-which. A complete map answers that for every unit number in the app.
 
   TRAPS 1   the DO row mixes units and Kg side by side
   TRAPS 2   shipped quantity is a unit count — misread three times
@@ -606,49 +511,84 @@ which. A complete map answers that for every unit number in the app.
 WHAT S109 TAUGHT THIS DOCUMENT
 ══════════════════════════════════════════════════════════════════════
 
-1  ⚠⚠ A SURVEY CAN BE WRONG IN BOTH DIRECTIONS. S108 warned that the
-   map would miss sites. It also MIS-MARKED THREE THAT WERE ALREADY
-   FIXED — one of them carrying a comment in the code saying so.
-   ▶ READ THE LINE BEFORE PATCHING IT. Three of nine Step 1 items
-     needed no work at all, and a fourth was not the job described.
-
-2  ⚠ A ROW CAN NAME THE WRONG LINE IN THE RIGHT FILE. Row 21 pointed
-   at a dividing function that NOTHING CALLS, while the live template
-   three files away was already correct and type-gated.
-   ▶ AN ADDRESS IS A CLAIM. Confirm the caller, not just the code.
-
+1  ⚠⚠ A SURVEY CAN BE WRONG IN BOTH DIRECTIONS.
+2  ⚠ A ROW CAN NAME THE WRONG LINE IN THE RIGHT FILE.
 3  ⚠⚠ "ONE-LINE REPOINT" IS A CLAIM ABOUT A CALL SITE AND SAYS NOTHING
-   ABOUT WHAT IT CALLS. Row 25 looked identical to rows 22-24 and is a
-   caller of a dividing helper with six siblings, some of them correct.
-   ▶ READ THE FUNCTION BODY BEFORE CALLING SOMETHING A REPOINT.
-
-4  ⚠ THE FIXTURE EARNED ITS KEEP AGAIN. 0.37 Kg per unit is not round,
-   so 41# (15.17 Kg) could not have reconciled by accident. Two of the
-   verifications would have been worthless on a 1:1 product.
+   ABOUT WHAT IT CALLS.
+4  ⚠ THE FIXTURE EARNED ITS KEEP AGAIN.
 
 ══════════════════════════════════════════════════════════════════════
 WHAT S110 TAUGHT THIS DOCUMENT
 ══════════════════════════════════════════════════════════════════════
 
 1  ⚠⚠ A ROW IS GREEN WHEN IT SATISFIES PART 1, NOT WHEN IT WAS TOUCHED.
-   Three rows had their arithmetic improved and their basis left wrong,
-   and were reported green until a row-by-row check against PART 1 caught
-   it.
-   ▶ THE "PART" STATUS EXISTS BECAUSE OF THIS. Half a fix recorded as
-     whole is how J117 nearly shipped a regression.
-
-2  ⚠⚠ A MOVING NUMBER IS NOT PROOF OF A CLOSED ROW. 5.891 became 5.892.
-   The screen changed, the arithmetic improved, the basis stayed wrong.
-
+2  ⚠⚠ A MOVING NUMBER IS NOT PROOF OF A CLOSED ROW.
 3  ⚠⚠ AN ADDRESS IS A CLAIM — AND THE MAP'S OWN ADDRESS WAS WRONG AGAIN.
-   Row 34 named a line in the create-and-fork WRITE path. The real line is
-   450 lines away in a different function. FOURTH TIME THIS CAMPAIGN.
+4  ⚠ ROWS THAT SIT ON ADJACENT LINES MUST BE SCHEDULED TOGETHER.
+5  ✓ THE CORRECT SHAPE IS OFTEN ALREADY IN THE FILE.
 
-4  ⚠ ROWS THAT SIT ON ADJACENT LINES MUST BE SCHEDULED TOGETHER. Rows 32
-   and 33 are lines 172 and 173 of the same four templates. The map lists
-   them separately and nothing in it says they are neighbours.
-   ▶ THE MAP RECORDS SITES. IT DOES NOT RECORD PROXIMITY. Check.
+══════════════════════════════════════════════════════════════════════
+WHAT S111 TAUGHT THIS DOCUMENT
+══════════════════════════════════════════════════════════════════════
 
-5  ✓ THE CORRECT SHAPE IS OFTEN ALREADY IN THE FILE. Line 1195 had been
-   multiplying by the MO quantity all along, which is why the packaging
-   control never moved. Third time this campaign.
+1  ⚠⚠ SIX ADDRESSES WERE WRONG IN ONE SESSION, AND FOUR OF THEM WERE
+   WRONG BY THE SAME CAUSE. Rows 19, 34, 35 and 36 all named lines that
+   had DRIFTED DOWN BY ABOUT SIX — because S110's own commit inserted a
+   comment and two const lines above them. THE DOCUMENT WAS WRITTEN
+   BEFORE THE CODE IT DESCRIBES AND NOBODY RE-READ IT AFTERWARDS.
+   ▶ WHEN A COMMIT INSERTS LINES, EVERY ADDRESS BELOW IT IN THIS MAP IS
+     STALE. Correct them in the same close, or the next session patches
+     by a number that no longer points anywhere.
+   ▶ AND ANCHOR ON TEXT, NEVER ON A LINE NUMBER. Row 34's :1150 is a
+     real line doing a real, different thing.
+
+2  ⚠⚠ A ROW CAN DESCRIBE ONE SITE WHEN THERE ARE TWO. Row 33 named the
+   intermediate stock figure. There were two of them on one screen, in
+   two blocks, from two loops. Fixing only the one the row named would
+   have left the screen CONTRADICTING ITSELF — 47 units in one block and
+   17.390 Kg in the other, for the same product, one block apart.
+   ▶ A HALF-FIXED SCREEN IS WORSE THAN A CONSISTENTLY WRONG ONE. A
+     client can act on a wrong number; nobody can act on two.
+   → ROW 49.
+
+3  ⚠⚠ IDENTICAL MARKUP IN THREE LOOPS MEANS THE ANCHOR IS THE BLOCK,
+   NOT THE STRING. {{getQty(item?.inventory)}} appears three times per
+   template and TWO OF THE THREE ARE CORRECT — materials and packaging
+   are Kg-anchored by rule. The patch split each file on the two loop
+   declarations and replaced only between them, asserting 3 before and
+   2 after.
+   ▶ WHEN THE SAME LINE IS RIGHT IN ONE PLACE AND WRONG IN ANOTHER,
+     SCOPE BY STRUCTURE. Same family as J114's closed-mlcs :79/:84.
+
+4  ⚠ THE BRACKETING LINES ARE THE CONTROL. Ginger Powder above and
+   Pouch below the changed line, both reading the same property, both
+   unmoved. ▶ A COUNT PROVES A STRING CHANGED. ONLY THE NEIGHBOURS
+   PROVE IT CHANGED IN THE RIGHT PLACE.
+
+5  ⚠⚠ A CHECK COPIED FROM ONE LAYER TO ANOTHER STOPS BEING A CHECK.
+   JR16 says "grep DEFINER= must return 0" — TRUE OF THE BUILT FILE.
+   Claude applied it to SHOW CREATE on the live procedure and set the
+   pass condition at 0. MySQL ALWAYS records a definer on CREATE; the
+   check could not have passed for any object that exists.
+   ▶ RE-ASK WHAT A CHECK MEANS WHEN YOU MOVE IT. Third mis-scoped check
+     this campaign, after JR7e's schema-less grep and S110's bare curl.
+
+6  ⚠⚠ AN ASSERTION THAT COUNTS ITS OWN INSERTION IS JT27, AND IT FIRED
+   AGAIN. A guard demanded ship_qty appear exactly once; the inserted
+   text `subrecipeformulation`.`ship_qty` as `..._ship_qty` contains it
+   TWICE. ✓ THE SCRIPT REFUSED TO WRITE, which is the guard working.
+   ▶ ASSERT ON THE ALIAS, WHICH IS UNIQUE, NOT ON THE COLUMN NAME.
+
+7  ⚠ A LONG HEREDOC TRUNCATED FOR THE THIRD TIME IN THREE SESSIONS. 21
+   lines hung the shell at `heredoc>`; the 11-line rewrite worked first
+   time. ▶ PLAN'S 12-LINE RULE IS NOT A STYLE PREFERENCE.
+
+8  ⚠⚠ TWO WRONG-BOX INCIDENTS, AND ONE OF THEM WOULD NOT HAVE FAILED
+   SAFELY. `cd ~/abletrace-lab-frontend` after a missed exit landed in
+   DEV's copy of the frontend repo — same path, same name, both
+   machines. A patch script run there would have edited files that the
+   next deploy overwrites, silently, and the screen would never have
+   changed. ▶ THE FRONTEND REPO EXISTS ON BOTH MACHINES. That is the
+   one wrong-box case environment does not catch.
+   ✓ `hostname -I` AT THE TOP OF EVERY BLOCK CAUGHT THE OTHER ONE — it
+     errored on macOS, which is exactly the tripwire behaviour wanted.
