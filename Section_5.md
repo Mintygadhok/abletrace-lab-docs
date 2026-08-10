@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J122 — ⚠ the next one is J123, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR22. Last appended: S112, Aug 10 2026.
+number. Highest is J123 — ⚠ the next one is J124, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR23. Last appended: S113, Aug 10 2026.
 ⚠ J116 IS NOT A STANDALONE ENTRY. It was assigned inside JR15 and is easily
 missed by anyone scanning for J-headings. That is why this header said J115 for
 four sessions. S85 and S86 both asked for it to be corrected; S107 did it.
@@ -5159,3 +5159,378 @@ BLAST RADIUS: both boxes carry two backend commits and two frontend
 ========
 
 END S112 APPEND
+
+S113 - APPENDED 10 AUG 2026
+NUMBERING: highest existing entry is J122. This is J123. Highest JR was
+JR22; the procedure change below is JR23. No JT entry - TRAPS.md is the
+traps file and it is not extended by this session.
+
+⚠ HEADER TO CORRECT IN THIS COMMIT: Section 5's own header reads
+"Highest is J122 - the next one is J123 ... Highest JR is JR22. Last
+appended: S112, Aug 10 2026."
+After this commit it is J123, next J124, Highest JR is JR23, Last
+appended: S113, Aug 10 2026.
+
+
+JR23. Trace_MaterialDetails_SP - returns mlomanagement.received_units
+     [P186, row 45, row 51, S113]
+
+     ⚠⚠ THE FIRST PROCEDURE IN THIS CAMPAIGN THAT BUILDS A TEMP TABLE,
+     AND THAT CHANGES THE SHAPE OF THE EDIT. JR16 through JR22 were all
+     single-statement SELECT-list additions or expression swaps. THIS
+     ONE NEEDS THE COLUMN IN THREE PLACES:
+       1  the CREATE TEMPORARY TABLE temp_table declaration
+       2  the INSERT into temp_table(...) column list
+       3  the SELECT that feeds that INSERT
+     ✓ AND NOWHERE ELSE. The final statement is `SELECT temp_table.*`,
+       so a column added to the temp table reaches the caller
+       automatically. NOTHING WAS NEEDED AT THE OUTPUT END.
+
+     THE CHANGE, exactly:
+       CREATE   received_qty VARCHAR(100),
+              + received_units VARCHAR(100),
+       INSERT   ... qty, received_qty, received_units, formula_internal_code ...
+       SELECT   ... mlomanagement.qty, mlomanagement.received_qty,
+                    mlomanagement.received_units, ...
+
+     ⚠⚠ EVERY temp_table COLUMN IS VARCHAR(100), INCLUDING qty AND
+       received_qty. THE FRONTEND RECEIVES NUMBERS AS STRINGS.
+       Multiplication coerces silently and works. ADDITION WOULD
+       CONCATENATE silently and would not. That is why the row 45 fix
+       wraps everything in Number(), and why
+       material-traceability-details.component.ts:171 -
+       `releasedQty = qty_allocated - qty_returned` - still works only
+       because subtraction coerces. -> P190.
+
+     IF MISSED: the material traceability MO row has no stored unit
+     count to read, and the frontend divides mlomanagement.qty - which
+     is a UNIT COUNT since the S41 flip - by the per-unit weight. On
+     MO-0010 that printed "10 Kg (1#)" where the truth is 10 units and
+     100 Kg. ⚠ NO ERROR, and HALF THE ROW READS CORRECTLY because its
+     neighbour received_qty genuinely is Kg.
+
+     ⚠⚠ THE SLASH COUNT IS NOT A GATE FOR THIS OBJECT. It is ZERO
+       before and after - the procedure does NO arithmetic and never
+       did. Every earlier JR used the falling slash count as its check.
+       ▶ HERE THE GATE IS THE JOIN COUNT HOLDING AT 10, plus the new
+         column appearing exactly three times.
+
+     ⚠⚠ AND THE PASS VALUE OF THE READ-BACK CHECK WAS PREDICTED WRONG.
+       Claude expected `SHOW CREATE PROCEDURE ... | grep -c
+       "received_units"` to return 1, reasoning from JR18's note that
+       the object is one line. THAT IS TRUE OF A VIEW AND FALSE OF A
+       PROCEDURE - SHOW CREATE PROCEDURE PRESERVES THE BODY'S NEWLINES.
+       It returned 3, which is the right answer for the right reason.
+       ▶ A WRONGLY-PREDICTED PASS VALUE COULD HAVE BEEN READ AS A
+         FAILURE AND INVITED A RE-RUN OF A WRITE ON A LIVE BOX. Fourth
+         mis-scoped check this campaign, after JR7e's schema-less grep,
+         S110's bare curl and S111's DEFINER read.
+
+     BACKUPS - captured fresh, BEFORE any write, on each box:
+       /home/ubuntu/Trace_MaterialDetails_SP.bak-S113-DEV.txt
+       /home/ubuntu/Trace_MaterialDetails_SP.bak-S113-PROD.txt
+     BOTH 4675 bytes, 2 CREATE lines, 10 joins, 0 slashes -
+       BYTE-IDENTICAL ACROSS THE TWO BOXES BEFORE THE CHANGE. The same
+       precondition JR18, JR20, JR21 and JR22 all record.
+     ⚠ THE "2 CREATE" IS NOT AN ANOMALY: one is the `Create Procedure:`
+       label, one is the body's own CREATE TEMPORARY TABLE.
+     SHOW CREATE text, NOT runnable. Add the DELIMITER $$ wrapper to
+       restore. Same shape as JR16 through JR22.
+     Applied via: /home/ubuntu/fix-matdetails-S113.sql        (dev)
+                  /home/ubuntu/fix-matdetails-S113-PROD.sql   (prod)
+     Recreated WITHOUT the DEFINER clause. It was `admin`@`%`.
+       ⚠ grep "DEFINER=" must return 0 ON THE BUILT FILE. On the live
+         object it reads admin@% and always will - JR22's correction.
+
+     METHOD - JR16's, on each box from its OWN backup:
+       1  SHOW CREATE to a .bak file. Verify bytes, CREATE count, join
+          count, slash count.
+       2  Build the new object ON THE BOX by a SHORT node script. All
+          THREE anchors asserted to appear EXACTLY ONCE; join count
+          asserted at 10 AFTER; received_units asserted at exactly 3.
+          The script refuses to write if any assertion fails.
+       3  diff the built file against the backup and READ IT. Expect
+          exactly three added lines plus the wrapper.
+       4  Apply with `mysql abletracelab_live < file`.
+       5  Read the column count and join count back OUT OF THE DATABASE.
+       6  CALL the proc against a real fixture.
+     NO PROC TEXT EVER TRAVELLED THROUGH SSH.
+
+     ⚠ THE ANCHORS, AND WHY NONE COULD BE SHORTER:
+         received_qty VARCHAR(100),
+         qty, received_qty, formula_internal_code
+         mlomanagement.qty, mlomanagement.received_qty,
+       The bare string `received_qty` APPEARS THREE TIMES in the body.
+       Any assertion on it alone would have thrown. JR22's lesson -
+       assert on the longest distinct string, never the column name.
+
+     VERIFICATION, out of the database on each box:
+       SHOW CREATE PROCEDURE Trace_MaterialDetails_SP\G
+         | grep -c "received_units"                    -> 3
+       ... | grep -o "join" | wc -l                     -> 10
+       SELECT SPECIFIC_NAME, DEFINER FROM information_schema.routines
+         WHERE ROUTINE_SCHEMA='abletracelab_live'
+           AND SPECIFIC_NAME='Trace_MaterialDetails_SP';
+         -> ONE ROW, admin@%
+       ⚠ THE SCHEMA CLAUSE IS NOT OPTIONAL. The dormant `abletrace`
+         archive holds its own copy. -> P101, P134.
+
+     PROVEN BY CALL, DEV, company 474, Salt lot 11222 / material 8126:
+       MO-0007  qty 100  received_qty 100  received_units 100  wgt 1
+       MO-0010  qty  10  received_qty 100  received_units  10  wgt 10
+       MO-0012  qty  10  received_qty 100  received_units  10  wgt 10
+     ⚠⚠ THE CALL FOUND A THIRD ROW THAT WAS IN NO DOCUMENT. MO-0012 /
+       IP3 / FO-0008 renders on the same screen and carried the same
+       defect. PLAN's gate named only MO-0007 and MO-0010.
+       ▶ CALL THE PROCEDURE BEFORE WRITING THE GATE. It tells you what
+         the screen will actually show.
+
+     PROVEN BY CALL, PROD, GLUTENULL, Agave lot 11176 / material 8081:
+       MO-0001  qty 1750  received_qty 560.00  received_units 1750  wgt 0.32
+       MO-0002  qty  802  received_qty 192.48  received_units  802  wgt 0.24
+     ⚠ 1750 x 0.32 = 560 and 802 x 0.24 = 192.48, both EXACT. The
+       stored count and the old division agree to the digit, so the
+       ARITHMETIC half of this fix is invisible on prod by design.
+       ⚠⚠ THE MISLABELLING HALF WAS NOT. See J123.
+
+     ⚠ TWO THINGS FOUND IN THE BODY, NEITHER TOUCHED:
+       @returnedQty and @mprIDs are SET and never used. Dead variables
+         inside a live procedure. -> P115.
+       The final SELECT drives FROM temp_qty_allocated left join
+         temp_table with no aggregation, so two allocation rows against
+         one lot would render the MO twice. P136's shape, in a second
+         object. NOT INVESTIGATED.
+
+     Applied to BOTH boxes 10 Aug 2026.
+     ⚠ db-definitions-S93.txt DOES NOT REFLECT THIS. It is now stale on
+       NINE objects. -> P119.
+
+
+J123 - S113. THE ONLY WRONG NUMBER IN THE QUEUE, CLOSED - AND THE
+DOCUMENT THAT DESCRIBED IT NAMED FOUR DEAD LINES AND TOLD US TO LEAVE
+THE REAL ONE ALONE. STATUS: CLOSED. Frontend commit e1a82e02, both
+boxes. Database change is JR23.
+
+⚠⚠ THE OUTPUT IS NOT IN THIS ENTRY. The map is UNITS-BIBLE.txt/.xlsx.
+  38 green, 10 red, 3 review, of 51. ROWS 45 AND 51 CLOSED.
+
+WHAT SHIPPED
+  JR23      Trace_MaterialDetails_SP, each box separately
+  e1a82e02  material-traceability-details .ts and .html, 2 files,
+            +8 -4. ⚠ NO BACKEND COMMIT THIS SESSION.
+
+⚠⚠ THE FINDING OF THE SESSION, AND IT IS ABOUT THE DOCUMENTS RATHER
+THAN THE CODE. Bible row 45 and PLAN both named FOUR fix sites -
+html :123 :124 :215 :216 - and both instructed, in bold, that :107 and
+:108 were MATERIAL rows to be LEFT ALONE.
+  MEASURED, BY OPENING THE FILE:
+    :123 :124   INSIDE A COMMENTED-OUT <tr> BLOCK that opens at :113.
+    :215 :216   LIVE MARKUP, in a mat-card with
+                *ngFor='let item of newList' - AND newList IS DECLARED
+                [] AT :24 AND EVERY WRITE TO IT IN THE .ts IS COMMENTED
+                OUT (:179 :180 :188 :194 :201). IT RENDERS NOTHING,
+                EVER, AND IT NEVER HAS.
+    :107 :108   THE DEFECT. Inside the LIVE
+                *ngFor="let item of listOfMaterialsRecvLot" at :97.
+  ▶ PATCHING BY THE DOCUMENT WOULD HAVE BUILT CLEAN, DEPLOYED CLEAN,
+    CHANGED NOTHING ON ANY SCREEN, AND THE ROW WOULD HAVE BEEN MARKED
+    GREEN. THE J117 SHAPE, arrived at from the opposite direction.
+  ⚠ THE ONLY REASON IT WAS CAUGHT: the file was read and its loops were
+    mapped BEFORE an anchor was written. The plan was to write the
+    anchor from PLAN's line numbers and the first `sed` disproved it.
+
+⚠⚠ AND "LEAVE THIS ONE ALONE" WAS WRONG FOR A SUBTLE REASON WORTH
+KEEPING. :107/:108 read `item.unit_name` where the dead blocks read
+`item.formula_id.uom.unit_name`, and that difference looked exactly
+like the material/product discriminator. IT WAS NOT. It reflected what
+the PROCEDURE serves, not what the ROW IS. The row carries
+formula_title AND formula_internal_code - it is the MO's PRODUCT,
+listed under a material - so by Minty's own S112 rule it takes units.
+  ▶ A PROPERTY NAME IS NOT A BASIS TELL. Resolve a row's identity from
+    its DATA.
+
+⚠⚠ THE DEFECT ITSELF, AND IT IS TWO YEARS OLD:
+    mlomanagement.qty = 10   ⚠⚠ SHIPPING UNITS SINCE THE S41 FLIP
+      printed raw with the product's UOM  -> "10 Kg"   MISLABELLED
+      ceil(10 / wgt_kgs_per_unit 10) = 1  -> "1#"      A COUNT DIVIDED
+    mlomanagement.received_qty = 100  ✓ GENUINELY Kg, so its half of
+      the row was right - AND THAT IS WHY NOBODY NOTICED.
+  ▶ THE SCREEN WAS WRITTEN WHEN qty MEANT KILOGRAMS. S41 CHANGED THE
+    COLUMN'S MEANING AND THIS SCREEN NEVER FOLLOWED. J7's shape; S43
+    fixed exactly this in Trace_ProductProdLotView.
+
+⚠ AND THE Math.ceil CLAIM IN EVERY DOCUMENT WAS WRONG AND IS WITHDRAWN.
+  It reads
+    Math.ceil(x * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces)
+  which is CEIL TO THREE DECIMALS, not ceil to a whole unit. The
+  recorded example - "10.1 Kg at 2 Kg per unit displays 6 where 5.05 is
+  true" - IS FALSE. It displayed 5.05. The division was the defect; the
+  rounding was a third-decimal quibble.
+  ▶ RECORDED AS DISPROVEN, because an unrecorded wrong answer becomes
+    the next session's foundation.
+
+THE FIX
+    wduTotal = Number(element.qty || 0)                    already units
+    wduRec   = Number(element.received_units || 0)         the stored count
+    qtyKg    = round(Number(qty) * Number(wgt_kgs_per_unit), decimalPlaces)
+    html     {{wduTotal}}# ({{qtyKg}} {{unit_name}})
+             {{wduRec}}# ({{received_qty}} {{unit_name}})
+  ⚠ Number() IS NOT DECORATION - see JR23. Every column is VARCHAR.
+  ⚠ decimalPlaces is the component's existing value, resolved to 3 in
+    J104. Hardcoding a 3 beside a variable meaning 3 is how two sources
+    of truth start.
+
+⚠ THE ANCHORS WERE UNIQUE ONLY BECAUSE OF `item.unit_name`. The dead
+  blocks use `item.formula_id.uom.unit_name` - a different string. That
+  is what scoped the patch to the one live row and kept it out of the
+  dead markup. ✓ AND THE PROOF IS THE DIFF: lines 123, 124, 215 and 216
+  DO NOT APPEAR IN IT.
+
+✓ PROVEN, DEV 474, Material Traceability -> Salt -> One Step Forward:
+    MO-0010   10# (100 Kg) / 10# (100 Kg)    ⚠ was 10 Kg (1#)
+    MO-0012   10# (100 Kg) / 10# (100 Kg)    the third row
+    MO-0007  100# (100 Kg) / 100# (100 Kg)   ✓ UNMOVED - THE CONTROL
+  Material figures: 10000 received, 9700 SOH, 0.000 misc, 300 released,
+  and the Qty Released column at 100 Kg on all three rows - ALL Kg ONLY,
+  NO "#" ANYWHERE. ⚠ SOH read 9700 where PLAN predicted 9800; Salt had
+  been released to MO-0012 after that note was written. 10000 - 300 =
+  9700, internally consistent. NOT A DEFECT.
+
+✓ PROVEN, PROD, THROUGH GLUTENULL'S OWN LOGIN, Agave MAT-1:
+    MO-0001  1750# (560 Kg)     ⚠ was "1750 Kg (1750#)"
+    MO-0002   802# (192.48 Kg)  ⚠ was  "802 Kg (802#)"
+  Header: 10000 Kg received, 9978.398 SOH, 0.000 misc, 21.602 released.
+  Qty Released column 14.584 and 7.018 Kg - AND THEY SUM TO 21.602
+  EXACTLY, which reconciles the header against the rows.
+  ⚠⚠ THIS IS THE FIRST CLIENT-VISIBLE CORRECTION OF THE WHOLE CAMPAIGN.
+    Every previous fix was invisible on prod by design because
+    Glutenull's ratios are round. THE ARITHMETIC WAS ALWAYS RIGHT HERE -
+    1750 x 0.32 = 560 exactly. IT WAS THE LABEL THAT WAS WRONG, and a
+    label is what an auditor reads.
+
+⚠ P181 CLOSED IN THE SAME SESSION, AT NO COST TO A FIXTURE.
+  start-mlc.component.html had been patched FOUR TIMES across S111 and
+  S112 and NEVER OPENED. It needs a RELEASED MO, and MO-0006 - S114's
+  write-path fixture - is unreleased and must stay that way.
+  ▶ MO-0011 (P2, released, received, complete) served instead. The
+    Intermediate Products block read IP2 7.000# (70.000 Kg) required and
+    3.000# (30.000 Kg) stock, with Batch Materials agreeing, and Ginger
+    Powder / Pouch / Case Kg-only as controls.
+  ▶ ASK WHAT A CHECK ACTUALLY REQUIRES BEFORE SPENDING SOMETHING.
+  ✓ ALL THREE INTERMEDIATE TEMPLATES ARE NOW SCREEN-PROVEN.
+  ⚠ P179's `formulations_myCodee` did not fire on that screen. Still open.
+
+⚠⚠ AND THAT SCREEN SHOWED S114's DEFECT SIDE BY SIDE WITH THE FIXED
+  FIGURES. On MO-0011, every IP2 figure carries a unit count - the
+  requirement 7.000# (70.000 Kg), the stock 3.000# (30.000 Kg), the
+  receipt 140.000 Kg / 7.000# - EXCEPT the Release Details line, which
+  reads "70.000Kg" alone.
+  ▶ ONLY THE RECORD OF WHAT PHYSICALLY LEFT THE WAREHOUSE HAS NO UNIT
+    COUNT. That is bible row 41, visible on one page.
+  ✓ AND THE GINGER POWDER RELEASE LINE BESIDE IT READS "70.000Kg" AND
+    IS CORRECT - materials are Kg only. THE TWO LINES SIT ADJACENT AND
+    MUST STAY DIFFERENT. Minty's discriminator, rendered.
+
+✓✓ THE PRECONDITION FOR S114 WAS A DOCUMENT CLAIM AND IS NOW A
+MEASUREMENT. NOW has said for four sessions that qty_allocated is read
+as Kg in six places. NOBODY HAD READ THEM. All six were read in S113:
+    Formulations.js  :1103 materials  :1136 formulations  :1188 packaging
+    MLOManagement.js :1097 :1102 :1107
+  EVERY ONE IS `sum = sum + <row>.qty_allocated`. No division, no
+  wgt_kgs_per_unit, no unit count reconstructed anywhere.
+  ▶ S114 CAN ADD qty_allocated_units WITHOUT TOUCHING ANY OF THE SIX,
+    SO LONG AS qty_allocated STAYS KILOGRAMS.
+  ⚠ IT WAS WORTH TEN MINUTES PRECISELY BECAUSE THE SAME DOCUMENT SET
+    HAD JUST BEEN WRONG ABOUT FOUR ADDRESSES.
+
+⚠⚠ AND THAT READ FOUND AN EIGHTH PIECE OF A SEVEN-PIECE JOB. After the
+capture, released_qty will STILL be a kilogram total - it is built by
+summing qty_allocated, which stays Kg by design - while final_qty is a
+unit count. release-mat-details.component.ts:296 subtracts one from the
+other. ⚠⚠ THAT IS THE EXACT SHAPE OF THE S112 REGRESSION, where the
+auto-fill put 4.846 units into a Kg box and the guard turned green on a
+release of nearly three times the requirement.
+  ▶ EITHER the backend serves a released_qty_units alongside, OR
+    final_qty_kg stays and that subtraction remains Kg-anchored as a
+    recorded decision. -> P188, and it must be settled BEFORE the
+    capture is written.
+  ▶ THIS IS WHY S114 WAS NOT STARTED IN S113. Not difficulty - scope
+    discovered at the end of a long session, on the live release path
+    both clients use daily.
+
+✓ P164 CONFIRMED FROM BOTH SIDES IN THE SAME READ. All three branches
+of Formulations.js declare `returnSum` and never assign it, then add
+the return into `sum` - the RELEASED total. MLOManagement.js:1112 DOES
+assign returnSum.
+  ▶ THE PROOF THAT ONE FILE IS WRONG IS SITTING IN THE OTHER FILE.
+  ⚠ DELIBERATELY NOT TOUCHED. Minty ruled the return path goes LAST,
+    and the inverted sign stays live on both clients until then.
+
+⚠⚠ MINTY AMENDED A STANDING RULE, AND THE AMENDMENT IS THE POINT.
+UNITS-BIBLE PART 1 had read "CLAUDE NEVER EDITS PART 1". Minty's
+ruling, S113: the intent was never that Claude cannot be trusted with
+it, but that PART 1 does not change without him saying so.
+  ▶ THE RULE IS NOW: PART 1 IS EDITED ONLY ON MINTY'S EXPRESS
+    PERMISSION, SOUGHT EACH TIME, WITH THE EXACT WORDING APPROVED
+    BEFORE IT IS WRITTEN. The default answer is still NO.
+  ✓ EXERCISED IMMEDIATELY. His two S112 rulings - which had been sitting
+    in PART 2's change log and in NOW for a full session while driving
+    the code twice - were written into PART 1 as sections 5 and 6, with
+    the wording approved in advance.
+  ⚠ A RULE THAT KEEPS A DECISION OUT OF THE DOCUMENT WHERE DECISIONS
+    LIVE IS A RULE WORKING AGAINST ITSELF.
+
+⚠ A PATH WAS TYPED FROM A DOCUMENT'S SHORTHAND AND WAS WRONG. PLAN
+names material-traceability-details.component.ts but not its directory.
+It sits at traceability/material-traceability/material-traceability-
+details/ - ONE LEVEL DEEPER than the obvious reading. `find src -name`
+settled it in seconds.
+  ▶ NEVER TYPE A PATH FROM MEMORY OF WHAT A DOCUMENT IMPLIED.
+
+⚠ TRAPS 9 FIRED THREE TIMES IN ONE SESSION AND EACH TIME IT MATTERED:
+  MO-0007 at 1 Kg/unit has qty, received_qty AND received_units all
+    equal to 100. It CANNOT MOVE whatever the code does - which is
+    exactly what makes it a perfect control and useless as proof.
+  Glutenull at 0.32 and 0.24 lands the old division exactly, so the
+    prod proof was the FORMAT, not the arithmetic.
+  wduRec changed basis with NO VISIBLE CHANGE - 100 / 10 and the stored
+    10 are identical. Only wduTotal moved, 1 -> 10.
+  ▶ PICK THE FIXTURE THAT CAN FAIL. Only MO-0010 at 10:1 showed it.
+
+MEASUREMENTS TAKEN, ALL READ-ONLY
+  THE COLUMN GATE RE-VERIFIED AT THE OPEN: qty_allocated_units returns
+    one row on DEV and an EMPTY SET on PROD. The deliberate divergence
+    is exactly one column and the record is accurate.
+  BOTH BOXES BYTE-IDENTICAL ON Trace_MaterialDetails_SP BEFORE THE
+    CHANGE - 4675 bytes, 2 CREATE, 10 joins, 0 slashes.
+  RESTART COUNTERS UNMOVED ALL SESSION - dev 263, prod 343. Nothing was
+    restarted; a frontend deploy needs no pm2 restart.
+  THE PROD ARTIFACT IS 9.07 MB AGAINST DEV'S 14.4 MB. Prod builds
+    without source maps. ⚠ RECORDED so nobody reads the size difference
+    as a truncated download.
+
+THREE FINDINGS RAISED, NONE ACTED ON:
+  P188  released_qty stays Kg against a units final_qty. -> S114.
+  P189  MLOManagement.js :1097 and :1102 sum the same material twice
+        under different guards (item.qty vs item.quantity). If a row
+        ever carried both properties it would double-count. Whether any
+        does is UNKNOWN. One query settles it.
+  P190  material-traceability-details.component.ts:171 subtracts two
+        VARCHAR strings. Works by coercion. A "+" would concatenate.
+  P115  gains three entries, and one of them ACTIVELY MISLED THIS
+        SESSION: the mat-card at html:191-216 iterating an array that
+        nothing assigns.
+
+FIXTURE RESIDUE ⚠ DEV ONLY, KEEP ALL OF IT: 474's whole IP set
+  including MO-0004 (the before picture) and MO-0006 (S114's write-path
+  fixture, ⚠ STILL UNSPENT), MO-0005's two receipts, MR-0009, DO-0002,
+  and the IP2/P2/IP3 set including MO-0012 which was found by CALLing
+  the procedure. 464's three returns.
+BLAST RADIUS: both boxes carry one procedure change and one frontend
+  commit. No schema change. No data healed. ⚠⚠ ONE CLIENT-FACING FIGURE
+  CHANGED ITS FORMAT ON PROD, DELIBERATELY AND CORRECTLY - Glutenull's
+  material traceability MO rows now read 1750# (560 Kg) where they read
+  1750 Kg (1750#). The underlying stored values did not move.
+========
+
+END S113 APPEND
