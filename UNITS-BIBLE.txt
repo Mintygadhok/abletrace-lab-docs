@@ -20,6 +20,11 @@ STATUS      ⚠ NOT EXHAUSTIVE, AND IT SAYS SO DELIBERATELY. S108's first
             ⚠⚠ S111 PROVED IT AGAIN IN THE FIRST DIRECTION. A SITE
             THAT NO ROW DESCRIBED WAS FOUND BY READING A TEMPLATE
             THAT WAS ALREADY OPEN. → ROW 49.
+            ⚠⚠ AND S112 FOUND ANOTHER, THE HARD WAY. A FIX ON ONE SCREEN
+            BROKE A SECOND SCREEN THAT READ THE SAME PROPERTY AND WAS
+            IN NO ROW. → ROW 50.
+            ▶ THE MAP RECORDS SITES. IT DOES NOT RECORD CONSUMERS.
+              BEFORE CHANGING A SERVED VALUE, GREP EVERY CONSUMER.
 TWIN        UNITS-BIBLE.xlsx is the readable copy. THIS FILE IS THE ONE
             GIT CAN DIFF. If they disagree, this one is the record.
 
@@ -74,6 +79,31 @@ CHANGE LOG  S108 — created. Four sources ruled by Minty. 47 sites mapped.
                 PLAN were wrong, one of them with a wrong instruction
                 attached. → SEE "WHAT S111 TAUGHT THIS DOCUMENT".
               ⚠ PART 1 UNTOUCHED.
+            S112, 10 August 2026 — NO ROW MOVED TO OK. TWO ROWS ADDED,
+              BOTH ALREADY GREEN, SO THE BALANCE IS UNCHANGED AT 14.
+              row 49 → ACCEPTED as its own row. ⚠ MINTY'S RULING.
+              row 50 ADDED — the release screen's product block.
+                ⚠⚠ IT WAS BROKEN BY S111 AND REPAIRED IN S112. S111 made
+                final_qty a UNIT count for the MO detail screens; the
+                RELEASE screen reads the same property and pairs it with
+                KILOGRAM inputs, so the auto-fill put 4.846 units into a
+                Kg box and the guard TURNED GREEN on a release of nearly
+                THREE TIMES the requirement.
+                ✓ ZERO CLIENT EXPOSURE — neither client has intermediates.
+                ▶ FIXED ADDITIVELY: the backend now serves final_qty_kg
+                  alongside final_qty, and the release screen reads the Kg
+                  one. final_qty UNTOUCHED, so rows 34 and 36 stand.
+              ⚠⚠ TWO RULINGS BY MINTY, AND BOTH RESHAPE THE CAMPAIGN:
+                1  UNITS ARE THE ANCHOR END TO END, INCLUDING TRACEABILITY.
+                   Every intermediate figure renders units# (Kg uom).
+                   ▶ THIS DECIDES STEP 5 — rows 37-41 get REPOINTED, not
+                     excused as correct-by-design.
+                2  MATERIALS ARE Kg ONLY. Products, whether sold or
+                   consumed as an intermediate, carry units and Kg.
+                   ▶ THIS RE-SCOPED ROW 45 FROM A REVIEW ITEM TO A JOB.
+              ⚠ BOTH BELONG IN PART 1 ON MINTY'S EXPRESS INSTRUCTION.
+                They are recorded here and in NOW until he places them.
+              ⚠ PART 1 UNTOUCHED BY CLAUDE.
 
 ══════════════════════════════════════════════════════════════════════
 PART 1 — THE RULE.  ⚠ MINTY'S RULINGS. DO NOT EDIT.
@@ -222,7 +252,7 @@ LEGEND   OK = reads a stored count, follows the rule
          ✓S109 = moved to OK by commit 281e8bd8 and PROVEN on screen
          ✓WAS  = was ALREADY OK. The S108 survey recorded it wrongly.
 
-──── ALIGNED — 34 ──────────────────────────────────────────────────
+──── ALIGNED — 36 ──────────────────────────────────────────────────
 OK  1  Stock info popup — In Store      stock-info.ts:188
        inventory_units, × weight for Kg          ▶ THE MODEL. COPY IT.
 OK  2  Stock info popup — Produced      stock-info.html:36
@@ -321,7 +351,8 @@ OK 19  Packaging cascade                Formulations.js:1201
        ⚠ 34 AND 36 ARE THE SAME LINE wearing two row numbers. Closing
          one closed the other, exactly as recorded.
 
-──── MISALIGNED — 10 ────────────────────────────────────────────────
+──── MISALIGNED — 12.  ⚠ ROW 45 JOINED THIS GROUP IN S112 AND ROW 51
+────  IS NEW. BOTH ARE LISTED IN THEIR OWN NUMBER ORDER. ────────────
 XX 20  Release screen Released Qty      Formulations.js :1108,:1141,:1189
        Returns ADDED into the released total. ⚠ LIVE, BOTH CLIENTS.
        ⚠ SEEN AGAIN IN S111 while patching :1156 — `released_qty = sum`
@@ -346,13 +377,53 @@ XX 43  Product return stock balance     ReturnMaterialProduct.js:68
 XX 48  Stock Information popup, the downstream-MO card.
        TRANSPOSED LABELS. ⚠ DISPLAY ONLY. → P169.
 
-──── TO REVIEW — 4. NOT DEFECTS. ────────────────────────────────────
+──── TO REVIEW — 3. ⚠ ROW 45 LEFT THIS GROUP IN S112, AND IS LISTED
+────  IN PLACE BELOW SO ITS NUMBER STAYS FINDABLE. ──────────────────
 ?? 44  DO details field named ship_qty  do-details.ts:30,54
-?? 45  Material traceability            material-traceability-details:169,170
+XX 45  Material traceability — ⚠⚠ THE ONLY WRONG NUMBER IN THE QUEUE
+       material-traceability-details.component.ts:169,170
+       html :123 :124 :215 :216
+       ⚠⚠ EVERY OTHER OPEN ITEM IS A RIGHT NUMBER REACHED BY A WRONG
+         ROUTE. THIS ONE IS SIMPLY INCORRECT.
+
+       Material Traceability → Salt → One Step Forward, MO-0010:
+           THE SCREEN SAYS   10 Kg (1#)
+           THE TRUTH         100 Kg, 10 units — the MO list says so
+         ⚠⚠ THE COMPLETED FIGURE ON THE SAME ROW READS 100 Kg (10#) AND
+           IS CORRECT. ONE ROW, TWO HALVES, CONTRADICTING EACH OTHER.
+
+       THE CAUSE — ONE NUMBER, USED TWICE, WRONG BOTH TIMES:
+         mlomanagement.qty = 10   ⚠⚠ UNITS SINCE THE S41 FLIP
+           printed raw with the product's UOM  → "10 Kg"  MISLABELLED
+           ceil(10 ÷ wgt_kgs_per_unit 10) = 1 → "1#"  A COUNT DIVIDED
+                                                       BY Kg-PER-UNIT
+         mlomanagement.received_qty = 100  ✓ GENUINELY Kg
+           → "100 Kg" and ceil(100÷10)=10   ✓ right number, wrong route
+       ▶ THE SCREEN WAS WRITTEN WHEN qty MEANT KILOGRAMS. S41 CHANGED
+         THE COLUMN'S MEANING AND THIS SCREEN NEVER FOLLOWED. Its
+         neighbour still holds Kg, SO HALF THE ROW KEPT WORKING — which
+         is why nobody noticed.
+       ⚠ J7's SHAPE. S43 fixed exactly this in Trace_ProductProdLotView.
+
+       ✓ TRACED END TO END 10 AUG, SEVEN HOPS, EVERY ONE READ:
+         component → shared service → NgRx effect → HTTP →
+         routes.js:400 → TraceabilityController:25 →
+         Traceability.js:360 → Trace_MaterialDetails_SP  → ROW 51
+       ✓ THE PROCEDURE IS INNOCENT. It hands over two honest columns and
+         does no arithmetic on them. THE DEFECT IS ENTIRELY FRONTEND.
+
+       ⚠⚠ Math.ceil ON EVERY SITE — ALWAYS ROUNDS UP. 10.1 Kg at 2 Kg
+         per unit displays 6 where 5.05 is true.
+       ⚠⚠ THE MATERIAL ROWS AT :107/:108 ARE FINE AND MUST NOT BE
+         TOUCHED. The "materials show unit counts" alarm was RAISED FROM
+         CODE AND WITHDRAWN — Minty's screens show clean Kg throughout.
+       ⚠ CONTROL FOR THE FIX: MO-0007's row MUST NOT MOVE. It ran under
+         IP2 VERSION 1 and reporting version 1's figures is CORRECT.
+                                                              → S113
 ?? 46  Seven-copy MO qty helper         7 files, same sum
 ?? 47  Add dispatch v1 popup            PopUps/add-dispatch  ▶ DELETE.
 
-──── ⚠⚠ NEW, S111 — AWAITING MINTY'S RULING ─────────────────────────
+──── ADDED S111 AND S112 — ✓ BOTH ACCEPTED BY MINTY ─────────────────
 OK 49  Batch Materials WH stock, intermediates
        edit-mlc.html:205 · edit-mlo.html:205 · start-mlc.html:233
        THE formulaList LOOP ONLY.
@@ -381,20 +452,70 @@ OK 49  Batch Materials WH stock, intermediates
          4347.000 Ea (packList, directly below) UNMOVED. The two
          bracketing controls are what prove the scoping held.
 
-       ▶ MINTY'S DECISION: does this stand as row 49?
-         IF YES  the board is 35 GREEN of 49 and the ceiling is 45.
-         IF NO   fold it into row 33's text and the board stays 34 of 48.
-       ⚠ CLAUDE'S VIEW: keep it as its own row. It is a different block,
-         a different data path and a different loop, and row 33's text
-         does not describe it. A row that describes two sites is how an
-         address becomes wrong.
+       ✓ MINTY'S RULING, S112: IT STANDS AS ITS OWN ROW.
+         A different block, a different data path, a different loop. A row
+         that describes two sites is how an address becomes wrong.
+
+OK 50  Release screen — the PRODUCT block
+       release-mat-details.component.html :115 :125 :157 :158
+       release-mat-details.component.ts   :296
+       ⚠⚠ ADDED S112, AND IT WAS ADDED BECAUSE S111 BROKE IT.
+
+       WHAT HAPPENED: S111 correctly made Formulations.js:1156 serve
+         final_qty as a UNIT count, for the MO detail screens. THE RELEASE
+         SCREEN READS THE SAME PROPERTY. Its inputs and its lot figures are
+         KILOGRAMS — 12.580 / 15.17 Kg, honest Kg minus Kg with no
+         division anywhere.
+         :296  remainToFill = final_qty (UNITS) − released_qty (Kg)
+         :326  that difference is AUTO-FILLED into a Kg input
+         :157  the guard compares the same two bases
+       ▶ ON dev 474 MO-0006 THE BOX FILLED WITH 4.846 AND THE BAR TURNED
+         GREEN. 4.846 Kg is 13.10 UNITS. The requirement is 4.846 UNITS.
+       ⚠⚠ IT WAS NOT WARNING THE OPERATOR. IT WAS CONFIRMING A RELEASE OF
+         NEARLY THREE TIMES THE REQUIREMENT.
+       ✓ ZERO CLIENT EXPOSURE. Neither client has intermediates, so no
+         client MO can reach that block. Live code on both boxes for a day.
+
+       THE FIX — ADDITIVE, NOT A REVERT. Reverting :1156 would have undone
+         rows 34 and 36, proven on two screens and promoted. Instead:
+           final_qty      UNITS  → the MO detail screens
+           final_qty_kg   Kg     → the release screen
+         Four sites repointed, PRODUCT BLOCK ONLY. Commit 8bbf2c30.
+       ✓ THE VARIABLE NAME IS THE BOUNDARY: `formula?` in the product
+         block, `item?` in matList and packList. A clean structural split.
+       ✓ PROVEN dev 474 MO-0006: 1.793 / 1.793 Kg, auto-fill 1.793.
+         Ginger Powder 701.190/701.190 Kg and Pouch 1323.000/1323.000 Ea
+         UNMOVED — the bracketing controls.
+
+       ⚠ THIS ROW IS GREEN AS A Kg-ANCHORED SCREEN, WHICH IS CONSISTENT
+         AND CORRECT TODAY. ⚠⚠ MINTY'S S112 RULING MEANS IT CHANGES AGAIN:
+         S113 makes the operator type UNITS with Kg derived. THE ROW STAYS
+         GREEN THROUGH THAT — it satisfies the rule in both states.
+       ▶ final_qty_kg MAY BECOME UNUSED WHEN S113 LANDS. Decide then. DO
+         NOT DELETE IT IN THE SAME COMMIT AS THE CAPTURE.
+
+XX 51  Trace_MaterialDetails_SP — ⚠⚠ IN NO PRIOR ROW
+       api/models/Traceability.js:360
+       FOUND S112 BY TRACING ROW 45's DEFECT TO ITS SOURCE.
+       ▶ IT FEEDS THE WHOLE MATERIAL TRACEABILITY SCREEN, AND THE SURVEY
+         NEVER MAPPED IT. Rows 37-41 name five procedures. THIS IS A
+         SIXTH.
+       ✓ IT IS INNOCENT. It hands over mlomanagement.qty (UNITS) and
+         mlomanagement.received_qty (Kg) honestly, plus wgt_kgs_per_unit
+         from fopackaging via mlcpackaging. IT DOES NO ARITHMETIC.
+       ⚠ LISTED RED ONLY BECAUSE IT MUST GAIN mlomanagement.received_units
+         for row 45's fix — added in THREE places: the temp table CREATE,
+         the INSERT column list, and the SELECT that feeds it.
+       ⚠⚠ THE FOURTH UNMAPPED SITE FOUND IN S112.
+                                                              → S113
 
 ══════════════════════════════════════════════════════════════════════
 PART 3 — THE SCOREBOARD
 ══════════════════════════════════════════════════════════════════════
 
-  ⚠⚠ 44 IS THE CEILING, NOT 48. Rows 44, 45, 46 and 47 are REVIEW items.
-    ⚠ IF ROW 49 IS ACCEPTED THE CEILING BECOMES 45 OF 49.
+  ⚠⚠ 47 IS THE CEILING, OF 51. Rows 44, 46 and 47 close as DECISIONS.
+    ⚠⚠ ROW 45 IS NO LONGER ONE OF THEM. Minty's S112 ruling — materials
+      are Kg only — made it a real job. See its entry.
 
   AFTER      WHAT MOVED                      GREEN  PART  RED  REVIEW
   S108       as the survey recorded it          19     0    24      4
@@ -405,25 +526,36 @@ PART 3 — THE SCOREBOARD
              row 35 ingredient requirement      30     3    11      4
   S111       rows 32, 33, 34, 36 —
              THE INTERMEDIATE BASIS             34     0    10      4
+  S111 close row 49 accepted                    35     0    10      4
+  S112       rows 50 and 51 added; row 45
+             rescoped. NO ROW MOVED TO OK.       36     0    12      3
 
   ⚠⚠ THE PART COLUMN IS BACK TO ZERO AND THAT IS THE POINT. The status
     was created in S110 for three half-fixed rows and S111 closed all
     three. ▶ THE DEFINITION STAYS IN THE LEGEND.
 
-  ▶ WHERE THE REMAINING 14 SIT
-    step 5            the schema  ▶ P82's ARITHMETIC CLOSES          5
-    step 6            the return path  ⚠ SURVEY FIRST                3
-    row 25            the seven-copy helper caller                   1
-    row 48            the transposed labels                          1
-    rows 44/45/46/47  REVIEW — decisions, not fixes                  4
+  ▶ WHERE THE REMAINING 15 SIT
+    rows 45 + 51 ⚠⚠ THE ONLY WRONG NUMBER IN THE QUEUE. S113          2
+    rows 37-41   STEP 5's read sites  ▶ P82's ARITHMETIC CLOSES      5
+                 ⚠⚠ BLOCKED ON THE UNITS CAPTURE. The column exists on
+                   dev and IS EMPTY. A repointed read would show 0.
+    rows 20/42/43  the return path  ⚠ MINTY'S RULING S112: LAST      3
+    row 25       the seven-copy helper caller                        1
+    row 48       the transposed labels                               1
+    rows 44/46/47  REVIEW — decisions, not fixes                     3
                                                                     ──
-                                                                    14
+                                                                    15
 
   AFTER    REMAINING WORK                   GREEN  PART  RED  REVIEW
-  step 5   the schema  ▶ P82 CLOSES           39     0     5      4
-  step 6   the return path                    42     0     2      4
-  row 25   the seven-copy helper sitting      43     0     1      4
-  row 48   the transposed labels              44     0     0      4
+  S113     rows 45 and 51 — ⚠⚠ THE ONLY
+           WRONG NUMBER IN THE QUEUE           38     0    10      3
+  S114     the units capture — MOVES NO ROW    38     0    10      3
+           ⚠⚠ IT UNBLOCKS FIVE. That is its whole value.
+  S115     rows 37-41  ▶ P82's ARITHMETIC
+           CLOSES · TRAPS 10 RETIRES           43     0     5      3
+  S116     rows 20/42/43, the return path      46     0     2      3
+  S117     rows 25 and 48, the tail            48     0     0      3
+                                               ▲ THE CEILING, OF 51
 
   ⚠⚠ S111's PRECONDITION WAS MEASURED IN S110 AND IT HELD.
     subrecipeformulation.ship_qty is populated on EVERY row of BOTH
@@ -592,3 +724,46 @@ WHAT S111 TAUGHT THIS DOCUMENT
    one wrong-box case environment does not catch.
    ✓ `hostname -I` AT THE TOP OF EVERY BLOCK CAUGHT THE OTHER ONE — it
      errored on macOS, which is exactly the tripwire behaviour wanted.
+
+══════════════════════════════════════════════════════════════════════
+WHAT S112 TAUGHT THIS DOCUMENT
+══════════════════════════════════════════════════════════════════════
+
+1  ⚠⚠ THE MAP RECORDS SITES. IT DOES NOT RECORD CONSUMERS. S111 changed
+   what Formulations.js:1156 SERVES. Rows 34 and 36 name that line and
+   both were proven. NEITHER ROW MENTIONS THAT A SECOND SCREEN READS THE
+   SAME PROPERTY — and that screen pairs it with kilogram inputs.
+   ▶ BEFORE CHANGING A SERVED VALUE, GREP EVERY CONSUMER OF THE PROPERTY.
+   ▶ A ROW NAMES WHERE A FIGURE IS SHOWN. IT DOES NOT NAME EVERYWHERE THE
+     VALUE BEHIND IT TRAVELS. → ROW 50 EXISTS BECAUSE OF THIS.
+
+2  ⚠⚠ A ROW NAMED AFTER A SCREEN DOES NOT COVER EVERYTHING THE SCREEN
+   RENDERS. THIRD INSTANCE.
+     row 33  named one figure; there were two, in two blocks.  → row 49
+     row 34  named one screen; the value fed two.              → row 50
+     row 45  named "material traceability"; the screen renders MO rows
+             for products too, dividing a weight for each.     → S115
+   ▶ WHEN A ROW IS NAMED FOR A SCREEN, LIST WHAT THE SCREEN ACTUALLY
+     SHOWS BEFORE TRUSTING THE NAME.
+
+3  ⚠⚠ A PLAN CAN ASSUME DATA THAT DOES NOT EXIST. Step 5 was scoped as
+   "schema, attribute, write path" as though a unit count were arriving
+   and being discarded. IT IS NEVER CAPTURED — the release screen asks
+   for kilograms and always has.
+   ✓ SETTLED BY THE ROW, NOT BY CODE. Two mprrecievelots rows allocate
+     1.12 and 5.56 against a receipt holding ONE unit. You cannot
+     allocate 5.56 units of one unit. It is Kg.
+   ▶ CONFIRM THE SOURCE OF A VALUE BEFORE PLANNING A WRITE PATH FOR IT.
+
+4  ⚠⚠ THE DOMAIN EXPERT'S CHALLENGE WAS SOUNDER THAN THE ASSUMPTION IT
+   CHALLENGED. Minty read the chain and found it clean: the receipt
+   stores units and derives Kg ONCE, one way, and every later step is Kg
+   minus Kg. THAT WOULD HAVE CLOSED ROWS 37-41 AS CORRECT-BY-DESIGN.
+   ▶ HE THEN RULED THE OTHER WAY, FOR CONSISTENCY, KNOWING THE COST.
+   ⚠ CLAUDE HAD TREATED THE Kg-ANCHORED READING AS OBVIOUSLY WRONG. IT
+     WAS NOT. RULES: Minty is the domain expert. That is what he is for.
+
+5  ⚠ A ROW CAN BE GREEN IN TWO DIFFERENT STATES. Row 50 is green today as
+   a consistent Kg-anchored screen, and will still be green after S113
+   makes it units-anchored. ▶ GREEN MEANS "SATISFIES PART 1", NOT
+   "FINISHED FOREVER". Note which state a row is green in.

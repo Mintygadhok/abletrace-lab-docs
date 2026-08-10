@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J121 — ⚠ the next one is J122, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR22. Last appended: S111, Aug 9 2026.
+number. Highest is J122 — ⚠ the next one is J123, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR22. Last appended: S112, Aug 10 2026.
 ⚠ J116 IS NOT A STANDALONE ENTRY. It was assigned inside JR15 and is easily
 missed by anyone scanning for J-headings. That is why this header said J115 for
 four sessions. S85 and S86 both asked for it to be corrected; S107 did it.
@@ -4828,3 +4828,334 @@ BLAST RADIUS: both boxes carry two procedure changes, two frontend commits
 ========
 
 END S111 APPEND
+S112 - APPENDED 10 AUG 2026
+NUMBERING: highest existing entry is J121. This is J122. Highest JR is
+JR22 and S112 ADDS NO JR - the ALTER is a column add on ONE box only, and
+it is recorded here until it lands on prod in S113, when it becomes JR23.
+No JT entry - TRAPS.md is the traps file.
+
+⚠ HEADER TO CORRECT IN THIS COMMIT: Section 5's own header reads
+"Highest is J121 - the next one is J122 ... Last appended: S111, Aug 9 2026."
+After this commit it is J122, next J123, Last appended: S112, Aug 10 2026.
+⚠ HIGHEST JR STAYS JR22.
+
+
+J122 - S112. THE STEP 5 GROUNDWORK, A REGRESSION S111 CAUSED AND REPAIRED,
+THE COMPOSITE DISPLAY, AND A RULING THAT DECIDES THE REST OF THE CAMPAIGN.
+STATUS: CLOSED. Backend 9dac080 and 4d43bd4, frontend 8bbf2c30 and
+2968c591, all on both boxes. One ALTER on DEV ONLY, deliberately.
+
+⚠⚠ THE OUTPUT IS NOT IN THIS ENTRY. The map is UNITS-BIBLE.txt/.xlsx.
+  36 green, 12 red, 3 review, of 51. THREE ROWS ADDED - 50, 51 and
+  row 45 rescoped from review to red. BALANCE 15. TWO ROWS ADDED, BALANCE UNCHANGED
+  AT 14. ⚠ S112 CLOSED NO ROW and the record says so plainly.
+
+WHAT SHIPPED
+  ALTER TABLE mprrecievelots ADD COLUMN qty_allocated_units double DEFAULT 0
+        ⚠⚠ DEV ONLY. 113 rows before and after, 99 material and 14 product,
+        null_units 0, zero_units 113. The default reached every row
+        including the 99 material ones, which will stay 0 BY RULE.
+  9dac080   MPRRecieveLots.js - the attribute. TRAPS 3's other half.
+  4d43bd4   Formulations.js - final_qty_kg, additive, final_qty untouched.
+  8bbf2c30  the release screen product block reads final_qty_kg - four
+            template sites plus remainToFill in the .ts.
+  2968c591  the composite units# (Kg uom) - four cells on each of three
+            MO detail templates.
+
+⚠⚠ THE FINDING OF THE SESSION: S111 BROKE THE RELEASE SCREEN AND NOTHING
+IN THE MAP POINTED AT IT.
+  S111 correctly made Formulations.js:1156 serve final_qty as a UNIT count
+  for the MO detail screens. THE RELEASE SCREEN READS THE SAME PROPERTY and
+  pairs it with KILOGRAM inputs:
+      :296  remainToFill = currentMat?.final_qty - currentMat.released_qty
+                           ▲ UNITS since S111    ▲ Kg (sums qty_allocated)
+      :326-329  the auto-fill writes that difference INTO A Kg INPUT
+      :157      the guard compares the same two bases
+  ▶ ON dev 474 MO-0006 THE SCREEN OFFERED 4.846 AND TURNED GREEN.
+    4.846 Kg IS 13.10 UNITS. The true requirement is 4.846 UNITS = 1.793 Kg.
+  ⚠⚠ THE BAR WENT GREEN ON A RELEASE OF NEARLY THREE TIMES THE
+    REQUIREMENT. It was not warning the operator - IT WAS CONFIRMING.
+    An operator following the screen would have over-released by 170% and
+    been told they got it exactly right.
+  ✓ CLIENT EXPOSURE WAS ZERO. Neither client has intermediates, so no
+    client MO can reach that block. But it was live code on both boxes
+    for a day.
+  ⚠ CAUGHT BY READING THE TEMPLATE, NOT BY A REPORT. And caught only
+    because Minty pushed to survey the frontend rather than close early.
+
+  ▶ THE FIX WAS ADDITIVE, NOT A REVERT. A revert of :1156 would have
+    undone bible rows 34 and 36, which were proven on two screens and
+    promoted. Instead the backend now serves BOTH figures:
+        final_qty      units  - the MO detail screens
+        final_qty_kg   Kg     - the release screen
+    Four frontend sites repointed, product block only.
+  ⚠ RECORDED AS A STOPGAP IN ITS OWN COMMENT. The proper fix is the units
+    capture, and once released_qty is units too, remainToFill goes back to
+    final_qty and final_qty_kg may become unused. DO NOT DELETE IT IN THE
+    SAME COMMIT AS THE CAPTURE - decide after.
+
+  ▶ THE TRANSFERABLE LESSON: BEFORE CHANGING A SERVED VALUE, GREP EVERY
+    CONSUMER OF THE PROPERTY. Not every screen you can think of - every
+    consumer. THE MAP RECORDS SITES, NOT CONSUMERS.
+  ⚠ THE MAP NOW CARRIES ROW 50 for exactly this reason.
+
+⚠⚠ THE PLAN ASSUMED DATA THAT DOES NOT EXIST, AND THIS RESHAPED STEP 5.
+  Step 5 was scoped as "schema, attribute, write path" as though a unit
+  count were arriving and being discarded. IT IS NEVER CAPTURED.
+  PROVEN THREE WAYS:
+    1  THE TEMPLATE. The product block's input binds recLot.qty and calls
+       addQty(...,'product'). No units field. qtyWdu - the dispatch
+       screen's pattern - APPEARS NOWHERE ON THIS SCREEN.
+    2  THE BACKEND. createReleaseMaterialProductsV2 uses only
+       data.qty_allocated, and subtracts it from formulations.inventory,
+       which is Kg.
+    3  ⚠⚠ THE ROW, WHICH IS WHAT SETTLED IT. On dev:
+         mprrecievelots 84005  qty_allocated 1.12  receipt 1 unit / 20 Kg
+         mprrecievelots 84008  qty_allocated 5.56  receipt 1 unit / 20 Kg
+       THE RECEIPT HOLDS ONE UNIT. You cannot allocate 5.56 units of it.
+       As kilograms both are fine. IT IS Kg.
+       ✓ AND 84001 + 84004 = 5.56 + 4.44 = 10.00 Kg exactly, same receipt.
+       ✓ AND J80's S73 test recorded that same release as "25.000 Kg".
+  ⚠ CLAUDE HAD RAISED AN ALARM THAT qty_allocated MIGHT ALREADY BE UNITS
+    BEING SUBTRACTED FROM A Kg BALANCE. IT IS NOT. The alarm is recorded
+    as disproven because an unrecorded wrong answer becomes the next
+    session's foundation (0.1a, J88, J109).
+  ▶ CONFIRM THE SOURCE OF A VALUE BEFORE PLANNING A WRITE PATH FOR IT.
+    One read of the template in S108 would have found this.
+
+⚠⚠ MINTY'S ARCHITECTURE CHALLENGE, AND IT WAS RIGHT.
+  Presented with the gap, Minty read the chain himself: the receipt stores
+  a unit count and derives Kg ONCE, one way; the release screen then
+  subtracts Kg from Kg with no reconstruction anywhere. THE CHAIN IS CLEAN.
+  ✓ VERIFIED. 15.17 = 41 x 0.37 exactly. 12.580 = 15.17 - 2.59, Kg minus
+    Kg. No division on those lot lines.
+  ▶ THAT READING WOULD HAVE CLOSED ROWS 37-41 AS CORRECT-BY-DESIGN, the
+    same status as materials, and Step 5 would have ended there.
+  ⚠⚠ CLAUDE HAD BEEN TREATING THE Kg-ANCHORED READING AS OBVIOUSLY WRONG.
+    IT WAS NOT. The domain expert's reasoning was sounder than the
+    assumption it challenged. RULES: Minty is the domain expert.
+
+⚠⚠ AND THEN MINTY RULED THE OTHER WAY, DELIBERATELY. S112:
+    ANY INTERMEDIATE-PRODUCT FIGURE, ANYWHERE INCLUDING TRACEABILITY,
+    SHOWS UNITS WITH Kg DERIVED BESIDE IT - units# (Kg uom).
+  ▶ UNITS ARE THE ANCHOR END TO END, from capture to the screen an
+    auditor reads.
+  ▶ THE REASON IS CONSISTENCY, NOT ARITHMETIC. Every defect this campaign
+    has caught was caught because one figure disagreed with another -
+    47 versus 17.390, 4.846 over a Kg input, 0.301 Kg on one page. A
+    single format everywhere is what makes the next mismatch announce
+    itself.
+  ⚠ THIS DECIDES STEP 5. The five read sites get repointed, not excused.
+  ⚠ IT SHOULD GO INTO UNITS-BIBLE PART 1 ON MINTY'S EXPRESS INSTRUCTION.
+    Claude has recorded it in PART 2's change log and in NOW; PART 1 is
+    Minty's alone.
+
+⚠⚠ A SECOND RULING, AND IT RE-SCOPED A REVIEW ROW INTO A JOB. Minty,
+S112: MATERIALS ARE Kg ONLY. Products - sold to a customer or consumed
+as an intermediate - carry units and Kg.
+  ⚠⚠ AND MINTY SHARPENED IT INTO SOMETHING TESTABLE:
+    "The same thing appearing as a material line in one recipe and a
+    product elsewhere carries units BECAUSE IT IS A PRODUCT, not because
+    of where it sits on a screen."
+  ▶ THE DISCRIMINATOR IS THE THING, NOT THE BLOCK. In code the test is:
+    does the row carry a formula_id?
+  ✓ AND THE SCHEMA ALREADY AGREES - the release backend branches on
+    Rec_Lot_id vs Rec_Product_id, which IS this distinction. THE RULE
+    AND THE DATA MODEL MATCH. IT IS THE SCREENS THAT DO NOT.
+  ⚠ THAT IS A BETTER RULE THAN "materials are Kg only", because it says
+    HOW TO TELL rather than just what the answer is.
+
+⚠⚠ AND THEN MINTY'S OWN FIXTURE FOUND A WRONG NUMBER - THE ONLY ONE IN
+THE QUEUE. He built IP2/P2 with round figures to think with, ran an MO,
+and read the Material Traceability screen.
+    Material Traceability -> Salt -> One Step Forward, MO-0010:
+        THE SCREEN SAYS   10 Kg (1#)
+        THE TRUTH         100 Kg, 10 units - the MO list says so
+    ⚠⚠ THE COMPLETED FIGURE ON THE SAME ROW READS 100 Kg (10#) AND IS
+      CORRECT. ONE ROW, TWO HALVES, CONTRADICTING EACH OTHER.
+  THE CAUSE - ONE NUMBER, USED TWICE, WRONG BOTH TIMES:
+    mlomanagement.qty = 10   ⚠⚠ SHIPPING UNITS SINCE THE S41 FLIP
+      printed raw with the product's UOM  -> "10 Kg"   MISLABELLED
+      ceil(10 / wgt_kgs_per_unit 10) = 1  -> "1#"      A COUNT DIVIDED
+                                                        BY Kg-PER-UNIT
+    mlomanagement.received_qty = 100  ✓ GENUINELY Kg, so its half of the
+      row is right - AND THAT IS WHY NOBODY NOTICED.
+  ▶ THE SCREEN WAS WRITTEN WHEN qty MEANT KILOGRAMS. S41 CHANGED THE
+    COLUMN'S MEANING AND THIS SCREEN NEVER FOLLOWED. J7's shape; S43
+    fixed exactly this in Trace_ProductProdLotView.
+
+⚠⚠ TRACED END TO END, SEVEN HOPS, EVERY ONE READ - NOT ONE INFERRED:
+    material-traceability-details.component.ts:162  subscribe -> mlcArray
+    material-traceability.component.ts:193  currentMatTraArray(result)
+      ⚠ A SHARED SERVICE, NOT A DIRECT CALL. Two hops, not one.
+    store/effects/traceability.effects.ts:56-59   ⚠ LOWERCASE `store`
+    Services/Traceability/traceability.service.ts:59  ⚠ CAPITALISED
+      -> apiService.get('traceability/getMaterialTraceability/...')
+    config/routes.js:400 -> "Traceability.getMaterialTraceability"
+    TraceabilityController.js:25  ✓ NO V2 DECOY. CHECKED - twice this
+      session there WAS one.
+    api/models/Traceability.js:360
+      -> CALL Trace_MaterialDetails_SP(recLotId, materialId, companyId)
+  ⚠⚠ THAT PROCEDURE IS IN NO BIBLE ROW. Rows 37-41 name five procedures;
+    THIS IS A SIXTH, feeding a whole traceability screen. -> ROW 51, and
+    the FOURTH unmapped site found in S112.
+  ✓ THE PROCEDURE IS INNOCENT. It hands over two honest columns and does
+    NO ARITHMETIC. THE DEFECT IS ENTIRELY FRONTEND, which makes the fix
+    smaller than first estimated.
+
+⚠⚠ AND THE "MATERIALS SHOW UNIT COUNTS" ALARM WAS WITHDRAWN. Claude
+raised it from reading :107/:108 in the code. MINTY'S SCREENS SHOW CLEAN
+Kg THROUGHOUT - 10000 received, 200 released, 9800 SOH, Ginger 70 Kg,
+Pouch 28 Ea, Case 7 Ea. NO "#" ANYWHERE ON A MATERIAL FIGURE.
+  ▶ RECORDED AS DISPROVEN. Second withdrawn alarm of the session, and
+    BOTH TIMES THE CODE IMPLIED SOMETHING THE SCREEN DID NOT SHOW.
+  ▶ READ THE SCREEN BEFORE RAISING THE ALARM.
+
+⚠⚠ MINTY'S FIXTURE ALSO DEMONSTRATED TRAPS 9 ON A LIVE SCREEN. Product
+Traceability on Pdt-260810-3 reads "Qty Used 7# (70.000 Kg)". THE 7 IS
+STORED NOWHERE - it is 70 / 10, computed at render time. AT IP2's ROUND
+RATIO IT LOOKS FLAWLESS. On IP-0.37 the same code produces a float tail.
+  ▶ A ROUND FIXTURE SHOWS THE FLOW PERFECTLY AND PROVES NOTHING.
+    474's 19 and 13, both prime, REMAINS THE PROVING GROUND.
+
+⚠ MO-0007 ON THAT SAME SCREEN IS CORRECT AND MUST NOT BE "FIXED". It ran
+under IP2 VERSION 1 and reports version 1's figures. MINTY'S RULING:
+traceability reports what was released AT THE TIME. A screen that
+re-cast history against the current formulation WOULD BE THE DEFECT.
+  ⚠ CLAUDE HAD BRIEFLY USED MO-0007 AS EVIDENCE. It was not.
+
+⚠⚠ THE COMPOSITE DISPLAY, AND WHY IT WAS CHEAP. Minty asked for units and
+Kg together on the intermediate rows. EVERY Kg HALF WAS ALREADY SERVED:
+    ship_qty x getFactor()   <- Kg from subrecipeformulation_qty x getFactor()
+    inventory_units          <- Kg from formulations_inventory
+    final_qty                <- Kg from final_qty_kg, ADDED THE SAME NIGHT
+    inventory_units          <- Kg from bare inventory
+  ✓ JR22 LEFT THE Kg COLUMNS IN BOTH PROCEDURES DELIBERATELY, for minimum
+    change. THAT DECISION PAID HERE - the composite needed no backend work
+    at all.
+  ✓ AND final_qty_kg, BUILT AS A STOPGAP HOURS EARLIER, TURNED OUT TO BE
+    THE MISSING FOURTH HALF.
+  ▶ FOUR CELLS x THREE TEMPLATES. J104's frozen format.
+  ✓ IT ALSO CLOSED P183 as a side effect: unit_name now sits INSIDE the
+    bracket beside the Kg figure, so a unit count no longer carries a Kg
+    label. That was the reverse of where the campaign started.
+
+⚠⚠ THE GUARDS EARNED THEIR KEEP THREE TIMES IN ONE SESSION.
+  1  START-MLC'S MARKUP DIFFERS BY ONE CHARACTER. edit-mlc and edit-mlo
+     read "{{getQty(...)}} {{item.unit_name}}" WITH a space; start-mlc has
+     NONE. The assertion threw 'anchor' and REFUSED TO WRITE. Two files
+     were already patched; the third needed its own anchor.
+     ▶ THE BLOCK SIZES HAD ALREADY HINTED AT IT - matList 70 lines,
+       formulaList 65. THE THREE TEMPLATES HAVE DRIFTED.
+  2  A 0-BYTE BACKUP. mysqldump errors on the ~/.my.cnf database= line
+     (J43), but the shell's redirect had already created the file.
+     ls -l showed 0 bytes and grep -c "CREATE TABLE" returned 0.
+     ▶ THE CHECK IS THE ONLY REASON WE KNEW. Third instance of a plausible
+       filename holding nothing - after S110's 0-byte .bak-S110-DEV.txt.
+     ▶ THE FIX IS J43's: grep -v -i "database" ~/.my.cnf > /tmp/dump.cnf.
+       ⚠ AND DELETE IT AFTERWARDS - IT HOLDS THE DATABASE PASSWORD.
+  3  THE TWO-LINE ANCHOR ON remainToFill. Line :296 alone is near-identical
+     to the material branch at :215. The console.log beneath it names
+     formulaList and is what makes the anchor unique.
+  ▶ SCOPE BY STRUCTURE, ASSERT EXACTLY ONCE, READ THE DIFF, AND LET THE
+    BRACKETING LINES BE THE CONTROL. Ginger Powder above and Pouch below,
+    unmoved, on every patch this session and last.
+
+⚠⚠ FOUR WRONG-BOX INCIDENTS, AND ONE SHOWED ITS OWN DANGER IN THE OUTPUT.
+A missed exit sent a `sed` to DEV's copy of the frontend repo - the same
+path, the same filename, and SEVENTEEN SESSIONS STALE at c2a52d8e.
+  IT PRINTED  subrecipeformulation_qty * mlcDetails.batches
+  THE MAC HAS subrecipeformulation_ship_qty * getFactor()
+  ▶ AN ANCHOR WRITTEN FROM THAT TEXT WOULD HAVE MATCHED NOTHING ON THE
+    MAC - or, with a looser anchor, matched and written the wrong thing.
+  ⚠ S111 RECORDED THIS AS THE ONE CASE ENVIRONMENT DOES NOT CATCH. S112
+    saw what it actually looks like.
+  ▶ `hostname` AND `git log --oneline -1` AT THE TOP OF EVERY MAC BLOCK.
+    The machine and the code, both, every time.
+
+⚠ A LONG COMMIT MESSAGE TRUNCATED MID-PASTE and left zsh at `>` waiting
+for a closing quote. THE FIRST COMMIT HAD LANDED; THE SECOND HAD NOT.
+Ctrl+C, then `git status --short` showed the file still staged and
+uncommitted - exactly the state wanted. A shorter message committed clean.
+  ⚠ FOURTH TRUNCATION IN FOUR SESSIONS, and the first that was a single
+    long line rather than a heredoc.
+  ▶ THE 12-LINE RULE APPLIES TO COMMIT MESSAGES TOO.
+
+⚠⚠ P102's PRECONDITION HAD NEVER BEEN RUN, AND THE ANSWER WAS THE OPPOSITE
+OF THE ASSUMPTION. The queue item has said "VERIFY PM2 STARTS ON BOOT
+FIRST" for sessions.
+    DEV   systemctl is-enabled pm2-ubuntu  ->  not-found
+    PROD  systemctl is-enabled pm2-ubuntu  ->  enabled
+  ⚠ NOW HAD RECORDED THE ASSUMPTION THAT PROD SHARED DEV'S GAP. It did not.
+    PROD WAS ALWAYS CORRECTLY CONFIGURED; DEV NEVER WAS.
+  ▶ MEASURE BOTH BOXES. A finding on one is not a finding on the other -
+    J84's lesson, in service configuration this time.
+  ⚠ IT ALSO SHARPENS S105's "dev failed to boot and crash-loop silently".
+    Dev is the box with no unit and dev is the box that failed. ⚠⚠ THAT IS
+    A HYPOTHESIS AND IS RECORDED AS ONE. Do not write it up as fact.
+  ✓ FIXED ON DEV THE SAME SESSION: `pm2 startup systemd -u ubuntu --hp
+    /home/ubuntu` printed the sudo command, which created
+    /etc/systemd/system/pm2-ubuntu.service and enabled it. Then `pm2 save`.
+    ⚠ THE UNIT'S ExecStart IS `pm2 resurrect`, WHICH READS dump.pm2. AN
+      ENABLED UNIT WITH A STALE DUMP STARTS pm2 AND THEN STARTS NOTHING.
+      pm2 save IS NOT OPTIONAL.
+  ✓ VERIFIED: enabled, dump.pm2 9928 bytes and current, and the restart
+    counter DID NOT MOVE - nothing was restarted by the change.
+  ▶ P102 IS UNBLOCKED. It remains its own job with its own gate.
+
+MEASUREMENTS TAKEN, ALL READ-ONLY
+  PRODUCT-SIDE ALLOCATIONS ON PROD, RE-MEASURED BY COMPANY:
+    465 test260704b@  5 rows.  471 Glutenull 0.  469 Hagensborg 0.
+    68 total - 63 material, 5 product, summing exactly.
+    ⚠ S108 RECORDED "sandboxes 5" WITHOUT NAMING WHICH. THEY ARE ALL ON
+      465. ▶ 465 IS THE COMPANY TO EXERCISE THE RELEASE PATH ON PROD,
+      NOT 464 AS PLAN SUGGESTED.
+    ▶ NO CLIENT HAS A SINGLE PRODUCT-SIDE ALLOCATION. NO BACKFILL.
+  DEV: 113 rows - 99 material, 14 product, on companies 464, 465 and 469.
+    ⚠⚠ COMPANY 474 HAS NONE. The intermediate fixture has never had an
+      intermediate released. THAT IS WHY MO-0006 WAS BUILT.
+  THE RELEASE-PATH CALLER CHAIN, PROVEN NOT ASSUMED:
+    route POST /api/v1/rmp/createReleaseMaterialProducts
+      -> MaterialsProductsReleasedController.createReleaseMaterialProducts
+      -> MaterialsProductsReleased.createReleaseMaterialProductsV2
+    ⚠⚠ THE ROUTE AND THE CONTROLLER METHOD SHARE THE OLD NAME AND THE
+      CONTROLLER CALLS V2. J119's shape exactly. THE CONTROLLER IS THE
+      ARBITER. -> the dead :52 function goes to P115.
+  THE PRODUCT BRANCH BRANCHES CORRECTLY: `if (!!data.Rec_Lot_id)` is
+    MATERIAL and `if (!!data.Rec_Product_id)` is PRODUCT.
+    ✓ MATERIALS CANNOT ACCIDENTALLY RECEIVE A UNIT COUNT.
+
+THE NEW FIXTURE, DEV COMPANY 474
+  MO-0006  Parent-0.53, 7 pallets, CREATED, NOT RELEASED.
+    ⚠ 7 CHOSEN DELIBERATELY - not a multiple of batch_qty 13, so
+      7/13 = 0.538461... and the rounding stays visible. TRAPS 9.
+    ▶ ITS FIGURES INDEPENDENTLY RE-PROVED S111's FIX AT A NEW QUANTITY:
+        IP-0.37 required   4.846 = 9 x 7/13        A UNIT COUNT
+        IP-0.37 WH Stock  47.000                   A UNIT COUNT
+        Ginger Powder    701.190 Kg = 1302.21 x 7/13, MATCHING Plan
+        Pouch 1323 = 7 x 9 x 7 x 3
+    ▶ IT EXISTS SO MO-0004 DOES NOT HAVE TO BE SPENT. Minty asked in S111
+      whether to run MO-0004; the answer was no, and this is the
+      alternative.
+
+FOUR FINDINGS RAISED, NONE ACTED ON:
+  P184  the release write path derives units from a weight and SUBTRACTS
+        THEM FROM formulations.inventory_units - a WRITE, not a display.
+        Arithmetically correct today; no client has ever released an
+        intermediate. ▶ CLOSES AS PART OF S113.
+  P185  eval() sums quantities on the release screen at :322, :439, :456,
+        on operator-entered input. Works. ▶ Replace in the same pass.
+  P186  the material traceability screen is mixed - see the ruling above.
+  P115  gains MaterialsProductsReleased.js:52, the dead release function.
+
+FIXTURE RESIDUE ⚠ DEV ONLY, KEEP ALL OF IT: 474's whole IP set including
+  MO-0004 (the before picture) and MO-0006 (S113's write-path fixture),
+  MO-0005's two receipts, MR-0009, DO-0002. 464's three returns.
+BLAST RADIUS: both boxes carry two backend commits and two frontend
+  commits. ONE COLUMN ADDED ON DEV ONLY. No data healed. NO CLIENT FIGURE
+  MOVED - verified through Glutenull's own login on MO-0001, every
+  ingredient and the packaging line unchanged, and the Intermediate
+  Products block rendering clean and empty.
+========
+
+END S112 APPEND
