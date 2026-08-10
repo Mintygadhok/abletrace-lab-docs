@@ -250,13 +250,21 @@ OK 19  Packaging cascade                Formulations.js:1195
        ▶ PROVEN on dev 474 MO-0001 (7.000# / 58.380 Kg) and
          474 MO-0003 (41.000# / 15.170 Kg, at 0.37 Kg per unit).
 
-✓DEP 23  MO detail Completed            edit-mlo.ts:251
+✓S110 23  MO detail Completed           edit-mlo.ts:251
        Same line, same commit, same procedure.
-       ⚠⚠ DEPLOYED TO DEV AND NOT PROVEN ON A SCREEN. /MLO-Management
-         was not reachable through the rail under the test user's
-         roles at S109. It shares getMLCbyIdV3 with rows 22 and 24,
-         both of which passed, so the risk is LOW — but LOW IS NOT
-         PROVEN. ▶ FIRST ITEM AT THE NEXT OPEN.
+       ✓ PROVEN S110 on dev 474 MO-0003 — Completed Quantity
+         41.000# (15.170 Kg), through the SALES CONTROLLER route.
+       ⚠⚠ THE "REDIRECT" WAS NEVER A DEFECT. /MLO-Management is the
+         SALES CONTROLLER's MO screen. Five attempts across S109 and
+         S110 clicked the WAREHOUSE tile and correctly got the
+         Warehouse screen, /Mfg-lot-codes.
+         ▶ MINTY, S110: MO Management is reached from three roles, each
+           for its own task. Sales CREATES the MO. Warehouse RELEASES
+           materials, RECEIVES product, yield and returns. Production
+           STARTS production and RELEASES the lot code.
+       ⚠ THERE IS NO "EDIT MO" OPERATION. MOs are created and closed;
+         fresh MOs are raised instead. The route names are URLs, not
+         tasks. DO NOT REASON ABOUT A SCREEN FROM ITS ROUTE NAME.
 
 ✓S109 24  Start MO Completed            start-mlc.ts:155
        Same line, same commit. ▶ PROVEN on dev 474 MO-0003.
@@ -336,6 +344,12 @@ OK 19  Packaging cascade                Formulations.js:1195
          which is the pass condition at 0.32 and 0.24 Kg per unit.
        ⚠ Both MO-0005 receipts carry the SAME internalCode Rec-260809-1.
          The receipt code is not unique per receipt. → P172.
+       ⚠⚠ THERE ARE TWO RECEIVING PANELS, ONE PER ROLE, AND THEY ARE
+         DIFFERENT TEMPLATES — the Sales Controller's carries a UOM
+         column the Warehouse one lacks. ✓ BOTH READ THE STORED COUNT:
+         5.000 and 8.000 on each, proven S110. ROW 31 WAS ONE SITE.
+       ⚠ ONLY edit-mlc.component.html:258 WAS PATCHED. The Sales panel
+         was already correct — it was never a getWdu caller.
 
 ✓S110 35  Ingredient requirement       Formulations.js:1120
        Now mat.qty × (MO units ÷ formula_id__batch_qty), computed live,

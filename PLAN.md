@@ -33,6 +33,10 @@ Disposable. Rewritten whole at every close.
 
 ```
 1  Health check both boxes. RULES → OPEN.
+   ⚠⚠ ROW 23 IS CLOSED. Do NOT open the session chasing /MLO-Management.
+     It never redirected — it is the SALES CONTROLLER's MO screen and
+     five sessions clicked the Warehouse tile. Proven S110:
+     474 MO-0003 Completed Quantity 41.000# (15.170 Kg).
    ⚠ ALSO, on EACH box:
        mysql abletracelab_live -e "SHOW CREATE PROCEDURE
          WhC_GetMoProductReceivingDetails_SP\G" | grep -o "join" | wc -l
@@ -42,6 +46,11 @@ Disposable. Rewritten whole at every close.
 
 2  ⚠ CONFIRM WHICH BLOCK READS WHICH PROCEDURE. Ten minutes, and it is the
    one thing that can waste the session.
+   ⚠⚠ AND REMEMBER THERE ARE TWO MO DETAIL SCREENS, ONE PER ROLE —
+     Sales Controller's /Edit-MLO and Warehouse Controller's /Edit-Mlc.
+     BOTH carry an Intermediate Products block and a Batch Materials
+     block. ▶ S111 MUST FIX AND PROVE BOTH. S110 patched only the three
+     templates it found; edit-mlo.component.ts:551 is still untouched.
    ▶ S110's reading suggests the pairing is the OPPOSITE of what earlier
      plans implied:
        Intermediate Products  ← WhC_GetMoIntermediateProducts_SP
@@ -333,7 +342,15 @@ RULES.md · NOW.md · TRAPS.md · PLAN.md
    to 5.892 on screen. The number moved, the arithmetic improved, and the
    BASIS IS STILL WRONG. A moving number is not proof of a closed row.
 
-8  ✓ THE SPLIT DECISION PAID. Step 3 was planned as four rows and turned out
+8  ⚠⚠ FIVE SESSIONS CHASED A REDIRECT THAT DID NOT EXIST. /MLO-Management
+   is the SALES CONTROLLER's MO screen; every attempt clicked the
+   WAREHOUSE tile and correctly got the Warehouse screen. Nobody asked
+   Minty what the roles owned until the sixth attempt, and he answered in
+   one sentence.
+   ▶ WHEN A SCREEN WILL NOT OPEN, ASK THE DOMAIN EXPERT BEFORE ASSUMING A
+     DEFECT. RULES: Minty is the domain expert. That is what he is for.
+
+9  ✓ THE SPLIT DECISION PAID. Step 3 was planned as four rows and turned out
    to be one row plus three that belonged to Step 4. Reading first cost an
    hour and saved shipping a half-fix as a whole one.
 ```

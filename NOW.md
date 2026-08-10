@@ -12,6 +12,9 @@ Rewritten whole every session.
 
 ⚠⚠ THE BOARD MOVED BY TWO, NOT FOUR. 30 GREEN · 3 PART · 11 RED · 4 REVIEW,
   of 48. ▶ CLAUDE CLAIMED 32 MID-SESSION AND WAS WRONG. See LESSONS.
+  ✓⚠ ALL 30 GREEN ROWS HAVE NOW BEEN SEEN ON A SCREEN. Row 23 was proven
+    at the close through the SALES CONTROLLER route. THERE ARE NO
+    GREEN-BUT-UNPROVEN ROWS LEFT.
   ▶ 44 IS THE CEILING, NOT 48 — rows 44/45/46/47 are review items that close
     as decisions, not fixes.
 
@@ -114,6 +117,39 @@ COMPANIES ⚠⚠ TWO LIVE CLIENTS ON PROD.
 DATABASES ⚠ THE LIVE DB ON BOTH BOXES IS `abletracelab_live`.
           Plus the dormant `abletrace` archive on each (P101, P109).
           ⚠ NAME THE DATABASE ON EVERY mysql CALL. → P134
+
+
+## THE ROLES AND WHO OWNS WHICH SCREEN
+⚠⚠ MINTY, S110. THIS COST FIVE SESSIONS TO LEARN AND WAS IN NO DOCUMENT.
+
+```
+⚠⚠ MO Management AND MO Details ARE REACHED FROM THREE ROLES, EACH FOR
+  ITS OWN TASK. THEY ARE NOT ALTERNATIVE ROUTES TO ONE SCREEN — each role
+  gets the screen its job needs.
+
+  SALES CONTROLLER       CREATES the MO
+                         /MLO-Management → /Edit-MLO
+  WAREHOUSE CONTROLLER   RELEASES materials · RECEIVES product ·
+                         yield · returns
+                         /Mfg-lot-codes → /Edit-Mlc
+  PRODUCTION CONTROLLER  STARTS production · RELEASES the lot code
+                         its own MO screen
+
+⚠⚠ "/MLO-Management REDIRECTS" WAS NEVER TRUE. Five sessions clicked the
+  Warehouse tile and correctly got the Warehouse screen. THERE IS NO
+  DEFECT AND NEVER WAS. → row 23 is now PROVEN, not green-unproven.
+
+⚠ THE ROUTE NAMES LIE ABOUT THE TASK. There is no "edit MO" operation —
+  MOs are CREATED and CLOSED, never edited. Fresh MOs are raised instead.
+  `Edit-MLO` and `Edit-Mlc` are URLs, not things anyone does.
+  ▶ DO NOT REASON ABOUT WHAT A SCREEN DOES FROM ITS ROUTE NAME. → J119's
+    lesson, in a new place.
+
+⚠ BOTH MO DETAIL SCREENS CARRY A RECEIVING PANEL AND THEY ARE DIFFERENT
+  TEMPLATES — the Sales one has a UOM column the Warehouse one lacks.
+  ✓ BOTH READ THE STORED PER-RECEIPT COUNT. Proven S110 on 474 MO-0005:
+    5.000 and 8.000 on each, NOT 13 and 13. Row 31 was one site.
+```
 
 ⚠ PROD IS REACHED FROM THE MAC. NEVER ssh from dev.
   ▶ PUT `hostname -I` AT THE TOP OF ANY BLOCK.
