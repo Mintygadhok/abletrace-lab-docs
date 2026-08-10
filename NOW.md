@@ -77,7 +77,7 @@ PROD      15.157.38.101 · pm2 abletrace-backend ↺343 · 200 · 157.3mb
 GITHUB    frontend main = e1a82e02   ✓ BUILT AND DEPLOYED BOTH BOXES
                                      ⚠ dev by push, prod by MANUAL DISPATCH
           backend  main = 4d43bd4    ✓ unchanged this session
-          docs     main = <READ FROM GITHUB AFTER THE PUSH>
+          docs     main = f7fad0b
             ⚠ RULES 6 — do not carry a number forward, read it.
           ⚠⚠ TWELVE dist ZIPS IN CIRCULATION, TEN SUPERSEDED. Every one is
             green and real. → the tidy list.
