@@ -56,6 +56,16 @@ CHANGE LOG  S108 — created. Four sources ruled by Minty. 47 sites mapped.
               ⚠⚠ TWO RULINGS BY MINTY, BOTH RESHAPING THE CAMPAIGN.
               ⚠ PART 1 UNTOUCHED BY CLAUDE — the rulings sat in this
               change log and in NOW awaiting placement.
+            S114, 10 August 2026 — ⚠ NO ROW MOVED, AND NONE WAS
+              MEANT TO. Row 50 CORRECTED — it was recorded green and was
+              HALF green: its five addresses were all right, and
+              getStockStatus, which the template CALLS, was not.
+              ⚠⚠ A FIFTH FAILURE MODE, AND THE QUIETEST. THE MAP
+              RECORDS SITES; IT DOES NOT RECORD WHAT THEY CALL.
+              ⚠⚠ MINTY REDESIGNED THE UNITS CAPTURE — units computed,
+              Kg derived. P188 DISSOLVES. → NOW, PLAN, J124.
+              ✓✓ P184 MEASURED: 42.15405405405406 STORED WHERE 42.154
+              IS TRUE. The first confirmed WRONG WRITE of this campaign.
             S113, 10 August 2026 — ⚠⚠ TWO ROWS TO OK, AND THEY ARE THE
               ONLY WRONG NUMBER THIS CAMPAIGN EVER FOUND.
               row 45 → OK. Material traceability MO rows. Procedure
@@ -442,11 +452,34 @@ OK 50  Release screen — the PRODUCT block
        ✓ RE-PROVEN ON SCREEN S113: MO-0006 reads 1.793 / 1.793 Kg with
          auto-fill 1.793, and Ginger Powder 701.190 and Pouch 1323.000
          unmoved.
-       ⚠⚠ IT CHANGES AGAIN IN S114 and THE ROW STAYS GREEN THROUGH IT.
-       ⚠⚠ AND S113 FOUND THE COMPLICATION: released_qty is built from
-         qty_allocated, WHICH STAYS Kg. So remainToFill cannot simply
-         return to final_qty. → P188, and it must be settled before the
-         capture is written.
+       ⚠⚠ AND IT WAS ONLY HALF DONE, WHICH THIS MAP RECORDED AS WHOLE.
+         S112 repointed the four template sites and :296. IT DID NOT
+         REPOINT getStockStatus:437 OR setMainStatus:454, WHICH THE
+         TEMPLATE CALLS ON THE SAME LINE AS THE BAR IT FIXED.
+           html:157  total vs final_qty_kg   ✓ Kg vs Kg, RIGHT
+           ts:437    toComplete = final_qty  ⚠ Kg vs UNITS, WRONG
+         ▶ TWO INDICATORS ON ONE ROW, DISAGREEING. Typing the correct
+           1.793 Kg left the dot ORANGE; filling to 4.846 Kg turned it
+           GREEN on a 170% over-release. ✓ CLIENT EXPOSURE ZERO.
+       ✓ FIXED S114, commit 4910b46d: toComplete = final_qty_kg ??
+         final_qty, at BOTH sites. ⚠ ?? NOT || — || falls through on a
+         legitimate ZERO. Materials and packaging carry no final_qty_kg
+         and fall through UNCHANGED.
+       ⚠⚠ PROVEN BY RE-SERVING THE OLD BUILD, AND IT HAD TO BE. The
+         numbers are IDENTICAL before and after; only the COLOUR moves,
+         so the after-screen alone could not fail. MINTY REFUSED THE
+         FIRST "PROVEN". e1a82e02 was restored from its rollback folder
+         and the same screen read ORANGE. ▶ SAME NUMBERS, DIFFERENT
+         COLOUR, BOTH OBSERVED. THAT is the proof.
+       ⚠⚠ IT CHANGES AGAIN IN S115 and THE ROW STAYS GREEN THROUGH IT.
+       ⚠⚠ P188 IS DISSOLVED, NOT DEFERRED. Minty’s S114 design makes
+         the screen unit-anchored end to end, so remainToFill becomes
+         units minus units and there is no basis mismatch left to
+         design around.
+       ⚠ FOUR MORE SITES ON THIS SCREEN ARE IN NO ROW OF THIS MAP —
+         P191 the lot scanner (materials only, CORRECT), P192 final_qty
+         rebuilt from `batches`, P193 the released_qty accumulator at
+         :866, P194 the oldRecProducts block. ▶ LISTED, NOT CHASED.
 
 ──── MISALIGNED — 10 ────────────────────────────────────────────────
 XX 20  Release screen Released Qty      Formulations.js :1108,:1141,:1189
@@ -539,8 +572,15 @@ THE PROVING GROUND — company 474 on dev, built S108.
   MO-0005  IP-0.37, 13 units, TWO receipts of 5 and 8
   MO-0006  Parent-0.53, 7 pallets, CREATED, NOT RELEASED
            ⚠⚠ S114's WRITE-PATH FIXTURE. ✓ STILL UNSPENT AFTER S113 —
-             MO-0011 served the start-mlc screen check instead, at no
-             cost. ▶ DO NOT SPEND IT ON A SCREEN CHECK.
+             MO-0011 served the start-mlc screen check instead.
+           ⚠⚠ SPENT IN S114. Released to measure P184, with the
+             prediction written BEFORE the write. 47 − 4.846 should be
+             42.154; the row holds 42.15405405405406. IT CANNOT BE
+             UN-RELEASED.
+           ▶ 474 MO-0004 IS NOW THE LAST UNRELEASED INTERMEDIATE MO.
+             ⚠ S115 SHOULD ASK FOR A FRESH FIXTURE RATHER THAN SPEND IT.
+           ⚠ THE WRONG VALUE IS STILL IN formulations id 3696 ON DEV,
+             DELIBERATELY, AS THE BEFORE PICTURE. Heal after the fix.
 
 ⚠ 19 AND 13 ARE BOTH PRIME AND SHARE NO FACTORS, so nearly any MO
   quantity produces a repeating decimal. TRAPS 9.

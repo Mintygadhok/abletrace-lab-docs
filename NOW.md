@@ -1,72 +1,75 @@
 # NOW
 
-Last rewritten: S113, 10 August 2026. State, pending promotion, and the queue.
+Last rewritten: S114, 10 August 2026. State, pending promotion, and the queue.
 Rewritten whole every session.
 
-✓ S113 SHIPPED TWO THINGS. BOTH ON BOTH BOXES.
-  PROCEDURE  Trace_MaterialDetails_SP — gains mlomanagement.received_units
-             in THREE places. JR23. Each box from its own backup.
-  e1a82e02   material traceability MO rows read stored counts, frontend
+✓ S114 SHIPPED ONE THING, ON BOTH BOXES.
+  4910b46d   the release status indicator reads final_qty_kg for products.
+             getStockStatus and setMainStatus, frontend only.
   ▶ NOTHING IS PENDING PROMOTION. Application stack and database in step.
   ⚠ THE ONE DIVERGENCE REMAINS mprrecievelots.qty_allocated_units — DEV
-    ONLY, DELIBERATELY. It lands on prod with the write path in S114.
+    ONLY, DELIBERATELY. It lands on prod with the write path in S115.
 
-⚠⚠ THE BOARD: 38 GREEN · 10 RED · 3 REVIEW, of 51. BALANCE 13.
-  ▶ ROWS 45 AND 51 CLOSED. ⚠⚠ ROW 45 WAS THE ONLY WRONG NUMBER IN THE
-    QUEUE. Everything still open is a RIGHT number reached by a WRONG
-    route.
-  ▶ 48 IS THE CEILING.
-  ✓ FIRST SESSION OF THIS CAMPAIGN TO CORRECT A FIGURE A CLIENT COULD
-    HAVE READ WRONGLY. Every previous fix was invisible on prod by
-    design. Glutenull's MO rows read "1750 Kg (1750#)" this morning.
+⚠⚠ THE BOARD: 38 GREEN · 10 RED · 3 REVIEW, of 51. UNCHANGED.
+  ▶ S114 MOVED NO ROW AND WAS NOT MEANT TO. Row 50 was already green
+    and was HALF green — see below. 48 IS THE CEILING.
 
-⚠⚠ WHAT S113 PROVED ABOUT THE PLAN ITSELF — READ BEFORE TRUSTING A ROW.
-  PLAN AND THE BIBLE BOTH NAMED FOUR FIX SITES. ALL FOUR WERE DEAD.
-    :123 :124   inside a commented-out <tr> block
-    :215 :216   a live mat-card iterating newList — AND NOTHING EVER
-                ASSIGNS newList. Every write to it is commented out.
-  AND THE LINE BOTH DOCUMENTS SAID TO LEAVE ALONE — :107/:108 — WAS THE
-  DEFECT. It renders the MO row and it printed "10 Kg (1#)".
-  ▶ PATCHING BY THE DOCUMENT WOULD HAVE BUILT CLEAN, DEPLOYED CLEAN AND
-    CHANGED NOTHING. J117's shape, and the addresses have been corrected
-    in the bible in this same close.
+✓✓ THE SESSION'S REAL OUTPUT IS NOT THE COMMIT. IT IS TWO THINGS:
+  1  P184 IS NO LONGER A DOCUMENT CLAIM. IT IS A MEASURED DEFECT with
+     the line, the arithmetic and the stored wrong value. → below.
+  2  ⚠⚠ MINTY REDESIGNED THE UNITS CAPTURE, and the new shape is
+     simpler than PLAN's seven-piece framing. → PLAN, and RULINGS.
+
+⚠⚠ WHAT S114 PROVED ABOUT PROOF ITSELF — READ BEFORE CALLING A FIX DONE.
+  Claude called the indicator fix "proven" on a screen that showed
+  1.793/1.793 GREEN. ⚠ THAT SCREEN COULD NOT HAVE FAILED — the numbers
+  are identical before and after; only the COLOUR moves.
+  ▶ MINTY REFUSED IT AND ASKED FOR THE BEFORE PICTURE. The old build
+    was re-served from its rollback folder and the same screen, same
+    numbers, read ORANGE.
+  ▶ THAT is the proof. The first version was a result that could not
+    have revealed the problem, read as though it had. → LESSONS 1.
 
 ---
 
 ## STATE
-⚠ READ OFF BOTH BOXES AT S113 CLOSE.
+⚠ READ OFF ALL THREE MACHINES AT S114 CLOSE.
 
 ```
-DEV       16.55.10.205 · pm2 abletrace-dev ↺263 · 200 · 162.9mb
-          frontend SERVING dev-e1a82e028903ec317399de1bf2dc8be14a2f1030
-          frontend checkout c2a52d8e — ⚠⚠ STALE BY EIGHTEEN SESSIONS.
-            HARMLESS UNTIL SOMEBODY READS IT AS LIVE CODE. It happened
-            in S112. → LESSONS.
+DEV       16.55.10.205 · pm2 abletrace-dev ↺263 · 200 · 162.2mb
+          frontend SERVING dev-4910b46d76a4c49eee431e1a9b435a0116fc9031
+          frontend checkout c2a52d8e — ⚠⚠ STALE BY NINETEEN SESSIONS.
+            HARMLESS UNTIL SOMEBODY READS IT AS LIVE CODE.
           backend HEAD 4d43bd4 · both repos clean
-          ⚠ NO BACKEND COMMIT IN S113.
+          ⚠ NO BACKEND COMMIT IN S114.
           Ubuntu 24.04.4 · 172.31.1.196
           ⚠ 12 UPDATES PENDING · restart required
           ✓ pm2-ubuntu systemd unit INSTALLED AND ENABLED, S112.
 
-PROD      15.157.38.101 · pm2 abletrace-backend ↺343 · 200 · 157.3mb
-          TWO LIVE CLIENTS · SERVING prod-e1a82e028903ec317399de1bf2dc8be14a2f1030
+PROD      15.157.38.101 · pm2 abletrace-backend ↺343 · 200 · 159.6mb
+          TWO LIVE CLIENTS · SERVING prod-4910b46d76a4c49eee431e1a9b435a0116fc9031
           backend HEAD 4d43bd4 · repo clean
-          ⚠ frontend checkout is not read at this path — P8, by design.
-            THE ROLLBACK LABEL IS THE ONLY RELIABLE READ OF WHAT IS LIVE.
+          ⚠ frontend checkout reads 9bce0238 — P8, BY DESIGN, and the
+            number is recorded here so nobody investigates it. It is
+            J62's pencil-edit commit from S61. THE ROLLBACK LABEL IS
+            THE ONLY RELIABLE READ OF WHAT IS LIVE.
           Ubuntu 26.04 · 172.31.3.156
-          ⚠⚠ 46 UPDATES PENDING · restart required. NINETEEN DAYS. → P102
+          ⚠⚠ 46 UPDATES PENDING · restart required. TWENTY DAYS. → P102
           ✓ pm2-ubuntu ENABLED — measured S112.
+
+MAC       Mintys-Air-2 · frontend repo CLEAN at 4910b46d
+          ⚠ THE ONLY MACHINE THAT EDITS THE FRONTEND.
 ```
 
 ```
 ✓ BACKENDS MATCH     dev 4d43bd4          prod 4d43bd4
-✓ FRONTENDS MATCH    dev e1a82e02...      prod e1a82e02...
+✓ FRONTENDS MATCH    dev 4910b46d...      prod 4910b46d...
 ⚠⚠ DATABASES DIVERGE BY ONE COLUMN, DELIBERATELY.
    mprrecievelots.qty_allocated_units EXISTS ON DEV, NOT ON PROD.
-   ✓ RE-VERIFIED AT THE S113 OPEN — one row on dev, EMPTY SET on prod.
+   ✓ RE-VERIFIED AT THE S114 OPEN — two columns on dev, one on prod.
    ▶ THE MODEL DECLARES IT ON BOTH. Harmless.
-   ▶ THE PROD ALTER IS S114's, and it lands with the write path.
-✓ Trace_MaterialDetails_SP  MATCHES — 3 received_units, 10 joins (JR23)
+   ▶ THE PROD ALTER IS S115's, and it lands with the write path.
+✓ Trace_MaterialDetails_SP  MATCHES — 3 received_units both boxes (JR23)
 ✓ BOTH INTERMEDIATE PROCEDURES MATCH — 3 joins, both new columns. JR22.
 ✓ THE HEADER VIEW    2 divisions each box (JR20)
 ✓ THE RECEIVING PROC 1 qty column, 2 joins (JR21)
@@ -74,33 +77,34 @@ PROD      15.157.38.101 · pm2 abletrace-backend ↺343 · 200 · 157.3mb
 ```
 
 ```
-GITHUB    frontend main = e1a82e02   ✓ BUILT AND DEPLOYED BOTH BOXES
-                                     ⚠ dev by push, prod by MANUAL DISPATCH
+GITHUB    frontend main = 4910b46d   ✓ BUILT AND DEPLOYED BOTH BOXES
+                                     ⚠ dev by push (run #75), prod by
+                                       MANUAL DISPATCH (run #76)
           backend  main = 4d43bd4    ✓ unchanged this session
-          docs     main = f7fad0b
-            ⚠ RULES 6 — do not carry a number forward, read it.
-          ⚠⚠ TWELVE dist ZIPS IN CIRCULATION, TEN SUPERSEDED. Every one is
-            green and real. → the tidy list.
-          ▶ THE DEFENCE IS THE STAMP AND NOTHING ELSE. TYPE IT IN FULL.
-            NEVER TAKE THE NEWEST BY POSITION. → J117.
+          docs     main = f7fad0b + S114's commit
+          ⚠⚠ A BUNDLE FILENAME IS NOT A BUILD IDENTIFIER ACROSS BOXES.
+            dev 4910b46d serves 1002.38fb2da9480a8597.js
+            prod 4910b46d serves 1002.79e33c32f5de8852.js
+            SAME COMMIT, DIFFERENT HASHES — prod builds without source
+            maps. ⚠ CLAUDE READ THE UNCHANGED PROD FILENAME AS A FAILED
+            DEPLOY. ▶ THE PROOF IS `diff -r artifact /var/www/html`,
+            WHICH RETURNS NOTHING WHEN IT IS RIGHT.
+          ▶ THE STAMP IS THE DEFENCE. TYPE IT IN FULL. NEVER TAKE THE
+            NEWEST BY POSITION. → J117.
           ⚠ BUILD ANNOTATION ON EVERY RUN: Node.js 20 deprecated, forced
             onto Node.js 24. Builds succeed. → P180.
-          ⚠ THE PROD ARTIFACT IS 9.07 MB, THE DEV ONE 14.4 MB. Prod builds
-            without source maps. NOT A DEFECT — record it so nobody reads
-            the size difference as a truncated download.
+          ⚠ dev artifact 14.4 MB · prod 9.07 MB. NOT A DEFECT.
 ```
 
 ```
-ROLLBACK  dev   /home/ubuntu/www-html.bak-dev-e1a82e028903ec317399de1bf2dc8be14a2f1030
-          prod  /home/ubuntu/www-html.bak-prod-e1a82e028903ec317399de1bf2dc8be14a2f1030
-          ⚠ EACH HOLDS THE BUILD IT REPLACED — BOTH HOLD 2968c591.
+ROLLBACK  dev   /home/ubuntu/www-html.bak-dev-4910b46d76a4c49eee431e1a9b435a0116fc9031
+          prod  /home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031
+          ⚠ EACH HOLDS THE BUILD IT REPLACED — BOTH HOLD e1a82e02.
           ⚠ READ OFF THE BOX AT CLOSE, never from the label.
           ⚠ BACKEND ROLLBACK is `git reset --hard fc78ce1` then restart.
 
           DATABASE BACKUPS — ⚠⚠ KEEP ALL OF THESE:
             BOTH Trace_MaterialDetails_SP.bak-S113-{DEV,PROD}.txt
-                 ⚠ 4675 bytes, 2 CREATE, 10 joins, 0 slashes — BYTE-
-                   IDENTICAL ACROSS THE BOXES BEFORE THE CHANGE.
             DEV  mprrecievelots-before-S112-DEV.sql  ⚠⚠ THE ONLY COLUMN
                  ROLLBACK.
             BOTH WhC_GetMoIntermediateProducts_SP.bak-S111-{DEV,PROD}.txt
@@ -127,9 +131,10 @@ COMPANIES ⚠⚠ TWO LIVE CLIENTS ON PROD.
             469  HAGENSBORG   13 MOs, none run. ZERO release rows.
                               ⚠⚠ batch_qty 1 ON ALL 13. TRAPS 9, permanently.
           ⚠⚠ NEITHER CLIENT HAS EVER CREATED A DISPATCH ORDER.
+          ⚠⚠ NEITHER CLIENT HAS EVER RELEASED AN INTERMEDIATE. That is
+            why P184 has banked nothing on prod. → S115's gate.
           ⚠ SANDBOXES ON PROD: 464 test260703@ and 465 test260704b@.
             ⚠⚠ 465 IS THE ONE WITH PRODUCT-SIDE ALLOCATION HISTORY.
-              ▶ USE 465, NOT 464, TO EXERCISE THE RELEASE PATH ON PROD.
           ⚠⚠ THE TWO BOXES DO NOT SHARE A COMPANY-ID NAMESPACE. → P156
 
 DATABASES ⚠ THE LIVE DB ON BOTH BOXES IS `abletracelab_live`.
@@ -149,9 +154,7 @@ DATABASES ⚠ THE LIVE DB ON BOTH BOXES IS `abletracelab_live`.
                                              /Start-mlc
 
 ⚠ THE ROUTE NAMES LIE ABOUT THE TASK. There is no "edit MO" operation.
-✓ ALL THREE INTERMEDIATE-BLOCK TEMPLATES ARE NOW SCREEN-PROVEN.
-  start-mlc WAS OPENED IN S113 ON 474 MO-0011 — P181 CLOSED after four
-  patches across two sessions with no screen check.
+✓ ALL THREE INTERMEDIATE-BLOCK TEMPLATES ARE SCREEN-PROVEN (S113).
 ⚠ THREE MORE INTERMEDIATE CONTROLS EXIST AND ARE IN NO DOCUMENT:
     edit-mlc.component.html:223 · edit-mlo.component.html:319 ·
     edit-closed-mlcs.component.html:77 — all <mat-label>. → P182.
@@ -159,79 +162,48 @@ DATABASES ⚠ THE LIVE DB ON BOTH BOXES IS `abletracelab_live`.
 
 ⚠ PROD IS REACHED FROM THE MAC. NEVER ssh from dev.
   ▶ `hostname` AND `git log --oneline -1` AT THE TOP OF EVERY MAC BLOCK.
-    ⚠⚠ THE FRONTEND REPO EXISTS ON BOTH MACHINES AT THE SAME PATH, AND
-      DEV'S COPY IS EIGHTEEN SESSIONS STALE.
+  ⚠⚠ THE MAC AND THE BOXES DO NOT SHARE A COMMAND VOCABULARY. Two
+    commands failed on the Mac in S114 for this reason — `hostname -I`
+    and `cat -A`, both GNU-only. BOTH FAILED LOUDLY.
+    ▶ THE ONE TO WATCH IS `sed -i`, WHICH EXISTS ON BOTH AND BEHAVES
+      DIFFERENTLY. BSD requires an argument to -i; GNU does not.
 
 ---
 
-## THE FIXTURES — ⚠ DO NOT DISTURB.
-
-### COMPANY 474 · test260805@ · on DEV — THE PROVING GROUND
+## ⚠⚠ THE MEASUREMENT THAT MATTERS — P184, PROVEN IN S114
 
 ```
-IP-0.37      FO-0004  0.37 Kg/unit  batch_qty 19  inventory_units 47
-Parent-0.53  FO-0005  0.53 Kg/unit  batch_qty 13
-             Pouch / Carton 3 / Case 7 / Pallet 9
-             Recipe: Ginger Powder 1302.21 Kg + IP-0.37 9 units
+THE DEFECT, IN api/models/MaterialsProductsReleased.js — THE ADDRESSES
+ARE READ, NOT QUOTED FROM A DOCUMENT:
+  :239  _ratio = Number(_lot.qty) / Number(_lot.recieved_qty)
+  :246  inventory_units −= Number(data.qty_allocated) * _ratio
+  :251-254  THE CLAMP DOES THE SAME THING when the lot is short.
+  ⚠ PLAN SAID :262 AND :228/:256. ⚠⚠ :228 IS THE MATERIAL CLAMP.
+    Patching there would have hit the clean branch.
 
-MO-0003  IP-0.37, 41 units, COMPLETE. ONE RECEIPT.
-MO-0004  Parent-0.53, 23 pallets, CREATED, NOT RELEASED
-         ⚠⚠ LEAVE IT ALONE. STILL THE BEFORE PICTURE.
-MO-0005  IP-0.37, 13 units, TWO RECEIPTS of 5 and 8.
-MO-0006  ⚠⚠ Parent-0.53, 7 pallets, CREATED, NOT RELEASED.
-         ▶ THIS IS S114's WRITE-PATH FIXTURE. It exists so MO-0004 does
-           not have to be spent. ⚠⚠ IT WAS NOT SPENT IN S113 — Minty
-           asked and the answer was no; MO-0011 served the screen check
-           instead, at no cost.
-         ⚠ 7 ÷ 13 = 0.538461... — deliberately not a multiple of 13.
-         ▶ ITS FIGURES, RE-PROVEN ON SCREEN S113 (start-mlc AND edit-mlc):
-             IP-0.37 required   4.846# (1.793 Kg)
-             IP-0.37 WH Stock  47.000# (17.390 Kg)
-             Ginger Powder    701.190 Kg  ·  Pouch 1323 · Carton 441 ·
-             Case 63 · Pallet 7
-         ⚠ RELEASING IT WILL CONSUME 4.846 UNITS, leaving 42.154.
-MR-0009  Ginger Powder, 10 Kg, reason Sample. MATERIAL.
-DO-0002  IP-0.37, 7 units typed, packing_units STORED AS 7.
+PROVEN ON dev 474 MO-0006, RELEASED IN S114 FOR THIS PURPOSE:
+  typed          1.793 Kg          (auto-filled)
+  _ratio         41 ÷ 15.17        = 2.7027027…
+  subtracted     1.793 × 2.7027027 = 4.845945945…
+  STORED         47 − 4.845945945  = 42.15405405405406
+  TRUE ANSWER    47 − 4.846        = 42.154
+  ⚠⚠ A WRITE, NOT A DISPLAY. THAT FIGURE IS THE CORE STOCK LINE.
 
-⚠ 19 AND 13 ARE BOTH PRIME AND SHARE NO FACTORS. TRAPS 9.
-```
+✓ THE CONTROLS WERE EXACT AND THEY BRACKET IT:
+    Ginger Powder  9696.983 − 701.190 = 8995.793   EXACT
+    Pouch          9750 − 1323        = 8427       EXACT
+    receipt        prev_received_qty 2.59 → 4.383  EXACT (Kg + Kg)
+  ▶ EVERY LIKE-FOR-LIKE SUM IS EXACT. THE ONLY FIGURE WITH A TAIL IS
+    THE ONLY ONE RECONSTRUCTED FROM A WEIGHT.
 
-### COMPANY 474 — THE IP2 / P2 / IP3 SET · ⚠ BUILT BY MINTY, S112
+⚠⚠ THE ROUND-RATIO ROWS PROVED NOTHING, AND THEY WERE CHECKED FIRST.
+  IP2 (3700) and IP3 (3702) were released the same afternoon at
+  10 Kg/unit. Both reconcile perfectly: 30÷10=3, 70÷10=7. TRAPS 9 —
+  at 10:1 the ugly route and the honest route are indistinguishable.
+  ▶ ONLY THE 0.37 FIXTURE COULD FAIL, AND IT DID.
 
-```
-IP2   FO-0006-2  Salt 10 Kg/batch · 1 unit/batch · 10 Kg per unit
-      MO-0007 ran under IP2 VERSION 1 at 1 Kg/unit — 100# (100 Kg).
-      MO-0010 ran under VERSION 2 at 10 Kg/unit — 10# (100 Kg).
-P2    FO-0007-2  Ginger 20 Kg + IP2 2# · 2 units/batch
-      Pouch 5 Kg → Case = 4 Pouch = 20 Kg per case
-      MO-0011 made 7# (140 Kg), batches 3.5.
-IP3   FO-0008   MO-0012 made 10# (100 Kg). ⚠⚠ FOUND IN S113 BY CALLING
-      THE PROCEDURE — it renders on the same screen as MO-0010 and
-      carried the same defect. IT WAS IN NO DOCUMENT.
-Salt  MAT-8, material id 8126. Receive lot 11222. ⚠ THE ONLY SALT LOT.
-      10000 Kg received · 300 released · 9700 SOH.
-
-⚠⚠ EVERY RATIO IS ROUND. A DIVISION AND A STORED READ PRODUCE IDENTICAL
-  NUMBERS. ▶ USEFUL FOR SEEING THE FLOW, USELESS FOR PROVING A FIX.
-⚠⚠ MO-0007 AT 1 Kg/unit IS TRAPS 9 IN ITS PUREST FORM — qty 100,
-  received_qty 100, received_units 100, ALL THREE IDENTICAL. It CANNOT
-  MOVE whatever the code does. THAT IS WHY IT IS THE CONTROL: it proves
-  history was not re-cast, and proves nothing about the fix.
-⚠⚠ MO-0007's ROW IS CORRECT AND MUST NOT BE "FIXED". Traceability
-  reports what was released AT THE TIME. ▶ MINTY'S RULING, S112.
-```
-
-### COMPANY 464 · test260703 · on DEV — THE OLDER FIXTURES
-
-```
-FO-0004 / test1.39 / 1.39 Kg per unit / MO-0007
-  DOs in all three bucket states. ⚠ DO NOT DELETE DO-0016.
-  ⚠ DO-0008 and DO-0009 carry packing_units 0.5 — THE FRACTIONAL FIXTURE.
-⚠⚠ MO-0002 CARRIES **TWO** 2 Kg GINGER POWDER RETURNS. → P168's proof.
-MO-0011  A 2 Kg GINGER POWDER RETURN. → P164's fixture.
-  ⚠⚠ DO NOT CLEAR EITHER.
-⚠ 464 IS A DIRTY BASELINE — MAT-6 missing Sesame, MAT-5 carrying Eggs,
-  FO-0005 fork residue.
+⚠ THE WRONG VALUE IS STILL IN THE ROW ON DEV. Left deliberately as the
+  before picture. ▶ HEAL IT WHEN THE FIX IS PROVEN, not before.
 ```
 
 ---
@@ -248,41 +220,49 @@ mprrecievelots       qty_allocated (KG) · qty_allocated_units (⚠ DEV ONLY)
                        ENCODES THE RELEASE TYPE:
                          material_id + Rec_Lot_id     = MATERIAL
                          formula_id  + Rec_Product_id = PRODUCT
-                     ✓ MEASURED S112 — dev 113 rows: 99 material, 14
-                       product. prod 68: 63 and 5. NO ORPHANS.
+                     ✓ MEASURED S114 — dev 127 rows: 111 material, 16
+                       product. NO ORPHANS. ⚠ NOW HAD SAID 113 SINCE
+                       S112; FOURTEEN ROWS WERE ADDED IN BETWEEN.
+                       ▶ RE-COUNT AT THE GATE. DO NOT CARRY IT FORWARD.
+                     ⚠ qty_allocated_units IS 0 ON ALL 127 ROWS.
+                       ⚠⚠ ITS DEFAULT IS 0 WHERE qty_allocated's IS NULL.
+                         SO AN OMITTED WRITE BANKS A ZERO, INDISTINGUISH-
+                         ABLE FROM A REAL ZERO. TRAPS 3's shape.
+                         ▶ A ZERO AT THE S115 GATE IS A FAILURE.
                      ✓✓ qty_allocated IS SUMMED AS Kg IN ALL SIX READ
                        SITES AND LEFT AS Kg. READ IN FULL, S113:
-                         Formulations.js :1103 :1136 :1188
+                         Formulations.js :1103 :1136 :1190
+                           ⚠ NOW SAID :1188. MEASURED :1190 IN S114.
                          MLOManagement.js :1097 :1102 :1107
-                       Every one is `sum = sum + qty_allocated`. NO
-                       DIVISION, no wgt_kgs_per_unit, no unit count
-                       reconstructed. ▶ S114 DOES NOT TOUCH THEM, so
-                       long as qty_allocated STAYS KILOGRAMS.
-                     ⚠ THIS WAS A DOCUMENT CLAIM UNTIL S113. IT IS NOW
-                       A MEASUREMENT.
+                       ▶ S115 DOES NOT TOUCH THEM, so long as
+                         qty_allocated STAYS KILOGRAMS.
 
 receiveproducts      qty (UNITS, per receipt) · recieved_qty (KG) ·
                      prev_received_qty (KG)
                      ⚠ NOTE THE MISSPELLING `recieved_qty`.
-                     ⚠⚠ prev_received_qty IS Kg, WHICH IS WHY THE
-                       UNITS-REMAINING FIGURE HAS TO BE BUILT RATHER
-                       THAN READ. → S114.
 
 mlomanagement        qty (UNITS since S41) · received_qty (KG) ·
                      received_units (UNITS)
-                     ⚠⚠ qty AND received_qty SIT SIDE BY SIDE IN OPPOSITE
-                       BASES. That is what broke material traceability
-                       for two years — half the row kept working.
 
 subrecipeformulation qty (KG) · ship_qty (UNITS)
                      ✓ ZERO null-or-zero ship_qty ON EITHER BOX.
+                     ⚠⚠ BOTH ARE STORED AND BOTH ARE SCALED SEPARATELY
+                       AT Formulations.js :1157 AND :1159. THEY AGREE
+                       TODAY. NOTHING GUARANTEES THEY AGREE TOMORROW.
+                       ▶ THAT IS WHAT MINTY'S S114 DESIGN REMOVES.
 
 formulations         inventory (KG) · inventory_units (UNITS) · batch_qty
                      ⚠ batch_qty IS SHIPPING UNITS PER BATCH, served by
                        WhC_GetMoDetails_SP ALIASED as formula_id__batch_qty.
 
-company              company_name  ← NOT `name`
 fopackaging          formulation_id ← NOT `formula_id`
+                     wgt_kgs_per_unit ON THE whd_flag ROW IS THE ONLY
+                     PLACE A UNIT WEIGHT IS HELD ANYWHERE.
+                     ⚠⚠ IT IS **NOT** IN SCOPE inside
+                       getFormulaByIdForReleaseMaterial's formulation
+                       loop. → S115 MUST BRING IT IN. MEASURED S114.
+
+company              company_name  ← NOT `name`
 soproducts           quantity (KG) · NO company_id · NO UNIT COUNT → P138
 ```
 
@@ -291,34 +271,17 @@ soproducts           quantity (KG) · NO company_id · NO UNIT COUNT → P138
 ## DATABASE OBJECTS
 
 ```
-Trace_MaterialDetails_SP  ✓ JR23, BOTH BOXES. NEW IN S113.
-  ▶ SERVES mlomanagement.received_units. Three insertion points: the temp
-    table CREATE, the INSERT column list, and the SELECT that feeds it.
-  ✓ THE FINAL SELECT IS `temp_table.*` — so a column added to the temp
-    table reaches the caller automatically. NOTHING TO ADD AT THE OUTPUT.
-  ⚠⚠ EVERY temp_table COLUMN IS VARCHAR(100). qty AND received_qty ARRIVE
-    AT THE FRONTEND AS STRINGS. Multiplication coerces; ADDITION WOULD
-    CONCATENATE. Number() is not optional in that component.
-  ⚠ IT HAS ZERO SLASHES AND ALWAYS DID. The slash count is NOT a usable
-    gate for this object — the join count (10) is.
-  ⚠ @returnedQty AND @mprIDs ARE COMPUTED AND NEVER USED. → P115.
-  ⚠ The final SELECT drives FROM temp_qty_allocated left join temp_table
-    with no aggregation — two allocations on one lot would render the MO
-    twice. P136's shape, NOT INVESTIGATED.
-
+Trace_MaterialDetails_SP  ✓ JR23, BOTH BOXES. S113.
 WhC_GetMoIntermediateProducts_SP   ✓ JR22, BOTH BOXES.
-  ▶ SERVES subrecipeformulation_ship_qty AND formulations_inventory_units.
   ⚠⚠ IT ALIASES EVERYTHING. ▶ FEEDS THE INTERMEDIATE PRODUCTS BLOCK.
 WhC_GetFormulaIntermediateProducts ✓ JR22, BOTH BOXES.
-  ▶ SERVES bare ship_qty AND bare inventory_units.
   ⚠⚠ IT SELECTS BARE WHERE ITS TWIN ALIASES. undefined, SILENTLY.
   ▶ FEEDS matList / formulaList / packList — THE BATCH MATERIALS BLOCK.
-
-Trace_ProductHeaderView   ⚠ TWO DIVISIONS REMAIN. → JR20, and → S115.
-  ▶ intermediate_prd_su and SOH_su. ⚠ SOH_su IS DEPENDENT on the other.
+Trace_ProductHeaderView   ⚠ TWO DIVISIONS REMAIN. → JR20, and → S116.
+  ▶ intermediate_prd_su and SOH_su. ⚠ SOH_su IS DEPENDENT.
   ⚠⚠ TRAPS 10 LIVES HERE AND IT IS LIVE.
-Trace_ProductOneStepBackwardIP_SP  ⚠⚠ TWO DEFECTS. → S115.
-Trace_ProductOneStepForwardIP_SP · ...ReleaseDetails_SP  → S115.
+Trace_ProductOneStepBackwardIP_SP  ⚠⚠ TWO DEFECTS. → S116.
+Trace_ProductOneStepForwardIP_SP · ...ReleaseDetails_SP  → S116.
 WhC_GetMoProductReceivingDetails_SP  ✓ receiveproducts.qty. JR21.
 WhC_GetMoDetails_SP  ✓ formula_id__batch_qty. ⚠ THE ALIAS IS THE POINT.
 
@@ -331,38 +294,54 @@ WhC_GetMoDetails_SP  ✓ formula_id__batch_qty. ⚠ THE ALIAS IS THE POINT.
 
 ```
 BACKEND    ✓ NOTHING PENDING. 4d43bd4 on both boxes.
-FRONTEND   ✓ NOTHING PENDING. e1a82e02 on both boxes.
-DATABASE   ✓ Trace_MaterialDetails_SP ON BOTH BOXES.
-           ⚠⚠ THE COLUMN ALTER IS DEV-ONLY AND THAT IS DELIBERATE.
-             It lands on prod with the write path in S114.
+FRONTEND   ✓ NOTHING PENDING. 4910b46d on both boxes.
+DATABASE   ⚠⚠ THE COLUMN ALTER IS DEV-ONLY AND THAT IS DELIBERATE.
+             It lands on prod with the write path in S115.
              ▶ THIS IS NOT A PENDING PROMOTION. It is a sequenced gate.
-DOCS       ⚠ S113's OUTPUT PENDING COMMIT:
+DOCS       ⚠ S114's OUTPUT PENDING COMMIT:
              NOW.md · PLAN.md · UNITS-BIBLE.txt + .xlsx
-             Section_5.md — J123 and JR23 to merge.
+             Section_5.md — J124 to merge.
            ⚠⚠ WRITE THE GITHUB DOCS LINE FROM GITHUB AFTER THE PUSH.
 ```
 
 ---
 
-## ⚠⚠ RULINGS MADE IN S113 — RECORDED, NOT PENDING
+## ⚠⚠ RULINGS MADE IN S114 — RECORDED, NOT PENDING
 
 ```
-1  ✓✓ UNITS-BIBLE PART 1 MAY NOW BE EDITED BY CLAUDE, ON MINTY'S EXPRESS
-   PERMISSION SOUGHT EACH TIME. The default answer is still NO. This
-   AMENDS the standing rule that Claude never edits Part 1.
-   ▶ THE TWO S112 RULINGS WERE WRITTEN INTO PART 1 AT THIS CLOSE, as
-     sections 5 and 6, with Minty approving the exact wording first.
-2  ✓ THE MATERIAL TRACEABILITY MO ROW TAKES UNITS. It carries a
-   formula_id, therefore it is a PRODUCT row, therefore units# (Kg uom).
-   ▶ Minty's own discriminator, applied.
-3  ✓ THE DEAD MARKUP IS LOGGED, NOT DELETED. Deleting in the same commit
-   as a fix makes a large diff where a small one would do, and if
-   something regresses nobody can tell which half caused it. → P115.
-4  ✓ THE PROCEDURE WENT TO PROD IN-SESSION, before the frontend was
-   screen-proven. Additive, no deployed code read the new column, and
-   the method and anchors were fresh. ▶ S112's lesson 10, applied.
-5  ✓ MO-0006 WAS NOT SPENT. MO-0011 — released, received, complete —
-   served the start-mlc screen check at no cost.
+1  ⚠⚠ THE UNITS CAPTURE IS REDESIGNED. MINTY, S114, AND IT SUPERSEDES
+   PLAN's SEVEN-PIECE FRAMING AND P188 BOTH.
+     "If the operator types units and the Kg is derived, the screen is
+      unit-anchored and the Kg is a display."
+   ▶ THE REQUIREMENT IS COMPUTED IN UNITS — ship_qty × (MO ÷ batch) —
+     AND THE Kg IS DERIVED FROM IT BY MULTIPLYING BY wgt_kgs_per_unit.
+     NOT read from the stored qty column.
+   ▶ BOTH ARE STORED. NEITHER IS RECONSTRUCTED FROM THE OTHER.
+   ⚠⚠ THIS DISSOLVES P188. There is no units-minus-Kg subtraction left
+     to design around, because both sides become units.
+   ▶ AND IT REMOVES A SECOND STORED FIGURE FROM THE PATH — see the
+     schema note on subrecipeformulation.
+
+2  ⚠⚠ MINTY'S OWN FRAMING OF WHY, AND IT IS THE CLEAREST STATEMENT OF
+   THIS DEFECT ANYONE HAS MADE:
+     A PRODUCT LEAVING TO A CUSTOMER captures a unit count (the DO,
+     qtyWdu, fixed S109). THE SAME PRODUCT LEAVING INTO ANOTHER
+     PRODUCT'S RECIPE DOES NOT.
+   ▶ SAME SHELF, SAME GOODS, SAME PHYSICAL ACT. One path records what
+     happened; the other reconstructs it.
+   ▶ THEREFORE THE DISPATCH SCREEN IS THE TEMPLATE, NOT AN INVENTION.
+
+3  ✓ MO-0006 WAS SPENT DELIBERATELY, WITH A PREDICTION WRITTEN FIRST.
+   ⚠⚠ MO-0004 IS NOW THE LAST UNRELEASED INTERMEDIATE MO.
+
+4  ✓ THE INDICATOR FIX WENT TO PROD THE SAME NIGHT. Preventive, not
+   corrective — neither client has intermediates, so no client row can
+   reach the patched path. ▶ RECORDED AS PREVENTIVE.
+
+5  ⚠ THE BEFORE PICTURE IS PART OF THE PROOF. Minty rejected a pass
+   that could not have failed and asked for the old build to be
+   re-served. → LESSONS 1, and it should govern every future screen
+   check where only a COLOUR or a FORMAT moves.
 ```
 
 ---
@@ -372,12 +351,12 @@ DOCS       ⚠ S113's OUTPUT PENDING COMMIT:
 Ranking is Minty's.
 
 ```
-P8    Prod's frontend checkout lags the served build.
+P8    Prod's frontend checkout lags the served build. ⚠ IT READS 9bce0238.
 P17   Two old-account IAM keys still valid, deliberately.
 P20   Delete pre-S72 Section J file.  P22  Delete old Section A file.
 P62   qty_shipped must never be NULL. ⚠ MEASURED S100 — it never is.
 P64   Product label prints "null" for Ext ID twice, on prod. → P10.
-      ⚠ SEEN AGAIN S113 — every IP-0.37 row renders "FO-0004 null".
+      ⚠ SEEN AGAIN S114 — every IP-0.37 row renders "FO-0004 null".
 P65   promote.sh runs plain scp and ssh with no -4.
 P66   3B.4 rollback points stale. ▶ DELETE them.
 P84   Zebra guide into the app.  P85  Windows printer guide.
@@ -389,8 +368,7 @@ P100  Dev carries UNACCOUNTED COMPANIES. ⚠⚠ SUPERSEDED BY P156.
 P101  Both boxes carry a dormant `abletrace` archive, AND IT HOLDS ITS
       OWN COPIES OF THE STORED PROCEDURES. → record in 3B.
 P102  ⚠⚠ SECURITY. Both boxes report *** System restart required ***.
-      ✓ UNBLOCKED S112 — both boxes have an enabled pm2 unit.
-      ⚠ dev 12 updates. prod 46. ⚠⚠ NINETEEN DAYS. TWO CLIENTS ON PROD.
+      ⚠ dev 12 updates. prod 46. ⚠⚠ TWENTY DAYS. TWO CLIENTS ON PROD.
       ▶ OWN JOB, OWN GATE.
 P106  acrobatics-map-S91.txt — keep or delete.
 P108  Review the J-entries WITH MINTY. KEEP JR. Own sitting.
@@ -406,20 +384,18 @@ P115  DELETE THE DEAD CODE SIBLINGS.
         edit-mlc.component.ts:311 lotReceived consumer — commented out
         edit-mlc.component.ts:227 formulaList.push(data3) — commented out
         MaterialsProductsReleased.js:52 createReleaseMaterialProducts
-      ⚠⚠ NEW S113, ALL IN material-traceability-details:
-        html:113-125  a whole commented-out <tr> block
-        html:191-216  a LIVE mat-card iterating newList — and every
-                      write to newList in the .ts is commented out, so
-                      it can never render. ⚠⚠ THE MORE DANGEROUS OF THE
-                      TWO: it LOOKS live and PLAN sent us to patch it.
-        Traceability.js — @returnedQty and @mprIDs inside
-                      Trace_MaterialDetails_SP, computed, never used.
+        material-traceability-details html:113-125 and html:191-216
+        Traceability.js — @returnedQty and @mprIDs, computed, never used
+      ⚠⚠ NEW S114: MaterialsProductsReleased.js :83-98 — the OLD
+        single-release function, same shape as the live V2 loop,
+        inventory only, no units. ⚠ IT MUST NOT BE MISTAKEN FOR THE
+        LIVE PATH IN S115. The live one is the block from :179 down.
 P116  Fix the JSON file-list reads properly.
 P117  File too large must say so.
 P118  MARK THE DELIBERATE CODE IN THE CODE.
-      ✓ PAID FOR ITSELF A SEVENTH TIME IN S113 — the S110/S111/S112
-        comments above :1156 made the basis question obvious again, and
-        S113 added one explaining why qty is not divided.
+      ✓ PAID FOR ITSELF AN EIGHTH TIME IN S114 — the comment at
+        Formulations.js:1159 CALLS ITSELF A STOPGAP, which is what told
+        us the S112 workaround was the thing Minty's design removes.
 P119  Back up the database's own code into the repo. ⚠ STALE ON NINE.
 P120  Material label barcode needs the product-label fix.
 P121  Say what the "java" process is, in the client guide.
@@ -431,10 +407,8 @@ P131  EDIT CLOSED MO LINE 133 — unit count with a WEIGHT label.
 P132  THREE DEAD STATUS COLUMNS ON THE SO TABLES.
 P133  do_status NEVER ADVANCES. ⚠ TRAPS 8 RETAINED UNTIL FIXED.
 P134  THREE DATABASES ON DEV AND THE NAMES ARE BACKWARDS.
-      ⚠⚠ NAME THE SCHEMA in every information_schema query too.
-P135  ⚠ TWO CELLS LEFT OF SIX. ▶ intermediate_prd_su and SOH_su. → S115.
+P135  ⚠ TWO CELLS LEFT OF SIX. ▶ intermediate_prd_su and SOH_su. → S116.
 P136  Trace_ProductHeaderView RETURNS DUPLICATE ROWS.
-      ⚠ THE SAME SHAPE EXISTS IN Trace_MaterialDetails_SP's final SELECT.
 P137  MR NUMBERING IS GLOBAL, NOT PER-COMPANY. ⚠ ASK MINTY FIRST.
 P138  soproducts STORES NO UNIT COUNT — Kg only, no company_id.
 P139  add-mlo:150 AND :228 LOOK LIKE DEFECTS AND ARE NOT.
@@ -449,110 +423,115 @@ P155  A Mac push does not update prod's origin until something fetches.
 P156  ⚠⚠ HAGENSBORG IS A SECOND LIVE CLIENT, AND THE TWO BOXES DO NOT
       SHARE A COMPANY-ID NAMESPACE.
 P158  ⚠⚠ Trace_ProductOneStepBackwardIP_SP — DIVIDES, AND joins
-      fopackaging with NO whd_flag filter. → S115.
-P159  ⚠ Trace_ProductOneStepForwardIP_SP — divides qty_allocated. → S115.
-P163  ⚠⚠ THE PRODUCT-RETURN LOT PICKER IS EMPTY. ▶ STEP 6.
+      fopackaging with NO whd_flag filter. → S116.
+P159  ⚠ Trace_ProductOneStepForwardIP_SP — divides qty_allocated. → S116.
+P163  ⚠⚠ THE PRODUCT-RETURN LOT PICKER IS EMPTY. ▶ THE RETURN PATH.
 P164  ⚠⚠ Formulations.js ADDS RETURNS INTO THE RELEASED TOTAL. THE SIGN
       IS INVERTED. ⚠⚠ LIVE ON BOTH CLIENTS.
-      ✓✓ CONFIRMED FROM BOTH SIDES IN S113. All three branches of
-        Formulations.js (:1103 :1136 :1188 regions) declare returnSum,
-        never assign it, and add the return into `sum`. MLOManagement.js
-        at :1112 DOES assign returnSum. ▶ THE PROOF THAT ONE FILE IS
-        WRONG IS SITTING IN THE OTHER FILE.
-      ▶ STEP 6, and Minty ruled it LAST.
-P165  ⚠ ReturnMaterialProduct.js — TWO DEFECTS. ▶ STEP 6.
+      ✓✓ RE-CONFIRMED S114 BY GREP: :1099 :1132 :1186 declare returnSum
+        and NOTHING assigns it; :1125 :1161 :1206 write it out as 0.
+        MLOManagement.js:1112 DOES assign it.
+      ▶ THE RETURN PATH, and Minty ruled it LAST.
+P165  ⚠ ReturnMaterialProduct.js — TWO DEFECTS. ▶ THE RETURN PATH.
 P166  ⚠ do-details.component.ts:30,54 — a field NAMED ship_qty holds Kg.
 P167  ⚠⚠ THE SEVEN-COPY MO QUANTITY HELPER. ▶ OWN SITTING.
-P168  ⚠⚠ ONLY ONE RETURN PER MATERIAL IS COUNTED. ▶ STEP 6. HIGH.
+P168  ⚠⚠ ONLY ONE RETURN PER MATERIAL IS COUNTED. ▶ RETURN PATH. HIGH.
 P169  ⚠ THE STOCK POPUP'S MO CARD TRANSPOSES ITS LABELS. ▶ ROW 48.
 P170  ⚠⚠ PRE-JR15 PRODUCT MR ROWS READ LOW IN THE VIEW. ▶ MINTY'S CALL.
 P171  ⚠ TWO QUANTITY TABLES HOLD DATA AND APPEAR IN NO MAP.
 P172  ⚠ receiveproducts.internalCode IS NOT UNIQUE PER RECEIPT. LOW.
-      ⚠ SEEN LIVE S113 on the release screen — two lot lines read
-        "Pdt-260808-1 ( Rec-260809-1 = ... )" identically, separable
-        only by their quantities.
 P173  ⚠ THE INTERMEDIATE PRODUCTS BLOCK RENDERS A NAMELESS 0.000 ROW. LOW.
 P174  ⚠ edit-mlc.component.ts:372 WRITES A FORM CONTROL BACK INTO
       mlcDetails.batches. ⚠ STILL NOT INVESTIGATED.
 P175  ⚠ getFormulaByIdForReleaseMaterial :1092 gates on
       `typeof x != undefined`. A gate that cannot fail. LOW.
 P176  ⚠ THE DEPLOY PROCEDURE IS NOT FULLY WRITTEN DOWN. `unzip` is absent
-      from both boxes; S113 used the python3 one-liner twice more.
-      ▶ RECORD IT IN 3B.4. MEDIUM.
-P178  ⚠⚠ COUNTED AT THE S113 CLOSE, AND BOTH FIGURES WERE
-      UNDERSTATED: PROD CARRIES 24 dist-prod-* FOLDERS AND DEV CARRIES
-      41, back to fa980dfd. NOW had said sixteen and "dev similar",
-      measured at S111.
-      ⚠ DEV ALSO CARRIES SIX www-html.bak-dev-* backups where the
-        rollback line implies two.
-      ▶ THIS NEEDS A RETENTION RULE, NOT AN AD-HOC SWEEP. Deleting 65
-        folders on a judgement call at the end of a session is how a
-        rollback goes missing. MINTY RULES THE RULE.
-      ▶ DECIDE A RETENTION RULE — keep the last three. LOW.
+      from both boxes; S114 used the python3 one-liner twice more.
+      ⚠⚠ AND S114 ADDS THE MISSING HALF: THE PROOF OF A DEPLOY IS
+        `diff -r <artifact-dir> /var/www/html` RETURNING NOTHING.
+        NOT the bundle filenames — those differ between dev and prod
+        builds of the SAME COMMIT. ▶ RECORD BOTH IN 3B.4. MEDIUM.
+P178  ⚠⚠ RE-COUNTED AT THE S114 CLOSE AND BOTH FIGURES GREW AGAIN:
+      DEV 50 dist-dev-* FOLDERS (was 41 at S113). PROD 26 (was 24).
+      ⚠ NINE ADDED ON DEV IN ONE DAY.
+      ✓ /tmp/*.js IS NOW ZERO ON BOTH BOXES — somebody tidied and did
+        not record it. ⚠ THIRD TIME A TIDY LIST WAS COPIED FORWARD
+        RATHER THAN READ.
+      ▶ PROPOSED RULE, AWAITING MINTY: KEEP THE LAST THREE GENERATIONS
+        OF dist-* AND www-html.bak-*, DELETE THE REST, EXECUTED AT
+        EVERY CLOSE. ⚠ A RULE SOMEBODY CAN APPLY WITHOUT JUDGEMENT.
+        MINTY RULES THE NUMBER.
 P179  ⚠ start-mlc.component.html:198 READS `formulations_myCodee` —
       THREE E's. Renders blank, silently. One-character fix. LOW.
-      ⚠ DID NOT FIRE ON MO-0011's SCREEN CHECK. Still open.
-P180  ⚠ THE BUILD WORKFLOW WARNS Node.js 20 is deprecated and forced
-      onto Node.js 24. ▶ Update the action versions. LOW.
+P180  ⚠ THE BUILD WORKFLOW WARNS Node.js 20 is deprecated. LOW.
 P182  ⚠ THREE MORE INTERMEDIATE CONTROLS IN NO DOCUMENT. MEDIUM.
 P184  ⚠⚠ THE RELEASE WRITE PATH DERIVES UNITS FROM A WEIGHT AND
       SUBTRACTS THEM FROM THE CORE STOCK LINE.
-        _ratio = _lot.qty / _lot.recieved_qty        units per Kg
-        inventory_units −= Number(qty_allocated) × _ratio
-      ⚠ IT WEARS A MULTIPLICATION AND IS ALGEBRAICALLY A DIVISION.
-      ⚠⚠ THIS IS A WRITE, NOT A DISPLAY. A wrong number here is STORED.
-      ✓ ARITHMETICALLY CORRECT TODAY. NO CLIENT HAS EVER RELEASED AN
-        INTERMEDIATE, so nothing wrong has been banked.
-      ▶ CLOSES AS PART OF S114. HIGH.
-P185  ⚠ eval() IS USED TO SUM QUANTITIES ON THE RELEASE SCREEN —
-      release-mat-details.component.ts :322, :439, :456.
-      ▶ REPLACE WITH reduce IN THE SAME PASS AS S114. MEDIUM.
-```
-
-### NEW IN S113
-
-```
-P188  ⚠⚠ AFTER THE UNITS CAPTURE, released_qty WILL STILL BE KILOGRAMS
-      WHILE final_qty IS A UNIT COUNT — THE EXACT BASIS MISMATCH THAT
-      CAUSED THE S112 REGRESSION.
-      release-mat-details.component.ts:296
-        remainToFill = final_qty − released_qty
-      released_qty is built by summing mprrecievelots.qty_allocated,
-      which STAYS Kg by design (six read sites depend on it).
-      ▶ SO remainToFill CANNOT SIMPLY GO BACK TO final_qty IN S114.
-        EITHER the backend serves a released_qty_units alongside, OR
-        final_qty_kg stays and the screen remains Kg-anchored on that
-        one subtraction.
-      ⚠⚠ THIS IS AN EIGHTH PIECE IN WHAT PLAN SCOPED AS A SEVEN-PIECE
-        JOB, AND IT IS WHY S114 WAS NOT STARTED IN S113. → S114.
-
+      ✓✓ NO LONGER A CLAIM. MEASURED IN S114 — 42.15405405405406
+        STORED WHERE 42.154 IS TRUE. → the measurement block above.
+      ⚠ THE WRONG VALUE IS STILL IN THE ROW ON DEV, DELIBERATELY.
+      ▶ CLOSES AS PART OF S115. HIGH.
+P185  ⚠ eval() IS USED TO SUM QUANTITIES ON THE RELEASE SCREEN.
+      ⚠⚠ IT IS FIVE SITES, NOT THREE — :239 :322 :399 :439 :456.
+      MEASURED S114. ▶ REPLACE WITH reduce IN THE SAME PASS. MEDIUM.
+P188  ⚠⚠ DISSOLVED BY MINTY'S S114 DESIGN. If the screen is
+      unit-anchored, remainToFill is units minus units and there is no
+      basis mismatch to design around. ▶ CLOSES WITH S115.
 P189  ⚠ MLOManagement.js :1097 AND :1102 SUM THE SAME MATERIAL TWICE
-      UNDER DIFFERENT GUARDS — one gates on item.qty, the other on
-      item.quantity, and both add data.qty_allocated for the same
-      material_id match.
-      ⚠ IF A ROW EVER CARRIED BOTH PROPERTIES IT WOULD DOUBLE-COUNT.
-      ⚠ NOT INVESTIGATED. Whether any row carries both is UNKNOWN.
-      ▶ One query settles it. LOW until then.
-
-P190  ⚠ material-traceability-details.component.ts:171
-        element.releasedQty = (element.qty_allocated - element.qty_returned)
-      BOTH ARE VARCHAR STRINGS from the temp table. Subtraction coerces,
-      so it works. ⚠ A "+" THERE WOULD SILENTLY CONCATENATE.
-      ▶ Wrap in Number() when that file is next opened. LOW.
+      UNDER DIFFERENT GUARDS. ⚠ NOT INVESTIGATED. LOW.
+P190  ⚠ material-traceability-details.component.ts:171 subtracts two
+      VARCHAR strings. Works by coercion. LOW.
 ```
 
-### ✓ CLOSED IN S113 — DELETE THESE LINES AT S114 CLOSE
+### NEW IN S114
 
 ```
-P181  ✓ start-mlc SCREEN-PROVEN on 474 MO-0011. Four patches, first look.
-P186  ✓ THE WRONG NUMBER ON MATERIAL TRACEABILITY. Both boxes, both
-      screens. ⚠⚠ THE ONLY WRONG NUMBER IN THE QUEUE, AND IT IS GONE.
-P187  ✓ absorbed — the IP2/P2/IP3 fixture is recorded under FIXTURES.
-P177 · P183   ✓ closed in S112, still listed.
-P160 · P162   ✓ closed in S111, still listed.
-P151 · P157   ✓ closed in S110, still listed.
-P147 · P161   ✓ closed in S109, still listed.
-P104 · P150   ✓ closed in S108, still listed.
+P191  ⚠⚠ THE RELEASE SCREEN HAS A LOT-CODE SCANNER AND IT IS IN NO
+      DOCUMENT. release-mat-details.component.ts:591 scanLotCode, with
+      a "Scan lot code…" input rendered above every material block.
+      ✓ IT IS MATERIALS-ONLY — it reads this.matList[materialIndex]
+        directly and guards on recLotList, so it can never see a
+        product line. THAT IS WHY ITS final_qty − released_qty AT :599
+        IS CORRECT: Kg minus Kg.
+      ⚠ Claude flagged it as a fourth basis-mismatch site and WITHDREW
+        the alarm on reading it. Recorded so nobody re-raises it.
+      ▶ BUT IT IS A REAL FEATURE IN NO MAP. → its own sitting.
+
+P192  ⚠ final_qty IS ALSO BUILT IN THE FRONTEND, FROM `batches`.
+      release-mat-details.component.ts :1071 :1083 :1095
+        Number(x.qty * this.mlcDetails.batches) + ...
+      ⚠⚠ THE STORED ROUNDED COLUMN RULES 7 FORBIDS. The BACKEND was
+        fixed in S110 to scale by getFactor(); this screen computes its
+        own on some path.
+      ⚠ WHICH PATH, AND WHETHER IT EVER WINS, IS UNKNOWN.
+      ▶ READ BEFORE S115 TOUCHES final_qty. MEDIUM.
+
+P193  ⚠ released_qty IS ACCUMULATED IN THE FRONTEND AFTER EACH RELEASE.
+      release-mat-details.component.ts :683 material · :775 pack ·
+      :866 product —  released_qty = released_qty + response.qty
+      ⚠⚠ ONCE THE TYPED FIGURE IS A UNIT COUNT, :866 ADDS UNITS INTO A
+        Kg RUNNING TOTAL. ▶ IT IS PART OF S115, NOT A SEPARATE JOB.
+
+P194  ⚠ THE oldRecProducts BLOCK ON THE RELEASE SCREEN RENDERS PRIOR
+      ALLOCATIONS FROM qty_allocated — KILOGRAMS — read-only.
+      release-mat-details.component.html :129-136
+      ⚠ A FOURTH DISPLAY SITE ON THAT SCREEN, IN NO DOCUMENT.
+      ▶ IT SHOULD SHOW units# (Kg) ONCE THE COLUMN IS POPULATED. LOW.
+
+P195  ⚠ THE PER-LOT ERROR MESSAGE READS remaining_qty IN Kg —
+      html:155. Once the box holds units, the message contradicts the
+      box above it. ▶ RIDES WITH S115.
+```
+
+### ✓ CLOSED IN S114 — DELETE THESE LINES AT S115 CLOSE
+
+```
+P186 · P187 · P181   ✓ closed in S113, still listed.
+P177 · P183          ✓ closed in S112, still listed.
+P160 · P162          ✓ closed in S111, still listed.
+P151 · P157          ✓ closed in S110, still listed.
+P147 · P161          ✓ closed in S109, still listed.
+P104 · P150          ✓ closed in S108, still listed.
 ```
 
 ---
@@ -560,124 +539,93 @@ P104 · P150   ✓ closed in S108, still listed.
 ## TIDY AT THE NEXT CLOSE — NOT BEFORE
 
 ⚠⚠ READ THE DIRECTORY AT THE CLOSE. DO NOT COPY THIS LIST FORWARD.
-  ⚠ THIS LIST WAS READ OFF BOTH BOXES AND THE MAC AT THE S113 CLOSE.
+  ⚠⚠ THIS INSTRUCTION WAS AT THE TOP OF S113's LIST AND THE LIST
+    UNDERNEATH IT WAS STILL STALE. S114 FOUND SEVEN ZIPS ALREADY
+    DELETED AND FIFTEEN /tmp SCRIPTS ALREADY GONE.
+    ▶ THE WARNING WAS BEING COPIED FORWARD ALONG WITH THE THING IT
+      WARNS ABOUT. COUNT IT, DO NOT DESCRIBE IT.
 
 ```
-MAC    ~/Downloads — TWELVE dist zips at S113 close:
-         dist-dev-e1a82e02... · dist-prod-e1a82e02...  ⚠⚠ KEEP, LIVE
-         dist-dev-2968c591... · dist-prod-2968c591...  keep one generation
-         dist-dev-8bbf2c30... · dist-prod-8bbf2c30...  DELETE
-         dist-dev-e8e8f572... · dist-prod-e8e8f572...  DELETE
-         dist-dev-3b176720...                          DELETE
-         dist-prod-bc03b22d... (1).zip                 DELETE, a duplicate
-         dist-dev-bc03b22d... · dist-prod-bc03b22d...  DELETE
-       ⚠ ALSO: UNITS-BIBLE-S110-SUPERSEDED.xlsx, and the "(1)/(2)"
-         duplicate downloads of NOW / PLAN / UNITS-BIBLE / Section_5.
-       ⚠⚠ VERIFY BY STAMP, NEVER BY POSITION.
+COUNTED AT THE S114 CLOSE:
+  MAC    6 dist-*.zip in ~/Downloads
+  DEV    50 dist-dev-* folders · 0 /tmp/*.js
+  PROD   26 dist-prod-* folders · 0 /tmp/*.js
 
-DEV    ~/dist-dev-e1a82e02*                       keep, live
-       ~/dist-dev-2968c591*                       keep one generation
-       ~/www-html.bak-dev-e1a82e02*               ⚠⚠ KEEP — LIVE ROLLBACK
-       ~/www-html.bak-dev-2968c591*               keep one generation
-       ~/Trace_MaterialDetails_SP.bak-S113-DEV.txt  ⚠⚠ KEEP
-       ~/mprrecievelots-before-S112-DEV.sql       ⚠⚠ KEEP — THE ONLY
-                                                    COLUMN ROLLBACK
-       ~/*.bak-S111-DEV.txt                       ⚠⚠ KEEP BOTH
-       ~/fix-matdetails-S113.sql                  keep with its backup
-       /tmp/*.js  — FIFTEEN, back to S106         delete all
-         ⚠ INCLUDING /tmp/p1.js and /tmp/p2.js, which share names with
-           S113's Mac scripts and are NOT them. Same-named files on two
-           machines. → LESSONS.
+KEEP, WHATEVER THE RULE:
+  dist-dev-4910b46d* · www-html.bak-dev-4910b46d*      LIVE
+  dist-prod-4910b46d* · www-html.bak-prod-4910b46d*    LIVE
+  www-html.bak-{dev,prod}-e1a82e02*                    ROLLBACK
+  ~/mprrecievelots-before-S112-DEV.sql   ⚠⚠ THE ONLY COLUMN ROLLBACK
+  ALL *.bak-S106/S109/S110/S111/S113 DATABASE BACKUPS, BOTH BOXES
+  ~/mo-0001-before-heal-S93.txt on prod  → P94, decide separately
 
-PROD   ~/dist-prod-e1a82e02*                      keep, live
-       ~/www-html.bak-prod-e1a82e02*              ⚠⚠ KEEP — LIVE ROLLBACK
-       ~/www-html.bak-prod-2968c591*              keep one generation
-       ~/Trace_MaterialDetails_SP.bak-S113-PROD.txt  ⚠⚠ KEEP
-       ~/*.bak-S111-PROD.txt                      ⚠⚠ KEEP BOTH
-       ~/dist-prod-* — SIXTEEN OLD FOLDERS        → P178
-       ~/mo-0001-before-heal-S93.txt              → P94
-       /tmp/*.js — NINE                           delete all
-       ✓ /tmp/dump.cnf IS ABSENT. It was deleted at the S112 close.
-         ▶ COMES OFF THIS LIST.
-
-⚠ RULES 6: tidy at the close and ONLY at the close.
-⚠⚠ DO NOT DELETE THE S106, S109, S110, S111, S112 OR S113 BACKUPS.
+▶ THE RULE ITSELF IS P178 AND IT IS MINTY'S TO SET.
 ```
 
 ---
 
-## THE LESSONS S113 EARNED
+## THE LESSONS S114 EARNED
 
 ```
-1  ⚠⚠ THE DOCUMENT NAMED FOUR FIX SITES AND ALL FOUR WERE DEAD, WHILE
-   THE LINE IT SAID TO LEAVE ALONE WAS THE DEFECT. Two of the four sat
-   inside a commented block; the other two iterate an array that nothing
-   assigns — every write to newList in the .ts is commented out.
-   ▶ PATCHING BY THE DOCUMENT WOULD HAVE BUILT CLEAN, DEPLOYED CLEAN AND
-     CHANGED NOTHING, and the row would have been marked green.
-   ▶ AN ADDRESS IS A CLAIM, AND SO IS "LEAVE THIS ONE ALONE". Both were
-     wrong in the same entry. The addresses are corrected in the bible.
-   ⚠ THE ONLY REASON IT WAS CAUGHT: the file was read before it was
-     patched, and the loops were mapped before an anchor was written.
+1  ⚠⚠ A PASS THAT COULD NOT HAVE FAILED IS NOT A PASS, AND MINTY
+   CAUGHT IT. Claude called the indicator fix proven because the screen
+   read 1.793/1.793 GREEN. But the NUMBERS are identical before and
+   after — only the COLOUR moves — so that screen looks the same
+   whether the patch worked or not.
+   ▶ THE OLD BUILD WAS RE-SERVED FROM ITS ROLLBACK FOLDER AND THE SAME
+     SCREEN READ ORANGE. That is the proof.
+   ▶ WHEN A FIX CHANGES A COLOUR, A FORMAT OR A LABEL RATHER THAN A
+     NUMBER, THE BEFORE PICTURE IS NOT OPTIONAL. The rollback folder
+     makes it a two-minute operation.
+   ⚠ FIFTH MIS-SCOPED CHECK THIS CAMPAIGN.
 
-2  ⚠⚠ A LIVE *ngFor OVER AN EMPTY ARRAY IS MORE DANGEROUS THAN COMMENTED
-   CODE. The commented block announces itself. The mat-card at :191 is
-   real markup, in the rendered template, and it renders nothing forever
-   because newList is only ever assigned inside comments.
-   ▶ REACHABILITY IS ABOUT THE DATA, NOT ONLY THE MARKUP. Grep what
-     fills the collection, not just whether the loop exists. J86's
-     lesson, one layer deeper.
+2  ⚠⚠ TWO MORE CHECKS HAD WRONG EXPECTED VALUES WHILE BEING SOUND.
+   Claude predicted "+8 insertions" and got +7 — its own arithmetic.
+   Claude predicted prod's bundle filenames would match dev's and read
+   the difference as a FAILED DEPLOY.
+   ▶ SEVENTH AND EIGHTH INSTANCES. SAY WHAT A PASS IS *AND WHY*, AND
+     WHEN THE PREDICTION FAILS, SUSPECT THE PREDICTION FIRST.
+   ✓ THE REAL PROOF WAS `diff -r`, WHICH RETURNED NOTHING. → P176.
 
-3  ⚠⚠ A CHECK'S EXPECTED VALUE CAN BE WRONG WITHOUT THE CHECK BEING
-   WRONG. Claude predicted grep -c "received_units" would return 1
-   against SHOW CREATE, reasoning from JR18's note that a view is one
-   line. IT RETURNED 3 — SHOW CREATE PROCEDURE preserves newlines.
-   ▶ THE RIGHT ANSWER FOR THE RIGHT REASON, AND IT COULD HAVE BEEN READ
-     AS A FAILURE. Say what a pass looks like AND why, and re-derive it
-     when the object type changes. Fourth mis-scoped check this campaign.
+3  ⚠⚠ THE MEASUREMENT THAT MATTERED WAS FREE, AND IT WAS FOUND BY
+   COUNTING ROWS RATHER THAN ASSUMING THEM. mprrecievelots was 127, not
+   the 113 the documents carried — and two of the fourteen new rows
+   were PRODUCT releases Minty had made that afternoon. THE WRITE PATH
+   HAD ALREADY RUN, TWICE, AND ITS RESULT WAS SITTING IN A ROW.
+   ▶ BEFORE SPENDING A FIXTURE, ASK WHETHER THE EVIDENCE ALREADY EXISTS.
 
-4  ✓✓ THE PRECONDITION WAS A DOCUMENT CLAIM AND IS NOW A MEASUREMENT.
-   NOW said qty_allocated is read as Kg in six places. Nobody had read
-   them. All six were read in S113 and all six are `sum = sum +
-   qty_allocated` — no division anywhere.
-   ▶ S114's WRITE PATH IS UNOBSTRUCTED, AND THAT IS KNOWN RATHER THAN
-     ASSUMED. ⚠ It was worth ten minutes precisely because the same
-     document had just been wrong about four addresses.
+4  ⚠⚠ AND THOSE TWO FREE ROWS PROVED NOTHING, WHICH IS THE OTHER HALF.
+   IP2 and IP3 are 10 Kg per unit. Both reconciled perfectly. AT 10:1
+   THE DIVISION AND THE STORED READ ARE INDISTINGUISHABLE — TRAPS 9.
+   ▶ ONLY THE 0.37 FIXTURE COULD FAIL. IT WAS SPENT DELIBERATELY, WITH
+     THE PREDICTION WRITTEN BEFORE THE WRITE, AND IT FAILED EXACTLY AS
+     PREDICTED. THAT IS WHAT A FIXTURE IS FOR.
 
-5  ⚠⚠ READING THE PRECONDITION FOUND AN EIGHTH PIECE OF A SEVEN-PIECE
-   JOB. released_qty stays Kg while final_qty is units — the same basis
-   mismatch that turned the guard green on a 170% over-release in S112.
-   ▶ P188. And it is the reason S114 was deferred rather than started
-     late in a long session.
+5  ⚠⚠ THE DOMAIN EXPERT REDESIGNED THE JOB AND THE DESIGN IS BETTER.
+   Claude carried PLAN's seven-piece framing plus an eighth piece
+   (P188). Minty's question — "where does the Kg figure come from?" —
+   exposed that final_qty_kg is scaled from a SECOND STORED COLUMN, and
+   his answer removes it: compute in units, derive the Kg.
+   ▶ P188 DISSOLVES. Two figures that must agree become one and a
+     multiplication.
+   ⚠ THIRD TIME THIS CAMPAIGN THAT MINTY'S READING BEAT THE PLAN.
 
-6  ✓ THE PROCEDURE WENT TO PROD BEFORE THE SCREEN WAS PROVEN, AND THAT
-   WAS RIGHT. It is additive, no deployed code read the new column, and
-   the anchors were fresh. ▶ WHEN THE PIECES ARE IN HAND, FINISHING
-   COSTS LESS THAN RESUMING — S112's lesson 10, applied deliberately.
+6  ⚠ FOUR SITES ON ONE SCREEN WERE IN NO DOCUMENT — the scanner, the
+   frontend final_qty, the frontend released_qty accumulation, and the
+   oldRecProducts block. THREE WERE FOUND BY READING THE FILE, ONE BY
+   READING THE TEMPLATE.
+   ▶ P191-P195. ⚠ THEY ARE LISTED, NOT CHASED. That is the discipline
+     that stops a session digressing — and it is the answer to why five
+     sessions have each found something new.
 
-7  ⚠ A PATH WRITTEN FROM A DOCUMENT'S SHORTHAND WAS WRONG. PLAN names
-   the component file but not its directory; the details component sits
-   one level deeper than the obvious guess. `find` settled it in seconds.
-   ▶ NEVER TYPE A PATH FROM MEMORY OF WHAT A DOCUMENT IMPLIED.
+7  ⚠ "DONE" AND "DEPLOYED" CAME APART. The prod deploy was reported
+   complete and had not run — no zip on the box, no backup folder.
+   ▶ ONE COMMAND SETTLED IT: `ls -1dt www-html.bak-* | head -1`.
+   ⚠ AND THE TIDY WAS STOPPED BECAUSE OF IT. Deleting older builds
+     around a deploy that never happened is how a rollback goes missing.
+   ▶ VERIFY THE DEPLOY BEFORE TIDYING. ALWAYS THAT ORDER.
 
-8  ⚠ TRAPS 9 APPEARED THREE TIMES IN ONE SESSION AND EACH TIME IT
-   MATTERED. MO-0007 at 1 Kg/unit has qty, received_qty and
-   received_units ALL EQUAL TO 100 — it cannot move whatever the code
-   does, which is exactly what makes it the control and useless as
-   proof. Glutenull at 0.32 and 0.24 lands the old division exactly, so
-   the prod fix is invisible in the numbers. And wduRec changed basis
-   with no visible change at all.
-   ▶ ONLY MO-0010 AT 10:1 SHOWED THE FIX. Pick the fixture that can fail.
-
-9  ⚠⚠ EVERY COLUMN OF A TEMP TABLE HERE IS VARCHAR(100), SO NUMBERS
-   ARRIVE AS STRINGS. Multiplication coerces silently and works;
-   addition would concatenate silently and not. Number() went in for
-   that reason and the adjacent releasedQty line is still unguarded.
-   → P190.
-
-10 ⚠ SAME-NAMED SCRIPTS EXIST ON TWO MACHINES. /tmp/p1.js and /tmp/p2.js
-   are on DEV from an earlier session; tonight's p1.js and p2.js ran on
-   the MAC. Harmless this time — the diff proved which ran — but it is
-   the /tmp version of the frontend-repo-on-both-machines hazard.
-   ▶ THE DIFF IS THE PROOF, NOT THE FILENAME.
+8  ⚠ THE MAC IS NOT A LINUX BOX. `hostname -I` and `cat -A` both failed
+   on it in one session. Both loud. ▶ THE DANGEROUS ONE IS `sed -i`,
+   which exists on both and takes different arguments.
 ```
