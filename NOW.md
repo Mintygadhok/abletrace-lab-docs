@@ -81,7 +81,9 @@ GITHUB    frontend main = 4910b46d   ✓ BUILT AND DEPLOYED BOTH BOXES
                                      ⚠ dev by push (run #75), prod by
                                        MANUAL DISPATCH (run #76)
           backend  main = 4d43bd4    ✓ unchanged this session
-          docs     main = f7fad0b + S114's commit
+          docs     main = 7e519c4   ✓ READ OFF GITHUB AFTER THE PUSH
+            ⚠ S113 RECORDED f7fad0b AND THE REPO WAS AT 66d376d.
+              RULES 6 EXISTS FOR EXACTLY THIS.
           ⚠⚠ A BUNDLE FILENAME IS NOT A BUILD IDENTIFIER ACROSS BOXES.
             dev 4910b46d serves 1002.38fb2da9480a8597.js
             prod 4910b46d serves 1002.79e33c32f5de8852.js
