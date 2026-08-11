@@ -66,6 +66,28 @@ CHANGE LOG  S108 — created. Four sources ruled by Minty. 47 sites mapped.
               Kg derived. P188 DISSOLVES. → NOW, PLAN, J124.
               ✓✓ P184 MEASURED: 42.15405405405406 STORED WHERE 42.154
               IS TRUE. The first confirmed WRONG WRITE of this campaign.
+            S115, 11 August 2026 — ⚠ NO ROW MOVED, AND NONE WAS MEANT
+              TO. Groundwork, like S114.
+              ⚠⚠ A DOCUMENT CLAIM ABOUT THE PRESENCE OF SOMETHING WAS
+              DISPROVEN BY TWO GREPS. Four documents said the unit
+              weight was "in reach" in Formulations.js. The string does
+              not appear in that file at all. ▶ A SIXTH FAILURE MODE,
+              AND THE MAP DID NOT CAUSE IT — PLAN did. Recorded here
+              because the same habit produced the map's wrong addresses.
+              ✓✓ ROW 50 IS UNCHANGED AND STAYS GREEN. Its Kg figure now
+              arrives by a different route and the row's rule is
+              satisfied either way.
+              ⚠⚠ P196 RAISED — the MO detail screen's TWO intermediate
+              blocks now derive the Kg differently and disagree by
+              0.011 Kg. Display only, both of them. Minty ruled it waits
+              for the capture. → NOW's queue, and J125.
+              ✓ THE PROD COLUMN LANDED. mprrecievelots.qty_allocated_units
+              now exists on BOTH boxes, empty on all 137 dev and 68 prod
+              rows. Rows 37-41 remain blocked until the WRITE lands.
+              ✓✓ AND A FIXTURE THAT CAN FAIL NOW EXISTS. → PART 4.
+              ⚠⚠ MINTY'S RULING: THE CAMPAIGN STOPS AFTER S116's CLEAN
+              REDUCTION. Rows 37-41 are PARKED — display defects, not
+              wrong writes. 38 GREEN OF 51 IS A DELIBERATE STOP.
             S113, 10 August 2026 — ⚠⚠ TWO ROWS TO OK, AND THEY ARE THE
               ONLY WRONG NUMBER THIS CAMPAIGN EVER FOUND.
               row 45 → OK. Material traceability MO rows. Procedure
@@ -592,6 +614,57 @@ THE PROVING GROUND — company 474 on dev, built S108.
   matList loop DIRECTLY ABOVE the intermediate line, reading the SAME
   property name. Pouch sits directly below. ▶ WHEN A PATCH IS SCOPED TO
   A BLOCK, THE CONTROLS ARE THE LINES THAT BRACKET IT.
+
+THE IP4 / P4 SET — ⚠⚠ BUILT BY MINTY S115, AND IT IS THE FIRST FIXTURE
+THAT CAN DISTINGUISH A DERIVED Kg FROM A SCALED ONE.
+  IP4  FO-0010  batch_qty 17
+       Level 1 Pouch  0.29 Kg
+       Level 2 Carton 7 Pouch   → 2.03 Kg
+       Level 3 Case   11 Carton → 22.33 Kg   ⚠⚠ THE whd_flag ROW
+       Recipe: Ginger Powder 380 Kg
+       MO-0014, 41 cases, PRODUCED AND RECEIVED. 41 × 22.33 = 915.53.
+  P4   FO-0011  batch_qty 23
+       Level 1 Pouch  0.41 Kg
+       Level 2 Carton 5 Pouch   → 2.05 Kg
+       Level 3 Case   13 Carton → 26.65 Kg   ⚠⚠ THE whd_flag ROW
+       Recipe: Salt 500 Kg + IP4 5 UNITS
+       MO-0015, 9 cases, CREATED, NOT RELEASED.
+       ⚠⚠ MO-0015 IS THE GATE FOR THE UNITS CAPTURE. DO NOT RELEASE IT
+         UNTIL THE WRITE PATH IS BUILT.
+
+  ⚠⚠ WHY THREE PACK LEVELS, AND IT IS THE WHOLE POINT OF THIS FIXTURE.
+    IP-0.37 IS SINGLE-LEVEL, so its Level 1 row and its whd_flag row
+    ARE THE SAME ROW. Code that reads the wrong one is INVISIBLE on it.
+    IP4's are 0.29 and 22.33 — SEVENTY-SEVEN TIMES APART.
+    ▶ TRAPS 9 ONE LAYER UP: a round ratio hides a division; a
+      SINGLE-LEVEL PRODUCT HIDES A WRONG-ROW READ.
+
+  ⚠ 17, 23, 11, 13, 5 AND 7 ARE ALL PRIME OR COPRIME. 9 ÷ 23 =
+    0.391304347… Nearly any quantity produces a repeating decimal.
+
+  ✓✓ IT DISCRIMINATED ON ITS FIRST USE, S115:
+       NEW route  1.957 × 22.33   = 43.700
+       OLD route  111.65 × (9/23) = 43.689
+     ⚠ ELEVEN GRAMS, AND NO OTHER ROUTE PRODUCES 43.700. The parent's
+       weights are 0.41/2.05/26.65 and IP4's Level 1 is 0.29.
+  ⚠ THE CONTROL IS SALT — a Kg-anchored material bracketing the
+    intermediate line. 195.652 Kg, NO "#" anywhere. PART 1 SECTION 5.
+
+  ⚠ THE RECIPE HOLDS 5 UNITS OF IP4 WHERE THE SPEC ASKED FOR 4. LEFT
+    DELIBERATELY — editing it would FORK the formulation (J9b/J81) and
+    the test would then run on a forked recipe. 5 gives a wider
+    discriminator than 4 would have.
+
+⚠⚠ AND WHY THIS FIXTURE HAD TO BE BUILT AT ALL — MEASURED S115, AND IT
+  IS THE MOST USEFUL SINGLE QUERY OF THE SESSION:
+    EVERY intermediate row on dev has stored qty ÷ stored ship_qty
+    EXACTLY EQUAL to its packaging weight. EIGHTEEN ROWS, GAP ZERO.
+  ▶ SO ON ALL EXISTING DATA THE TWO ROUTES AGREE, AND NO EXISTING
+    SCREEN COULD HAVE TOLD THEM APART.
+  ⚠⚠ THE TWO STORED FIGURES AGREE BY CONVENTION, NOT BY CONSTRUCTION.
+    Nothing in the app enforces it. THAT IS WHAT MINTY'S S114 DESIGN
+    REMOVES, and it is why "they agree today" was never a reason to
+    leave it alone.
 
 THE IP2 / P2 / IP3 SET — ⚠ BUILT BY MINTY S112, TO THINK WITH.
   IP2  FO-0006-2  Salt 10 Kg/batch · 1 unit/batch

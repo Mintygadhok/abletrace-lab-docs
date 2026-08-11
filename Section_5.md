@@ -6,7 +6,7 @@ Structure (rebuilt S72): JT (traps) · JR (rebuild checklist) · J-ENTRIES.
 ⚠ J holds KNOWLEDGE, not work. Pending work lives in Section 1 (NOW).
 Original J-numbers are PERMANENT — never renumber, cross-refs depend on
 them. Append new entries at the bottom of J-ENTRIES with the next free
-number. Highest is J124 — ⚠ the next one is J125, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR23. Last appended: S114, Aug 10 2026.
+number. Highest is J125 — ⚠ the next one is J126, regardless of how many entries exist (there are original gaps at J8, J30–J31, J54–J59). Highest trap is JT27. Last restructured: S72, Jul 16 2026. Highest JR is JR23. Last appended: S115, Aug 11 2026.
 ⚠ J116 IS NOT A STANDALONE ENTRY. It was assigned inside JR15 and is easily
 missed by anyone scanning for J-headings. That is why this header said J115 for
 four sessions. S85 and S86 both asked for it to be corrected; S107 did it.
@@ -5862,3 +5862,317 @@ BLAST RADIUS: both boxes carry one frontend commit. No schema change,
 ========
 
 END S114 APPEND
+
+S115 - APPENDED 11 AUG 2026
+NUMBERING: highest existing entry is J124. This is J125. Highest JR is
+JR23 and S115 ADDS NO JR - the prod ALTER is the OTHER HALF of a column
+add already recorded, not a new object. It is recorded in this entry and
+in NOW's ROLLBACK block. No JT entry - TRAPS.md is the traps file.
+
+
+J125 - S115. THE UNIT WEIGHT WAS NOT WHERE FOUR SESSIONS OF DOCUMENTS
+SAID IT WAS. ONE BACKEND COMMIT, THE PROD COLUMN LANDED, AND A FIXTURE
+BUILT BECAUSE A QUERY PROVED NO EXISTING ONE COULD WORK.
+STATUS: CLOSED. Backend commit 2c2da8b, DEV ONLY. Prod schema altered.
+NO FRONTEND CHANGE. NO DATABASE OBJECT CHANGED.
+
+⚠⚠ THE OUTPUT IS NOT IN THIS ENTRY. The map is UNITS-BIBLE.txt/.xlsx.
+  38 green, 10 red, 3 review, of 51. ⚠ NO ROW MOVED AND NONE WAS MEANT
+  TO. S115 is groundwork, like S114 before it.
+
+WHAT SHIPPED
+  2c2da8b   Formulations.js, 1 file, +30 -2. final_qty_kg is DERIVED
+            from final_qty by multiplying by the intermediate's own
+            wgt_kgs_per_unit. ⚠ DEV ONLY, DELIBERATELY.
+  PROD      ALTER TABLE mprrecievelots ADD COLUMN qty_allocated_units
+            double DEFAULT 0;
+            ✓✓ THE ONE-COLUMN DIVERGENCE THAT HAD BEEN IN NOW SINCE
+              S112 IS CLOSED. Both boxes carry two columns.
+
+
+⚠⚠⚠ THE FINDING OF THE SESSION, AND IT IS ABOUT AN UNVERIFIED CLAIM
+THAT FOUR DOCUMENTS CARRIED AS A MEASUREMENT.
+
+  PLAN, NOW and the two-session brief all said the same thing about
+  the one number piece (a) needed:
+    "wgt_kgs_per_unit IS **NOT** IN SCOPE IN THAT LOOP. MEASURED S114 -
+     the block reads ship_qty, qty, batch_qty and the return sums, and
+     nothing else. > IT IS SERVED TO THE PACKAGING CASCADE FURTHER DOWN
+     THE SAME FUNCTION (:1201 region, fopackaging). IN REACH, NOT FREE."
+  THE FIRST HALF WAS RIGHT. THE SECOND HALF WAS WRONG.
+    grep -n -i "wgt" api/models/Formulations.js   -> ZERO HITS
+    grep -n -i "kgs" api/models/Formulations.js   -> ZERO HITS
+    grep -n "whd_flag" ...                        -> ONE HIT, COMMENTED
+  ⚠ THE PACKAGING CASCADE AT :1201 USES pack_level AND quantity AND NO
+    WEIGHT AT ALL. It multiplies a cascade count by mlcDetails.qty.
+  > THE CLAIM WAS WRITTEN FROM THE SHAPE OF THE CODE - there is a
+    packaging cascade, packaging carries weights, therefore the weight
+    must be there. IT COSTS ONE GREP TO CHECK AND NOBODY HAD.
+  ⚠ SIXTH MIS-SCOPED CLAIM THIS CAMPAIGN, and the first where the
+    documents asserted the PRESENCE of something absent rather than
+    naming a wrong address.
+
+⚠⚠ AND THE REASON IT IS ABSENT IS STRUCTURAL, NOT AN OVERSIGHT. All
+  three procedures at the head of getFormulaByIdForReleaseMaterial take
+  req.body.formula_id - THE MO's PRODUCT, THE PARENT:
+    :1082  WhC_GetFormulaMaterials
+    :1083  WhC_GetFormulaIntermediateProducts
+    :1084  WhC_GetFormulaPackagingMaterials
+  So findPackaging holds the PARENT's packaging. On 474 MO-0015 that is
+  P4's 0.41 / 2.05 / 26.65. THE INTERMEDIATE'S OWN 22.33 IS NOT IN THAT
+  SET AT ANY LEVEL AND CANNOT BE.
+  > THE FIX IS A SECOND CALL TO THE SAME PROCEDURE, ONCE PER
+    INTERMEDIATE, WITH THE INTERMEDIATE'S OWN formulation_id.
+
+THREE ROUTES WERE ON THE TABLE. MINTY RULED, AND THE RULING COST MONEY.
+  A  call WhC_GetFormulaPackagingMaterials per intermediate. CODE ONLY.
+  B  add a fopackaging join to WhC_GetFormulaIntermediateProducts.
+     ⚠ MEASURED: that proc has 0 hits for fopackaging and 3 joins. A
+       join would be the BIGGEST database edit of the campaign, and
+       without a whd_flag filter it multiplies one intermediate into
+       four rows - row 39's second defect, exactly.
+  C  MINTY'S OWN SUGGESTION: take the weight from the LOT.
+     15.17 Kg / 41 units = 0.37. IT WORKS. And from SOH:
+     15.597 / 42.154 = 0.37. THAT WORKS TOO.
+  ⚠⚠ C WAS KILLED BY MINTY HIMSELF, ON HIS OWN RULE: "the unit weight
+    we will pick up from formulation and nowhere else." PART 1 SECTION
+    2 SAYS THERE IS ONE PLACE A UNIT WEIGHT IS HELD.
+  > ROUTE A SHIPPED. ⚠ IT COSTS ONE EXTRA DATABASE CALL PER
+    INTERMEDIATE ON EVERY RELEASE-SCREEN LOAD - up to three today,
+    measured. ACCEPTED DELIBERATELY.
+  ⚠ A RULE THAT ONLY EVER AGREES WITH THE CHEAP ANSWER IS NOT DOING ANY
+    WORK. This one rejected two cheaper correct answers.
+
+THE CODE, AND THE TWO THINGS THAT WOULD HAVE BROKEN IT SILENTLY
+  let __ipWeights = {};
+  for (const __fo of data.formulations) { ... await ... }
+  ⚠ for...of AND NOT INSIDE .map(). An await inside .map() yields
+    PROMISES, NOT VALUES, and the map is synchronous.
+  ⚠⚠ THE LOOP VARIABLE IS __fo, NOT __f. __f IS THE SCALING FACTOR
+    DECLARED AT :1152 IN THE SAME FUNCTION. Shadowing it would have
+    corrupted every requirement figure on the screen, silently, in a
+    build that compiles clean.
+  ✓ AND THE FALLBACK IS THE OLD ROUTE, NOT A ZERO: an intermediate with
+    no whd_flag row keeps qty x __f rather than banking 0. TRAPS 3.
+  ⚠ MEASURED FIRST: ALL 13 INTERMEDIATES ON DEV HAVE EXACTLY ONE
+    whd_flag ROW. No zero, no two. The fallback is a guard, not a path.
+
+⚠⚠ NO EXISTING FIXTURE COULD HAVE PROVEN THE FIX, AND ONE QUERY SAID SO
+BEFORE ANYTHING WAS BUILT.
+  Every intermediate row on dev was compared - stored qty divided by
+  stored ship_qty, against the packaging weight:
+    18 ROWS. GAP ZERO ON EVERY ONE.
+  > SO THE OLD ROUTE AND THE NEW ROUTE PRODUCE IDENTICAL ANSWERS ON ALL
+    EXISTING DATA. The MO-0004 screen check confirmed nothing broke and
+    PROVED NOTHING ELSE - AND THAT WAS SAID OUT LOUD BEFORE IT WAS RUN,
+    which is S114's lesson applied rather than re-learned.
+  ⚠⚠ THE TWO STORED FIGURES AGREE BY CONVENTION, NOT BY CONSTRUCTION.
+    Nothing in the app enforces it. That is what Minty's design removes.
+
+THE FIXTURE, BUILT BY MINTY IN TEN MINUTES, AND IT NEEDED THREE PACK
+LEVELS
+  ⚠ IP-0.37 IS SINGLE-LEVEL, SO ITS LEVEL 1 ROW AND ITS whd_flag ROW
+    ARE THE SAME ROW. A wrong-row read is INVISIBLE on it.
+  IP4  FO-0010  batch_qty 17
+       Pouch 0.29 - Carton 7 Pouch 2.03 - Case 11 Carton 22.33 whd_flag
+       ⚠⚠ 22.33 IS 77x THE LEVEL 1 WEIGHT.
+       MO-0014, 41 cases, produced and received. 41 x 22.33 = 915.53
+       EXACTLY.
+  P4   FO-0011  batch_qty 23
+       Pouch 0.41 - Carton 5 Pouch 2.05 - Case 13 Carton 26.65 whd_flag
+       Recipe: Salt 500 Kg + IP4 5 UNITS
+       MO-0015, 9 cases, CREATED AND NOT RELEASED.
+  ⚠ THE SPEC ASKED FOR 4 UNITS OF IP4 AND MINTY ENTERED 5. LEFT
+    DELIBERATELY - changing it would FORK the formulation (J9b/J81) and
+    the test would run on a forked recipe. ✓ 5 GIVES A WIDER
+    DISCRIMINATOR. The fixture is BETTER as built.
+  ⚠ 17, 23, 11, 13, 5, 7 - ALL PRIME OR COPRIME.
+
+✓✓ THE PROOF, AND IT COULD HAVE FAILED. On 474 MO-0015, both blocks
+  visible on ONE PAGE, on BOTH /Edit-MLO and /Edit-Mlc after a refresh:
+      Intermediate Products   IP4  1.957# (43.689 Kg)   OLD ROUTE
+      Batch Materials         IP4  1.957# (43.700 Kg)   NEW ROUTE
+    NEW  1.957 x 22.33   = 43.700
+    OLD  111.65 x (9/23) = 43.689
+  > 43.700 CANNOT BE REACHED ANY OTHER WAY. The parent's weights are
+    0.41/2.05/26.65 and IP4's Level 1 is 0.29. Only IP4's whd_flag row
+    at 22.33 produces it. THE PATCH IS TAKING THE NEW PATH AND READING
+    THE RIGHT ROW.
+  ✓ CONTROLS HELD: Salt 195.652 Kg with NO "#" anywhere - materials are
+    Kg only, PART 1 SECTION 5. Pouch 585, Carton 117, Case 9, all from
+    the cascade, all unmoved.
+  ⚠⚠ AND THE SAME SCREEN IS P196 - see below. The proof and the new
+    defect are the same two lines.
+
+⚠⚠ PIECE (b) IS BLOCKED ON A PROCEDURE, AND THAT WAS MEASURED RATHER
+THAN ASSUMED.
+  WhC_GetMoMaterialProductReleaseDetails_SP
+    grep -o "qty_allocated" | wc -l  -> 1    THE KG COLUMN ONLY
+    grep -o "join" | wc -l           -> 8
+    CALL ...('11612')                -> qty_allocated_units ABSENT FROM
+                                        THE HEADER ROW
+  > SO A SUM OF qty_allocated_units IN Formulations.js WOULD READ
+    undefined AND BANK NaN, SILENTLY. TRAPS 3's shape.
+  ✓ THE EDIT IS THE EASIEST SHAPE THIS CAMPAIGN HAS SEEN: ONE SELECT,
+    ONE COLUMN PER LINE, `mprrecievelots` IS THE DRIVING TABLE SO THE
+    COLUMN IS ALREADY IN SCOPE. NO NEW JOIN. -> JR24, S116.
+  ⚠ SEVENTH INSTANCE OF "THE COLUMN EXISTS, THE JOIN EXISTS, IT IS
+    SIMPLY NOT IN THE SELECT LIST" - after JR16, JR17, JR20, JR21,
+    JR22, JR23.
+
+⚠⚠⚠ AND FINDING THAT EXPOSED AN ORDERING ERROR IN THE PLAN THAT WOULD
+HAVE BROKEN PROD.
+  PLAN listed the prod ALTER as step (h), LAST, "ITS OWN GATE, LAST".
+  BUT JR24 MAKES A PROCEDURE READ qty_allocated_units. A procedure that
+  references a column that does not exist is BROKEN THE MOMENT IT
+  LANDS. If the procedure had gone to prod before the ALTER, the
+  release-details read would have failed on a live client box.
+  > JR1 ALREADY SAYS THIS IN PLAIN WORDS: "Apply COLUMN adds (JR2, JR3,
+    JR4) - procs and views READ these; create them first or the routine
+    is built against a missing column."
+  ⚠⚠ THE RULE EXISTED, IN THIS FILE, AND THE PLAN CONTRADICTED IT FOR
+    THREE SESSIONS WITHOUT ANYONE NOTICING.
+
+✓✓ MINTY SPLIT THE SESSION AT EXACTLY THE RIGHT SEAM, AND CLAUDE HAD IT
+IN THE WRONG PLACE.
+  Claude recommended closing S115 with the ENTIRE database half undone,
+  treating "procedure rebuild + prod ALTER" as one block of risk.
+  MINTY: "will it not be better to do the column now and do the
+  finishing in next session."
+  > THE TWO OPERATIONS ARE NOT EQUALLY RISKY AND THAT IS THE WHOLE
+    POINT:
+      THE COLUMN IS INERT. Nothing reads it. No procedure selects it,
+        no code writes it, and the Waterline attribute has been
+        declared on both boxes since 9dac080. The app cannot behave
+        differently before and after.
+      THE PROCEDURE IS NOT INERT. A wrong procedure breaks a live
+        screen immediately.
+  > SPLIT BY RISK, NOT BY CATEGORY. And it closed a divergence that had
+    been carried in NOW for four sessions.
+
+THE ALTER, AND EVERY GATE PASSED
+  BACKUP FIRST, J43's method:
+    grep -v -i "database" ~/.my.cnf > /tmp/dump.cnf ; chmod 600
+    mysqldump --single-transaction --skip-lock-tables
+      --set-gtid-purged=OFF --no-data abletracelab_live mprrecievelots
+    -> ~/mprrecievelots-before-S115-PROD.sql
+  ✓ 2807 BYTES, grep -c "CREATE TABLE" = 1. ⚠⚠ THE CHECK IS NOT
+    CEREMONY - S112 wrote a 0-BYTE backup because mysqldump rejects the
+    ~/.my.cnf database= line WHILE THE SHELL'S REDIRECT CREATES THE
+    FILE ANYWAY. The check is the only thing that catches it.
+  BEFORE  68 rows - 63 material - 5 product - ONE column
+  AFTER   68 rows - 63 material - 5 product - TWO columns
+          null_units 0 - zero_units 68
+  ✓ IDENTICAL COUNTS. The default reached every row.
+  ✓ /tmp/dump.cnf REMOVED - IT HOLDS THE DATABASE PASSWORD.
+  ✓ pm2 RESTART COUNTER 343 BEFORE AND AFTER. An ALTER needs no
+    restart; a moved counter would have meant something else happened.
+  ✓ ALL FIVE PRODUCT ROWS ON PROD ARE ON SANDBOX 465. NO CLIENT HAS A
+    PRODUCT-SIDE ALLOCATION. Re-measured, not carried forward.
+
+⚠⚠ THE PATCH SCRIPT PUT ITS OWN BACKUP IN THE ONE DIRECTORY THE
+DOCUMENTS NAME AS DANGEROUS.
+  Formulations.js.bak-S115a-20260811-201821 was written INTO
+  api/models/. P153 and J32 both record that a .bak file inside a Sails
+  models directory is a live-code hazard - Sails loads that directory.
+  ⚠ The filename does not end .js so it was almost certainly ignored,
+    but "almost certainly" is not the standard for the directory that
+    boots the app.
+  ✓ CAUGHT ON READING THE SCRIPT'S OUTPUT, MOVED TO /home/ubuntu
+    IMMEDIATELY, and git status confirmed no untracked stray remained.
+  ⚠ THE ROLLBACK WAS GIT ANYWAY. The file backup was belt-and-braces
+    that INTRODUCED a hazard.
+  > THE RULE: PATCH SCRIPTS WRITE BACKUPS TO /home/ubuntu, NEVER
+    BESIDE THE FILE THEY PATCH.
+
+MEASUREMENTS TAKEN, ALL READ-ONLY
+  ALL 13 INTERMEDIATES ON DEV HAVE EXACTLY ONE whd_flag ROW. Twelve
+    have one packaging row; 3605 has three. No ambiguity anywhere.
+  ⚠⚠ ON A MULTI-LEVEL PRODUCT THE whd_flag ROW IS NOT LEVEL 1. P4's
+    Level 1 Pouch is 0.41 and its whd_flag Case is 26.65 - A FACTOR OF
+    65. PART 1 says Level 1 carries the base weight; NOW and PLAN say
+    the weight lives on the whd_flag row. BOTH ARE TRUE AND THEY ARE
+    DIFFERENT ROWS, and on every single-level product they coincide.
+    > READ whd_flag. ALWAYS. ⚠ Claude raised this as a contradiction
+      between two documents and WITHDREW IT on doing the arithmetic:
+      2303.910 / 23 = 100.17 = Parent-0.53's whd_flag Pallet. The
+      documents agree; only their wording differs.
+  mprrecievelots AT THE CLOSE: DEV 137 rows, 17 product. PROD 68 rows,
+    5 product. ⚠⚠ DEV WAS 127 AND 16 AT S114 - TEN ROWS ADDED TODAY BY
+    THE IP4 MO's OWN RELEASE. > RE-COUNT AT EVERY GATE.
+  ⚠ qty_allocated_units IS 0 ON EVERY ROW OF BOTH BOXES, INCLUDING THE
+    TEN ADDED TODAY. Its DEFAULT is 0 where qty_allocated's is NULL, so
+    AN OMITTED WRITE IS INDISTINGUISHABLE FROM A REAL ZERO.
+    ⚠⚠ ROW 84044 IS THE S114 DEFECT MADE VISIBLE: MPR 11611, formula
+      3696, qty_allocated 1.793, qty_allocated_units 0. The Kg was
+      banked and the count that belongs beside it never was.
+  ⚠ mlomanagement HAS NO MPR_id COLUMN. A query assumed it did and
+    errored. MPR_id reaches the frontend from WhC_GetMoDetails_SP,
+    aliased from elsewhere. > DO NOT SELECT IT FROM mlomanagement.
+  ⚠⚠ DEV'S /tmp HELD 57 PYTHON PATCH SCRIPTS GOING BACK TO S84. PROD
+    HELD ZERO. CLEARED AT THIS CLOSE.
+    ⚠⚠ S114's CLOSE RECORDED "/tmp/*.js IS NOW ZERO ON BOTH BOXES -
+      somebody tidied and did not record it". THE SCRIPTS ARE .py. We
+      have not written a .js patch since S97. THE COUNT MATCHED THE
+      WRONG PATTERN, in the same file whose own instruction is COUNT
+      IT, DO NOT DESCRIBE IT.
+    ⚠ RULES 5.2 says patch scripts are run from /tmp and DELETED. That
+      had not happened for thirty sessions. -> P197, closed same day.
+  DEV'S PENDING UPDATES WENT 12 -> 22, TEN OF THEM SECURITY. Prod 46,
+    twenty-one days. -> P102, and it is getting heavier.
+  dist FOLDER COUNTS DID NOT MOVE - dev 50, prod 26. No frontend build
+    ran this session.
+
+TWO FINDINGS RAISED, NEITHER CHASED - MINTY'S ONE-JOB RULE HOLDING
+  P196  ⚠⚠ THE TWO INTERMEDIATE BLOCKS NOW DISAGREE BY 0.011 Kg.
+        Batch Materials reads 43.700 (fixed by S115a); Intermediate
+        Products reads 43.689 (MLOManagement.js:393 via
+        WhC_GetMoIntermediateProducts_SP, still scaling
+        subrecipeformulation.qty).
+        ⚠ IT IS ROW 49's SHAPE REPEATING - the same figure rendered
+          twice, two blocks apart, disagreeing. A client can act on a
+          wrong number; nobody can act on two that disagree.
+        ✓ BOTH ARE DISPLAY. NEITHER IS STORED. NEITHER FEEDS THE WRITE.
+        ✓ MINTY'S RULING: "this is a display figure and can be fixed
+          after you complete what you have in plan."
+  P197  the 57 patch scripts. CLOSED at the same close.
+
+⚠ TWO SCREENS WERE READ AS THE WRONG SCREEN BEFORE THE RIGHT ONE WAS
+  FOUND. MO-0014 is the IP4 MO and carries no intermediates of its own,
+  so its Intermediate Products block renders the nameless 0.000 row -
+  P173, expected. MO-0015 is the P4 MO and sits on PAGE TWO of a
+  ten-row list.
+  > NAME THE MO NUMBER AND THE PAGE. A screenshot of the wrong screen
+    cannot fail the check either.
+
+⚠⚠ AND MINTY ASKED WHY THE CAMPAIGN FELT ENDLESS. HE WAS RIGHT TO.
+  Two sessions in a row moved no row. The answer was not to defend the
+  rate but to FIND THE STOPPING POINT.
+  > MINTY'S RULING, S115: S116 lands the CLEAN REDUCTION - release in
+    units so stock falls by exactly the count typed, no float tail -
+    AND THE UNITS CAMPAIGN STOPS THERE. Rows 37-41 are DISPLAY defects
+    and are PARKED behind the reboot, the return path and QuickBooks.
+  > THE PRINCIPLE: S116 stops a WRONG VALUE BEING WRITTEN. Rows 37-41
+    fix numbers being SHOWN. A wrong write compounds forever; a wrong
+    display is fixable any afternoon.
+  ⚠ THE BOARD WILL READ 38 GREEN OF 51 AND THAT IS A DELIBERATE STOP,
+    NOT AN UNFINISHED ONE. The record must say so plainly.
+
+FIXTURE RESIDUE ⚠ DEV ONLY, KEEP ALL OF IT:
+  ✓✓ NEW: IP4 (FO-0010) and P4 (FO-0011) on company 474, with MO-0014
+    produced and received at 41 cases and MO-0015 CREATED AND
+    UNRELEASED at 9 cases. ⚠⚠ MO-0015 IS S116's GATE. DO NOT RELEASE IT
+    UNTIL THE CAPTURE IS BUILT.
+  ⚠⚠ 474 MO-0004 WAS NOT SPENT. Still the last unreleased intermediate
+    MO of the original set, still the S110 before picture.
+  formulations 3696 still carries 42.15405405405406, deliberately.
+  Everything else unchanged - MO-0005's two receipts, MR-0009, DO-0002,
+  the IP2/P2/IP3 set, 464's three returns.
+
+BLAST RADIUS: dev carries one backend commit. PROD CARRIES A SCHEMA
+  CHANGE AND NOTHING ELSE - no code, no procedure, no frontend. The
+  column is read by nothing and written by nothing on either box. NO
+  CLIENT FIGURE MOVED AND NO CLIENT FIGURE COULD HAVE.
+========
+
+END S115 APPEND
