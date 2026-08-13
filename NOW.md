@@ -99,3 +99,10 @@ P184 (write-path defect, fixed and healed S116) · P188 (settled by ruling S116)
 - **Return path goes last.** *(Minty, S112)*
 - **Materials are Kg only; anything carrying a formula_id carries units.** *(Minty, S112 — Bible Part 1 §5)*
 - **Traceability reports what was released at the time.** A screen re-casting history against the current formulation would be the defect. *(Minty, S112)*
+
+**At the S117 open, run these two greps on dev and paste the output** — cheaper than re-reading both files, and it re-measures the line numbers instead of trusting this document:
+
+    grep -n "_u = Math.round|qty_allocated_units|Math.max(0" api/models/MaterialsProductsReleased.js
+    grep -n "sumU|released_qty_units" api/models/Formulations.js
+
+(Use backslash-pipe between the terms — grep needs the escape.)
