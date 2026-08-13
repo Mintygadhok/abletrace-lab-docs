@@ -28,12 +28,21 @@ STATUS      ⚠ NOT EXHAUSTIVE, AND IT SAYS SO DELIBERATELY. S108's first
             ONE YET: A ROW CAN NAME FOUR FIX SITES THAT ARE ALL DEAD
             WHILE TELLING YOU TO LEAVE ALONE THE LINE THAT IS ACTUALLY
             BROKEN. → ROW 45's ENTRY, AND ITS CORRECTED ADDRESSES.
+            ⚠⚠ S116 FOUND A SEVENTH: A ROW CAN NAME FIVE SITES ON A
+            SCREEN THAT HAS TEN, AND THE FIVE IT MISSES CAN INCLUDE THE
+            DANGEROUS ONE. → ROW 50's ENTRY.
             ▶ THE MAP RECORDS SITES. IT DOES NOT RECORD CONSUMERS, AND
               IT DOES NOT KNOW WHICH SITES ARE REACHABLE.
 TWIN        UNITS-BIBLE.xlsx is the readable copy. THIS FILE IS THE ONE
             GIT CAN DIFF. If they disagree, this one is the record.
 
 CREATED     S108, 7 August 2026
+
+⚠⚠ THE CHANGE LOG BELOW WAS OUT OF SEQUENCE AND IS RE-ORDERED HERE.
+  S113's entry sat AFTER S115's for three sessions, having been appended
+  in the wrong place. NO WORDING WAS CHANGED — only the order. ▶ RECORDED
+  because a silent re-order is indistinguishable from a silent edit.
+
 CHANGE LOG  S108 — created. Four sources ruled by Minty. 47 sites mapped.
             S108 close — PART 2 pointers only: the four return-path
               rows now point at STEP 6, a SURVEY not a fix list.
@@ -56,6 +65,22 @@ CHANGE LOG  S108 — created. Four sources ruled by Minty. 47 sites mapped.
               ⚠⚠ TWO RULINGS BY MINTY, BOTH RESHAPING THE CAMPAIGN.
               ⚠ PART 1 UNTOUCHED BY CLAUDE — the rulings sat in this
               change log and in NOW awaiting placement.
+            S113, 10 August 2026 — ⚠⚠ TWO ROWS TO OK, AND THEY ARE THE
+              ONLY WRONG NUMBER THIS CAMPAIGN EVER FOUND.
+              row 45 → OK. Material traceability MO rows. Procedure
+                JR23 on both boxes plus frontend commit e1a82e02.
+                ⚠⚠ ITS FOUR RECORDED ADDRESSES WERE ALL DEAD AND THE
+                LINE IT SAID TO LEAVE ALONE WAS THE DEFECT. THE
+                ADDRESSES ARE CORRECTED IN ITS ENTRY BELOW.
+              row 51 → OK. Trace_MaterialDetails_SP now serves
+                mlomanagement.received_units. JR23.
+              ⚠⚠ FIRST CLIENT-VISIBLE CORRECTION OF THE CAMPAIGN.
+                Glutenull's MO rows read "1750 Kg (1750#)" that morning.
+              ✓✓ PART 1 EDITED FOR THE FIRST TIME, ON MINTY'S EXPRESS
+                PERMISSION, WORDING APPROVED IN ADVANCE. Sections 5 and
+                6 added — his two S112 rulings, finally placed where the
+                rules live. The CHANGES rule at the head of this file
+                was amended in the same breath.
             S114, 10 August 2026 — ⚠ NO ROW MOVED, AND NONE WAS
               MEANT TO. Row 50 CORRECTED — it was recorded green and was
               HALF green: its five addresses were all right, and
@@ -64,6 +89,7 @@ CHANGE LOG  S108 — created. Four sources ruled by Minty. 47 sites mapped.
               RECORDS SITES; IT DOES NOT RECORD WHAT THEY CALL.
               ⚠⚠ MINTY REDESIGNED THE UNITS CAPTURE — units computed,
               Kg derived. P188 DISSOLVES. → NOW, PLAN, J124.
+              ⚠⚠ THAT DESIGN WAS SUPERSEDED IN S116 AND NEVER BUILT.
               ✓✓ P184 MEASURED: 42.15405405405406 STORED WHERE 42.154
               IS TRUE. The first confirmed WRONG WRITE of this campaign.
             S115, 11 August 2026 — ⚠ NO ROW MOVED, AND NONE WAS MEANT
@@ -88,26 +114,56 @@ CHANGE LOG  S108 — created. Four sources ruled by Minty. 47 sites mapped.
               ⚠⚠ MINTY'S RULING: THE CAMPAIGN STOPS AFTER S116's CLEAN
               REDUCTION. Rows 37-41 are PARKED — display defects, not
               wrong writes. 38 GREEN OF 51 IS A DELIBERATE STOP.
-            S113, 10 August 2026 — ⚠⚠ TWO ROWS TO OK, AND THEY ARE THE
-              ONLY WRONG NUMBER THIS CAMPAIGN EVER FOUND.
-              row 45 → OK. Material traceability MO rows. Procedure
-                JR23 on both boxes plus frontend commit e1a82e02.
-                ⚠⚠ ITS FOUR RECORDED ADDRESSES WERE ALL DEAD AND THE
-                LINE IT SAID TO LEAVE ALONE WAS THE DEFECT. THE
-                ADDRESSES ARE CORRECTED IN ITS ENTRY BELOW.
-              row 51 → OK. Trace_MaterialDetails_SP now serves
-                mlomanagement.received_units. JR23.
-              ⚠⚠ FIRST CLIENT-VISIBLE CORRECTION OF THE CAMPAIGN.
-                Glutenull's MO rows read "1750 Kg (1750#)" that morning.
-              ✓✓ PART 1 EDITED FOR THE FIRST TIME, ON MINTY'S EXPRESS
-                PERMISSION, WORDING APPROVED IN ADVANCE. Sections 5 and
-                6 added — his two S112 rulings, finally placed where the
-                rules live. The CHANGES rule at the head of this file
-                was amended in the same breath.
+            S116, 12 August 2026 — ⚠ NO ROW MOVED, AND NONE WAS MEANT
+              TO. THIRD GROUNDWORK SESSION RUNNING, AND THE LAST ONE.
+              ✓✓ THE WRITE PATH IS CLOSED. P184 IS FIXED AND ITS STORED
+              RESIDUE IS HEALED — dev formulations 3696 went
+              42.15405405405406 → 42.154. That was the first and only
+              confirmed WRONG WRITE this campaign ever found.
+              ⚠⚠ AND IT CLOSED ON A DIFFERENT DESIGN FROM THE ONE PLAN
+              CARRIED. MINTY'S RULING, S116: THE OPERATOR KEEPS TYPING
+              KILOGRAMS. The unit count is DERIVED ONCE at the write,
+              rounded to three decimals, and that ONE figure is both
+              banked in the row and subtracted from stock, so the release
+              record and the balance cannot disagree.
+              ▶ THE FRONTEND WAS NEVER TOUCHED. No build ran. The ten
+                release-screen sites a unit-anchored input would have
+                required are OUT OF SCOPE, not outstanding.
+              ⚠⚠ THE COST WAS STATED BEFORE THE DECISION AND IS NOT
+              SOFTENED HERE: the count is a DERIVATION, not a record of
+              what was physically counted. PART 1's rule — units are
+              never worked out from weight — is now satisfied ONCE, at
+              one auditable site, instead of being scattered across five.
+              IT IS NOT ELIMINATED. ▶ A FUTURE READER MUST NOT READ
+              "the view returns zero divisions" AS "nothing divides".
+              ✓ MINTY'S SECOND RULING: a lot drawn down over several
+              releases can leave ~0.001 units of variance. ACCEPTED AND
+              NOT A DEFECT — warehouse SOH is reconciled against physical
+              count monthly and materials carry far larger inherent
+              variance. The cumulative derivation that removes it by
+              construction was offered, costed at two lines, and RULED
+              AGAINST. → J126, recorded so nobody re-derives it.
+              ✓✓ MINTY'S THIRD RULING, AND HE FOUND THE CASE CLAUDE HAD
+              ACCEPTED: the balance must never go negative, however
+              small. Math.max(0,...) on both branches. ⚠ SHIPPED, NEVER
+              EXERCISED — it cannot fire on correct data.
+              ✓ JR24 LANDED ON BOTH BOXES. WhC_GetMoMaterialProduct-
+              ReleaseDetails_SP now serves qty_allocated_units. COLUMN,
+              THEN ROUTINE, THEN CODE — JR1's order, which S115 found
+              the plan contradicting.
+              ✓✓ ROWS 37-41 ARE NO LONGER BLOCKED. The column is
+              populated for the first time in the app's life — row 84054
+              on dev, 1.957 units beside 43.700 Kg.
+              ⚠ P196 UNCHANGED AND RE-SEEN on 474 MO-0015, before and
+              after the release. Display only. Not a gate failure.
+              ⚠⚠ THE FIXTURE IS PARTLY SPENT. 474 MO-0015 was released
+              in full. → PART 4.
+              ⚠ AND THE PROOF EXERCISED ONE PATH OF FOUR. → PART 4.
 
 ══════════════════════════════════════════════════════════════════════
 PART 1 — THE RULE.  ⚠ MINTY'S RULINGS.
 ⚠⚠ EDITED ONLY ON MINTY'S EXPRESS PERMISSION, SOUGHT EACH TIME.
+⚠ UNTOUCHED IN S114, S115 AND S116.
 ══════════════════════════════════════════════════════════════════════
 
 EVERY UNIT FIGURE ON EVERY SCREEN COMES FROM ONE OF FOUR PLACES.
@@ -306,6 +362,8 @@ OK 18  Sales order product popup        products-for-sales-order.ts:43
 OK 19  Packaging cascade                Formulations.js:1201
        ⚠⚠ ADDRESS CORRECTED S111. It multiplies by mlcDetails.qty,
          NEVER by batches — which is WHY the Pouch control never moves.
+       ⚠⚠ ADDRESS DRIFTED AGAIN IN S116 — 2c2da8b inserted thirty lines
+         above it in S115. ▶ ANCHOR ON TEXT, NOT ON THE NUMBER.
        ✓ DO NOT TOUCH THIS LINE. It is the control.
 
 ✓WAS 21  MR product list + details      rejected-materials.html:63
@@ -323,7 +381,13 @@ OK 19  Packaging cascade                Formulations.js:1201
          pre-JR15 rows. ✓ NO CLIENT ROW MOVED. → P170.
 ✓S109 30  Dispatch order — WRITES units   add-dispatch-v2.ts:183,194
        ⚠⚠ IT WAS A ROUND-TRIP, AND THAT IS WORSE THAN A DIVISION.
-       ▶ THE PATTERN S114 MUST COPY. qtyWdu, typed, Kg derived.
+       ▶ THE PATTERN. qtyWdu, typed, Kg derived.
+       ⚠⚠ AND IT REMAINS THE ONLY PLACE IN THE APP WHERE AN OPERATOR
+         TYPES A UNIT COUNT FOR A PRODUCT LEAVING STOCK. THE RELEASE
+         SCREEN DOES NOT — MINTY'S S116 RULING KEEPS ITS INPUT IN Kg.
+         ▶ THAT ASYMMETRY IS NOW DELIBERATE, NOT AN OVERSIGHT. A product
+           leaving to a CUSTOMER has its count recorded; the same product
+           leaving into another product's RECIPE has its count derived.
 ✓S110 31  MO detail receiving panel   edit-mlc.html:258 + JR21
        ▶ PROVEN dev 474 MO-0005: two receipts, 5.000# and 8.000#.
 
@@ -338,13 +402,18 @@ OK 19  Packaging cascade                Formulations.js:1201
        Now reads formulations_inventory_units.
        ▶ PROVEN dev 474 MO-0004: 47.000 where it read 17.390 Kg.
        ✓✓ RE-PROVEN S113 on MO-0006 AND on start-mlc: 47.000# (17.390 Kg).
+       ✓✓ RE-PROVEN S116 ON 474 MO-0015, AND IT MOVED: 41.000# (915.530
+         Kg) → 39.043# (871.830 Kg) after the release. ⚠ THAT IS THE
+         FIRST TIME THIS CELL HAS BEEN WATCHED ACROSS A WRITE.
 
 ✓S111 34  MO detail Batch Materials     Formulations.js:1156
        Now scales Number(formulation.ship_qty || 0) by the live factor.
-       ⚠ P164's INVERTED SIGN SITS THREE LINES BELOW, at :1157.
+       ⚠ P164's INVERTED SIGN SITS THREE LINES BELOW.
          ✓✓ CONFIRMED FROM BOTH SIDES S113 — returnSum is declared and
          never assigned in ALL THREE branches of this file, while
          MLOManagement.js:1112 DOES assign it. NOT TOUCHED. STEP 6.
+       ✓ RE-READ IN FULL S116 while patching the same function. STILL
+         NOT TOUCHED. The return path goes LAST, by Minty's ruling.
 
 ✓S110 35  Ingredient requirement       Formulations.js:1123
        ✓ INGREDIENTS ARE Kg-ANCHORED BY RULE. DO NOT TOUCH.
@@ -462,6 +531,9 @@ OK 49  Batch Materials WH stock, intermediates
        ✓ PROVEN dev 474 MO-0004: both blocks read 47.000, with Ginger
          Powder and Pouch — the bracketing controls — unmoved.
        ✓✓ RE-PROVEN S113 ON MO-0006 AND ON start-mlc/MO-0011.
+       ✓✓ RE-PROVEN S116 ON 474 MO-0015 ACROSS A WRITE — both blocks
+         moved together from 41.000 to 39.043, and Salt above them moved
+         in Kg only. ▶ THE BRACKETING LINES WERE THE CONTROL AGAIN.
 
 OK 50  Release screen — the PRODUCT block
        release-mat-details.component.html :115 :125 :157 :158
@@ -493,15 +565,54 @@ OK 50  Release screen — the PRODUCT block
          FIRST "PROVEN". e1a82e02 was restored from its rollback folder
          and the same screen read ORANGE. ▶ SAME NUMBERS, DIFFERENT
          COLOUR, BOTH OBSERVED. THAT is the proof.
-       ⚠⚠ IT CHANGES AGAIN IN S115 and THE ROW STAYS GREEN THROUGH IT.
-       ⚠⚠ P188 IS DISSOLVED, NOT DEFERRED. Minty’s S114 design makes
-         the screen unit-anchored end to end, so remainToFill becomes
-         units minus units and there is no basis mismatch left to
-         design around.
+       ⚠⚠ IT CHANGED AGAIN IN S115 and THE ROW STAYS GREEN THROUGH IT.
+
+       ⚠⚠ AND IT CHANGED AGAIN IN S116 — BY NOT CHANGING.
+         MINTY'S RULING makes the release screen KG-ANCHORED BY DESIGN
+         rather than by accident: the operator types Kg, so final_qty_kg
+         STAYS, remainToFill at :296 remains Kg minus Kg, and
+         getStockStatus / setMainStatus keep the ?? fallback S114 gave
+         them. ALL OF IT IS CORRECT AS IT STANDS.
+       ▶ P188 IS SETTLED THE OTHER WAY — NOT dissolved by a unit-anchored
+         screen, but RESOLVED BY RULING. final_qty_kg is PERMANENT, not
+         a stopgap. ⚠ THE COMMENT AT ITS SITE STILL CALLS ITSELF A
+         STOPGAP AND SHOULD BE CORRECTED WHEN THAT FILE IS NEXT OPENED.
+         → P118.
+
+       ⚠⚠ AND S116's READING FOUND THAT THIS ROW NAMES FIVE SITES ON A
+         SCREEN THAT HAS TEN. THE FULL LIST, MEASURED:
+           html :115 the checkbox gate        :124 the header total
+                :145 THE LOT LINE             :156 the per-lot error
+                :159 the over-release message
+           ts   :296 remainToFill             :325 THE LOT CLAMP
+                :440 getStockStatus           :459 setMainStatus
+                :871 the accumulator
+         ⚠⚠ ts:325 IS THE DANGEROUS ONE AND IT IS IN NO ROW. The
+           auto-fill clamps against `item.remaining_qty`, which is
+           KILOGRAMS — computed at :286 from four Kg columns. Under a
+           unit-anchored input a nearly-exhausted lot would have filled
+           a units box with a Kg figure. IT ONLY FIRES NEAR EXHAUSTION,
+           SO A TEST ON A FULL LOT PASSES AND LOOKS FINE.
+         ✓ ALL TEN ARE CORRECT UNDER THE S116 RULING, because the input
+           stayed Kg. ▶ THEY ARE RECORDED SO THAT ANY FUTURE MOVE TO A
+           UNIT-ANCHORED SCREEN STARTS FROM TEN, NOT FIVE.
+
        ⚠ FOUR MORE SITES ON THIS SCREEN ARE IN NO ROW OF THIS MAP —
          P191 the lot scanner (materials only, CORRECT), P192 final_qty
-         rebuilt from `batches`, P193 the released_qty accumulator at
-         :866, P194 the oldRecProducts block. ▶ LISTED, NOT CHASED.
+         rebuilt from `batches`, P193 the released_qty accumulator,
+         P194 the oldRecProducts block.
+         ⚠⚠ ADDRESSES CORRECTED S116: P192 is :1076 :1088 :1100, NOT
+           :1071 :1083 :1095. P193 is :871, NOT :866. 2c2da8b's thirty
+           inserted lines moved them.
+         ✓ AND P192's REACHABILITY IS NOW MEASURED. Each of its three
+           sites sits in the ELSE of `if (!byId[key]) { byId[key] = data }
+           else { ...batches... }`. THE FIRST OCCURRENCE OF ANY
+           FORMULATION KEEPS THE BACKEND'S CORRECTLY-SCALED VALUE; the
+           batches arithmetic fires ONLY on a DUPLICATE row in one
+           result set. ▶ IT DOES NOT UNDERMINE THE UNIT BASIS. Still
+           wrong when it does fire.
+         ✓ P193, P194 AND P195 ARE CORRECT UNDER THE S116 RULING — they
+           handle Kg in a Kg-anchored screen. ARGUABLY CLOSED.
 
 ──── MISALIGNED — 10 ────────────────────────────────────────────────
 XX 20  Release screen Released Qty      Formulations.js :1108,:1141,:1189
@@ -509,6 +620,12 @@ XX 20  Release screen Released Qty      Formulations.js :1108,:1141,:1189
        ✓✓ CONFIRMED FROM BOTH SIDES S113. All three branches declare
          returnSum and never assign it. MLOManagement.js:1112 does.
        ▶ THE PROOF ONE FILE IS WRONG IS IN THE OTHER FILE.
+       ⚠ ADDRESSES DRIFTED S116 — the qty_allocated sums now sit at
+         :1121 :1154 :1218. ANCHOR ON TEXT.
+       ✓ S116 ADDED released_qty_units BESIDE released_qty IN THE
+         FORMULATION BRANCH, SUMMING ALLOCATIONS ONLY, NOT RETURNS.
+         ▶ SO THE UNITS SIDE IS ALREADY RIGHT WHEN THE RETURN PATH IS
+           EVENTUALLY FIXED. ⚠ IT IS CONSUMED BY NOTHING TODAY.
                                                 → STEP 6, RETURN PATH
 
 XX 25  MO list Completed Qty            mfg-lot-codes.html:69
@@ -520,9 +637,35 @@ XX 39  IP trace backward                Trace_ProductOneStepBackwardIP_SP
 XX 40  IP trace forward                 Trace_ProductOneStepForwardIP_SP
 XX 41  Release details screen           ...ReleaseDetails_SP
        All need mprrecievelots.qty_allocated_units.
-       ⚠⚠ THE COLUMN EXISTS ON DEV AND IS EMPTY. It cannot be populated
-         until the release screen captures a unit count. → S114, THEN
-         S115. A read repointed today would show 0.
+
+       ⚠⚠ UNBLOCKED S116. The column exists on BOTH boxes and is
+         POPULATED for the first time — dev row 84054, 1.957 units
+         beside 43.700 Kg, written by the S116 release path.
+       ⚠ EVERY OTHER PRODUCT ROW ON BOTH BOXES IS STILL 0. Repointing a
+         read today shows the true value on new rows and ZERO on all
+         history. THAT IS THE JR20 TRADE AND IT PRODUCED P170.
+         ▶ dev 18 product rows, ONE with a real value. prod 5, all
+           sandbox, all zero. THE EXPOSURE IS NIL NOW AND GROWS WITH
+           EVERY RELEASE — sooner is cheaper.
+       ⚠⚠ AND THE COUNT THEY WOULD READ IS DERIVED, NOT CAPTURED. Under
+         Minty's S116 ruling the operator types Kg and the count is
+         worked out once at the write. Repointing these five removes
+         FIVE live divisions and leaves ONE, banked and auditable.
+         ▶ THAT IS BETTER AND IT IS NOT THE SAME AS "nothing divides".
+           Record it that way when they move, or the map will overstate
+           what it has achieved.
+       ✓ ROW 41 IS THE CHEAPEST AND THE MOST VISIBLE. JR24 ALREADY
+         SERVES THE COLUMN TO THAT SCREEN. Seen on the S116 gate: the
+         release details line reads "43.700 Kg" ALONE while every other
+         IP4 figure on the page carries its count.
+       ⚠ ROW 39 HAS A SECOND DEFECT INDEPENDENT OF ALL THIS — it joins
+         fopackaging with NO whd_flag filter, so one intermediate can
+         multiply into four rows. → P158.
+       ⚠ ROW 38 IS SOH_su AND IT DOES NOT READ inventory_units — it
+         subtracts five Kg terms and divides. ▶ THE CLEAN 39.043 THE
+         S116 WRITE PATH PRODUCES DOES NOT REACH THAT SCREEN. Two stock
+         figures, one stored and one derived, able to disagree.
+
 XX 42  Return details screen            ...ReturnDetails_SP
 XX 43  Product return stock balance     ReturnMaterialProduct.js:68
                                                 → STEP 6, RETURN PATH
@@ -555,11 +698,21 @@ PART 3 — THE SCOREBOARD
              rescoped. NO ROW MOVED TO OK.      36     0    12      3
   S113       rows 45 and 51 — ⚠⚠ THE ONLY
              WRONG NUMBER IN THE QUEUE          38     0    10      3
+  S114       THE P184 MEASUREMENT. NO ROW
+             MOVED AND NONE WAS MEANT TO.       38     0    10      3
+  S115       THE PROD COLUMN AND THE DERIVED
+             Kg. NO ROW MOVED.                  38     0    10      3
+  S116       THE WRITE PATH. NO ROW MOVED.      38     0    10      3
+             ⚠⚠ IT CLOSES P184 AND UNBLOCKS FIVE. Nothing on any screen
+               changed for a client. A scoreboard reading "no progress"
+               would be as wrong as one crediting it with rows.
+             ▶ THE CAMPAIGN'S WRITE PATH IS NOW CLOSED. 38 GREEN OF 51
+               IS A DELIBERATE STOP, NOT AN UNFINISHED ONE.
 
   ▶ WHERE THE REMAINING 13 SIT
     rows 37-41   the read sites  ▶ P82's ARITHMETIC CLOSES           5
-                 ⚠⚠ BLOCKED ON THE UNITS CAPTURE. The column exists on
-                   dev and IS EMPTY. A repointed read would show 0.
+                 ✓✓ UNBLOCKED S116 — the column is populated.
+                 ⚠ ALL HISTORY STILL READS 0. The JR20 trade.
     rows 20/42/43  the return path  ⚠ MINTY'S RULING S112: LAST      3
     row 25       the seven-copy helper caller                        1
     row 48       the transposed labels                               1
@@ -567,42 +720,35 @@ PART 3 — THE SCOREBOARD
                                                                     ──
                                                                     13
 
-  AFTER    REMAINING WORK                   GREEN  PART  RED  REVIEW
-  S114     THE UNITS CAPTURE — MOVES NO ROW    38     0    10      3
-           ⚠⚠ IT UNBLOCKS FIVE. THAT IS ITS WHOLE VALUE, AND THE RECORD
-             MUST SAY SO. Nothing on any screen changes; a scoreboard
-             that reads "no progress" would be as wrong as one that
-             credited it with rows.
-  S115     rows 37-41  ▶ P82's ARITHMETIC
-           CLOSES · TRAPS 10 RETIRES           43     0     5      3
-  S116     rows 20/42/43, the return path      46     0     2      3
-  S117     rows 25 and 48, the tail            48     0     0      3
-                                               ▲ THE CEILING, OF 51
+⚠⚠ THE FORECAST ROWS THAT USED TO SIT HERE ARE STRUCK. They predicted
+  rows 37-41 closing in S115 and the return path in S116. NEITHER
+  HAPPENED, AND BOTH WERE RE-RANKED BY RULING RATHER THAN MISSED.
+  ▶ A SCOREBOARD THAT PREDICTS IS A SCOREBOARD THAT WILL BE WRONG.
+    THIS ONE RECORDS.
 
 ══════════════════════════════════════════════════════════════════════
 PART 4 — HOW TO PROVE A FIX
 ══════════════════════════════════════════════════════════════════════
 
 THE PROVING GROUND — company 474 on dev, built S108.
-  IP-0.37      FO-0004  0.37 Kg/unit   19 units per batch  inv_units 47
+  IP-0.37      FO-0004  0.37 Kg/unit   19 units per batch
+               ⚠ inv_units WAS 47, then 42.15405405405406 after S114's
+                 test release, and IS NOW 42.154 — HEALED S116.
+                 ▶ IT IS NO LONGER A BEFORE PICTURE. Do not describe it
+                   as one.
   Parent-0.53  FO-0005  0.53 Kg/unit   13 units per batch
                Pouch / Carton 3 / Case 7 / Pallet 9
                Recipe: Ginger Powder 1302.21 Kg + IP-0.37 9 units
   MO-0003  IP-0.37, 41 units, COMPLETE, ONE receipt
   MO-0004  Parent-0.53, 23 pallets, CREATED, NOT RELEASED
-           ⚠⚠ LEAVE IT ALONE. IT IS THE BEFORE PICTURE.
+           ⚠⚠ LEAVE IT ALONE. IT IS THE BEFORE PICTURE, AND AFTER S114
+             AND S116 IT IS THE LAST UNRELEASED INTERMEDIATE MO OF THE
+             ORIGINAL SET.
   MO-0005  IP-0.37, 13 units, TWO receipts of 5 and 8
-  MO-0006  Parent-0.53, 7 pallets, CREATED, NOT RELEASED
-           ⚠⚠ S114's WRITE-PATH FIXTURE. ✓ STILL UNSPENT AFTER S113 —
-             MO-0011 served the start-mlc screen check instead.
-           ⚠⚠ SPENT IN S114. Released to measure P184, with the
-             prediction written BEFORE the write. 47 − 4.846 should be
-             42.154; the row holds 42.15405405405406. IT CANNOT BE
-             UN-RELEASED.
-           ▶ 474 MO-0004 IS NOW THE LAST UNRELEASED INTERMEDIATE MO.
-             ⚠ S115 SHOULD ASK FOR A FRESH FIXTURE RATHER THAN SPEND IT.
-           ⚠ THE WRONG VALUE IS STILL IN formulations id 3696 ON DEV,
-             DELIBERATELY, AS THE BEFORE PICTURE. Heal after the fix.
+  MO-0006  Parent-0.53, 7 pallets. ⚠⚠ SPENT IN S114 to measure P184,
+           with the prediction written BEFORE the write. 47 − 4.846
+           should have been 42.154; the row held 42.15405405405406.
+           ✓ THAT WRONG VALUE IS NOW HEALED. → S116.
 
 ⚠ 19 AND 13 ARE BOTH PRIME AND SHARE NO FACTORS, so nearly any MO
   quantity produces a repeating decimal. TRAPS 9.
@@ -628,9 +774,7 @@ THAT CAN DISTINGUISH A DERIVED Kg FROM A SCALED ONE.
        Level 2 Carton 5 Pouch   → 2.05 Kg
        Level 3 Case   13 Carton → 26.65 Kg   ⚠⚠ THE whd_flag ROW
        Recipe: Salt 500 Kg + IP4 5 UNITS
-       MO-0015, 9 cases, CREATED, NOT RELEASED.
-       ⚠⚠ MO-0015 IS THE GATE FOR THE UNITS CAPTURE. DO NOT RELEASE IT
-         UNTIL THE WRITE PATH IS BUILT.
+       MO-0015, 9 cases.
 
   ⚠⚠ WHY THREE PACK LEVELS, AND IT IS THE WHOLE POINT OF THIS FIXTURE.
     IP-0.37 IS SINGLE-LEVEL, so its Level 1 row and its whd_flag row
@@ -655,16 +799,47 @@ THAT CAN DISTINGUISH A DERIVED Kg FROM A SCALED ONE.
     the test would then run on a forked recipe. 5 gives a wider
     discriminator than 4 would have.
 
-⚠⚠ AND WHY THIS FIXTURE HAD TO BE BUILT AT ALL — MEASURED S115, AND IT
-  IS THE MOST USEFUL SINGLE QUERY OF THE SESSION:
-    EVERY intermediate row on dev has stored qty ÷ stored ship_qty
-    EXACTLY EQUAL to its packaging weight. EIGHTEEN ROWS, GAP ZERO.
-  ▶ SO ON ALL EXISTING DATA THE TWO ROUTES AGREE, AND NO EXISTING
-    SCREEN COULD HAVE TOLD THEM APART.
-  ⚠⚠ THE TWO STORED FIGURES AGREE BY CONVENTION, NOT BY CONSTRUCTION.
-    Nothing in the app enforces it. THAT IS WHAT MINTY'S S114 DESIGN
-    REMOVES, and it is why "they agree today" was never a reason to
-    leave it alone.
+  ⚠⚠ MO-0015 IS SPENT. RELEASED IN FULL, S116, to prove the write path.
+    IT CANNOT BE UN-RELEASED.
+    THE LOT AFTER IT:  Pdt-260811-1 / Rec-260811-1, receiveproducts 11457
+      RECEIVED   41 units · 915.53 Kg
+      DRAWN      1.957 units · 43.700 Kg
+      REMAINING  39.043 units · 871.83 Kg
+      ⚠ prev_received_qty ON THAT ROW IS NOW 43.700, NOT 0.
+    ▶ THE REMAINING 39.043 UNITS ARE THE NEXT SESSION'S TEST MATERIAL.
+      Two new P4 MOs are needed — one small, for a SECOND release
+      against the same lot; one large enough to EXCEED what is left, for
+      the PARTIAL branch and the exhaustion case in one release.
+
+  ✓✓ WHAT IT PROVED, S116 — AND IT COULD HAVE FAILED:
+        PREDICTED  ratio 41 ÷ 915.53 = 0.04478498…
+                   43.700 × ratio = 1.95710… → banks 1.957
+                   41 − 1.957 = 39.043 EXACTLY
+        MEASURED   row 84054 qty_allocated 43.7 · units 1.957
+                   3704 inventory_units 39.043   NO TAIL
+        CONTROLS   Salt 195.652 Kg with NO "#" · Pouch 585 · Carton 117 ·
+                   Case 9, all unmoved
+        ON SCREEN  IP4 WH Stock 39.043# (871.830 Kg) in BOTH blocks
+  ⚠⚠ AND WHAT IT COULD NOT SHOW, SAID AT THE TIME: 915.53 ÷ 41 = 22.33,
+    which IS IP4's whd_flag weight. THE LOT RATIO AND THE PACKAGING
+    WEIGHT AGREE HERE, as they do on all eighteen intermediate rows on
+    dev. ▶ IT PROVES THE ROUNDING AND THE BANKING. IT DOES NOT PROVE
+    THE TWO SOURCES CAN NEVER DIVERGE.
+  ⚠⚠ AND IT EXERCISED ONE CODE PATH OF FOUR. NONE OF THESE HAVE RUN:
+        the PARTIAL branch (the clamp, when a lot holds less than asked)
+        a SECOND release against the same lot
+        a DRAW-DOWN TO EXHAUSTION
+        the Math.max(0,…) FLOOR
+    ▶ MINTY ASKED FOR THAT TESTING HIMSELF BEFORE ANY PROD PROMOTION.
+
+  ⚠⚠ THE COMPARISON THAT NEEDED NO EXPLAINING, and it is worth keeping
+    as a METHOD rather than a result. Both rows in ONE query:
+        3696  IP-0.37  42.15405405405406   the same operation BEFORE
+        3704  IP4      39.043              the same operation AFTER
+    Same code path, same kind of release, one tail and one clean.
+    ▶ WHEN A FIX CHANGES A STORED VALUE, LEAVE THE OLD ONE IN PLACE
+      UNTIL THE NEW ONE EXISTS, THEN READ THEM TOGETHER. The before
+      picture earned its keep in the last five minutes of its life.
 
 THE IP2 / P2 / IP3 SET — ⚠ BUILT BY MINTY S112, TO THINK WITH.
   IP2  FO-0006-2  Salt 10 Kg/batch · 1 unit/batch
@@ -753,6 +928,8 @@ WHAT S112 TAUGHT THIS DOCUMENT
 4  ⚠⚠ THE DOMAIN EXPERT'S CHALLENGE WAS SOUNDER THAN THE ASSUMPTION IT
    CHALLENGED. ⚠ CLAUDE HAD TREATED THE Kg-ANCHORED READING AS
    OBVIOUSLY WRONG. IT WAS NOT.
+   ⚠⚠ AND S116 SETTLED IT IN THE Kg-ANCHORED DIRECTION FOR THE RELEASE
+     SCREEN, ON MINTY'S RULING. THE ASSUMPTION WAS WRONG TWICE OVER.
 5  ⚠ A ROW CAN BE GREEN IN TWO DIFFERENT STATES.
 
 ══════════════════════════════════════════════════════════════════════
@@ -800,6 +977,8 @@ WHAT S113 TAUGHT THIS DOCUMENT
 6  ⚠⚠ AND THAT READING FOUND AN EIGHTH PIECE OF A SEVEN-PIECE JOB —
    released_qty stays Kg while final_qty is units, which is the exact
    basis mismatch that produced the S112 regression. → P188.
+   ⚠⚠ S116 SETTLED IT BY RULING RATHER THAN BY CODE. The screen stays
+     Kg-anchored, so there was never a mismatch to fix.
 
 7  ⚠ TRAPS 9 FIRED THREE TIMES IN ONE SESSION. MO-0007 at 1:1 cannot
    move; Glutenull at 0.32 lands the division exactly; wduRec changed
@@ -812,3 +991,63 @@ WHAT S113 TAUGHT THIS DOCUMENT
 9  ✓ A SCREEN CHECK DOES NOT HAVE TO SPEND A FIXTURE. start-mlc needed
    a released MO; MO-0011 was one. MO-0006 stayed intact for S114.
    ▶ ASK WHAT THE CHECK ACTUALLY REQUIRES BEFORE SPENDING SOMETHING.
+
+══════════════════════════════════════════════════════════════════════
+WHAT S116 TAUGHT THIS DOCUMENT
+══════════════════════════════════════════════════════════════════════
+
+1  ⚠⚠ A ROW CAN BE CLOSED BY A RULING RATHER THAN BY CODE, AND THE MAP
+   MUST SAY WHICH. P188 was recorded as "dissolved" by S114's unit-
+   anchored design. THAT DESIGN WAS NEVER BUILT. It is RESOLVED — the
+   screen stays Kg-anchored deliberately, so the code that was going to
+   be replaced is correct as it stands.
+   ▶ "DISSOLVED", "RESOLVED" AND "FIXED" ARE THREE DIFFERENT THINGS AND
+     ONLY ONE OF THEM INVOLVES A COMMIT.
+
+2  ⚠⚠ THE MAP RECORDED FIVE SITES ON A SCREEN THAT HAS TEN, AND THE
+   FIVE IT MISSED INCLUDED THE DANGEROUS ONE. The lot clamp at ts:325
+   compares against a Kg figure and ONLY FIRES NEAR EXHAUSTION, so a
+   test on a full lot passes and looks fine.
+   ▶ FIFTH TIME THIS MAP HAS UNDER-COUNTED A SCREEN — rows 33, 34, 45,
+     49 and 50. ▶ AND THE READING WAS NOT WASTED EVEN THOUGH THE DESIGN
+     CHANGED: it is what made the cost of each option concrete enough
+     for Minty to choose between them.
+
+3  ⚠⚠ AN ADDRESS GOES STALE THE MOMENT OUR OWN COMMIT INSERTS LINES
+   ABOVE IT. 2c2da8b added thirty lines to Formulations.js in S115 and
+   four recorded addresses across three documents were wrong the next
+   morning — the qty_allocated sums by eighteen lines, P193 by five,
+   P192 by five.
+   ▶ SEVENTH DRIFT THIS CAMPAIGN, SECOND CAUSED BY US. ANCHOR ON TEXT.
+     One grep replaced four guesses with facts and cost nothing.
+
+4  ⚠⚠ IDENTICAL LINES IN THREE BRANCHES MEAN THE ANCHOR IS THE BLOCK.
+   `sum = sum + mpreceiveLots.qty_allocated;` appears three times with
+   identical indentation. The patch split on the map's opening and
+   closing lines and asserted each anchor once INSIDE the block.
+   ✓ AND THE PROOF WAS THE GREP RANGE, NOT THE ASSERTION COUNT — three
+     hits between 1151 and 1194, none below 1200 where packaging lives.
+
+5  ⚠ A CLAIM IN THIS DOCUMENT'S OWN HISTORY WAS TOO STRONG AND IS
+   WITHDRAWN. J124 recorded that "every like-for-like sum is exact; the
+   only figure carrying a tail is the one reconstructed from a weight."
+   S116 measured formulations.inventory — a plain Kg minus Kg
+   subtraction — holding 871.8299999999999 and 15.597000000000001.
+   ▶ THE DIAGNOSIS WAS RIGHT AND THE SWEEPING SENTENCE AROUND IT WAS
+     NOT. → P198.
+
+6  ⚠⚠ THE DOMAIN EXPERT'S QUESTION SHRANK THE JOB BY A FACTOR OF FOUR,
+   AND HIS SECOND QUESTION FOUND THE EDGE CASE THE ENGINEER HAD
+   ACCEPTED. "can we avoid the tail… leaving the operator fill to kgs"
+   removed ten frontend sites. "the soh should never get to negative"
+   produced the floor, which Claude had not raised.
+   ▶ CLAUDE'S JOB WAS TO STATE THE COST OF EACH OPTION HONESTLY BEFORE
+     THE CHOICE — including that the cheaper one leaves a DERIVATION
+     where a RECORD would be better. THAT IS THE PROCESS WORKING, AND IT
+     ONLY WORKS IF THE COST IS SAID BEFORE THE DECISION, NOT AFTER.
+
+7  ⚠⚠ AND THE REJECTED ALTERNATIVE BELONGS IN THE RECORD. The cumulative
+   derivation that removes the residue by construction was offered and
+   costed at two lines. Minty ruled against it on domain grounds.
+   ▶ A FUTURE SESSION THAT REDISCOVERS THE RESIDUE WILL FIND THE RULING
+     RATHER THAN RE-DERIVE THE FIX. → J126.
