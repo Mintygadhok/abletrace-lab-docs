@@ -1,12 +1,16 @@
 # RULES
 
-Last revised: S106.
+Last revised: S117.
 ⚠ S98 REWROTE THIS FILE WHOLE. Nineteen rules cut to SIX.
   MINTY, S98: "our principles have to be sound. So our rules have to be
   very sound." The old file had grown until the method was buried in
   the history that earned it. The lessons are kept; the stories are not.
 ⚠ S105 ADDED RULE 7 · QUANTITY. Committed at 5b2cb9e.
 ⚠ S106 CHANGED ONE LINE in RULE 2 — the browser reload. Minty's ruling.
+⚠ S117 CHANGED TWO THINGS IN RULE 6, BOTH ON MINTY'S RULING. The
+  MATERIAL line now requires everything a job needs to be QUOTED INTO
+  NOW rather than referenced, because a session now opens on RULES and
+  NOW alone. And the RESERVE signal is added.
 ⚠ A NEW RULE IS ADDED ONLY WHEN A REAL FAILURE SHOWS SOMETHING MISSING,
   AND ONLY WITH MINTY'S APPROVAL. The default answer is NO.
 
@@ -232,6 +236,9 @@ ELSEWHERE
    paste. Claude writes the file and presents it.
    ⚠ Copying from the rendered chat copies the OUTPUT, not the
      source.
+   ⚠ CLEAR THE DOWNLOADS FIRST. The browser numbers duplicates,
+     so the PLAIN filename can be the OLDEST copy. Read the
+     stamp and the timestamp before copying anything anywhere.
 
 3  WHAT MINTY DOES NOW — every reply needing action ends with it.
    Plain words, three steps or fewer, nothing after.
@@ -261,7 +268,13 @@ never renumbers. ⚠ Ranking is Minty's.
 
 THE CLOSE PRODUCES THE PLAN. Every job in it carries:
   the ACTION      what to do, in order
-  the MATERIAL    every file needed, BY NAME
+  the MATERIAL    everything the job needs, QUOTED IN, not referenced.
+                  ⚠ A POINTER TO ANOTHER DOCUMENT IS A RE-DERIVATION.
+                    If the next session must open a second file to
+                    start, THE CLOSE FAILED.
+                  ⚠ A session opens on RULES and NOW. Anything the job
+                    needs from any other document is copied into NOW
+                    at the close, in the job block, in full.
   the ANALYSIS    the thinking already done
   the VERIFY      what must be seen on screen to call it done
 
@@ -273,10 +286,39 @@ THE CLOSE PRODUCES THE PLAN. Every job in it carries:
   copying, before committing.
 ⚠ COMMIT MESSAGES: TWO OR THREE SENTENCES. What changed and why,
   plus anything a future reader would get wrong without it. The
-  detail belongs in the code comment and in PLAN, not repeated in
+  detail belongs in the code comment and in NOW, not repeated in
   all three. Minty's ruling S99.
 ⚠ Do not start work that cannot be recorded.
 ⚠ Claude raises the close; Minty decides.
+
+⚠⚠ CLAUDE SAYS "RESERVE" WHEN ITS GRIP STARTS TO LOOSEN.
+  THE SIGNAL IS ONE WORD, IN CAPS, SAID ONCE: RESERVE.
+  It fires when Claude notices the early part of the session going
+  hazy, or finds itself wanting to re-ask for a number already
+  measured. Those are the symptoms and they only appear near the end.
+
+  ⚠ NOT AT EVERY CROSSING. Claude does not raise the close because
+    a job finished, because a decision was made, or because a
+    natural pause arrived. RESERVE is said when it is GENUINELY THE
+    POINT, and it is said plainly rather than as a question.
+
+  ⚠ CLAUDE CANNOT SEE A GAUGE. There is no counter and no
+    percentage. The signal is a judgement about symptoms, so it may
+    come late.
+    ▶ MINTY MAY ASK "WHERE ARE WE" AT ANY POINT and gets an honest
+      read — comfortable, or getting thin — without waiting for
+      RESERVE.
+
+  ⚠⚠ THE CLOSE IS WORTH MORE THAN THE LAST JOB. A next session
+    specified fully beats one more half-finished thing. WHEN RESERVE
+    FIRES, STOP TAKING NEW WORK AND SPEND WHAT IS LEFT ON THE CLOSE.
+    ▶ MINTY, S117: it is more important to spec out the next session
+      fully than to stretch Claude at the fag end.
+
+  ⚠ WHAT MAKES THE RESERVE ARRIVE SOONER: large pastes. A whole
+    document, a wide query, a long file dump. Ask for the block,
+    not the file.
+
 ⚠ WRITE THE STATE BLOCK FROM THE BOXES AT CLOSE, AND WRITE THE
   GITHUB LINE FROM GITHUB. S106 opened with NOW claiming a docs
   commit was pending that had in fact been pushed.
@@ -363,6 +405,8 @@ DISPLAY  three decimal places.
 ⚠ THE FULL MAP — every site that produces a unit figure, aligned and
   misaligned, with its address — IS THE UNITS BIBLE.
   ▶ UNITS-BIBLE.txt in the docs repo. Minty's document.
+  ⚠ FROZEN AS AN ARCHIVE AT S117. It describes the app as of the
+    campaign's close. Consulted PER ROW, never read at the open.
 
 ⚠ MINTY'S RULINGS, S108. THIS SUPERSEDES THE S105 RULING THAT THE
   INGREDIENT ROUNDING VARIANCE IS ACCEPTED.
@@ -370,20 +414,26 @@ DISPLAY  three decimal places.
 
 ---
 
-## THE FOUR FILES
+## THE FILES
 
 ```
-RULES.md   how we work. Rarely edited.
-NOW.md     state, pending promotion, and the queue. Rewritten
-           whole each session.
-TRAPS.md   what fails SILENTLY. Ten entries. Cut deliberately.
-PLAN.md    the next session's work. Rewritten whole.
+⚠⚠ A SESSION OPENS ON TWO. Minty's ruling, S117.
 
-⚠ Every one carries its stamp on the FIRST lines. At session open
-  read all four against the session being opened. If they lag,
-  THE BOXES ARE THE ARBITER.
-⚠ Anything worth keeping must NOT live in NOW or PLAN. Both are
-  rewritten whole.
+  RULES.md   how we work. Rarely edited.
+  NOW.md     state, the next job, and the queue. Rewritten whole
+             each session. ⚠ It must carry everything the next
+             job needs — see RULE 6.
+
+ON DEMAND, when the work reaches them:
+  TRAPS.md        what fails SILENTLY. Ten entries. Cut deliberately.
+  Bible Part 1    the quantity rules. Minty's.
+  3A              the app, module by module.
+  3B              boxes, databases, pipeline, DNS, printer.
+  Section 5 / JR  the database record. NONE of it is in git.
+
+⚠ NO DEDICATED TIDY-UP SESSION. A document is cleaned by whichever
+  session next opens it. Minty's ruling, S117.
+⚠ Anything worth keeping must NOT live in NOW. It is rewritten whole.
 ⚠ DOC EDITS ARE PATCHES. Pull first, patch, diff, commit, push.
   Run patch scripts from /tmp and delete them.
 ```
