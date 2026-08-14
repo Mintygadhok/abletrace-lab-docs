@@ -109,16 +109,29 @@ ACTION — DEV ONLY. PROD IS NOT TOUCHED AT ANY POINT.
 
 2  DONE IN S118. Do not re-run — the answer is in MATERIAL below.
 
-3  INSTALL NODE 22 ALONGSIDE. DO NOT SWITCH THE DEFAULT.
+3  INSTALL NODE 24 **AND** NODE 22 ALONGSIDE. DO NOT SWITCH THE
+   DEFAULT.
    ⚠⚠ THE DEFAULT MUST STAY 18. If it changes, the next pm2 restart
      or reboot silently brings the app up on an untested engine —
      and S118 just proved pm2 resurrects by itself.
-   ⚠ NEVER `pm2 restart` while Node 22 is active in the shell.
+   ⚠ NEVER `pm2 restart` while a new Node is active in the shell.
+   ⚠ **TEST BOTH. DO NOT PICK ONE ON REASONING.** 24 is Active LTS
+     and the longest runway; 22 is Maintenance and the shorter hop,
+     so likelier to clear grunt 1.0.4. The extra cost is minutes in
+     the same scratch copy, and it replaces an argument with a
+     measurement. RULES 1: state what result distinguishes the two
+     answers, then get it.
+       both work        → take 24. Longest support. Done.
+       22 only          → 24 has a NAMED blocker; choose knowing it.
+       neither          → the blocker was never the Node version.
+                          That is the most valuable finding of all.
 
 4  BUILD A SCRATCH COPY — do not test in the live dev app.
-     cp -r ~/abletrace-lab-backend /home/ubuntu/node22-trial
-   Then, with Node 22 active IN THAT SHELL ONLY, `npm install` fresh
-   inside the copy.
+     cp -r ~/abletrace-lab-backend /home/ubuntu/node-trial
+   Then, with the new Node active IN THAT SHELL ONLY, `npm install`
+   fresh inside the copy. Repeat for the second version.
+   ⚠ `package-lock.json` IS IN GIT (confirmed S118) — the install is
+     deterministic, so the two runs are comparable.
    ⚠ NATIVE MODULES ARE COMPILED AGAINST ONE NODE VERSION and throw
      "compiled against a different Node.js version" under a new one.
      THAT IS A FALSE ALARM, NOT AN INCOMPATIBILITY — rebuild before
@@ -140,7 +153,7 @@ ACTION — DEV ONLY. PROD IS NOT TOUCHED AT ANY POINT.
 
 6  RESTORE DEV AND PROVE IT. Node 22 out of the shell, pm2 process
    started, `sleep 8`, curl 200, one screen read.
-   ⚠ Delete /home/ubuntu/node22-trial at the close.
+   ⚠ Delete /home/ubuntu/node-trial at the close.
 
 MATERIAL — quoted in, nothing to look up
 
@@ -153,6 +166,27 @@ MATERIAL — quoted in, nothing to look up
   Every block opens with `hostname -I`.
   Backend is edited, committed and pushed ON DEV — no build step.
   After any restart: sleep 8, THEN curl.
+
+  ⚠⚠ **BOTH BOXES MEASURED S118 — THE APPLICATION STACK MATCHES.**
+    Not deduced from the commit; read from each box.
+                     DEV        PROD
+      Node           18.20.8    18.20.8   ✓
+      npm            10.8.2     10.8.2    ✓
+      **PM2          7.0.3      7.0.1     ✗ DIFFERS → P205**
+      sails          1.5.8      1.5.8     ✓  (latest 1.5.x is 1.5.18)
+      sails-mysql    3.0.1      3.0.1     ✓
+      sails-hook-orm 4.0.2      4.0.2     ✓
+      sails-hook-grunt 4.0.1    4.0.1     ✓
+      grunt          1.0.4      1.0.4     ✓
+      nested-pop     0.1.4      0.1.4     ✓
+      backend commit 99852bf    99852bf   ✓
+    ⚠ **`package-lock.json` IS IN GIT** (311 KB, 8 Jul). That is WHY
+      they match — the lock pins exact versions, so `^1.5.8` did not
+      drift up to 1.5.18. Declared ≠ installed: read the lock, never
+      the caret.
+    ▶ **CONSEQUENCE FOR THIS JOB: a dev survey DOES transfer at the
+      package layer.** The OS still differs, so HOST behaviour does
+      not — but that is not what this job tests.
 
   MEASURED S118 — do not re-derive any of this.
     Sails ^1.5.8 · sails-hook-orm ^4.0.2 · sails-mysql ^3.0.1 ·
@@ -179,8 +213,16 @@ MATERIAL — quoted in, nothing to look up
 
 ANALYSIS — already done, do not re-derive
 
-  · Node 18 EOL April 2025. Node 22 is supported into 2027 and is
-    the target. Not Node 20 — it is nearer its own end.
+  · **NODE LTS POSITIONS, CHECKED S118 (14 Aug 2026).** Only three
+    lines are supported: **26 Current · 24 Active LTS · 22
+    Maintenance LTS.** Everything else is EOL. Node 20 died 30 Apr
+    2026; Node 18 died Apr 2025.
+    ⚠ **DO NOT TARGET 26.** Current means library authors are still
+      catching up. Production takes Active or Maintenance LTS only.
+    ⚠ **AN EARLIER DRAFT OF THIS BLOCK NAMED NODE 22 AS THE TARGET.
+      THAT WAS WRONG** — 22 is Maintenance, so its window closes
+      soonest and the job would repeat next year. 24 is the target
+      IF IT PASSES. Step 3 tests both rather than assuming.
   · The queue's old P180 line said "Node 20 deprecated". It was
     WRONG. 3B's record of v18.20.8 was RIGHT, on both boxes,
     measured S118 from the box. P180 is closed and replaced by this.
@@ -275,6 +317,14 @@ these are named exactly, not left as a search:**
 - **P203** Neither box has ESM Apps enabled; 17 updates pending on dev,
   36 on prod. Measured S118 after the reboot.
 
+- **P205** PM2 differs between boxes: **dev 7.0.3, prod 7.0.1**.
+  Measured S118. PM2 is installed GLOBALLY, outside package-lock's
+  control, so it drifts independently of every other version — it is
+  the one unmatched item in an otherwise identical stack. Both
+  resurrected correctly through the S118 reboot, so the behaviour
+  that matters is proven. Low, but it is the layer that keeps the
+  app alive. ⚠ package.json declares `pm2 ^5.3.0` and neither box
+  runs 5.x — the app's copy is not what runs.
 - **P204** 3B cites queue numbers that are not in this file — P1(b),
   P3, P4, P12, P16, P21, P23, P28, P74, P76, P77. Either two
   numbering schemes are live or NOW's queue has lost entries. Found
