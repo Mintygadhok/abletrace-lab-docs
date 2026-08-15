@@ -379,6 +379,19 @@ pass then, by that session.** Named exactly, not left as a search:
   deliberate — settled S119, do not re-open. → THE JOB AFTER, above.
   May be pulled into S120 if it finishes clean.
   ⚠ Not dev-only: the builder makes prod's frontend too.
+  ⚠⚠ **TWO FACTS THIS JOB NEEDS DO NOT EXIST IN ANY DOCUMENT. MEASURE
+    AND RECORD THEM, DO NOT GUESS.** Carried here in the QUEUE, not only
+    in the job block, because NOW is rewritten whole and a job block
+    dies with the job.
+      (a) **WHERE THE NODE PIN LIVES.** 3B.4 says the CI pins Node 18
+          and says why, but names no file and no line. Measure on the
+          Mac: `grep -rn "node-version\|setup-node" .github/workflows/`
+          ▶ RECORD THE FILE AND LINE IN 3B.4.
+      (b) **THE FRONTEND DEPLOY PROCEDURE — P154/P176, still open.**
+          Minty runs promote.sh and knows the steps; they are written
+          down nowhere. P209 cannot be proved without a deploy.
+          ▶ WRITE THE STEPS DOWN WHILE RUNNING THEM. That closes
+            P154/P176 as a by-product of a job that needs it anyway.
 - **P206** **MO material release panel shows ONE release per material,
   not each distinct release.** Measured S119 on MO-0014: traceability
   lists four Ginger Powder releases (916.471, 10, 100, 200 Kg) but the

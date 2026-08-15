@@ -207,6 +207,31 @@ opposite basis, one view, a few lines apart.
 
 ---
 
+## 11 · PM2 REPORTS "online" WHILE THE APP IS DEAD ON THE PORT.
+If anything else already holds 1337 — most often an `node app.js`
+left running in a FOREGROUND terminal window — the pm2 process
+cannot bind, exits, and pm2 restarts it forever.
+
+⚠ **`pm2 status` SHOWS `online` THROUGHOUT.** That is the silent
+  part. The status column reports the supervisor's intent, not a
+  working app. curl returns 500 and the screen is dead.
+
+THE TELL IS ↺, NOT THE STATUS WORD. A CLIMBING RESTART COUNTER IS A
+CRASH LOOP, NOT A SLOW BOOT. Read ↺ TWICE, eight seconds apart,
+before believing any pm2 line.
+
+THE ERROR IS ONLY IN THE LOG:
+  pm2 logs <name> --lines 40 --nostream --err
+Look for `EADDRINUSE: address already in use 0.0.0.0:1337`.
+
+⚠ A foreground app does NOT stop when its folder is deleted. Kill
+  the process, not the files. Ctrl+C only works in the window that
+  is actually running it.
+
+S119: cost ~15 minutes and looked far worse than it was.
+
+---
+
 ## WHAT WAS CUT IN S96, AND WHY
 
 ⚠ RECORDED SO NOBODY RE-ADDS THEM. Everything below was reviewed
