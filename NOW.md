@@ -1,4 +1,4 @@
-# NOW — S118 close, 14 Aug 2026
+# NOW — S119 close, 15 Aug 2026
 
 **State, next job, queue. Nothing else.**
 
@@ -19,47 +19,26 @@ beside the code. If it fits none of those it goes nowhere.
 
 ```
 DEV   16.55.10.205  Ubuntu 24.04.4 LTS  kernel 7.0.0-1010-aws  Node v18.20.8
-      backend 99852bf  pm2 abletrace-dev  online ↺0  200  clean
+      backend 99852bf  pm2 abletrace-dev  online  ↺0 (reset at close)  200  clean
       frontend serving 4910b46d · checkout c2a52d8e (stale, harmless)
 PROD  15.157.38.101  Ubuntu 26.04 LTS    kernel 7.0.0-1010-aws  Node v18.20.8
-      backend 99852bf  pm2 abletrace-backend  online ↺0  200  clean
+      ⚠ NOT READ THIS SESSION. Values carried from the S118 close.
+      backend 99852bf  pm2 abletrace-backend
       frontend serving 4910b46d · checkout 9bce0238 (P8, by design)
 MAC   frontend repo clean at 4910b46d — the only machine that edits it
 ```
 
-Commits read at open, pre-reboot. **No code changed this session** —
-P102 touched no repo, so the commits stand as read.
+**No code changed this session.** P202 was a survey: nothing installed to
+the system, nothing upgraded, nothing switched. Dev ends exactly as it
+opened — verified on screen, MO-0014 reading 41# (915.53 Kg).
 
-**BOTH BOXES REBOOTED, S118. P102 CLOSED after pending since S35.**
-Both came back on kernel 7.0.0-1010-aws — dev jumped a generation
-(6.17→7.0), prod a point release (7.0.0-1004→7.0.0-1010).
+⚠ **PROD WAS NOT TOUCHED AND NOT READ.** The job block said dev only and
+that was held to. The prod line above is S118's, not a fresh measurement.
+S120 opens on prod's own OPEN check before relying on it.
 
-**⚠ pm2 RESURRECT IS NOW PROVEN, NOT MERELY ENABLED.** Both boxes
-brought their named process back **unattended**, ↺ reset to 0,
-`pm2-ubuntu.service` active. Verified on screen: dev MO-0014 reads
-41# (915.53 Kg); prod, Glutenull's own login, MO-0001 reads
-**1750# (560 Kg)**. P177 is closed properly.
-
-**Databases match.** Both boxes carry `mprrecievelots.qty_allocated_units`
-and JR24. Not re-measured this session — unchanged by a reboot.
-
-**Rollback:** frontend `www-html.bak-{dev,prod}-4910b46d*` (holds
-e1a82e02). Backend on prod `git reset --hard 4d43bd4`. JR24 from
-`~/WhC_GetMoMaterialProductReleaseDetails_SP.bak-S116-{DEV,PROD}.txt`,
-2390 bytes each — SHOW CREATE text, needs the DELIMITER wrapper.
-⚠ These are S91-era values, still unverified. → P66
-
-**Clients:** 471 Glutenull (2 MOs, round ratios) · 469 Hagensborg
-(13 MOs, none run, batch_qty 1 — can never demonstrate a quantity fix).
-Neither has ever created a dispatch order or released an intermediate.
-
-**Measured after the reboot:** updates pending **17 on dev, 36 on prod**.
-⚠ **Neither box has ESM Apps enabled.** Both banners say so.
-Prompt colours confirmed live: dev green, prod red.
-
-**3B'S PASS WAS NOT DONE.** S118 measured the host facts but never
-opened 3B to edit it. S119 opens 3B for the Node record — **it gets its
-pass then, by that session.** Carried in full at the foot of the job.
+⚠ **`hostname -I` ON DEV RETURNS 172.31.1.196**, the private address. This
+file records the public one, 16.55.10.205. Both are dev. Noted so a
+future session does not read a mismatch where there is none. → 3B
 
 ---
 
@@ -69,235 +48,325 @@ Nothing. Backend, frontend and database are all level across both boxes.
 
 ---
 
-## THE NEXT JOB — S119
+## P202 — WHAT THE SURVEY FOUND. Measured S119, do not re-derive.
 
-**P202 — Node 18 survey. DEV ONLY. NOTHING IS UPGRADED.**
+```
+VERDICT: NODE 24 PASSES ON DEV, AT THE PACKAGE LAYER, INCLUDING A WRITE.
+         NODE 22 WAS NOT LIFTED — it became unnecessary once 24 passed.
 
-**WHY IT MATTERS, IN PLAIN WORDS.** Node is the engine that runs the
-app — every screen and every save passes through it. Both boxes run
-Node 18, which **stopped receiving security fixes in April 2025**.
-People are still finding holes in it; nobody is fixing them for you.
-S118's reboot did nothing for this: those were Ubuntu's patches, and
-Node arrives by a separate route. The box reports itself up to date
-while the thing running two clients' data is sixteen months past its
-last fix.
+HOW NODE IS INSTALLED ON DEV — step 1's answer, and it is the one that
+shapes the upgrade:
+  /usr/bin/node · dpkg package `nodejs 18.20.8-1nodesource1` ·
+  repo /etc/apt/sources.list.d/ pinned to deb.nodesource.com/node_18.x ·
+  NO nvm.
+  ⚠⚠ **APT REPLACES, IT DOES NOT ADD.** There is no way to apt-install a
+    second Node alongside. Point the repo at 24 and the default flips
+    system-wide the instant apt runs — and S118 proved pm2 resurrects
+    unattended, so a flipped default reaches the app without anyone
+    touching it. That is WHY S119 used tarballs instead.
+  ▶ **THE UPGRADE ROUTE IS THEREFORE: change the repo line from
+    node_18.x to node_24.x, then apt. One command, and it is a
+    REPLACEMENT, not an addition.**
+  ⚠ **PROD'S INSTALL METHOD IS UNMEASURED.** Almost certainly the same.
+    Not assumed. S120 measures it.
 
-**WHY A SURVEY AND NOT THE UPGRADE.** AbleTrace sits on Sails, and
-Sails sits on several hundred smaller packages, some untouched for
-years. When the engine changes a handful stop working, and they do not
-announce it — the symptom is a screen that will not load or a save that
-silently does not save. Upgrading blind on a box with two live clients
-is how you find that out the hard way. **This session ends with dev
-running exactly as it does now, plus a costed list.**
+INSTALLED ALONGSIDE, AND STILL ON THE BOX — plain folders, nothing
+registered with the system, deletable at any time:
+  /home/ubuntu/node-v24.19.0-linux-x64/bin/node
+  /home/ubuntu/node-v22.23.2-linux-x64/bin/node
+  Kept deliberately: S120 wants them. `/usr/bin/node` never moved —
+  verified before and after every step.
+
+MEASURED, NODE 24, IN A SCRATCH COPY:
+  npm install         exit 0 · 990 packages · 17s · npm 11.17.0
+  EBADENGINE          NONE. Nothing declared itself incompatible.
+  gyp / native build  NONE. Confirms S118: no native modules.
+  **grunt 1.0.4**     INSTALLED AND RAN. It was named the likeliest
+                      blocker; sails-hook-grunt runs at lift and the
+                      lift succeeded. **IT IS NOT A BLOCKER.**
+  Sails lift          `Server lifted` · v1.5.8 · port 1337
+  curl                200
+  package-lock.json   NOT rewritten by the install (git status clean),
+                      so the 22 and 24 runs are genuinely comparable.
+
+MEASURED, NODE 22: npm install exit 0, no engine complaints, npm 10.9.8.
+  **NOT LIFTED.** 24 passing made it moot. If 24 ever fails in the wild,
+  22's install is known good and the lift is ten minutes.
+
+THE WRITE TEST — the strongest evidence taken. Predicted BEFORE the
+release, then measured. 200 Kg of Ginger Powder, lot Mat-260804-3,
+released against MO-0014 through the app on Node 24:
+                        predicted     actual
+  Material SOH          7769.322 Kg   7769.322 Kg   ✓
+  Qty Released          2220.678 Kg   2220.678 Kg   ✓
+  Qty Received / Misc   unchanged     unchanged     ✓
+  MO-0014 plan & compl  unchanged     unchanged     ✓
+  One Step Forward      new 200 row   new 200 row   ✓
+  Every figure landed. The release path wrote correctly under Node 24.
+
+⚠ **`migrate: "safe"` — config/models.js:53, `alter` commented at :55.**
+  Measured before lifting. A lift touches no tables. This is why the
+  scratch copy could safely point at dev's live database.
+
+⚠ **THE BOOT WARNINGS ARE NOT NODE'S.** Waterline complains about null
+  `description` (companyuserrole, roles) and null createdAt/updatedAt
+  (company). Old data against newer model definitions. Prints identically
+  on 18; pm2 just hides it in a log. → P207
+
+⚠ **WHAT THIS DOES NOT PROVE.** Dev is 24.04, prod is 26.04. The package
+  layer transfers (identical lock, identical versions — S118). **HOST
+  behaviour does not.** Same ruling as S118 and S119.
+```
+
+---
+
+## THE NEXT JOB — S120
+
+**P202b — UPGRADE DEV TO NODE 24. DEV ONLY. PROD IS NOT TOUCHED.**
+
+**WHY IT MATTERS, IN PLAIN WORDS.** Node is the engine the app runs on.
+Both boxes run Node 18, which stopped getting security fixes in April
+2025 — sixteen months ago. People still find holes in it; nobody patches
+them. S119 proved the app runs correctly on Node 24, including a real
+release that wrote the exact figures predicted in advance. This session
+makes that the engine dev actually uses. **Prod follows in its own
+session, once dev has run on 24 for a while.**
+
+**WHY DEV ALONE, AND WHY NOT BOTH TODAY.** Prod is a different operating
+system and carries two clients' data. A dev result is evidence about the
+packages, not about prod's host. Dev also gets to run for days before
+prod is asked to. Nothing about this is urgent enough to skip that.
 
 ```
 ACTION — DEV ONLY. PROD IS NOT TOUCHED AT ANY POINT.
 
-1  FIND OUT HOW NODE IS INSTALLED. Everything downstream depends on
-   this answer.
-   ⚠ **3B WAS READ AT THE S118 CLOSE AND DOES NOT RECORD IT.** 3B.2
-     says only: "NODE v18.20.8 on BOTH boxes. ⚠ VERIFIED S79,
-     `node -v`, both. CI pins Node 18 to match." Version only. This
-     step is a genuine measurement, not a re-derivation.
-     ▶ RECORD THE ANSWER IN 3B WHEN FOUND.
-     which node
-     node -v ; npm -v
-     ls -d ~/.nvm 2>/dev/null || echo "no nvm"
-     dpkg -l | grep -i nodejs || echo "not an apt package"
-     cat /etc/apt/sources.list.d/*node* 2>/dev/null || echo "no nodesource repo"
-   ⚠ Do not install anything until this is answered.
+1  OPEN CHECK, then read the engine and confirm the two tarball folders
+   survived the week.
+     hostname -I
+     node -v ; which node
+     ls -d /home/ubuntu/node-v2*-linux-x64
+   ⚠ If the folders are gone, re-fetch them — the commands are in
+     MATERIAL below.
 
-2  DONE IN S118. Do not re-run — the answer is in MATERIAL below.
+2  BACK UP THE ROLLBACK ROUTE BEFORE CHANGING ANYTHING.
+     dpkg -l | grep -i nodejs
+     cat /etc/apt/sources.list.d/*node*
+   ⚠ **WRITE THE EXACT PACKAGE VERSION STRING DOWN.** It is
+     `18.20.8-1nodesource1` as of S119. That string IS the rollback.
 
-3  INSTALL NODE 24 **AND** NODE 22 ALONGSIDE. DO NOT SWITCH THE
-   DEFAULT.
-   ⚠⚠ THE DEFAULT MUST STAY 18. If it changes, the next pm2 restart
-     or reboot silently brings the app up on an untested engine —
-     and S118 just proved pm2 resurrects by itself.
-   ⚠ NEVER `pm2 restart` while a new Node is active in the shell.
-   ⚠ **TEST BOTH. DO NOT PICK ONE ON REASONING.** 24 is Active LTS
-     and the longest runway; 22 is Maintenance and the shorter hop,
-     so likelier to clear grunt 1.0.4. The extra cost is minutes in
-     the same scratch copy, and it replaces an argument with a
-     measurement. RULES 1: state what result distinguishes the two
-     answers, then get it.
-       both work        → take 24. Longest support. Done.
-       22 only          → 24 has a NAMED blocker; choose knowing it.
-       neither          → the blocker was never the Node version.
-                          That is the most valuable finding of all.
+3  STOP THE APP FIRST. `pm2 stop abletrace-dev`, confirm stopped.
+   ⚠ Do not upgrade an engine underneath a running process.
 
-4  BUILD A SCRATCH COPY — do not test in the live dev app.
-     cp -r ~/abletrace-lab-backend /home/ubuntu/node-trial
-   Then, with the new Node active IN THAT SHELL ONLY, `npm install`
-   fresh inside the copy. Repeat for the second version.
-   ⚠ `package-lock.json` IS IN GIT (confirmed S118) — the install is
-     deterministic, so the two runs are comparable.
-   ⚠ NATIVE MODULES ARE COMPILED AGAINST ONE NODE VERSION and throw
-     "compiled against a different Node.js version" under a new one.
-     THAT IS A FALSE ALARM, NOT AN INCOMPATIBILITY — rebuild before
-     judging it. **Measured S118: the declared dependencies contain
-     NO native modules** — sails-mysql is pure JavaScript. So this
-     risk is LOW, and it survives here only because transitive
-     dependencies were not read. If it appears, it is noise.
+4  SWITCH THE REPO AND UPGRADE.
+     The NodeSource line changes node_18.x → node_24.x, then
+     `sudo apt update` and `sudo apt install -y nodejs`.
+   ⚠⚠ THIS REPLACES NODE 18. It is not reversible by undo — only by
+     reinstalling 18 from the same repo route. That is the rollback.
+   Then: `node -v` must read v24.x and `which node` must read
+   /usr/bin/node.
 
-5  LIFT IT AND WATCH.  `node app.js`  in the foreground.
-   ⚠ MEASURED S118: that is EXACTLY what pm2 runs — interpreter
-     `node`, script `/home/ubuntu/abletrace-lab-backend/app.js`, no
-     args, no ecosystem file, **no NODE_ENV set** (pm2 reports
-     N/A). There is NO wrapper to reproduce. Do not add NODE_ENV;
-     it would not match what runs today.
-   ⚠ It will bind 1337. Stop the pm2 process first, and restart it
-     at the end. Dev has no clients; this is safe.
-   Some failures land at boot. Others only on a path, so WALK THE
-   PATHS: an MO, a release, traceability, one report.
+5  REINSTALL THE APP'S PACKAGES AGAINST THE NEW ENGINE.
+     cd ~/abletrace-lab-backend ; rm -rf node_modules ; npm install
+   ⚠ `package-lock.json` IS IN GIT and must NOT be committed if npm
+     rewrites it. Check `git status` after. S119 measured that it does
+     NOT get rewritten — if it does this time, that is a finding.
 
-6  RESTORE DEV AND PROVE IT. Node 22 out of the shell, pm2 process
-   started, `sleep 8`, curl 200, one screen read.
-   ⚠ Delete /home/ubuntu/node-trial at the close.
+6  START AND PROVE IT.
+     pm2 start abletrace-dev ; sleep 8 ; pm2 status ; curl … 1337
+   ⚠ ↺ MUST STAY PUT. A CLIMBING ↺ IS A CRASH LOOP, NOT A SLOW BOOT.
+     Read it twice, eight seconds apart, before believing it.
+
+7  WALK THE PATHS ON THE BROWSER. Shift+Cmd+R first.
+   Log in · MO-0014 must read **41# (915.53 Kg)** · release some
+   material and check SOH moves by exactly what was released ·
+   material traceability · one report.
+
+8  SAVE THE STARTUP DEFINITION. `pm2 save`, so a reboot brings the app
+   up on 24 and not on a stale definition.
+   ⚠ Then REBOOT DEV and prove it resurrects on 24 unattended. S118
+     proved resurrect works; this proves it works on the new engine.
+     ▶ Minty's call whether the reboot is this session or its own.
 
 MATERIAL — quoted in, nothing to look up
 
   DEV   16.55.10.205 · green prompt · pm2 name abletrace-dev
-        Ubuntu 24.04.4 LTS · kernel 7.0.0-1010-aws · Node v18.20.8
+        Ubuntu 24.04.4 LTS · Node v18.20.8 at /usr/bin/node
         backend repo ~/abletrace-lab-backend at 99852bf
-  PROD  15.157.38.101 · red prompt · pm2 name abletrace-backend
-        NOT TOUCHED THIS SESSION.
+        apt package `nodejs 18.20.8-1nodesource1`
+        repo deb.nodesource.com/node_18.x nodistro main
+        signed-by /usr/share/keyrings/nodesource.gpg
+  PROD  15.157.38.101 · red prompt · NOT TOUCHED THIS SESSION.
   ssh and scp ALWAYS from the Mac; the pem exists nowhere else.
+    ⚠ **DEV IS 16.55.10.205. PROD IS 15.157.38.101.** One digit apart at
+      the front. S119 landed on prod by mistyping it. Read the prompt
+      colour before every command.
   Every block opens with `hostname -I`.
   Backend is edited, committed and pushed ON DEV — no build step.
   After any restart: sleep 8, THEN curl.
 
-  ⚠⚠ **BOTH BOXES MEASURED S118 — THE APPLICATION STACK MATCHES.**
-    Not deduced from the commit; read from each box.
-                     DEV        PROD
-      Node           18.20.8    18.20.8   ✓
-      npm            10.8.2     10.8.2    ✓
-      **PM2          7.0.3      7.0.1     ✗ DIFFERS → P205**
-      sails          1.5.8      1.5.8     ✓  (latest 1.5.x is 1.5.18)
-      sails-mysql    3.0.1      3.0.1     ✓
-      sails-hook-orm 4.0.2      4.0.2     ✓
-      sails-hook-grunt 4.0.1    4.0.1     ✓
-      grunt          1.0.4      1.0.4     ✓
-      nested-pop     0.1.4      0.1.4     ✓
-      backend commit 99852bf    99852bf   ✓
-    ⚠ **`package-lock.json` IS IN GIT** (311 KB, 8 Jul). That is WHY
-      they match — the lock pins exact versions, so `^1.5.8` did not
-      drift up to 1.5.18. Declared ≠ installed: read the lock, never
-      the caret.
-    ▶ **CONSEQUENCE FOR THIS JOB: a dev survey DOES transfer at the
-      package layer.** The OS still differs, so HOST behaviour does
-      not — but that is not what this job tests.
+  TARGET VERSIONS, measured S119 (14–15 Aug 2026):
+    Node 24.19.0  Active LTS   ← the target
+    Node 22.23.2  Maintenance  ← the fallback, install proven, lift not
+    ⚠ DO NOT TARGET 26. Current, not LTS.
+    Tarball re-fetch if the folders are gone:
+      cd /home/ubuntu
+      curl -fsSLO https://nodejs.org/dist/latest-v24.x/node-v24.19.0-linux-x64.tar.gz
+      tar -xzf node-v24.19.0-linux-x64.tar.gz
 
-  MEASURED S118 — do not re-derive any of this.
-    Sails ^1.5.8 · sails-hook-orm ^4.0.2 · sails-mysql ^3.0.1 ·
-    sails-hook-grunt ^4.0.0 · sails-hook-sockets ^3.0.0 ·
-    sails-hook-responsetime ^1.0.8 · @sailshq/connect-redis ^6.1.3 ·
-    @sailshq/lodash ^3.10.4 · @sailshq/socket.io-redis ^6.1.2 ·
-    aws-sdk ^2.1525.0 · axios ^1.6.2 · dotenv ^17.4.2 ·
-    express-rate-limit ^8.5.2 · **grunt 1.0.4 (PINNED EXACT)** ·
-    jsonwebtoken ^9.0.2 · moment ^2.29.4 · moment-timezone ^0.6.0 ·
-    nested-pop ^0.1.4 · node-cache ^5.1.2 · node-schedule ^2.1.0 ·
-    nodemailer ^6.9.7 · pm2 ^5.3.0 · skipper-better-s3 ^2.3.0 ·
-    xlsx ^0.18.5
-    devDependencies: eslint 5.16.0 (PINNED) · nodemon ^3.0.2
-    ⚠ **NO `engines` FIELD.** Nothing declares a Node constraint —
-      npm will not block, and will not warn.
-    Disk on dev: 13G free of 19G. Ample for the scratch copy.
-
-  ROLLBACK. There is none to write, because nothing is changed. If
-  dev will not come back on 18:
-    pm2 start /home/ubuntu/abletrace-lab-backend/app.js --name abletrace-dev
-  ⚠ **THERE IS NO ECOSYSTEM FILE** — measured S118. `pm2 resurrect`
-    also works; dump.pm2 holds the definition. NOT a code rollback
-    — no code changed.
+  ROLLBACK — the real one, because this session DOES change the box:
+    Repo line back to node_18.x, `sudo apt update`, then
+    `sudo apt install -y nodejs=18.20.8-1nodesource1`.
+    Then rm -rf node_modules and npm install again on 18.
+    ⚠ **NO ECOSYSTEM FILE EXISTS** (S118). pm2 definition is in
+      dump.pm2; `pm2 resurrect` restores it. If pm2 loses the process:
+      pm2 start /home/ubuntu/abletrace-lab-backend/app.js --name abletrace-dev
 
 ANALYSIS — already done, do not re-derive
 
-  · **NODE LTS POSITIONS, CHECKED S118 (14 Aug 2026).** Only three
-    lines are supported: **26 Current · 24 Active LTS · 22
-    Maintenance LTS.** Everything else is EOL. Node 20 died 30 Apr
-    2026; Node 18 died Apr 2025.
-    ⚠ **DO NOT TARGET 26.** Current means library authors are still
-      catching up. Production takes Active or Maintenance LTS only.
-    ⚠ **AN EARLIER DRAFT OF THIS BLOCK NAMED NODE 22 AS THE TARGET.
-      THAT WAS WRONG** — 22 is Maintenance, so its window closes
-      soonest and the job would repeat next year. 24 is the target
-      IF IT PASSES. Step 3 tests both rather than assuming.
-  · The queue's old P180 line said "Node 20 deprecated". It was
-    WRONG. 3B's record of v18.20.8 was RIGHT, on both boxes,
-    measured S118 from the box. P180 is closed and replaced by this.
-  · Dev is 24.04, prod is 26.04. **A clean dev survey is evidence
-    about the packages, NOT proof about prod's OS.** Prod gets its
-    own run when the real upgrade comes. Same ruling as S118.
-  · **THE FOUR SUSPECTS, named S118 so S119 need not hunt them:**
-    **grunt, pinned at exactly 1.0.4** (2018, no caret, so npm
-    cannot drift it forward — the likeliest break, and
-    sails-hook-grunt depends on it) · **eslint 5.16.0** (2019, but
-    devDependency only, so it CANNOT affect the running app) ·
-    **aws-sdk v2** (itself end-of-life; runs, but unsupported) ·
-    **nested-pop 0.1.4** (unmaintained, and already TRAPS'd from
-    S55 — two COLLECTION associations in one populate array).
-    Sails 1.5.8 itself is current enough not to be the problem.
-  · ⚠ **RULES §4 SAYS dotenvx. package.json SAYS `dotenv` ^17.4.2.**
-    One of them is wrong. Settle it while the file is open — the
-    credentials record must not be wrong about how secrets load.
-  · ⚠⚠ **NODE 18 LIVES IN THREE PLACES, NOT TWO.** 3B.4 records the
-    GitHub Actions frontend build as pinning **Node 18 "to match"**
-    the boxes (runner ~7 GB, NODE_OPTIONS=--max-old-space-size=4096,
-    ~9 min, artifact dist-<target>-<full 40-char sha>). The Angular
-    build engine is INDEPENDENT of the app's runtime, so this does
-    NOT block the backend upgrade — but the record's stated intent
-    was parity. Decide it deliberately; do not discover it later.
-  · **SETTLED S118: IT IS `dotenv`, NOT `dotenvx`.** package.json
-    declares `dotenv ^17.4.2`, and 3B.3's own dev-database recipe
-    describes dotenv printing its "◇ injected env" banner. **RULES
-    §4 and 3B.8 both carry the wrong name** — one propagated from
-    the other. Correct both. It changes no command; it makes the
-    credentials record true.
-  · Native-module ABI errors are noise, and now look unlikely.
-    See step 4.
-  · The survey is one session. The upgrade is one more if clean,
-    two or three if not. That range is honest and unnarrowable
-    until step 5 runs.
+  · **THE FOUR SUSPECTS ARE ANSWERED.** grunt 1.0.4 installs AND runs on
+    24 — it was the likeliest blocker and it is not one. eslint 5.16.0 is
+    devDependency only, cannot reach the running app. aws-sdk v2 warns at
+    boot on every version including 18. nested-pop 0.1.4 is untouched by
+    the engine. **NO NAMED BLOCKER SURVIVES.**
+  · The scratch copy pointed at dev's live database and wrote to it —
+    deliberately, because `migrate: "safe"` was measured first. The S120
+    upgrade writes to the same database from the same code. No new risk.
+  · **110 npm vulnerabilities (33 critical) reported on both engines.**
+    Real, unrelated to Node, and NOT this job. → P208
+  · The upgrade is one session if clean. S119 removed the reason to
+    expect otherwise.
+  · ⚠ **NODE 18 LIVES IN THREE PLACES.** 3B.4 records the GitHub Actions
+    frontend build pinning Node 18 "to match" the boxes. The Angular
+    build engine is INDEPENDENT of the app's runtime, so it does NOT
+    block this. **SETTLED S119, MINTY: PARITY IS KEPT ON PURPOSE — dev
+    runtime to 24 first, then the builder to 24 (P209).** The "to match"
+    wording therefore STAYS. It needs a date and a version, not deletion:
+      *CI pins Node to match the boxes. 18 → 24, S120/S121. Parity is
+       deliberate, re-confirmed S119.*
+    ▶ Do not re-open this as a question. It was asked and answered.
+  · **SETTLED S118, RE-CONFIRMED S119 ON SCREEN: IT IS `dotenv`, NOT
+    `dotenvx`.** The lift printed dotenv's own "◇ injected env (9)"
+    banner. **RULES §4 and 3B.8 both carry the wrong name.** Correct
+    both. Changes no command; makes the credentials record true.
 
 VERIFY
 
-  A written list: which packages break, which need replacing, which
-  have no maintained version. Plus dev back on Node 18, pm2
-  abletrace-dev online, 200, and one screen read on the browser.
+  Dev running Node 24, pm2 abletrace-dev online with a STEADY ↺, curl
+  200, and on the browser: MO-0014 at 41# (915.53 Kg), plus a release
+  whose SOH movement equals exactly what was released.
   ⚠ NOTHING IS DONE UNTIL IT IS SEEN ON THE SCREEN.
 ```
 
-**While 3B is open for the Node record, it gets its pass** — no
-separate job, per S117's ruling. **3B was read at the S118 close, so
-these are named exactly, not left as a search:**
-- **3B.2 CONTRADICTS ITSELF ON THE REBOOT, and S118 settled it.** The
-  OS block warns "rebooting dev does NOT rehearse rebooting prod" —
-  then four lines later the restart-required note says "⚠ DO DEV
-  FIRST — it is a true twin, so it is a real rehearsal." **Delete the
-  second.** Dev-first is right for a different reason: dev is the box
-  with no clients.
+---
+
+## THE JOB AFTER — S121, AND IT MAY BE PULLED INTO S120
+
+**P209 — GITHUB BUILDER TO NODE 24.** Written out here so that IF S120
+finishes fast and clean, this can be started the same day WITHOUT opening
+3B. Minty decides at the box, not in advance.
+
+**WHY IT IS SEPARATE.** The builder is not the runtime. GitHub Actions
+spins up a temporary machine, compiles Angular into files, and vanishes.
+The app never meets it. So it CANNOT break the backend upgrade — but it
+also gets no free ride from S120's proof, because it is a different
+machine doing a different job with its own failure mode.
+
+⚠⚠ **THIS IS NOT A DEV-ONLY JOB, AND S120 IS.** The builder produces the
+frontend for BOTH boxes — dev on a push, prod on a manual dispatch.
+Changing it changes how PROD's next frontend build is made. Nothing
+reaches prod until Minty dispatches, so it is not dangerous. But do not
+call the session dev-only once this is in scope.
+
+```
+ACTION
+
+1  MEASURE WHERE THE PIN IS. **NOT RECORDED ANYWHERE — 3B.4 states the
+   Node 18 pin exists and WHY, but not the file or the line.** This is a
+   genuine measurement. On the MAC, in the frontend repo:
+     ls -la .github/workflows/
+     grep -rn "node-version\|setup-node\|NODE_OPTIONS" .github/workflows/
+   ⚠ Expect a `uses: actions/setup-node` block with a version. That
+     version string is the whole job.
+
+2  CHANGE THE PIN to 24, on a branch or with a clear single-purpose
+   commit. Frontend is edited ON THE MAC. RULES §2.
+
+3  BUILD. A push builds dev. Watch the run to completion.
+   ⚠ **THE BUILD IS THE TEST.** Angular's toolchain is where a Node
+     change would bite, not the app code.
+   ⚠ If it fails on memory, the NODE_OPTIONS line below is the knob.
+
+4  DEPLOY TO DEV AND PROVE IT ON SCREEN. Shift+Cmd+R, then MO-0014 must
+   read **41# (915.53 Kg)**, plus one release screen and one report.
+   ⚠⚠ **THE DEPLOY PROCEDURE IS NOT WRITTEN DOWN — P154/P176, still
+     open.** Minty runs promote.sh from the Mac and knows the steps;
+     Claude does not have them quoted. **WRITE THEM DOWN WHILE DOING
+     THEM.** That closes P154/P176 as a by-product.
+
+5  PROD IS NOT DISPATCHED. The new builder's output reaches prod only at
+   the next deliberate prod deploy, which is a separate decision.
+
+MATERIAL — what IS recorded, quoted from 3B.4 (read S118)
+
+  Runner ~7 GB · NODE_OPTIONS=--max-old-space-size=4096 · ~9 minutes ·
+  artifact named dist-<target>-<full 40-char sha>.
+  CI exists because the EC2 t3.small CANNOT build Angular — RAM ceiling.
+  That is why the frontend is built on GitHub and not on the box.
+  Frontend repo lives on the MAC and on GitHub. Dev's copy is
+  overwritten by the next deploy and is not a source of truth.
+  Rollback: `www-html.bak-dev-4910b46d*` on dev (holds e1a82e02).
+  ⚠ These backup paths are S91-era and UNVERIFIED. → P66. **Read the
+    rollback path off the box before relying on it.** RULES §2.
+
+ANALYSIS
+
+  · **PARITY IS SETTLED — MINTY, S119.** 3B.4 says the builder is pinned
+    to 18 "to match" the boxes. That intent STANDS: dev runtime to 24
+    (S120), then the builder to 24 (this job). The wording is not
+    deleted; it is DATED and given its new number:
+      *CI pins Node to match the boxes. 18 → 24, S120/S121. Parity is
+       deliberate, re-confirmed S119.*
+    ⚠ The alternative — let them drift and delete the claim — was
+      offered and NOT taken. Do not re-derive it.
+    ⚠ **UNTIL THIS JOB LANDS, 3B's SENTENCE IS TEMPORARILY FALSE** (box
+      24, builder 18). That gap is expected and closes here.
+  · A different Node compiling the same Angular source SHOULD produce
+    equivalent output. "Should" is not a measurement. Step 4 exists
+    because a bad frontend build looks fine until one screen does not.
+  · Small job, own failure mode. That is why it is written separately
+    rather than bolted onto S120's verify.
+```
+
+---
+
+**3B'S PASS IS STILL OWED.** S118 measured but did not open it; S119 did
+not open it either. **S120 opens 3B for the Node record — it gets its
+pass then, by that session.** Named exactly, not left as a search:
+- **ADD THE NODE INSTALL METHOD** — NodeSource apt, `/usr/bin/node`,
+  package `nodejs 18.20.8-1nodesource1`, repo `node_18.x`, no nvm.
+  Measured S119, dev. **Prod unmeasured — say so.** Date the v18.20.8
+  line to S118, and record the new version once S120 lands.
+- **3B.2 CONTRADICTS ITSELF ON THE REBOOT.** The OS block warns
+  "rebooting dev does NOT rehearse rebooting prod", then four lines later
+  says "⚠ DO DEV FIRST — it is a true twin, so it is a real rehearsal."
+  **Delete the second.** Dev-first is right for a different reason: dev
+  is the box with no clients.
 - **3B.2 kernel lines are stale.** Records prod 7.0.0-1004 / dev
-  6.17.0-1017. Both boxes are now **7.0.0-1010-aws** (S118). OS
-  versions unchanged: prod 26.04, dev 24.04.4.
+  6.17.0-1017. Both are now **7.0.0-1010-aws** (S118).
 - **Delete the whole "SYSTEM RESTART REQUIRED — PENDING SINCE S35"
   note.** Done S118, both boxes.
-- **Record that pm2 resurrect is PROVEN**, both boxes, S118 —
-  unattended, ↺ reset to 0. 3B currently only says to verify it.
-- **Add the Node install method** once step 1 measures it, and date
-  the v18.20.8 line to S118.
-- **3B.8 says dotenvx; it is dotenv.** See ANALYSIS above.
+- **Record that pm2 resurrect is PROVEN**, both boxes, S118.
+- **3B.8 says dotenvx; it is dotenv.** Proven on screen S119.
 - **3B.4's rollback points read `www-html.bak-{prod,dev}-275c025039d7`
   (S91).** Both boxes are now at **4910b46d**. → P66
 - **3B.2 calls the reboot P21; NOW called it P102.** One job, two
   numbers. Note which survives — Minty's call.
-- ⚠ **3B.4 step 4 says Cmd+Q the browser; RULES §2 says Shift+Cmd+R
-  (Minty's ruling, S106).** RULES is later and is the authority.
-  Reconcile 3B to it or record why both exist.
-- Strip incident language. Session numbers, "cost 40 minutes in S71",
-  "old Section A said X" — the facts survive without the stories.
-- Delete the build-history header and the ROUTING RECORD. Both describe
-  a 2026 reorganisation and say nothing about the system.
+- ⚠ **3B.4 step 4 says Cmd+Q the browser; RULES §2 says Shift+Cmd+R**
+  (Minty's ruling, S106). RULES is later and is the authority.
+- **Add dev's private address 172.31.1.196** beside the public
+  16.55.10.205, so `hostname -I` output is never read as a mismatch.
+- Strip incident language. Delete the build-history header and the
+  ROUTING RECORD.
 
 ---
 
@@ -305,7 +374,21 @@ these are named exactly, not left as a search:**
 
 **Top candidates**
 
-- **P202** Node 18 is end of life. → THE NEXT JOB, above.
+- **P202b** Upgrade dev to Node 24. → THE NEXT JOB, above.
+- **P209** GitHub builder to Node 24. Parity with the boxes is
+  deliberate — settled S119, do not re-open. → THE JOB AFTER, above.
+  May be pulled into S120 if it finishes clean.
+  ⚠ Not dev-only: the builder makes prod's frontend too.
+- **P206** **MO material release panel shows ONE release per material,
+  not each distinct release.** Measured S119 on MO-0014: traceability
+  lists four Ginger Powder releases (916.471, 10, 100, 200 Kg) but the
+  MO's own Material/Products Release Details panel shows a single row of
+  916.471 — and it is not summing them either (that would be 1226.471).
+  ⚠ **PRE-EXISTING, NOT A NODE FINDING** — the 10 and 100 rows were
+  already there and already missing before anything was touched.
+  ⚠ A warehouse controller reading that MO cannot see what was actually
+  consumed. Find which query feeds the panel; suspect a join collapse or
+  a missing aggregate. Raised by Minty.
 - **Return path** — P163, **P164 (inverted sign, live on both clients)**,
   P165, P168, rows 20/42/43. Budget as a survey; never read end to end.
   ⚠ `PackingSlips.js:267` and `:419` subtract `currentToDate - returnQty`
@@ -315,34 +398,37 @@ these are named exactly, not left as a search:**
   and promoted. One planning session, no code. Needs a new column
   (TRAPS 3).
 - **P203** Neither box has ESM Apps enabled; 17 updates pending on dev,
-  36 on prod. Measured S118 after the reboot.
+  36 on prod. Measured S118, unchanged S119.
 
 - **P205** PM2 differs between boxes: **dev 7.0.3, prod 7.0.1**.
-  Measured S118. PM2 is installed GLOBALLY, outside package-lock's
-  control, so it drifts independently of every other version — it is
-  the one unmatched item in an otherwise identical stack. Both
-  resurrected correctly through the S118 reboot, so the behaviour
-  that matters is proven. Low, but it is the layer that keeps the
-  app alive. ⚠ package.json declares `pm2 ^5.3.0` and neither box
-  runs 5.x — the app's copy is not what runs.
-- **P204** 3B cites queue numbers that are not in this file — P1(b),
-  P3, P4, P12, P16, P21, P23, P28, P74, P76, P77. Either two
-  numbering schemes are live or NOW's queue has lost entries. Found
-  S118 while reading 3B. **Settle before ranking anything by number.**
+  Installed GLOBALLY, outside package-lock's control, so it drifts
+  independently. Both resurrected correctly through the S118 reboot.
+  ⚠ package.json declares `pm2 ^5.3.0` and neither box runs 5.x.
+- **P204** 3B cites queue numbers not in this file — P1(b), P3, P4, P12,
+  P16, P21, P23, P28, P74, P76, P77. **Settle before ranking by number.**
+- **P207** Waterline warns at every boot: null `description` on
+  `companyuserrole` and `roles`, null `createdAt`/`updatedAt` on
+  `company`. Old data against newer model definitions. Harmless in
+  itself — but it floods the error log, and **a real error would be
+  buried in it**. That is the only reason it matters. Measured S119.
+- **P208** `npm install` reports **110 vulnerabilities, 33 critical**, on
+  both Node 22 and 24. Unrelated to the engine. Not yet read in detail —
+  `npm audit` names them. Measured S119.
 
 **Units campaign leftovers** — board 38 green of 51, a deliberate stop.
-⚠ The Bible is **frozen as an archive at S117**. It describes the app as
-of the campaign's close and is consulted per row, not read at the open.
+⚠ The Bible is **frozen as an archive at S117**. Consulted per row.
 
 - **Rows 37-41** unblocked; the column is populated. Row 41 is cheapest
   and most visible — release details shows Kg with no unit count.
   ⚠ All history still reads 0 (the JR20/P170 trade); sooner is cheaper.
 - **P196** two intermediate blocks disagree by 0.011 Kg (0.004 on the
-  IP4 fixture). Display only. Re-seen S117 on MO-0016 and MO-0017.
+  IP4 fixture). Display only.
 - **P135** two divisions left in `Trace_ProductHeaderView`. Retires TRAPS 10.
 - **P198** `formulations.inventory` (the Kg line) carries float tails.
-  ⚠ Measured S117: the Kg line has **no floor and no rounding** — only
-  `inventory_units` gets `Math.round` and `Math.max(0,…)`. Low.
+  ⚠ The Kg line has **no floor and no rounding** — only `inventory_units`
+  gets `Math.round` and `Math.max(0,…)`. Low.
+  ⚠ Seen again S119: MO-0005 displays `4.8100000000000005 Kg` on the
+  material traceability screen. Same family. Stored history, not new.
 
 **Open, unranked**
 
@@ -369,19 +455,17 @@ differ · P158/P159 IP trace procedures divide · P166 field named ship_qty
 holds Kg · P167 seven-copy helper · P169 transposed labels · P170
 pre-JR15 MR rows read low · P171 unmapped quantity tables · P172 receipt
 code not unique · P173 nameless 0.000 row · P174 form control written
-into batches · P175 gate that cannot fail · P178 retention rule *(run
-S117, both boxes at three generations)* · P179 `formulations_myCodee`
-typo · P182 undocumented controls · P185 eval() on release screen, five
-sites · P189 possible double-count · P190 VARCHAR subtraction · P191 lot
-scanner undocumented · P192 final_qty from `batches` (fires only on
-duplicate rows) · P194/P195 Kg displays, correct under the S116 ruling
+into batches · P175 gate that cannot fail · P178 retention rule · P179
+`formulations_myCodee` typo · P182 undocumented controls · P185 eval() on
+release screen, five sites · P189 possible double-count · P190 VARCHAR
+subtraction · P191 lot scanner undocumented · P192 final_qty from
+`batches` (fires only on duplicate rows) · P194/P195 Kg displays, correct
+under the S116 ruling
 
 - **P200** Negative quantity accepted on the add-sales-order screen.
   `add-sales-order.component.html:84` has no `min`; `.ts:245` and `:249`
-  have no `Validators.min(0)`. A negative unit count multiplies cleanly
-  through `:256` and banks a negative Kg plan at `soproducts.quantity`.
-  Fix both. Frontend — needs a build and deploy.
-  ⚠ Check the sibling quantity-entry screens before calling it done.
+  have no `Validators.min(0)`. Fix both. Frontend — needs a build and
+  deploy. ⚠ Check the sibling quantity-entry screens before closing.
 - **P201** Acrobatics at `add-sales-order.component.ts:393`.
   `(quantity / batch_qty) × (batch_qty / wgt_kgs_per_unit)` — batch_qty
   cancels, so it divides a weight to make a unit count. Assigns
@@ -398,12 +482,11 @@ getMLCbyId/V2 · `PopUps/add-dispatch` v1 · `edit-mlc.ts:311,227` ·
 
 ## CLOSED — delete these lines at the next close
 
-**P102** (both boxes rebooted S118, verified on prod through Glutenull's
-own login) · **P177** (pm2 resurrect proven through a real reboot, both
-boxes, S118 — it was only ever recorded as enabled) · **P180** (the
-queue line was wrong and 3B was right: both boxes run Node v18.20.8.
-Superseded by P202) · P199 · P184 · P188 · P197 · P187 · P186 · P181 ·
-P183 · P160 · P162 · P151 · P157 · P147 · P161 · P104 · P150
+**P202** (Node 18 survey done S119: Node 24 installs, lifts, serves 200,
+and wrote a release correctly on dev. grunt 1.0.4 cleared. Node 22
+install proven, lift not needed. Superseded by P202b) · P102 · P177 ·
+P180 · P199 · P184 · P188 · P197 · P187 · P186 · P181 · P183 · P160 ·
+P162 · P151 · P157 · P147 · P161 · P104 · P150
 
 ---
 
@@ -416,7 +499,7 @@ P183 · P160 · P162 · P151 · P157 · P147 · P161 · P104 · P150
   long session, never both boxes at once. Dev first, standalone; prod
   only if dev resurrects cleanly. *(Proven S118.)*
 - **Dev does not rehearse prod's OS.** 24.04 against 26.04. State the
-  verdict out loud before relying on a dev result. *(S118.)*
+  verdict out loud before relying on a dev result. *(S118, held S119.)*
 - **Release input stays kilograms.** The unit count is derived once at
   the write, rounded to three decimals, and the same figure is banked in
   the row and subtracted from stock. *(Minty, S116)*
@@ -429,6 +512,11 @@ P183 · P160 · P162 · P151 · P157 · P147 · P161 · P104 · P150
 - **Materials are Kg only; anything carrying a formula_id carries
   units.** *(Minty, S112 — Bible Part 1 §5)*
 - **Traceability reports what was released at the time.** *(Minty, S112)*
+- **CI's Node stays in step with the boxes.** The builder is independent
+  of the runtime and need not match — but Minty rules that it DOES, on
+  purpose. 18 → 24, dev runtime first (S120), builder second (S121).
+  3B.4's "to match" wording stays; it gets a date and a version.
+  *(Minty, S119)*
 
 ---
 

@@ -1,6 +1,6 @@
 # RULES
 
-Last revised: S117.
+Last revised: S119.
 ⚠ S98 REWROTE THIS FILE WHOLE. Nineteen rules cut to SIX.
   MINTY, S98: "our principles have to be sound. So our rules have to be
   very sound." The old file had grown until the method was buried in
@@ -11,6 +11,11 @@ Last revised: S117.
   MATERIAL line now requires everything a job needs to be QUOTED INTO
   NOW rather than referenced, because a session now opens on RULES and
   NOW alone. And the RESERVE signal is added.
+⚠ S119 CHANGED ONE WORD IN RULE 4. It said `dotenvx`; it is `dotenv`.
+  package.json declares `dotenv ^17.4.2`, and the app printed dotenv's
+  own "◇ injected env" banner on screen at the S119 lift. 3B.8 carries
+  the same error and is corrected in S120. Changes no command — it
+  makes the credentials record true.
 ⚠ A NEW RULE IS ADDED ONLY WHEN A REAL FAILURE SHOWS SOMETHING MISSING,
   AND ONLY WITH MINTY'S APPROVAL. The default answer is NO.
 
@@ -190,7 +195,9 @@ ON THE BOXES — .env, each box, never in git
   S3_SECRET
   SMTP_USER         ⚠ actually an AWS IAM key ID, not SMTP
   SMTP_PASSWORD     ⚠ actually the IAM secret
-  ⚠ dotenvx loads at runtime — `pm2 env` does NOT list them.
+  ⚠ dotenv loads at runtime — `pm2 env` does NOT list them.
+    (S119: it is `dotenv`, not `dotenvx`. package.json declares
+     dotenv ^17.4.2 and the lift prints its own banner.)
 
 ON BOTH BOXES
   ~/.my.cnf         DB password, chmod 600.
@@ -425,7 +432,7 @@ DISPLAY  three decimal places.
              job needs — see RULE 6.
 
 ON DEMAND, when the work reaches them:
-  TRAPS.md        what fails SILENTLY. Ten entries. Cut deliberately.
+  TRAPS.md        what fails SILENTLY. Eleven entries. Cut deliberately.
   Bible Part 1    the quantity rules. Minty's.
   3A              the app, module by module.
   3B              boxes, databases, pipeline, DNS, printer.
