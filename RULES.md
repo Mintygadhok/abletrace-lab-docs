@@ -16,6 +16,11 @@ Last revised: S119.
   own "◇ injected env" banner on screen at the S119 lift. 3B.8 carries
   the same error and is corrected in S120. Changes no command — it
   makes the credentials record true.
+⚠ S121 ADDED ONE LINE TO THE OPEN BLOCK — `node -v`. Minty's ruling.
+  Until S120 both boxes ran the same engine and the check did not need
+  to read it. They now differ: dev runtime 24, prod runtime 18, and the
+  CI builder 20 (Angular 18 caps at Node 20 — S121). Three versions in
+  play, and the check could not see any of them. Costs one line.
 ⚠ A NEW RULE IS ADDED ONLY WHEN A REAL FAILURE SHOWS SOMETHING MISSING,
   AND ONLY WITH MINTY'S APPROVAL. The default answer is NO.
 
@@ -44,6 +49,7 @@ git -C ~/abletrace-lab-frontend status --short
 git -C ~/abletrace-lab-backend status --short
 pm2 status
 curl -s -o /dev/null -w "%{http_code}\n" localhost:1337
+node -v
 ```
 
 ON PROD ONLY, add this seventh line. Prod's git checkout LAGS the served
