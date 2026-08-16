@@ -1,6 +1,6 @@
 # RULES
 
-Last revised: S119.
+Last revised: S121.
 ⚠ S98 REWROTE THIS FILE WHOLE. Nineteen rules cut to SIX.
   MINTY, S98: "our principles have to be sound. So our rules have to be
   very sound." The old file had grown until the method was buried in
@@ -212,11 +212,15 @@ ON BOTH BOXES
 ON THE MAC
   SSH KEY           ~/.ssh/abletrace-lab-key.pem
                     ⚠ Not on either box. Backup in Drive.
-  GITHUB PAT        Mac keychain, used for all Mac pushes.
 
 ELSEWHERE
-  GITHUB PAT        Minty's Drive note (the record).
-                    Embedded in dev's BACKEND remote URL.
+  GITHUB PAT        ⚠⚠ ONE CREDENTIAL, THREE PLACES, SAME STRING.
+                    Fingerprint fd24c9618394, 40-char classic PAT.
+                    Measured S122.
+                      Mac keychain — all Mac pushes
+                      dev's BACKEND remote URL
+                      Minty's Drive note — the record
+                    ⚠ A ROTATION MUST CHANGE ALL THREE.
                     ⚠ Dev's frontend remote is clean.
   AWS CONSOLE       Minty. NEW 208073623096 · OLD 350466202408
   GODADDY           Minty. Both domains registered here.
@@ -302,6 +306,9 @@ THE CLOSE PRODUCES THE PLAN. Every job in it carries:
   detail belongs in the code comment and in NOW, not repeated in
   all three. Minty's ruling S99.
 ⚠ Do not start work that cannot be recorded.
+⚠⚠ REPLACE NOW IN PROJECT KNOWLEDGE AT EVERY CLOSE. NOW goes stale
+  the moment it is rewritten, and a stale document that is SEARCHABLE
+  is worse than one that is absent. Minty's ruling, S124.
 ⚠ Claude raises the close; Minty decides.
 
 ⚠⚠ CLAUDE SAYS "RESERVE" WHEN ITS GRIP STARTS TO LOOSEN.
@@ -437,12 +444,17 @@ DISPLAY  three decimal places.
              each session. ⚠ It must carry everything the next
              job needs — see RULE 6.
 
+⚠⚠ THE GIT REPO IS THE ARBITER. Project knowledge is a MIRROR of it
+  and can go stale. When the two disagree, the repo wins. Minty's
+  ruling, S124.
+
 ON DEMAND, when the work reaches them:
   TRAPS.md        what fails SILENTLY. Eleven entries. Cut deliberately.
   Bible Part 1    the quantity rules. Minty's.
   3A              the app, module by module.
   3B              boxes, databases, pipeline, DNS, printer.
-  Section 5 / JR  the database record. NONE of it is in git.
+  Section 5 / JR  the database record. ⚠ Section_5.md IS in git;
+                  measured S123. The rest of the record is not.
 
 ⚠ NO DEDICATED TIDY-UP SESSION. A document is cleaned by whichever
   session next opens it. Minty's ruling, S117.
