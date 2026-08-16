@@ -22,7 +22,9 @@ THREE          ⚠ THERE ARE THREE ENVIRONMENTS, not two. Old Section A
 ENVIRONMENTS   said two for ~30 sessions and it was wrong.
 
   PROD    trace.mintekfoodsafety.com   NEW account   ⚠ LIVE CLIENT
-  DEV     dev.mintekfoodsafety.com     NEW account   true twin of prod
+  DEV     dev.mintekfoodsafety.com     NEW account   ⚠ NOT A TWIN
+                                                     Ubuntu 24.04 against
+                                                     prod's 26.04. See 3B.2.
   OLD APP abletrace.ca                 OLD account   2 legacy clients
                                                      → see 3B.10
 
@@ -55,15 +57,21 @@ DEV    abletrace-lab-dev    i-098e2cc59844d9ef3   t3.small   Running
   conclusion is unaffected either way: 2 GB cannot build Angular.
 
 PROD ELASTIC IP   15.157.38.101   (permanent, public)
+                  private 172.31.3.156
 DEV ELASTIC IP    16.55.10.205    (eipalloc-0c1a1db8451091427)
+                  private 172.31.1.196
 ⚠ Two other EIPs in the account (15.223.243.179, 16.54.131.69) are
   RDS-MANAGED — not releasable, not associable. Leave them. [J63]
 
 ⚠⚠ OS — THE TWO BOXES ARE NOT ON THE SAME OPERATING SYSTEM.
    Verified S79 from /etc/os-release on both, not from a banner.
 
-   PROD   Ubuntu 26.04 LTS "resolute"    kernel 7.0.0-1004-aws
-   DEV    Ubuntu 24.04.4 LTS "noble"     kernel 6.17.0-1017-aws
+   PROD   Ubuntu 26.04 LTS "resolute"    kernel 7.0.0-1010-aws
+   DEV    Ubuntu 24.04.4 LTS "noble"     kernel 7.0.0-1010-aws
+   ⚠ KERNELS MEASURED S122. BOTH BOXES NOW READ THE SAME KERNEL
+     STRING. THIS DOES NOT SOFTEN ANYTHING BELOW — the OS releases
+     are still two majors apart and the same kernel is not the same
+     operating system.
 
    ⚠ TWO MAJOR RELEASES APART. This is not drift that was spotted and
      left — it was never known. Both prior records were half-right:
@@ -77,16 +85,27 @@ DEV ELASTIC IP    16.55.10.205    (eipalloc-0c1a1db8451091427)
      leans against a release upgrade having run.
      ⚠ DO NOT WRITE A CAUSE INTO THIS BLOCK LATER WITHOUT EVIDENCE.
      An invented cause is how the t2/t3 and ship_qty phantoms started.
-   ⚠ CONSEQUENCE: rebooting dev does NOT rehearse rebooting prod. → P21
+   ⚠ CONSEQUENCE: rebooting dev does NOT rehearse rebooting prod.
+     → P102, DONE S118. Dev first is right because dev has NO CLIENTS,
+     not because it is a twin.
 
-NODE       v18.20.8 on BOTH boxes. ⚠ VERIFIED S79, `node -v`, both.
-           CI pins Node 18 to match.
+NODE       ⚠⚠ THE RUNTIMES DIFFER. Measured S122.
+  DEV      v24.19.0 · npm 11.17.0 · pm2 7.0.3
+           /usr/bin/node · apt nodejs 24.19.0-1nodesource1
+           repo node_24.x · no nvm
+           rollback file /home/ubuntu/nodesource.list.bak-S120
+  PROD     v18.20.8 · npm 10.8.2 · pm2 7.0.1
+           apt nodejs 18.20.8-1nodesource1
+           repo deb.nodesource.com/node_18.x
+           ⚠ PINNED AT 600 against Ubuntu's own 22.22.1 at 500. The
+           pin is why apt has never pulled a newer Node on its own.
+  ▶ PROD'S INSTALL METHOD IS NODESOURCE, THE SAME AS DEV'S, so the
+    dev upgrade route transfers. → P210, prod to Node 24.
+  CI       builder Node 20. Angular 18 caps there. See 3B.4.
 
-⚠ "SYSTEM RESTART REQUIRED" — PENDING SINCE S35, STILL SHOWING.
-  Do NOT reboot casually and do NOT reboot mid-work. It is its own
-  clean step: verify pm2 resurrects on the 26.04 kernel (pm2 save /
-  pm2 startup) BEFORE relying on it, then reboot standalone.
-  ⚠ DO DEV FIRST — it is a true twin, so it is a real rehearsal. → P21
+⚠ A REBOOT IS ITS OWN STEP. Never mid-work, never both boxes at once,
+  dev first and standalone. The S35 restart notice was cleared at S118
+  and pm2 startup is configured on both boxes. → P102, closed.
 
 PM2        prod = abletrace-backend      dev = abletrace-dev
            ⚠ NEVER `pm2 restart all`. Always the NAMED process.
@@ -115,7 +134,10 @@ KEY        ~/.ssh/abletrace-lab-key.pem   ON THE MAC, chmod 600.
   box. If the prompt reads ubuntu@ip-172-31-... you are ON the box and
   scp will fail with "Identity file not accessible". `whoami` to check.
 
+⚠ READ OUT OF promote.sh, NOT GUESSED. ~/.ssh/config has NO host entry
+  for either box, so the full command is the only way in.
 PROD       ssh -i ~/.ssh/abletrace-lab-key.pem ubuntu@15.157.38.101
+DEV        ssh -i ~/.ssh/abletrace-lab-key.pem ubuntu@16.55.10.205
 
 ⚠ DEV SSH — LEARNED THE HARD WAY S73, DO NOT RE-DERIVE:
   Dev SG inbound SSH/22 allows ONE IPv4 /32 — Minty's home address.
@@ -125,7 +147,8 @@ PROD       ssh -i ~/.ssh/abletrace-lab-key.pem ubuntu@15.157.38.101
   IF DEV SSH TIMES OUT: run `curl -4 ifconfig.me`, put THAT /32 on the
   rule, connect with -4. ⚠ Prod SSH is more permissive so prod still
   connects — that difference IS the tell that it is a dev-SG issue.
-  → P23 (add an IPv6 rule so this stops recurring).
+  → P224 (add an IPv6 rule so this stops recurring). Raised S124; the
+    old P23 number appears in no queue.
 ```
 
 ### ⚠ PROMPT COLOURS — check before every command
@@ -287,14 +310,23 @@ FULL DUMP   /home/ubuntu/abletrace-pre-upgrade-20260701.sql (116 MB,
               was wrong and had stood for an unknown number of sessions.
               PROD REQUIRES A MANUAL DISPATCH with target=prod.
               A MANUAL DISPATCH takes a `target` input (prod|dev).
-              Runner ~7 GB RAM, Node pinned 18,
-              NODE_OPTIONS=--max-old-space-size=4096. ~9 min.
+              Runner ~7 GB RAM.
+              CI pins Node to the highest the toolchain accepts.
+              18 → 20, S121. Angular 18 caps at Node 20; the runtime
+              is on 24. The gap is deliberate and closes only when
+              Angular is upgraded (P217).
+              .github/workflows/build-frontend.yml line 27 sets the
+              version; NODE_OPTIONS=--max-old-space-size=4096 is at
+              line 40. ~9 min.
               Artifact name: dist-<target>-<sha>
               ⚠ <sha> IS THE FULL 40-CHARACTER SHA, not the short form.
               e.g. dist-prod-275c025039d77a3b88b6e5e1b5671108d33d389a
 
-2  PROMOTE    ~/promote.sh ON THE MAC.
+2  PROMOTE    ~/promote.sh ON THE MAC. ⚠ NOT IN VERSION CONTROL → P215.
               Usage:  ~/promote.sh <artifact.zip> <dev|prod>
+              Label = target + the FIRST 12 of the sha. ⚠ Older
+              backups on the boxes carry the full 40, so the two
+              naming styles sit side by side.
               Unzips → scp to the box's /home/ubuntu/dist-<label> →
               ssh and run deploy-frontend.sh there.
               ⚠ SAFETY GUARD: refuses to push a dist-dev-* artifact to
@@ -312,13 +344,14 @@ FULL DUMP   /home/ubuntu/abletrace-pre-upgrade-20260701.sql (116 MB,
 
 4  VERIFY     ⚠ CONFIRM THE ARTIFACT PREFIX MATCHES THE TARGET
               (dist-dev- / dist-prod-).
-              ⚠ THEN Cmd+Q THE BROWSER. A hard reload does NOT clear
-              lazy-loaded chunks — popups and the HACCP module cache
-              separately from the main bundle. Empty-Cache-Hard-Reload
-              and even LOGOUT do not do it. Only a full quit. [J66]
+              ⚠ THEN Shift+Cmd+R IN CHROME. Minty's ruling, S106 —
+              RULES §2 is the authority on this and supersedes the
+              old Cmd+Q instruction. ⚠ promote.sh's last echo line
+              still said Cmd+Q and was corrected in the same pass.
+              (J66 recorded the original lazy-chunk finding.)
 
 ⚠ BOTH SCRIPTS ARE ON-BOX / MAC ONLY, NOT IN GIT. Drive is the only
-  other copy and /home/ubuntu is not backed up. → JR14 · P16
+  other copy and /home/ubuntu is not backed up. → JR14 · P215
 ```
 
 ### BACKEND DEPLOY — different, simpler
@@ -342,16 +375,30 @@ curl -s -o /dev/null -w "%{http_code}\n" localhost:1337    → expect 200
 Every deploy leaves /home/ubuntu/www-html.bak-<label>. Restore by
 copying it back over /var/www/html.
 
-CURRENT ROLLBACK POINTS (S91):
-  www-html.bak-prod-275c025039d7
-  www-html.bak-dev-275c025039d7
-⚠ A BACKUP DIRECTORY HOLDS THE BUILD THAT WAS REPLACED, NOT THE ONE IT
-  IS NAMED AFTER. See TRAPS. The newest backup name tells you what is
-  CURRENTLY SERVED — the only reliable way to read that.
+CURRENT ROLLBACK POINTS — READ OFF THE BOXES S122.
+⚠ THE TWO LISTS DIVERGE, CORRECTLY. Never copy one box's onto the other.
+  PROD
+    /home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031
+    /home/ubuntu/www-html.bak-prod-e1a82e028903ec317399de1bf2dc8be14a2f1030
+    /home/ubuntu/www-html.bak-prod-2968c59142dc9144e2f6f0fb9925bcdf43f9e1a1
+    /home/ubuntu/www-html.bak-prod-e8e8f5724cdfb9dc0734daabf5b10ae5d91ce8d4
+    /home/ubuntu/www-html.bak-prod-bc03b22dc375ba51bd81b18ffb4299b36aa34ab8
+  DEV's fifth is 8bbf2c30 where prod's is bc03b22d.
+⚠ ALWAYS READ THE PATH OFF THE BOX, never write it from a build label.
+  It is the one thing that must be right before it is needed.
+
+⚠⚠ THE BACKUP-NAME TRAP. deploy-frontend.sh NAMES the backup for the
+  build being DEPLOYED, but the directory CONTAINS the build being
+  REPLACED. www-html.bak-dev-9523b9131a86 holds 4910b46d.
+  ▶ SO THE NAME IS TRUE ABOUT WHAT IS LIVE, and the newest backup name
+    is the reliable read of the served build — which is why RULES' OPEN
+    block reads it. THE CONTENTS ARE THE TRAP: restoring by name
+    restores the wrong build.
+  ⚠ NOT A TRAPS ENTRY. Minty's ruling, S122 — it belongs here. → P219
 
 ⚠ PROD'S FRONTEND GIT CHECKOUT LAGS THE SERVED BUILD. It reads
   9bce0238 and has for a long time; prod SERVES whatever was last
-  promoted (prod-275c025039d7 as of S91). The deploy swaps built files
+  promoted (4910b46d as of S122). The deploy swaps built files
   into /var/www/html; the git checkout is not what is served.
   ⚠ READING A FILE FROM PROD'S CHECKOUT SHOWS CODE THAT IS NOT LIVE.
   This caused a stale read in S70. Cosmetic to fix (a git pull tidies
@@ -359,7 +406,8 @@ CURRENT ROLLBACK POINTS (S91):
 
 ⚠ SWEEP THE MAC's ~/Downloads. 11+ old build artifacts back to S61.
   promote.sh deploys whatever zip you name — a stale-zip promote is a
-  real risk. → P12
+  real risk. → P225, raised S124; the old P12 number appears in no
+  queue. RULES §6 makes clearing Downloads a close step.
 ```
 
 ---
@@ -551,12 +599,21 @@ WHAT EXISTS
   S3_ACCESS_KEY     NEW-account key
   S3_SECRET
   SESSION_SECRET    signs user sessions
-  GitHub PAT        embedded in both repo remote URLs
+  GitHub PAT        ⚠⚠ ONE CREDENTIAL, THREE PLACES, SAME STRING.
+                    Fingerprint fd24c9618394, 40-char classic PAT.
+                    Mac keychain · dev's BACKEND remote URL ·
+                    Minty's Drive note. A rotation must change all
+                    three. ⚠ DEV'S FRONTEND REMOTE IS CLEAN — the
+                    old "both repo remote URLs" claim was wrong.
+                    Measured S122. ▶ NOT ROTATED: never exposed.
   PEM key           SSH → 3B.2
 
 WHERE      All backend secrets live in `.env` ON THE SERVER, never in git.
-           ⚠ dotenvx loads .env at RUNTIME, so `pm2 env` does NOT list
+           ⚠ dotenv loads .env at RUNTIME, so `pm2 env` does NOT list
            them. Verify by grepping .env for NAMES, never values.
+           ⚠ IT IS `dotenv`, NOT `dotenvx`. package.json declares
+           dotenv ^17.4.2 and the app prints dotenv's own banner at
+           boot. Corrected S124; RULES §4 was corrected at S119.
            (Nearly chased a phantom "S3 broken" bug on this in S35.)
 
 ROTATION   ⚠ GENERATE STRAIGHT INTO A FILE, NEVER PRINT TO SCREEN, NEVER
@@ -754,30 +811,16 @@ BUILD vs SERVE          Stop any local http.server holding dist/ BEFORE
 
 ---
 
-## ⚠ ROUTING RECORD — where the rest of old Section A went (S79)
+## 3B.12 THE REPOS ON THE MAC — added S124
 
 ```
-Roughly half of Section A was never infrastructure. Recorded here so a
-future reader does not go looking for it in 3B.
-
-→ §2 (WHY)     A7 licence lifecycle · A11 quantity/HACCP/packing rules ·
-               A16 NgRx pattern · A18 bulk actions + soft delete ·
-               A6's module-licensing half
-→ 3A           A9 · A10 · A15 file maps · A24 role/task nav (→ 3A.8 and
-               §2 Logic E) · A6's module half
-→ §4 (LOOK)    A23 design system — font, palette, tiles, rail.
-               ⚠ THIS IS P1(b)'s INCOMING MATERIAL.
-→ §5           A25 proc discipline (already JR) · the three S69 entries
-               misfiled under A (they are J-entries: J71, J72, and a
-               deploy record)
-→ §0           A's "SESSION 0" block — wholly superseded by Section 0
-→ DELETED      the S66 DEV ENVIRONMENT block, which appeared TWICE
-               verbatim · "CURRENT POSITION (S42 close)", 37 sessions
-               stale · A12's on-box build recipe · A13's "two
-               environments" · A1's Ubuntu 24.04 and `abletrace`-as-live
-               · the A-S61 "t2.small correction", which was itself wrong
-
-⚠ ONCE THIS SECTION IS APPROVED, SECTION A IS DELETED, NOT EDITED. → P22
+FRONTEND   /Users/mintym1/abletrace-lab-frontend
+           Edited HERE, never on dev — dev's copy is overwritten by
+           the next deploy and is seventeen sessions stale.
+DOCS       /Users/mintym1/abletrace-lab-docs
+           Thirteen text files. ⚠ Section_5.md IS in git.
+BACKEND    edited, committed and pushed ON DEV. No build step — Node
+           runs the source. The asymmetry is DELIBERATE.
 ```
 
 ---
