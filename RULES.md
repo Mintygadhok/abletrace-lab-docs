@@ -1,26 +1,16 @@
 # RULES
 
-Last revised: S121.
-⚠ S98 REWROTE THIS FILE WHOLE. Nineteen rules cut to SIX.
-  MINTY, S98: "our principles have to be sound. So our rules have to be
-  very sound." The old file had grown until the method was buried in
-  the history that earned it. The lessons are kept; the stories are not.
-⚠ S105 ADDED RULE 7 · QUANTITY. Committed at 5b2cb9e.
-⚠ S106 CHANGED ONE LINE in RULE 2 — the browser reload. Minty's ruling.
-⚠ S117 CHANGED TWO THINGS IN RULE 6, BOTH ON MINTY'S RULING. The
-  MATERIAL line now requires everything a job needs to be QUOTED INTO
-  NOW rather than referenced, because a session now opens on RULES and
-  NOW alone. And the RESERVE signal is added.
-⚠ S119 CHANGED ONE WORD IN RULE 4. It said `dotenvx`; it is `dotenv`.
-  package.json declares `dotenv ^17.4.2`, and the app printed dotenv's
-  own "◇ injected env" banner on screen at the S119 lift. 3B.8 carries
-  the same error and is corrected in S120. Changes no command — it
-  makes the credentials record true.
-⚠ S121 ADDED ONE LINE TO THE OPEN BLOCK — `node -v`. Minty's ruling.
-  Until S120 both boxes ran the same engine and the check did not need
-  to read it. They now differ: dev runtime 24, prod runtime 18, and the
-  CI builder 20 (Angular 18 caps at Node 20 — S121). Three versions in
-  play, and the check could not see any of them. Costs one line.
+Last revised: S125.
+
+TWO PRINCIPLES GOVERN EVERYTHING BELOW. Minty's ruling, S125.
+  MEASURE, DON'T STORE.
+  REPLACE, DON'T PATCH.
+⚠ MEASURE MEANS CHEAPLY. A finding that cost a session and cannot be
+  repeated safely stays until the job that needs it is done.
+⚠ REPLACE GOVERNS DOCUMENTS, NOT CODE. And it means READ FIRST — a
+  document nobody has read is retired or left alone, never rewritten
+  blind.
+
 ⚠ A NEW RULE IS ADDED ONLY WHEN A REAL FAILURE SHOWS SOMETHING MISSING,
   AND ONLY WITH MINTY'S APPROVAL. The default answer is NO.
 
@@ -52,7 +42,7 @@ curl -s -o /dev/null -w "%{http_code}\n" localhost:1337
 node -v
 ```
 
-ON PROD ONLY, add this seventh line. Prod's git checkout LAGS the served
+ON PROD ONLY, add this eighth line. Prod's git checkout LAGS the served
 build, so this is the only reliable read of what is actually live:
 
 ```
@@ -60,10 +50,12 @@ ls -1dt /home/ubuntu/www-html.bak-* | head -1
 ```
 
 ⚠ Expect clean trees, the NAMED process online, and 200.
-⚠ COMPARE AGAINST NOW's STATE BLOCK. If they differ, STOP and reconcile
-  the record before doing any work.
-⚠ CHECK NOW's "Last rewritten" LINE FIRST. If it is stale, the STATE
-  block is not a valid comparison target and THE BOXES ARE THE ARBITER.
+⚠ THIS CHECK IS THE ARBITER. It measures commits, process, port,
+  runtime and dirty trees. NOW does not carry a copy of any of it, so
+  there is nothing to reconcile against — what the boxes say is true.
+⚠ NOW's STATE says only what no command returns: what is DELIBERATE,
+  and what is HALF-DONE. Read it for intent, then treat anything the
+  check shows that intent does not explain as a FINDING.
 ⚠ After any backend restart, sleep 8 before the curl. 000 means Sails is
   still booting, not that it crashed.
 ⚠ THIS CHECK DOES NOT COMPARE THE DATABASE OR THE HOST OS. A passing
@@ -84,11 +76,12 @@ ls -1dt /home/ubuntu/www-html.bak-* | head -1
      which ROUTE       → the code line
      does it RUN       → grep the caller
 
-⚠ BEFORE ANY CHECK, state what result would distinguish the two
-  answers. If no result could, it is not a check.
-⚠ Reason only from VERIFIED information — the screen, the row,
-  the code line. When a claim can be checked, ask Minty to look
-  before reasoning about it.
+⚠ A CHECK MUST BE ABLE TO FAIL. Before running it, say what result
+  would distinguish the two answers; if no result could, it is not a
+  check. ⚠ And it must not match text the patch itself introduced,
+  comments included.
+⚠ When a claim can be checked, ask Minty to look before reasoning
+  about it.
 ⚠ A screen proves BEHAVIOUR, never a saved value.
 ⚠ When ENTERED and STORED disagree, read the save code, not the
   form. A form can send a hidden value instead of the one typed.
@@ -99,10 +92,6 @@ BEFORE CHANGING A NUMBER — two greps, both cheap:
   where is this number USED?
   is the same mistake made ELSEWHERE?
 
-BEFORE TRUSTING A CHECK — could it have failed? A check that
-cannot return a pass is not a check. ⚠ And a check must not
-match text the patch itself introduced, comments included.
-
 BEFORE UNDOING — a revert is a trade, not a fix. Say what the
 commit was fixing and name both sides.
 
@@ -112,13 +101,10 @@ written as you commit. Never afterwards.
 ⚠ NOTHING IS DONE UNTIL IT IS VERIFIED ON THE SCREEN. Deployed is
   not proven. Say which it is, every time.
 
-⚠ IF THE ANSWER IS NOT IN THE APP, IT IS IN A DOCUMENT. Ask Minty
-  for it BY NAME before acting.
-    §2   the business logic
-    3A   the app, module by module
-    3B   the infrastructure — boxes, databases, pipeline, DNS,
-         printer
-    JR   the database rebuild record (in Section 5)
+⚠ ASK THE BOX BEFORE ASKING FOR A DOCUMENT. If a command returns
+  the answer, run the command.
+⚠ IF THE ANSWER IS NOT IN THE APP AND CANNOT BE MEASURED, IT IS IN
+  A DOCUMENT. Ask Minty for it BY NAME. The list is in THE FILES.
 ```
 
 ---
@@ -176,8 +162,6 @@ A wrong value already STORED stays wrong until someone changes it.
 
 ⚠ Before any heal: back up the row, scope by id AND company_id,
   and say out loud that it is a live write.
-⚠ Zero wrong rows is the common answer and it ends the question.
-  Query before assuming either way.
 ⚠ A FIGURE THAT RECORDS WHAT PHYSICALLY HAPPENED IS NOT A WRONG
   ROW. Minty's ruling S106 on the 0.08 clamshell over-release:
   the release figure is the true record of what was picked, even
@@ -202,12 +186,9 @@ ON THE BOXES — .env, each box, never in git
   SMTP_USER         ⚠ actually an AWS IAM key ID, not SMTP
   SMTP_PASSWORD     ⚠ actually the IAM secret
   ⚠ dotenv loads at runtime — `pm2 env` does NOT list them.
-    (S119: it is `dotenv`, not `dotenvx`. package.json declares
-     dotenv ^17.4.2 and the lift prints its own banner.)
 
 ON BOTH BOXES
   ~/.my.cnf         DB password, chmod 600.
-                    ⚠ Dev's was built from .env by Node script.
 
 ON THE MAC
   SSH KEY           ~/.ssh/abletrace-lab-key.pem
@@ -215,8 +196,6 @@ ON THE MAC
 
 ELSEWHERE
   GITHUB PAT        ⚠⚠ ONE CREDENTIAL, THREE PLACES, SAME STRING.
-                    Fingerprint fd24c9618394, 40-char classic PAT.
-                    Measured S122.
                       Mac keychain — all Mac pushes
                       dev's BACKEND remote URL
                       Minty's Drive note — the record
@@ -283,20 +262,32 @@ never renumbers. ⚠ Ranking is Minty's.
 ```
 ⚠ Nothing is closed until it is COMMITTED AND PUSHED.
 
-THE CLOSE PRODUCES THE PLAN. Every job in it carries:
-  the ACTION      what to do, in order
-  the MATERIAL    everything the job needs, QUOTED IN, not referenced.
-                  ⚠ A POINTER TO ANOTHER DOCUMENT IS A RE-DERIVATION.
-                    If the next session must open a second file to
-                    start, THE CLOSE FAILED.
-                  ⚠ A session opens on RULES and NOW. Anything the job
-                    needs from any other document is copied into NOW
-                    at the close, in the job block, in full.
-  the ANALYSIS    the thinking already done
-  the VERIFY      what must be seen on screen to call it done
+THE CLOSE PRODUCES THE LAUNCHPAD. Minty's ruling, S125.
+  1  ONE JOB, substantial. Named at the SESSION MIDPOINT, not at
+     the close — homework then happens as capacity allows.
+  2  DO ITS HOMEWORK NOW. Measurements, paths, dependencies,
+     prerequisites, rollback. Discovery belongs to this session.
+  3  WRITE IT INTO NOW so the next session starts without
+     rediscovery and without reopening a previous chat.
+       the ACTION    what to do, in order
+       the MATERIAL  everything THAT JOB needs, QUOTED IN, in full.
+                     ⚠ A POINTER TO ANOTHER DOCUMENT IS A
+                       RE-DERIVATION.
+                     ⚠ JOB-SCOPED ONLY. Anything not about this job
+                       is measured when it is needed.
+       the ANALYSIS  the thinking already done
+       the VERIFY    what must be seen on screen to call it done
+  4  STATE IS INTENT, NOT FACTS. The open check measures commits,
+     process, port, runtime and dirty trees. STATE carries only
+     what no command returns: what is DELIBERATE, and what is
+     HALF-DONE.
+  5  DELETE what is finished, temporary or no longer relevant. Do
+     not carry it forward and do not file it elsewhere.
 
-⚠ If the next session has to re-derive something this one
-  already knew, the close failed.
+THE TEST: can the next session open NOW and start meaningful work?
+⚠ Optimise the close for the next session's OPENING OVERHEAD, not
+  for a record of the system. NOW is a launchpad, not a database.
+
 ⚠ Tidy here and ONLY here — temp files, patch scripts, stale
   downloads. Never at the start of a session.
 ⚠ CLEAR THE DOWNLOADS AT THE CLOSE. Verify the STAMP after
@@ -307,8 +298,8 @@ THE CLOSE PRODUCES THE PLAN. Every job in it carries:
   all three. Minty's ruling S99.
 ⚠ Do not start work that cannot be recorded.
 ⚠⚠ REPLACE NOW IN PROJECT KNOWLEDGE AT EVERY CLOSE. NOW goes stale
-  the moment it is rewritten, and a stale document that is SEARCHABLE
-  is worse than one that is absent. Minty's ruling, S124.
+  the moment it is rewritten, and a stale document that is
+  SEARCHABLE is worse than one that is absent. Minty's ruling, S124.
 ⚠ Claude raises the close; Minty decides.
 
 ⚠⚠ CLAUDE SAYS "RESERVE" WHEN ITS GRIP STARTS TO LOOSEN.
@@ -338,10 +329,6 @@ THE CLOSE PRODUCES THE PLAN. Every job in it carries:
   ⚠ WHAT MAKES THE RESERVE ARRIVE SOONER: large pastes. A whole
     document, a wide query, a long file dump. Ask for the block,
     not the file.
-
-⚠ WRITE THE STATE BLOCK FROM THE BOXES AT CLOSE, AND WRITE THE
-  GITHUB LINE FROM GITHUB. S106 opened with NOW claiming a docs
-  commit was pending that had in fact been pushed.
 ```
 
 ---
@@ -440,9 +427,8 @@ DISPLAY  three decimal places.
 ⚠⚠ A SESSION OPENS ON TWO. Minty's ruling, S117.
 
   RULES.md   how we work. Rarely edited.
-  NOW.md     state, the next job, and the queue. Rewritten whole
-             each session. ⚠ It must carry everything the next
-             job needs — see RULE 6.
+  NOW.md     the launchpad. Intent, the next job, and the queue.
+             Rewritten whole each session — see RULE 6.
 
 ⚠⚠ THE GIT REPO IS THE ARBITER. Project knowledge is a MIRROR of it
   and can go stale. When the two disagree, the repo wins. Minty's
@@ -459,6 +445,6 @@ ON DEMAND, when the work reaches them:
 ⚠ NO DEDICATED TIDY-UP SESSION. A document is cleaned by whichever
   session next opens it. Minty's ruling, S117.
 ⚠ Anything worth keeping must NOT live in NOW. It is rewritten whole.
-⚠ DOC EDITS ARE PATCHES. Pull first, patch, diff, commit, push.
-  Run patch scripts from /tmp and delete them.
+⚠ DOC EDITS ARE REPLACEMENTS. Pull first, replace the file whole,
+  diff, commit, push.
 ```
