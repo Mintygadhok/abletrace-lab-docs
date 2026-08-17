@@ -1,352 +1,191 @@
-NOW — S124 close, 16 Aug 2026
-State, next job, queue. Nothing else.
+# NOW
 
-⚠⚠ A SESSION OPENS ON TWO FILES: RULES AND THIS ONE. (Minty, S117) Everything else is consulted ON DEMAND, when the work touches it: BUSINESS LOGIC (Bible Part 1 = Section_2.md) · 3A the app · 3B infrastructure · Section 5 / JR the database record · TRAPS (eleven entries). ▶ NO DEDICATED TIDY-UP SESSION. A document is cleaned when it is next opened, by the session that opens it. (Minty, S117)
+S125 close, 16 Aug 2026.
 
-⚠⚠ SIX OF THOSE FILES ARE NOW IN PROJECT KNOWLEDGE AND ARE SEARCHABLE WITHOUT A PASTE. Built S124. Section_3B.md and Section_4.md are NOT — see THE MIRROR below.
+A session opens on **RULES** and this file. Everything else on demand.
 
-What does not go here: lessons, narrative, retrospectives, proof write-ups. A lesson becomes a RULES line, a TRAPS entry, or a comment beside the code. If it fits none of those it goes nowhere.
+This is a launchpad: state, one job, the pending list. Facts the open check measures are not written here.
 
-STATE — BOXES MEASURED AT THE S124 OPEN. NEITHER BOX WAS TOUCHED ALL SESSION.
-⚠ Every S124 command ran on the MAC, in the docs repo. No deploy, no pull,
-  no restart, no database write on either box. The readings below are the
-  S124 open, and they are still true. The MAC line is written from the push.
+---
 
-DEV   16.55.10.205 (private 172.31.1.196)  Ubuntu 24.04.4 LTS
-      Node v24.19.0 · pm2 abletrace-dev  online  ↺0  200
-      backend 99852bf · frontend checkout c2a52d8e (stale, harmless)
-      ⚠ ?? node_modules.old-node18/ — the 303 MB Node-18 rollback tree.
-        ▶ STILL PRESENT. Deferred S122 → S123 → S124. THREE SESSIONS.
-        DELETE AT THE S125 CLOSE IF DEV IS STILL CLEAN — Minty's call.
+## STATE
 
-PROD  15.157.38.101 (private 172.31.3.156)  Ubuntu 26.04 LTS
-      Node v18.20.8 · pm2 abletrace-backend  online  ↺0  200
-      backend 99852bf · frontend checkout 9bce0238 (P8, by design)
-      live build 4910b46d, read off the newest backup name
-      both trees CLEAN, nothing untracked
-      ⚠⚠ **PROD IS STILL ON NODE 18. THE RUNTIMES DIFFER.** → P210
+### Deliberate — do not "fix" these
 
-MAC   /Users/mintym1/abletrace-lab-frontend  HEAD 9523b913, clean
-      Docs repo /Users/mintym1/abletrace-lab-docs at **e38c20b**
-      ⚠ WRITTEN FROM THE PUSH, not from memory. Two commits this session:
-        bff7503  RULES, five corrections
-        e38c20b  Section 3B, the pass
-      ✓ THE THREE .bak STRAYS ARE DELETED. git status --short returned
-        only ` M Section_3B.md` — no ?? lines. P211 step 3 done.
-      ✓ /Users/mintym1/promote.sh.bak-S124 — taken before editing it.
+| looks wrong | why it isn't |
+|---|---|
+| prod's frontend git checkout lags the served build | by design. P8. Read the live build off the newest `www-html.bak-*` name |
+| prod on Node 18, dev on Node 24 | dev runs a new engine for a while before prod is asked to. → P210 |
+| CI builder on Node 20 | Angular 18 caps at 20, so parity is unreachable. Documented gap, S121. → P217 |
+| dev 24.04, prod 26.04 | the hosts do not transfer. Say the verdict out loud before relying on a dev result |
 
-⚠ THE HOSTS STILL DO NOT TRANSFER. 24.04 against 26.04. Same kernel string
-  is not the same OS. The S118 ruling stands.
+### Half-done
 
-DEV DATA — UNCHANGED. No writes in S122, S123 or S124.
+- **Prod was never checked at the S125 open.** Dev was read and matched. Run both boxes at the S126 open.
+- **Dev's Node-18 rollback tree is still on disk** — 303 MB at `~/abletrace-lab-backend/node_modules.old-node18`. **Not** at `~/`, where three sessions of notes had it. Nothing depends on it. Delete on the next visit to dev. → P227
+- **The project Instructions field holds stale RULES**, now two commits behind. Changes no command.
 
-Ginger Powder, lot Mat-260804-3
-  SOH                                  7619.322 Kg
-  Qty Released                         2370.678 Kg
-  Qty Received / Misc Release          10000 / 10.000
-MO-0014 material release rows          6 (916.471, 10, 100, 200, 50, 100)
-MO-0014 planned & completed            41# (915.53 Kg) — the fixture
-Header ties: 10000 − 2370.678 − 10 = 7619.322. No float tail.
+---
 
-PENDING PROMOTION
-Nothing in code. ⚠ THE BUILDER MAKES PROD'S FRONTEND ON NODE 20 — prod's
-next deliberate deploy uses it. Nothing reaches prod until Minty dispatches.
+## THE JOB — S126 · 3B'S FATE
 
-PROD'S ROLLBACK POINTS — read off the box S122. NOW ALSO IN 3B.4.
-  /home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031
-  /home/ubuntu/www-html.bak-prod-e1a82e028903ec317399de1bf2dc8be14a2f1030
-  /home/ubuntu/www-html.bak-prod-2968c59142dc9144e2f6f0fb9925bcdf43f9e1a1
-  /home/ubuntu/www-html.bak-prod-e8e8f5724cdfb9dc0734daabf5b10ae5d91ce8d4
-  /home/ubuntu/www-html.bak-prod-bc03b22dc375ba51bd81b18ffb4299b36aa34ab8
-⚠ Dev's fifth is 8bbf2c30; prod's is bc03b22d. Never copy one onto the other.
-⚠⚠ THE BACKUP-NAME TRAP (P219) IS NOW RECORDED IN 3B.4 AS MINTY RULED AT
-  S122. The name is true about what is LIVE; the CONTENTS are the trap.
+> Minty, S124: *"this section has cost us a lot to maintain it. not sure if it has value."*
 
-CREDENTIALS — MEASURED S122, NOTHING CHANGED S123 OR S124.
-  Working GitHub PAT   fingerprint fd24c9618394 · 40-char classic PAT
-  Leaked token         061cec73339d — DEAD, HTTP 401
-⚠⚠ ONE CREDENTIAL, THREE PLACES: Mac keychain · dev's BACKEND remote URL ·
-  Minty's Drive note. A rotation must change all three. RULES §4 and 3B.8
-  BOTH now say so — corrected S124. Dev's FRONTEND remote is clean.
-▶ NO ROTATION. It was never exposed. (Minty, S122.)
+829 lines, last edited 28 July. **No session has ever read 60% of it.** S124 corrected seventeen things in it and the file came out **43 lines longer** — that session is why RULES now says replace, don't patch.
 
-═══════════════════════════════════════════════════════════════════════
-WHAT S124 DID. ⚠ DO NOT RE-DERIVE ANY OF THIS.
-═══════════════════════════════════════════════════════════════════════
+### Action
 
-P212 — THE PROJECT WORKSPACE. ✓ CLOSED.
-  Project "Abletrace" exists. RULES pasted into the INSTRUCTIONS field and
-  it FIT — the length cap was never reached, so the knowledge-base fallback
-  was not needed. Six files uploaded to CONTEXT (the panel is called
-  Context, not Knowledge): Section_3A · Section_5 · TRAPS · Section_2 ·
-  UNITS-BIBLE.txt · NOW.
-  ✓ VERIFIED BY SEARCH, not by looking at the panel. TRAPS returned entry
-    11 verbatim; 3A returned all five STUB modules; Section_5 returned
-    J-entries by number; Section_2 returned the licence lifecycle; the
-    Bible returned rows 20/25/37-41; NOW returned its own state block.
-  ⚠⚠ HOW THE ABSENCE CHECK WAS DONE, because the obvious way is WRONG.
-    Searching for 3B's CONTENT proves nothing — NOW quotes 3B's corrections
-    in full, so a hit is guaranteed either way. THE DISTINGUISHING SIGNAL
-    IS THE SOURCE FILENAME. Across four searches only six filenames ever
-    appeared. Section_3B.md and Section_4.md never did. Same for Section 4:
-    the MO-progress hits came from Section_5 and NOW, never from Section_4.
-  ⚠ ONE VERIFY ITEM IS STILL UNPROVEN: "RULES loads into every chat" cannot
-    be tested from the chat that created it. The panel showing the text
-    proves it SAVED, not that it LOADS. ▶ S125's open proves it or doesn't.
+**1 · Map it.** The line numbers we hold are derived, not measured. An address is a claim.
 
-P223 + the two mirror lines — FIVE RULES CORRECTIONS. ✓ CLOSED at bff7503.
-  All five approved by Minty in one go, S124.
-    THE FILES  the git repo is the ARBITER; project knowledge is a MIRROR
-    §6 CLOSE   replace NOW in project knowledge at every close
-    THE FILES  Section_5.md IS in git (the old text said none of it was)
-    header     Last revised S119 → S121
-    §4         one GitHub PAT in three places, not two credentials
-  ✓ Six anchored replacements, all unique, 453 → 465 lines. The +12 is
-    exactly what the six edits should produce — a free second signal.
+```
+grep -n "^## 3B" ~/abletrace-lab-docs/Section_3B.md
+```
 
-P211 — 3B's PASS. ✓ CLOSED at e38c20b. Seventeen anchored corrections.
-  ✓ BOTH "true twin" claims are gone. The headline one was at line 30 in
-    3B.1 as S122 said; the SECOND was inside the SYSTEM RESTART REQUIRED
-    block, which the pass deleted whole — so one cut removed both the
-    contradiction and a restart notice cleared at S118.
-  ✓ Node record rewritten: dev 24 / prod 18 / CI 20, with prod's NodeSource
-    pin at 600 recorded. Rollback paths replaced with the real ones. The
-    backup-name trap written into 3B.4. dotenvx → dotenv. The PAT claim
-    corrected. ssh commands and private addresses added for both boxes.
-    ROUTING RECORD cut; new 3B.12 records where the repos live.
-  ✓ promote.sh line 99 corrected Cmd+Q → Shift+Cmd+R, matching RULES §2.
-    Backup at /Users/mintym1/promote.sh.bak-S124. ⚠ STILL NOT IN GIT → P215.
-  ⚠ 786 → 829 LINES. THE PASS MADE 3B TRUE AND 43 LINES LONGER. That is
-    the whole of Minty's challenge and it is not answered yet. → S125.
+**2 · Read the seven blocks nobody has opened.** 3B.3 databases · 3B.5 health check · 3B.6 domains/DNS/SSL · 3B.7 services · 3B.9 repos · 3B.10 the old app · 3B.11 when it breaks. ~430 lines. **Two pastes, not one.**
 
-⚠⚠ TWO PATCH-SCRIPT LESSONS, BOTH CHEAP, BOTH WORTH KEEPING.
-  1 AN EDIT THAT CONSUMES ITS OWN ANCHOR BREAKS A LATER CHECK. The first
-    3B script replaced the ROUTING RECORD heading and THEN tried to cut the
-    tail at that heading. It found zero and exited. ⚠ NOTHING WAS WRITTEN —
-    the assert-then-write shape held. ▶ CUT FIRST, THEN EDIT, THEN APPEND.
-  2 THE SAME FILENAME TWICE IS THE DOWNLOADS TRAP. The fix was reissued as
-    patch-3b-S124-fixed.py precisely so the browser could not number a
-    duplicate and leave the BROKEN copy holding the plain name.
+**3 · Sort every line into three buckets.** This is a hunt, not a comprehension read.
 
-⚠ RULES §5.1 FIRED THREE TIMES IN THIS SESSION — terminal output pasted
-  back and run as commands. Harmless each time; nothing was pending. But
-  S106 is the case where the same thing silently ate a git pull.
+- **measurable** — a command returns it. Goes, whatever happens to 3B.
+- **load-bearing and unmeasurable** — a credential location, or a procedure the box will not tell you. The only content that must survive.
+- **history** — git holds it.
 
-═══════════════════════════════════════════════════════════════════════
-THE MIRROR — THE OPEN PROBLEM S125 MUST SETTLE FIRST
-═══════════════════════════════════════════════════════════════════════
-⚠⚠ MINTY, S124: "i dont do any intervention manually. i will make errors —
-  all updates are best done by you."
+**4 · Decide.** Retire, or replace whole at ~150 lines — the operations card someone reaches for when something is broken.
 
-THE PROBLEM. Project knowledge is a COPY. NOW goes stale the moment it is
-rewritten, so every close needs a manual re-upload. That is a permanent
-error surface and Minty has ruled against carrying it.
+**5 · Tie off the two RULES pointers**, quoted here so nobody goes looking:
 
-THE CANDIDATE ANSWER — THE GITHUB CONNECTOR. Claude's Context panel offers
-GitHub alongside "Upload from device". If the project reads the REPO, there
-is no copy, no staleness and no re-upload: Minty pushes, the project sees it.
-  ⚠ IT WAS OFFERED AND CANCELLED AT S124, DELIBERATELY AND CORRECTLY. At
-    that moment 3B was stale, and connecting the repo would have made a
-    stale document searchable — the exact thing the whole ruling guards
-    against. 3B IS NOW CLEAN, SO THAT OBJECTION IS SPENT.
-  ⚠ WHAT STILL NEEDS DECIDING, and it is a business decision:
-    1 The OAuth screen grants "Act on your behalf" — write access to the
-      GitHub account that holds the working PAT. Nothing in the workflow
-      needs write. Is read-only available, and is the scope acceptable?
-    2 Section_4.md would become searchable and it is stale (P222).
-      Either clean it first or accept it.
-    3 Does a connected repo actually stay current, or does it snapshot?
-      ⚠ UNMEASURED. If it snapshots, it solves nothing and the manual
-      re-upload stands. ▶ ESTABLISH THIS BEFORE DECIDING ANYTHING ELSE.
-  ▶ THIS IS THE FIRST ITEM OF S125. Everything else about documents
-    depends on it.
+- §4 CREDENTIALS — *"Rotation method is 3B.8. Read it first — a fumble on a live DB password locks the app out."* **The one genuinely load-bearing pointer in RULES.** If 3B goes, this needs a home.
+- THE FILES — *"3B — boxes, databases, pipeline, DNS, printer."*
 
-⚠ UNTIL IT IS SETTLED, ONE MANUAL STEP SURVIVES: replace NOW.md in Context
-  at every close. RULES §6 now requires it.
-⚠ THE INSTRUCTIONS FIELD HOLDS PRE-PATCH RULES — five lines out of date.
-  None of them change a command, so it is not urgent, but it is wrong.
+**6 · Settle P204's six orphans** while the blocks are on screen. 3B cites queue numbers that exist in no queue: **P1(b), P3, P4, P28, P74, P76, P77**. All in unread blocks. They die with 3B if it retires.
 
-═══════════════════════════════════════════════════════════════════════
-THE NEXT JOB — S125. THE DOCUMENTS DECISION.
-═══════════════════════════════════════════════════════════════════════
-▶ MINTY RAISED THE REAL QUESTION AT S124 AND IT IS NOT ANSWERED: "this
-  section has cost us a lot to maintain it. not sure if it has value."
+### Material — done at S124, do not redo
 
-⚠⚠ THE 3B QUESTION AND THE RULES REVIEW ARE ONE DECISION, NOT TWO. If the
-  operational facts belong in RULES, 3B retires. If they do not, 3B is cut
-  hard and uploaded. Neither can be settled without the other.
+**The six-facts analysis.** Six operational facts from 3B were vetted as candidates for RULES. **Only two are genuinely missing.**
 
-ACTION — PART ZERO. THE CONNECTOR. See THE MIRROR above. Settle whether the
-  project can read the repo directly before touching any document.
+*Already covered, do not add:* rollback paths (§2 says read them off the box — writing them down is what creates the stale copy) · cannot-build-Angular (§2 already assigns build to GitHub, run to dev) · rotation order (§4's pointer, above) · nginx symlink and HSTS (needed once a year; not a rule).
 
-ACTION — PART ONE. READ THE SEVEN UNREAD 3B BLOCKS.
-⚠⚠ NO SESSION HAS EVER READ 60% OF 3B. S124 read five blocks (3B.1, 3B.2,
-  3B.4, 3B.8 and the routing record) and patched only those. SEVEN BLOCKS,
-  ROUGHLY 430 LINES, HAVE NEVER BEEN OPENED BY ANYONE:
-    3B.3  THE DATABASES        3B.9   REPOS
-    3B.5  HEALTH CHECK         3B.10  THE OLD APP
-    3B.6  DOMAINS / DNS / SSL  3B.11  WHEN IT BREAKS
-    3B.7  SERVICES
-▶ CUT-OR-RETIRE CANNOT BE DECIDED WITHOUT SEEING THEM. This is new
-  MEASUREMENT, not a re-derivation. ⚠ Line numbers below are POST-PATCH.
+*Genuinely missing:*
 
-  Read in two pastes, not one. ~430 lines is too much for a single block.
+```
+ssh -i ~/.ssh/abletrace-lab-key.pem ubuntu@16.55.10.205
+ssh -i ~/.ssh/abletrace-lab-key.pem ubuntu@15.157.38.101
+```
 
-    sed -n '164,300p' ~/abletrace-lab-docs/Section_3B.md
+§2 says ssh always from the Mac but never gives the command, and `~/.ssh/config` has no host entry for either box.
 
-    sed -n '415,600p;620,811p' ~/abletrace-lab-docs/Section_3B.md
+▶ **Claude's recommendation, S125: don't write these down — make them measurable.** Add host entries to `~/.ssh/config` so `ssh dev` and `ssh prod` work. Nothing to store, nothing to go stale.
 
-  ⚠ VERIFY THE RANGES FIRST — the pass shifted every line below 3B.1:
-    grep -n "^## 3B" ~/abletrace-lab-docs/Section_3B.md
-    ▶ RUN THAT FIRST AND CORRECT THE sed RANGES FROM ITS OUTPUT. The
-      numbers above are derived from the pre-patch map plus the diff, NOT
-      measured. AN ADDRESS IS A CLAIM.
+**Dev's ssh is fragile.** Dev's security group allows inbound 22 from **one IPv4 /32**, so the Mac drifting onto IPv6 locks you out of dev while prod still connects — that asymmetry is the tell. Always `ssh -4`; plain `curl ifconfig.me` reports a phantom address, only `curl -4 ifconfig.me` gives the real source. Cost a session at S73. → P224
 
-ACTION — PART TWO. THE RULES REVIEW, CLAUSE BY CLAUSE.
-⚠ 465 lines. The honest expectation is that most survives — it was
-  rewritten whole at S98 and added to sparingly since.
+### Analysis
 
-⚠⚠ THE SIX-FACTS ANALYSIS, DONE S124, QUOTED IN FULL SO IT IS NOT REDONE.
-  Claude proposed six operational facts from 3B as candidates for RULES.
-  Checked against RULES as committed at bff7503, ONLY TWO ARE MISSING.
+**The evidence leans to retire.** Last edited 28 July. S122 mapped its headers without opening it. Every fact corrected into it at S124 had already been *measured somewhere else*, because someone needed it and went and looked rather than reading 3B. A document that gets re-derived instead of read is not being used.
 
-  ALREADY COVERED — DO NOT ADD THESE:
-    ROLLBACK PATHS      §2 already says READ THE ROLLBACK PATH OFF THE BOX,
-                        never write it from the build label. That is the
-                        correct rule and it means the paths must NOT be
-                        written into any document — writing them down is
-                        what creates the stale copy. (3B.4 now carries them
-                        anyway, which is a live tension worth naming.)
-    CANNOT BUILD ANGULAR §2 already assigns BUILD to GITHUB and RUN to DEV.
-                        The constraint is encoded in the topology.
-    ROTATION ORDER      §4 already says ROTATION METHOD is 3B.8, read it
-                        first. ⚠ SOUND TODAY, BREAKS THE MOMENT 3B RETIRES.
-                        If 3B goes, this line must go somewhere.
-    NGINX SYMLINK/HSTS  Needed roughly once a year. Not a rule.
+**Against that: replace means read first.** Retiring or rewriting a document nobody has read deletes facts nobody knows are there. Git holds them, but nobody goes looking for what they don't know was removed. Step 2 is not optional.
 
-  GENUINELY MISSING — VET THESE TWO:
-    THE ssh COMMAND     §2 says scp and ssh ALWAYS FROM THE MAC but never
-                        gives the command. ~/.ssh/config has NO host entry
-                        for either box, so there is no other way to know it.
-                          ssh -i ~/.ssh/abletrace-lab-key.pem ubuntu@16.55.10.205
-                          ssh -i ~/.ssh/abletrace-lab-key.pem ubuntu@15.157.38.101
-    DEV'S SSH IS FRAGILE Dev SG inbound 22 allows ONE IPv4 /32. ALWAYS
-                        connect with `ssh -4`; a plain `curl ifconfig.me`
-                        reports a PHANTOM address and only `curl -4
-                        ifconfig.me` gives the real source. ⚠ PROD STILL
-                        CONNECTS when dev does not — that difference IS the
-                        tell. Cost a session at S73. → P224.
+Everything cut stays in git history. Nothing is lost by cutting.
 
-⚠ TWO RULES LINES POINT AT 3B AND FOLLOW WHATEVER IS DECIDED: §1's document
-  list and §4's rotation pointer.
+### Precondition — only if the answer is "cut and upload"
 
-ACTION — PART THREE. 3B's FATE. The review decides it.
-  CUT     to roughly 150 lines — the operations card someone reaches for
-          when something is broken — then upload to the project.
-  RETIRE  lift the load-bearing facts into RULES, leave 3B in the repo as
-          an archive nobody opens. ⚠ THE EVIDENCE LEANS THIS WAY: 3B was
-          last edited 28 July, S122 mapped its headers without opening it,
-          and every fact corrected into it at S124 had already been
-          MEASURED SOMEWHERE ELSE because someone needed it and went and
-          looked rather than reading here. A document that gets
-          re-derived instead of read is not being used.
-  ⚠ Everything cut stays in git history. Nothing is lost by cutting.
+The upload is a manual copy into project Context, the staleness we have hit twice already. The GitHub connector would remove it. Unmeasured:
 
-ACTION — PART FOUR, IF THERE IS ROOM.
-  Delete dev's node_modules.old-node18/. Deferred three sessions running.
+1. **Does a connected repo stay current, or snapshot?** If it snapshots it solves nothing. Establish first.
+2. OAuth grants write access to the account holding the working PAT. Nothing needs write. Is read-only available?
+3. Section_4.md becomes searchable and it is stale. → P222
 
-    cd ~ && du -sh node_modules.old-node18 && rm -rf node_modules.old-node18 && ls -la ~ | grep node_modules
+Not a blocker for **retire**.
 
-  ⚠ [DEV] GREEN. Read the size before deleting; expect ~303 MB.
+### Verify
 
-VERIFY: the connector question is answered with a measurement, not a guess;
-all seven unread 3B blocks have been on screen; RULES has been reviewed
-clause by clause and the two candidate additions accepted or refused; 3B is
-either cut and uploaded or retired with its load-bearing facts relocated;
-whatever is decided is COMMITTED AND PUSHED.
+All seven unread blocks on screen · decision made on evidence · 3B replaced whole or retired with its load-bearing facts relocated · both RULES pointers resolved · P204's six orphans settled or killed · committed and pushed.
 
-S126  P210 — PROD to Node 24. Own session, nothing else in it. UNCHANGED.
+---
 
-QUEUE — Minty ranks. New items at the bottom, never renumbered.
-Top candidates
+## PENDING
 
-P210 PROD TO NODE 24. Prod still on 18, unpatched since April 2025. ⚠ Prod is Ubuntu 26.04; dev is 24.04. The host does not transfer. ▶ INSTALL METHOD MEASURED S122 — NodeSource node_18.x, pinned 600. THE DEV ROUTE TRANSFERS: change the repo line to node_24.x, apt update, apt install -y nodejs. APT REPLACES, IT DOES NOT ADD.
-  ⚠⚠ **MANDATORY PRE-UPGRADE GATE — MINTY'S RULING, S122.** needrestart WILL restart pm2 mid-upgrade. apt's needrestart sees the pm2 service linked to the Node binary it has just replaced and runs `systemctl restart pm2-ubuntu.service`, whose job is `pm2 resurrect`. A deliberately stopped app therefore comes back UNATTENDED, on the new engine, against the OLD node_modules, pointed at the live database. Nothing announces it — pm2 reads `online` with ↺0 as though all were well. Measured S120 on dev. On prod that is Glutenull and Hagensborg back up without instruction.
-  ▶ THE RUNBOOK MUST DO ALL THREE, IN ORDER:
-    1 PREVENT — set needrestart to never restart services before the repo line is touched, and PROVE the setting is in force before proceeding.
-    2 VERIFY — read `pm2 status` IMMEDIATELY after `apt install nodejs`, before anything else, every time, whether or not step 1 appeared to work.
-    3 STOP AGAIN — if it resurrected, stop the app before reinstalling node_modules. Never reinstall packages under a running app.
-  ⚠ A STEP IN the runbook, not a warning at the end of it. Not a TRAPS entry precisely because it CAN be prevented — TRAPS rule 2. Own session, nothing else in it.
-P217 ANGULAR 18 → 20. ⚠ THE ONLY THING THAT UNBLOCKS A BUILDER ON NODE 24. Angular 18 caps at Node 20; Angular 20 supports ^20.19.0 || ^22.12.0 || ^24.0.0. A framework major on a live client app — multiple sessions, own risk, own gate. Raised and NOT taken at S121; Minty chose the documented gap.
-P206 MO material release panel shows ONE release per material, not each distinct release. MO-0014 traceability lists SIX Ginger Powder releases (916.471, 10, 100, 200, 50, 100 Kg); the MO's own panel shows a single row of 916.471 — and is not summing them either. PRE-EXISTING, re-confirmed S120 and S121. ⚠ A warehouse controller reading that MO cannot see what was actually consumed. Suspect a join collapse or a missing aggregate. Raised by Minty.
-Return path — P163, P164 (inverted sign, live on both clients), P165, P168, rows 20/42/43. Budget as a survey; never read end to end. ⚠ PackingSlips.js:267 and :419 subtract currentToDate - returnQty with no floor — the same negative-balance exposure Minty ruled against in S116, on the return path. Measured S117.
-P111 QuickBooks. Precondition met. One planning session, no code. Needs a new column (TRAPS 3).
-P203 Neither box has ESM Apps enabled; 17 updates pending on dev, 36 on prod. Measured S118. ⚠ Prod's login banner still read 36 at the S124 open.
-P205 PM2 differs: dev 7.0.3, prod 7.0.1 — re-confirmed S122. Installed GLOBALLY, outside package-lock, so it drifts independently and P210 will NOT fix it. ⚠ package.json declares pm2 ^5.3.0 and neither box runs 5.x. ⚠ npm differs too (11.17.0 / 10.8.2) but that is Node's bundled npm and closes itself with P210.
-P204 3B CITES QUEUE NUMBERS THAT EXIST IN NO QUEUE. ⚠ PARTIALLY SETTLED S124: P12 → P225, P16 → P215, P21 → P102 (closed), P23 → P224. ▶ SIX REMAIN — P1(b), P3, P4, P28, P74, P76, P77 — and every one of them lives in a block NOBODY HAS READ. Settle inside S125's Part One, with those blocks on screen. ⚠ Dies with 3B if 3B retires.
-P207 Waterline warns at every boot: null description on companyuserrole and roles, null createdAt/updatedAt on company. Harmless in itself — but it floods the error log and a real error would be buried in it. Measured S119.
-P208 npm install reports 110 vulnerabilities, 33 critical, unchanged under Node 24 and npm 11. Not yet read in detail — npm audit names them.
-P214 OLD REPO ~/abletrace-lab/abletrace-frontend. HEAD cb07d7b8, GitLab-era, superseded. ⚠ Its GitHub token is DEAD (401, measured S122). ⚠ Its GITLAB token was NOT measured and may still be live — Minty ruled S122 not to spend time on the dismantled app's credentials; revoke in GitLab's UI whenever convenient, it is free. ▶ KEEP ONE SANITIZED HISTORICAL SNAPSHOT, THEN DELETE. Sanitized = strip the remotes BEFORE snapshotting.
-P215 promote.sh IS NOT IN VERSION CONTROL. /Users/mintym1/promote.sh, outside any repo, on one machine. deploy-frontend.sh is likewise only on the boxes. These two scripts ARE the deploy procedure. ⚠ Losing the Mac loses the promote path. ✓ S124 took /Users/mintym1/promote.sh.bak-S124 before editing it — that is a backup, NOT version control, and it is on the same machine. Decide where they live. ⚠ ABSORBS the old P16 number, which 3B used to cite.
-P216 GitHub Actions v4 are deprecated. checkout@v4, setup-node@v4, upload-artifact@v4 run on GitHub's Node 20 action runtime, which is being retired — the warning on every run. Bump to @v5. ⚠ NOT related to node-version: '20'; different thing entirely. Cheap.
-P218 OVER-RELEASE IS ACCEPTED SILENTLY AGAINST AN MO REQUIREMENT. MO-0014 requires 916.471 Kg of Ginger Powder; the release screen reads 1016.471/916.471 Kg and the app took it without complaint. ⚠ NOT a wrong row — the S106 clamshell ruling says a release figure is the true record of what was picked. ⚠ The question is whether it should WARN. Business question, Minty's, not a defect until he says so.
+New items at the bottom, never renumbered. **Ranking is Minty's.**
 
-New from S123 — the inventory's items
+### Next up
 
-P221 BIBLE PART 1 (Section_2.md) CARRIES FOUR SELF-DECLARED INCOMPLETE BLOCKS — WHAT'S LEFT TO WALK · TO BE VERIFIED · CLEANUP PILE · FUTURE SCOPE. ⚠ TO BE VERIFIED is the hazard: it says outright "unconfirmed against live code", and it sits inside the document a session trusts for business rules. ⚠ Untouched since S84. ⚠⚠ IT IS NOW IN PROJECT KNOWLEDGE AND SEARCHABLE — uploaded S124 as ruled at S123. The blocks are labelled, so a reader is warned, but the warning now has to survive being surfaced one paragraph at a time by a search. Raised in priority by that fact. Resolve or clearly mark each block.
-P222 SECTION 4 (LOOK & FEEL) IS HELD OUT OF THE PROJECT. 635 lines, created S79 and NEVER EDITED SINCE. Whole blocks read "PENDING", "NOT BUILT", "STILL THE PLAN, NEVER ACTIONED".
-  ⚠⚠ **P222 STARTS FROM THE WRONG END AND S124 FOUND IT.** The item assumed Section 4's "MO PRODUCTION-STATUS INDICATOR ✅ BUILT" claim was FALSE against the S46 backlog. Section_5's J22 says the opposite: the shared mo-progress-chart component WAS built at S49, commit 2228cda9 — two status circles plus a buildup bar, replacing hand-rolled blocks on five surfaces. J27 extends it. ▶ SECTION 4 IS PROBABLY RIGHT AND THE S46 BACKLOG IS THE STALE RECORD. Do not "correct" a true claim.
-  ⚠ Everything else about the item stands: stale-and-searchable, same treatment as 3B. Not critical path.
+**P210 · PROD TO NODE 24.** Own session, nothing else in it. Prod unpatched since April 2025. Install method measured S122 — NodeSource `node_18.x`, pinned 600. Dev's route transfers: change the repo line to `node_24.x`, apt update, apt install. **Apt replaces, it does not add.**
 
-New from S124
+> **Mandatory gate — Minty's ruling, S122.** needrestart *will* restart pm2 mid-upgrade: apt sees the pm2 service linked to the Node binary it just replaced and runs `systemctl restart pm2-ubuntu.service`, whose job is `pm2 resurrect`. A deliberately stopped app comes back **unattended**, on the new engine, against the **old** `node_modules`, pointed at the **live database** — and pm2 reads `online` with ↺0 as though all were well. Measured S120 on dev. On prod that is Glutenull and Hagensborg back up without instruction.
+>
+> Three steps, in order, **inside** the runbook: **prevent** (needrestart set to never restart, proven in force *before* the repo line is touched) · **verify** (`pm2 status` immediately after `apt install nodejs`, every time, whether or not step 1 looked like it worked) · **stop again** (if it resurrected, stop the app before reinstalling `node_modules`).
 
-P224 DEV SSH HAS NO IPv6 RULE. Dev SG inbound 22 allows ONE IPv4 /32, so the Mac drifting onto IPv6 locks Minty out of dev while prod still connects. Workaround is `ssh -4` plus `curl -4 ifconfig.me` to find the real source. Cost a session at S73. ▶ Add an IPv6 rule so it stops recurring. ⚠ Replaces the old P23 number, which appeared in no queue.
-P225 SWEEP THE MAC's ~/Downloads. 11+ old build artifacts back to S61. promote.sh deploys whatever zip you name, so a stale-zip promote is a real risk — and S111 proved it, offering a superseded-but-green artifact for deployment to prod. ⚠ Replaces the old P12 number. ▶ RULES §6 already makes clearing Downloads a close step; this is the historic backlog.
+**P217 · Angular 18 → 20.** The only thing that unblocks a Node 24 builder. Angular 20 supports ^20.19 || ^22.12 || ^24. Framework major on a live client app — multiple sessions, own gate.
 
-Units campaign leftovers — board 38 green of 51, a deliberate stop. ⚠ The Bible is frozen as an archive at S117. Consulted per row.
+**P206 · MO release panel shows one release per material, not each.** MO-0014 traceability lists six Ginger Powder releases; the MO's own panel shows a single row of 916.471 and is not summing them either. A warehouse controller cannot see what was actually consumed. Suspect a join collapse or missing aggregate. Raised by Minty.
 
-Rows 37-41 unblocked; the column is populated. Row 41 is cheapest and most visible — release details shows Kg with no unit count. ⚠ All history still reads 0 (the JR20/P170 trade); sooner is cheaper.
-P196 two intermediate blocks disagree by 0.011 Kg (0.004 on the IP4 fixture). Display only.
-P135 two divisions left in Trace_ProductHeaderView. Retires TRAPS 10.
-P198 formulations.inventory (the Kg line) carries float tails. ⚠ No floor and no rounding — only inventory_units gets Math.round and Math.max(0,…). Low.
+**P228 · Move three business-logic rulings into Bible Part 1** (`Section_2.md`). They are domain rules and have been sitting in NOW:
 
-Open, unranked
+- *Traceability reports what was released at the time.* MO-0007 ran under IP2 version 1 and reports version 1's figures. A screen that re-cast history against the current formulation **would be the defect**. (S112)
+- *~0.001 variance on a multi-release lot is accepted.* SOH is reconciled against physical count monthly. The cumulative fix was offered and rejected on domain grounds. (S116)
+- *Stock must never go negative.* `Math.max(0,…)` on both branches.
 
-P90 TWO FALSE CLAIMS IN 3A. ⚠⚠ 3A IS NOW IN PROJECT KNOWLEDGE AND SEARCHABLE — uploaded S124. Five of its eight modules are self-marked STUB, which is honest and harmless. A FALSE CLAIM is neither, and it will now be returned confidently by a search. Find them.
-P8 prod frontend checkout lags · P17 two old IAM keys live · P20/P22 delete old section files · P64 product label prints "null" · P65 promote.sh no -4 · P84/P85 printer guides · P86 cold boot untested · P88 dead "Fix A" pointers · P94 stray heal file on prod · P101/P109 dormant archive holds its own procedures · P106 old map file · P108 review J-entries · P114 closed vs in-progress MOs · P115 delete dead code (below) · P116/P117 file-read handling · P118 comment deliberate code (working — keep) · P119 db definitions stale on ten objects ⚠ the file is db-definitions-S93.txt, 293 lines, ruled OUT of the Project for exactly this reason · P120 material barcode · P121-P123 client guide gaps · P124 SO status compares units to Kg, live · P129 food safety toggle has no attribute · P130 Excel exports unchecked · P131 unit count with weight label · P132 dead status columns · P133 do_status never advances · P134 schema naming · P136 view returns duplicates · P137 MR numbering global · P138 soproducts has no unit count ⚠ and no company_id · P139 not defects · P142 MR buttons commented out · P145/P146 MR screen quirks · P148 narrow residual · P152 read-rows drops columns · P153 .bak in api/models · P155 Mac push and prod origin · P156 company-id namespaces differ · P158/P159 IP trace procedures divide · P166 field named ship_qty holds Kg · P167 seven-copy helper · P169 transposed labels · P170 pre-JR15 MR rows read low · P171 unmapped quantity tables · P172 receipt code not unique · P173 nameless 0.000 row · P174 form control written into batches · P175 gate that cannot fail · P178 retention rule · P179 formulations_myCodee typo · P182 undocumented controls · P185 eval() on release screen, five sites · P189 possible double-count · P190 VARCHAR subtraction · P191 lot scanner undocumented · P192 final_qty from batches · P194/P195 Kg displays, correct under the S116 ruling
+⚠ Part 1 is edited only on Minty's express permission, wording approved in advance. And **read first** — P221 says four of its blocks are self-declared incomplete. Do this as a job, not a close task. Originals are in Section 5 regardless.
 
-P200 Negative quantity accepted on the add-sales-order screen. add-sales-order.component.html:84 has no min; .ts:245 and :249 have no Validators.min(0). Frontend: needs a build and deploy, a known 20-minute path.
-P201 Acrobatics at add-sales-order.component.ts:393. (quantity / batch_qty) × (batch_qty / wgt_kgs_per_unit) — batch_qty cancels, so it divides a weight to make a unit count. ⚠ Reachability unmeasured.
-P115 dead code: rejected-materials.ts:152-154 · MLOManagement.js getMLCbyId/V2 · PopUps/add-dispatch v1 · edit-mlc.ts:311,227 · MaterialsProductsReleased.js:52 and :83-98 · material-traceability-details.html:113-125, 191-216 · Traceability.js @returnedQty/@mprIDs
+**P111 · QuickBooks.** Precondition met. One planning session, no code. Needs a new column (TRAPS 3).
 
-CLOSED — delete these lines at the next close
-P212 · P211 · P223 · P220 · P213 · P66 · P209 · P154/P176 · P202b · P202 · P102 · P177 · P180 · P199 · P184 · P188 · P197 · P187 · P186 · P181 · P183 · P160 · P162 · P151 · P157 · P147 · P161 · P104 · P150
-⚠ P219 is RECORDED in 3B.4 as Minty ruled, but it is not CLOSED — the naming behaviour in deploy-frontend.sh is unchanged. It stays open as a decision about the script.
+### Return path — goes last, Minty's ruling S112
 
-SETTLED DECISIONS — do not re-open
-A session opens on RULES and NOW only. Everything else on demand. No dedicated documents session — a file is cleaned when next opened. (Minty, S117)
-⚠ THE S123 INVENTORY DID NOT BREACH THAT RULING AND IS NOT A PRECEDENT. One-time census, taken because P212 could not name its own inputs. (Minty, S123.)
-THE INVENTORY'S RULING STANDS AS WRITTEN. Seven files into the Project; 3B and Section 4 held back until cleaned; Section 6, the xlsx, the S108 survey, db-definitions, README and the printer guide stay in the repo and out of the Project. (Minty, S123.)
-⚠⚠ THE GIT REPO IS THE ARBITER. Project knowledge is a MIRROR of it and can go stale. When the two disagree, the repo wins. NOW is replaced in project knowledge at every close. (Minty, S124 — now RULES.)
-BIBLE PART 1 IS Section_2.md. Confirmed from its headings, S123.
-SECTION 5 IS IN GIT. Measured S123. ✓ RULES corrected S124.
-SECTION 5 IS NEVER CLEANED. Append-only forensic record; its value is that nothing was removed. (S123.)
-A reboot is its own step. Never mid-work, never both boxes at once. Dev first, standalone. (Proven S118, S120.)
-Dev does not rehearse prod's OS. 24.04 against 26.04. State the verdict out loud before relying on a dev result. (S118, held S119–S124. ⚠ Both boxes report kernel 7.0.0-1010-aws — this does NOT soften the ruling. ✓ 3B's two contradicting "true twin" claims are now deleted.)
-Dev runs on a new engine for a while before prod is asked to. (Minty, S120.)
-⚠⚠ THE CI PARITY RULING IS SUPERSEDED. Angular 18 CAPS AT NODE 20, so parity with a Node 24 runtime is unreachable without a framework upgrade. MINTY RULED OPTION A: builder to 20, documented gap, Angular upgrade queued as P217 and not taken. The gap is deliberate. (Minty, S121.)
-TRAPS STAYS AT ELEVEN. A hazard that can be configured away is a queue item, not a trap — TRAPS' own rule 2. The needrestart hazard is a mandatory STEP inside P210. (Minty, S122.)
-THE WORKING GITHUB PAT IS NOT ROTATED. It was never exposed. The leaked one was already dead. (Minty, S122.)
-The old GitLab-era application is being dismantled. Do not spend time repairing or rotating its credentials. (Minty, S121 and S122.)
-⚠ P212 AND P211 RAN IN ONE SESSION AT S124 AND BOTH CLOSED. (Minty, S123.)
-Release input stays kilograms. The unit count is derived once at the write, rounded to three decimals, and the same figure is banked in the row and subtracted from stock. (Minty, S116)
-~0.001 variance on a multi-release lot is accepted. SOH is reconciled against physical count monthly. The cumulative fix was offered and rejected on domain grounds. (Minty, S116)
-Stock must never go negative. Math.max(0,…) on both branches.
-Return path goes last. (Minty, S112)
-Materials are Kg only; anything carrying a formula_id carries units. (Minty, S112 — Bible Part 1 §5)
-Traceability reports what was released at the time. (Minty, S112)
+P163 · **P164** · P165 · P168 · Bible rows 20/42/43. Budget as a survey; never read end to end.
 
-ONE CORRECTION TO CARRY
-Bible PART 4 records the IP4 lot ratio as 0.04478498…. The true figure is
-41 ÷ 915.53 = 0.0447828…. It changed no result — 1.957 either way — but it
-is wrong where a future session would copy it.
+**P164 is live on both clients today, deliberately.** `Formulations.js` declares `returnSum` in all three branches and never assigns it, then adds the return into the **released** total — so returning material makes the screen show *more* released, and Returned Qty always reads 0. `MLOManagement.js:1112` does the identical job correctly. **The proof one file is wrong is sitting in the other file.**
+
+Also here: `PackingSlips.js:267` and `:419` subtract `currentToDate - returnQty` with no floor — the negative-balance exposure ruled against in S116, on the return path.
+
+### Infrastructure
+
+**P203** No ESM Apps on either box; 17 updates pending dev, 36 prod (S118).
+**P205** pm2 differs, dev 7.0.3 / prod 7.0.1. Global, outside package-lock. `package.json` declares `^5.3.0` and neither box runs 5.x. P210 will not fix it.
+**P207** Waterline warns at every boot — null `description` on `companyuserrole` and `roles`, null timestamps on `company`. Harmless, but it floods the log and a real error would be buried.
+**P208** `npm install` reports 110 vulnerabilities, 33 critical. `npm audit` names them.
+**P214** Old repo `~/abletrace-lab/abletrace-frontend`, GitLab-era. GitHub token dead (401). **GitLab token never measured, may still be live** — revoke in GitLab's UI, it is free. Keep one sanitized snapshot (strip remotes first), then delete.
+**P215** `promote.sh` is not in version control — `/Users/mintym1/promote.sh`, outside any repo, one machine. `deploy-frontend.sh` likewise only on the boxes. **These two scripts are the deploy procedure.**
+**P216** GitHub Actions v4 deprecated. Bump `checkout`, `setup-node`, `upload-artifact` to @v5. Unrelated to `node-version: '20'`. Cheap.
+**P219** `deploy-frontend.sh` names backups after the build. The name is true about what is live; the **contents** are the trap.
+**P224** Dev SSH has no IPv6 rule — see the job block.
+**P225** Sweep `~/Downloads`. 11+ build artifacts back to S61. `promote.sh` deploys whatever zip you name, and S111 offered a superseded artifact for prod.
+**P227** Delete dev's `~/abletrace-lab-backend/node_modules.old-node18`, 303 MB.
+
+### Documents
+
+**P90** Two false claims in 3A, which is searchable in project knowledge. Five of eight modules self-marked STUB is honest; a false claim is not. Find them.
+**P221** Bible Part 1 has four self-declared incomplete blocks. **TO BE VERIFIED is the hazard** — it says outright "unconfirmed against live code" and sits in the document a session trusts for business rules. Untouched since S84, now searchable a paragraph at a time.
+**P222** Section 4, 635 lines, never edited since S79, held out of the project. ⚠ **The item starts from the wrong end:** it assumed Section 4's "MO production-status indicator ✅ BUILT" was false, but Section_5's J22 says the component *was* built at S49, commit 2228cda9. **Section 4 is probably right and the S46 backlog is the stale record.** Do not correct a true claim.
+**P229** Bible **Part 4** records the IP4 lot ratio as 0.04478498…. True figure is 41 ÷ 915.53 = 0.0447828…. Changed no result — 1.957 either way — but wrong where a future session would copy it.
+
+### Business questions — Minty's, not defects
+
+**P218** Over-release accepted silently. MO-0014 requires 916.471 Kg of Ginger Powder; the screen read 1016.471/916.471 and the app took it. Not a wrong row — the S106 clamshell ruling holds. **Should it warn?**
+**P200** Negative quantity accepted on add-sales-order. `.html:84` no `min`; `.ts:245` and `:249` no `Validators.min(0)`. Frontend build and deploy, known 20-minute path.
+**P201** `add-sales-order.component.ts:393` — `(quantity / batch_qty) × (batch_qty / wgt_kgs_per_unit)`. batch_qty cancels, so it divides a weight to make a unit count. Reachability unmeasured.
+
+### Units campaign — 38 green of 51, a deliberate stop
+
+Bible frozen as an archive; consulted per row.
+
+**Row 41 is cheapest and most visible** — release details shows Kg with no unit count. All history reads 0 (the JR20/P170 trade); sooner is cheaper.
+**P196** Two intermediate blocks disagree by 0.011 Kg (0.004 on IP4). Display only.
+**P135** Two divisions left in `Trace_ProductHeaderView`. Retires TRAPS 10.
+**P198** `formulations.inventory` carries float tails — no floor, no rounding. Only `inventory_units` gets `Math.round` and `Math.max(0,…)`. Low.
+
+### Unranked
+
+P8 · P17 · P20/P22 · P64 · P65 · P84/P85 · P86 · P88 · P94 · P101/P109 · P106 · P108 · P114 · P116/P117 · P118 · P119 · P120 · P121–P123 · P124 · P129 · P130 · P131 · P132 · P133 · P134 · P136 · P137 · P138 · P139 · P142 · P145/P146 · P148 · P152 · P153 · P155 · P156 · P158/P159 · P166 · P167 · P169 · P170 · P171 · P172 · P173 · P174 · P175 · P178 · P179 · P182 · P185 · P189 · P190 · P191 · P192 · P194/P195
+
+**P115 dead code:** `rejected-materials.ts:152-154` · `MLOManagement.js` getMLCbyId/V2 · PopUps/add-dispatch v1 · `edit-mlc.ts:311,227` · `MaterialsProductsReleased.js:52` and `:83-98` · `material-traceability-details.html:113-125, 191-216` · `Traceability.js` @returnedQty/@mprIDs
+
+---
+
+## SETTLED — DO NOT RE-OPEN
+
+Rulings that are **not** already in RULES:
+
+- **Section 5 is never cleaned.** Append-only forensic record; its value is that nothing was removed.
+- **A reboot is its own step.** Never mid-work, never both boxes at once. Dev first, standalone.
+- **The working GitHub PAT is not rotated.** Never exposed; the leaked one (`061cec73339d`) is dead, HTTP 401.
+- **The old GitLab-era app is being dismantled.** Do not spend time repairing or rotating its credentials.
+- **Release input stays kilograms.** The unit count is derived once at the write, rounded to three decimals, banked in the row and subtracted from stock. (S116 — now RULES §7 as the single exception to the units test.)
+- **Materials are Kg only;** anything carrying a `formula_id` carries units. (S112)
