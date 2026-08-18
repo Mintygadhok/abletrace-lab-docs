@@ -1,151 +1,213 @@
 # NOW
 
-S125 close, 16 Aug 2026.
-
-A session opens on **RULES** and this file. Everything else on demand.
-
-This is a launchpad: state, one job, the pending list. Facts the open check measures are not written here.
+Written at the S126 close. Rewritten whole — see RULES 6.
 
 ---
 
 ## STATE
 
-### Deliberate — do not "fix" these
+What no command returns. Everything measurable is in the open check.
 
-| looks wrong | why it isn't |
+| | |
 |---|---|
 | prod's frontend git checkout lags the served build | by design. P8. Read the live build off the newest `www-html.bak-*` name |
 | prod on Node 18, dev on Node 24 | dev runs a new engine for a while before prod is asked to. → P210 |
 | CI builder on Node 20 | Angular 18 caps at 20, so parity is unreachable. Documented gap, S121. → P217 |
-| dev 24.04, prod 26.04 | the hosts do not transfer. Say the verdict out loud before relying on a dev result |
 
-### Half-done
-
-- **Prod was never checked at the S125 open.** Dev was read and matched. Run both boxes at the S126 open.
-- **Dev's Node-18 rollback tree is still on disk** — 303 MB at `~/abletrace-lab-backend/node_modules.old-node18`. **Not** at `~/`, where three sessions of notes had it. Nothing depends on it. Delete on the next visit to dev. → P227
-- **The project Instructions field holds stale RULES**, now two commits behind. Changes no command.
-
----
-
-## THE JOB — S126 · 3B'S FATE
-
-> Minty, S124: *"this section has cost us a lot to maintain it. not sure if it has value."*
-
-829 lines, last edited 28 July. **No session has ever read 60% of it.** S124 corrected seventeen things in it and the file came out **43 lines longer** — that session is why RULES now says replace, don't patch.
-
-### Action
-
-**1 · Map it.** The line numbers we hold are derived, not measured. An address is a claim.
-
-```
-grep -n "^## 3B" ~/abletrace-lab-docs/Section_3B.md
-```
-
-**2 · Read the seven blocks nobody has opened.** 3B.3 databases · 3B.5 health check · 3B.6 domains/DNS/SSL · 3B.7 services · 3B.9 repos · 3B.10 the old app · 3B.11 when it breaks. ~430 lines. **Two pastes, not one.**
-
-**3 · Sort every line into three buckets.** This is a hunt, not a comprehension read.
-
-- **measurable** — a command returns it. Goes, whatever happens to 3B.
-- **load-bearing and unmeasurable** — a credential location, or a procedure the box will not tell you. The only content that must survive.
-- **history** — git holds it.
-
-**4 · Decide.** Retire, or replace whole at ~150 lines — the operations card someone reaches for when something is broken.
-
-**5 · Tie off the two RULES pointers**, quoted here so nobody goes looking:
-
-- §4 CREDENTIALS — *"Rotation method is 3B.8. Read it first — a fumble on a live DB password locks the app out."* **The one genuinely load-bearing pointer in RULES.** If 3B goes, this needs a home.
-- THE FILES — *"3B — boxes, databases, pipeline, DNS, printer."*
-
-**6 · Settle P204's six orphans** while the blocks are on screen. 3B cites queue numbers that exist in no queue: **P1(b), P3, P4, P28, P74, P76, P77**. All in unread blocks. They die with 3B if it retires.
-
-### Material — done at S124, do not redo
-
-**The six-facts analysis.** Six operational facts from 3B were vetted as candidates for RULES. **Only two are genuinely missing.**
-
-*Already covered, do not add:* rollback paths (§2 says read them off the box — writing them down is what creates the stale copy) · cannot-build-Angular (§2 already assigns build to GitHub, run to dev) · rotation order (§4's pointer, above) · nginx symlink and HSTS (needed once a year; not a rule).
-
-*Genuinely missing:*
-
-```
-ssh -i ~/.ssh/abletrace-lab-key.pem ubuntu@16.55.10.205
-ssh -i ~/.ssh/abletrace-lab-key.pem ubuntu@15.157.38.101
-```
-
-§2 says ssh always from the Mac but never gives the command, and `~/.ssh/config` has no host entry for either box.
-
-▶ **Claude's recommendation, S125: don't write these down — make them measurable.** Add host entries to `~/.ssh/config` so `ssh dev` and `ssh prod` work. Nothing to store, nothing to go stale.
+**Dev's backend tree is not clean, deliberately.** `git status` on dev's backend shows `?? node_modules.old-node18/` — the 303 MB Node-18 rollback tree sits *inside* the repo as an untracked directory, not beside it. Nothing depends on it. This is the concrete reason RULES §2 forbids `git add .`. Delete on the next visit to dev. → P227
 
 **Dev's ssh is fragile.** Dev's security group allows inbound 22 from **one IPv4 /32**, so the Mac drifting onto IPv6 locks you out of dev while prod still connects — that asymmetry is the tell. Always `ssh -4`; plain `curl ifconfig.me` reports a phantom address, only `curl -4 ifconfig.me` gives the real source. Cost a session at S73. → P224
 
-### Analysis
-
-**The evidence leans to retire.** Last edited 28 July. S122 mapped its headers without opening it. Every fact corrected into it at S124 had already been *measured somewhere else*, because someone needed it and went and looked rather than reading 3B. A document that gets re-derived instead of read is not being used.
-
-**Against that: replace means read first.** Retiring or rewriting a document nobody has read deletes facts nobody knows are there. Git holds them, but nobody goes looking for what they don't know was removed. Step 2 is not optional.
-
-Everything cut stays in git history. Nothing is lost by cutting.
-
-### Precondition — only if the answer is "cut and upload"
-
-The upload is a manual copy into project Context, the staleness we have hit twice already. The GitHub connector would remove it. Unmeasured:
-
-1. **Does a connected repo stay current, or snapshot?** If it snapshots it solves nothing. Establish first.
-2. OAuth grants write access to the account holding the working PAT. Nothing needs write. Is read-only available?
-3. Section_4.md becomes searchable and it is stale. → P222
-
-Not a blocker for **retire**.
-
-### Verify
-
-All seven unread blocks on screen · decision made on evidence · 3B replaced whole or retired with its load-bearing facts relocated · both RULES pointers resolved · P204's six orphans settled or killed · committed and pushed.
+**The old AWS account is being wound down.** Minty's decision, S126. Both live apps verified working after the teardown.
 
 ---
 
-## PENDING
+## THE JOB — S127
 
-New items at the bottom, never renumbered. **Ranking is Minty's.**
+### Move SES to the new AWS account
 
-### Next up
+**One job. Nothing else in the session.**
+
+S126's dependency sweep proved this is the **only** thing the live app takes from the old account. Everything below is measured, not assumed. Do not re-derive it.
+
+### What the sweep established
+
+**S3 is clean.** Every bucket reference on dev and prod is `abletrace-lab-fileuploads` — the new account's bucket. `abletrace-fileuploads1` appears nowhere in code.
+
+**No old-account identifier is hardcoded anywhere.** `350466202408`, `ILD4K76I` and `H7IPS3W7` returned nothing across dev, prod and the Mac frontend.
+
+**DNS is clean for both deployed builds.** `angular.json` replaces `environment.ts` in all three build configurations, so the file naming `devapiw.abletrace.ca` never reaches an artifact — it is the local `ng serve` default only. `environment.prod.ts` points at `trace.mintekfoodsafety.com` (GoDaddy). `environment.dev.ts` holds no `abletrace.ca` reference. Only `environment.stage.ts` uses the old zone, and staging is dead.
+
+**`.env` parity is clean.** Both boxes carry the same nine variables. Dev has `IS_DEV_BOX` extra — the bootstrap dev-safety guard, expected.
+
+### The dependency, precisely
+
+Not "the account" — two things:
+
+1. **`SMTP_USER` holds a raw AKIA key ID** belonging to the old account's `ses` IAM user. Confirmed present in `.env` on **both** boxes.
+2. **`abletrace.ca` is a verified sending domain in the old account.** `fromEmail: 'info@abletrace.ca'` is what the app sends as.
+
+### The material — measured S126, quoted in
+
+**The credential path is env-only. No code edit needed for the swap.**
+
+```
+config/env/local.js:3-4        smtpUser: process.env.SMTP_USER
+config/env/development.js:8-9  smtpPassword: process.env.SMTP_PASSWORD
+config/env/staging.js:3-4      ← same pair
+config/env/production.js:32-33 ← same pair
+```
+
+`email.js` reads `sails.config.smtpUser` / `sails.config.smtpPassword`, which those four files map from `process.env`. **So P231 changes `.env` on two boxes and nothing else.**
+
+**`fromEmail` is hardcoded**, not env-driven:
+
+```
+local.js:5 · development.js:10 · staging.js:5 · production.js:34
+    fromEmail: 'info@abletrace.ca'
+```
+
+There is a `FROM_EMAIL` variable in `.env` that **nothing reads**. If the sending address ever changes, that is a code edit in four files.
+
+**⚠ Two corrections to Section 3B.7, measured S126:**
+
+1. **It is not `SES.sendEmail()`.** The live path is nodemailer wrapping the SES transport — `nodemailer.createTransport({SES})` then `transporter.sendMail(...)`. The direct SES call is commented out. Still SES, but 3B records the wrong call shape.
+2. **The error swallow is worse than 3B says.** The live code is:
+
+```
+.then(doc => { return true; })
+.catch(err => { return false; })
+```
+
+Those returns go into a floating promise nothing awaits. The caller gets no value either way and the error object is discarded unlogged. **A failed send is invisible to the app, the logs and the user.** → P240
+
+`email.js` also hardcodes `region: 'ca-central-1'` — same region in both accounts, so not a blocker.
+
+**The old account's SES is in production mode (50k/day). The new account's status is UNMEASURED.** Production access is per-account and granted by AWS support review, not instantly. **If the new account is in sandbox, that request is the long pole and must be filed first.** Measure with:
+
+```
+aws sesv2 get-account --query "ProductionAccessEnabled"
+```
+
+### The action
+
+1. Measure the new account's SES production-access status. If sandbox, file the request **before** anything else.
+2. Verify `abletrace.ca` as a sending domain in the new account. Publish the DKIM records into the existing Route 53 zone — **the zone can stay in the old account for this**; it does not need moving first.
+3. Create a new IAM user and access key in the new account, scoped to SES send only.
+4. Generate straight into a file, never to screen, never into chat. Swap `SMTP_USER` and `SMTP_PASSWORD` in `.env` on dev, then prod. Rotation method is RULES §4 / 3B.8 — `cp .env` to a dated backup first, Python rewrite not `sed`, never `nano`.
+5. `pm2 restart <NAME> --update-env`, `sleep 8`, curl 200.
+6. Dev first, prove it, then prod.
+
+### The verify
+
+**An invite email arriving in an inbox.** Not a 200, not a clean deploy, not an absence of errors in the log — the error path returns nothing and logs nothing, so only receipt proves it. Send one on dev, then one on prod, and confirm both landed.
+
+### Then
+
+Deactivate the old account's `ses` IAM key — deactivate, not delete, so it is reversible in one click. That closes the second half of **P17**.
+
+---
+
+## OLD ACCOUNT — where the teardown stands
+
+**Done at S126.** Deleted: RDS `newinstance` (with final snapshot), EC2 `devapi_windows` and `stgapi_windows`, three Elastic IPs (`3.97.172.190`, `3.98.110.30`, `52.60.108.220`), and the two Route 53 A records that pointed at the released addresses. About **$215 of a $256/month forecast** removed. Both live apps verified working afterwards.
+
+**Why the bill jumped in August.** RDS for MySQL 8.0 reached end of standard support on **31 July 2026**. From 1 August AWS auto-enrols any 8.0 instance into paid **Extended Support**, billed per vCPU-hour. `newinstance` was 8.0.45 on a 2-vCPU `db.t3.micro`: July $0.83/day → August $5.47/day, a delta of $4.64/day = **$0.097 per vCPU-hour**, the published year-1 rate. Not a leak — a deadline.
+
+⚠ **Prod's own database escaped this by one month** — upgraded to 8.4 on 1 July. **Dev's instance in the new account is unmeasured.** If `abletrace-lab-dev-s62-dev` is still on 8.0 it has been paying the same surcharge since 1 August, in the account you actually use. → P235
+
+⚠ **The final snapshot of `newinstance` is the only copy of two years of departed-client traceability data.** Do not sweep it in a later tidy-up. Restoring it after 1 August puts that instance back on Extended Support pricing, so any restore is a short deliberate exercise.
+
+**Still standing, and why:** the old app's EC2 box + Elastic IP `3.98.223.126` (→ P233) · SES (→ P231, the S127 job) · the Route 53 zone, which holds the live Zoho mail records (→ P232) · CloudFront marketing site (→ P234) · old bucket `abletrace-fileuploads1` (→ P236).
+
+**The two legacy clients are gone.** Section 3B.10 states they are still live on the old app. That is now false and it removes the blocker on closing the account.
+
+**Minty's test, S126, governs the whole programme:** *if I were to shut the old AWS account, nothing of my current new AWS account or nothing of my current new app should be impacted.* After S127 that will be true of the application. The Route 53 zone will still be outstanding — it fails no app test, but closing the account without moving it kills `info@abletrace.ca`.
+
+---
+
+## SECTION 3B — decided, not yet executed
+
+**Verdict: replace whole. Do not retire.** Minty's call pending; Claude's recommendation, on evidence.
+
+All twelve blocks read at S126 — the file has **twelve**, not eleven, and is 828 lines. Six blocks carry facts that would each cost a session to relearn, three of which could take down the app, the client's mail, or the database. 3B.5 is the only genuinely dead block, and it is dead because RULES absorbed it.
+
+**Contradictions the file carries against itself** — the argument that patching it does not work:
+
+1. 3B.8 says dev's frontend remote is clean (measured S122); 3B.9 fifty lines later says the PAT is in **both** remote URLs.
+2. 3B.8 says `dotenv`, corrected S124; 3B.11 still says `dotenvx`.
+3. 3B.5 records dev on kernel 6.17.0 vs prod 7.0.0; both banners now read **7.0.0-1010-aws**. Only the distros differ.
+4. 3B.7's SES call shape is wrong, and its error-swallow note understates the defect. Measured S126 — see THE JOB.
+
+**The rewrite cannot be written without reading 3B.1, 3B.2 and 3B.4** — ~290 lines never sorted. → P237
+
+**P204's orphans, settled at S126:**
+
+| | |
+|---|---|
+| P28 | homed in 3B.3 by its own text. Number dies, content survives |
+| P76 | Zebra `java` process — corrected S91. Dead |
+| P77 | never add the Zebra in System Settings. A standing instruction, not a proposal. Number dies |
+| P4 | duplicate of **P117** per TRAPS' own S96 cut list. Dead |
+| P3 | live — the 8.0 rollback snapshot's existence is unverified. One look at the RDS snapshot list |
+| P74 | live and material — nothing watches SSL renewal on either box, and Let's Encrypt no longer warns |
+| P1(b) | **not found.** Absent from all 513 lines read. It lives in 3B.1, 3B.2 or 3B.4 |
+
+---
+
+## QUEUE
+
+New items go at the **bottom** with the next free number. Claude never renumbers. Ranking is Minty's.
+
+### Named next
+
+**P231 · SES to the new account.** The S127 job — see above.
+
+**P230 · Point prod's `~/.my.cnf` at `abletracelab_live`.** Today it carries `database=abletrace`, the dormant archive, so a bare `mysql < file.sql` writes into the wrong database silently. A one-line fix removes the trap at source rather than documenting it. Grep first for anything on prod calling a bare `mysql`. `~/.my.cnf` is not in git — record the change in Section 5's JR block.
+
+**P232 · `abletrace.ca` DNS zone to the new account.** Not an app dependency — proved S126 — but it holds the live Zoho mail records, so the account cannot close without it. Full record export from the Route 53 console first; `dig` only finds what you already know to ask for. Replicate, repoint GoDaddy's nameservers, verify, leave the old zone standing while resolvers drain. **Be surgical.**
+
+**P233 · Old app box.** Image to an AMI first — last copy of that server's configuration — then terminate and release `3.98.223.126`.
+
+**P234 · Marketing site needs a new home** before the account closes.
+
+**P235 · Check dev's RDS engine version in the new account.** If 8.0, it is paying Extended Support. Two minutes.
+
+**P236 · `abletrace-fileuploads1` retention decision.** Departed clients' uploaded food-safety documents. **May carry a regulatory retention period.** Business decision, not technical. Download to Drive if in doubt.
+
+**P237 · Read 3B.1, 3B.2, 3B.4, then rewrite 3B whole.**
+
+**P239 · Dead nodemailer block in `email.js` carries a plaintext password** — `support@piklane.com`, from an unrelated project, commented out but in the repo and therefore in git history. Delete the block; the credential is not ours to leak.
+
+**P240 · `email.js` send errors vanish.** `.then(→true).catch(→false)` on a floating promise nothing awaits. Caller gets no value, error object discarded unlogged. A failed invite is invisible everywhere. Fix while P231 has the file open.
+
+**P16 · JR source files are single-copy on prod.** Every `.sql` behind ~36 procs and 9 views lives only in `/home/ubuntu` on the prod box, which is not backed up off-instance; the Drive copy is unverified. Cited in 3B.3 and in no queue until now.
+
+### Standing
 
 **P210 · PROD TO NODE 24.** Own session, nothing else in it. Prod unpatched since April 2025. Install method measured S122 — NodeSource `node_18.x`, pinned 600. Dev's route transfers: change the repo line to `node_24.x`, apt update, apt install. **Apt replaces, it does not add.**
-
-> **Mandatory gate — Minty's ruling, S122.** needrestart *will* restart pm2 mid-upgrade: apt sees the pm2 service linked to the Node binary it just replaced and runs `systemctl restart pm2-ubuntu.service`, whose job is `pm2 resurrect`. A deliberately stopped app comes back **unattended**, on the new engine, against the **old** `node_modules`, pointed at the **live database** — and pm2 reads `online` with ↺0 as though all were well. Measured S120 on dev. On prod that is Glutenull and Hagensborg back up without instruction.
->
-> Three steps, in order, **inside** the runbook: **prevent** (needrestart set to never restart, proven in force *before* the repo line is touched) · **verify** (`pm2 status` immediately after `apt install nodejs`, every time, whether or not step 1 looked like it worked) · **stop again** (if it resurrected, stop the app before reinstalling `node_modules`).
 
 **P217 · Angular 18 → 20.** The only thing that unblocks a Node 24 builder. Angular 20 supports ^20.19 || ^22.12 || ^24. Framework major on a live client app — multiple sessions, own gate.
 
 **P206 · MO release panel shows one release per material, not each.** MO-0014 traceability lists six Ginger Powder releases; the MO's own panel shows a single row of 916.471 and is not summing them either. A warehouse controller cannot see what was actually consumed. Suspect a join collapse or missing aggregate. Raised by Minty.
 
-**P228 · Move three business-logic rulings into Bible Part 1** (`Section_2.md`). They are domain rules and have been sitting in NOW:
-
-- *Traceability reports what was released at the time.* MO-0007 ran under IP2 version 1 and reports version 1's figures. A screen that re-cast history against the current formulation **would be the defect**. (S112)
-- *~0.001 variance on a multi-release lot is accepted.* SOH is reconciled against physical count monthly. The cumulative fix was offered and rejected on domain grounds. (S116)
-- *Stock must never go negative.* `Math.max(0,…)` on both branches.
-
-⚠ Part 1 is edited only on Minty's express permission, wording approved in advance. And **read first** — P221 says four of its blocks are self-declared incomplete. Do this as a job, not a close task. Originals are in Section 5 regardless.
+**P228 · Move three business-logic rulings into Bible Part 1** (`Section_2.md`). ⚠ Part 1 is edited only on Minty's express permission, wording approved in advance. And **read first** — P221 says four of its blocks are self-declared incomplete. Do this as a job, not a close task. Originals are in Section 5 regardless.
 
 **P111 · QuickBooks.** Precondition met. One planning session, no code. Needs a new column (TRAPS 3).
 
-### Return path — goes last, Minty's ruling S112
+**P164 is live on both clients today, deliberately.** `Formulations.js` declares `returnSum` in all three branches and never assigns it, then adds the return into the **released** total — so returning material makes the screen show *more* released, and Returned Qty always reads 0. `MLOManagement.js:1112` does the identical job correctly. **The proof one file is wrong is sitting in the other file.** With P163 · P165 · P168 · Bible rows 20/42/43 — budget as a survey; never read end to end.
 
-P163 · **P164** · P165 · P168 · Bible rows 20/42/43. Budget as a survey; never read end to end.
+### Housekeeping
 
-**P164 is live on both clients today, deliberately.** `Formulations.js` declares `returnSum` in all three branches and never assigns it, then adds the return into the **released** total — so returning material makes the screen show *more* released, and Returned Qty always reads 0. `MLOManagement.js:1112` does the identical job correctly. **The proof one file is wrong is sitting in the other file.**
-
-Also here: `PackingSlips.js:267` and `:419` subtract `currentToDate - returnQty` with no floor — the negative-balance exposure ruled against in S116, on the return path.
-
-### Infrastructure
-
-**P203** No ESM Apps on either box; 17 updates pending dev, 36 prod (S118).
+**P203** No ESM Apps on either box; **18** updates pending dev (was 17 at S118), 36 prod.
 **P205** pm2 differs, dev 7.0.3 / prod 7.0.1. Global, outside package-lock. `package.json` declares `^5.3.0` and neither box runs 5.x. P210 will not fix it.
 **P207** Waterline warns at every boot — null `description` on `companyuserrole` and `roles`, null timestamps on `company`. Harmless, but it floods the log and a real error would be buried.
-**P208** `npm install` reports 110 vulnerabilities, 33 critical. `npm audit` names them.
+**P208** `npm install` reports 110 vulnerabilities, 33 critical. `npm audit` names them. Note `aws-sdk` v2 is unmaintained since Sept 2025 — used by `email.js`.
 **P214** Old repo `~/abletrace-lab/abletrace-frontend`, GitLab-era. GitHub token dead (401). **GitLab token never measured, may still be live** — revoke in GitLab's UI, it is free. Keep one sanitized snapshot (strip remotes first), then delete.
 **P215** `promote.sh` is not in version control — `/Users/mintym1/promote.sh`, outside any repo, one machine. `deploy-frontend.sh` likewise only on the boxes. **These two scripts are the deploy procedure.**
 **P216** GitHub Actions v4 deprecated. Bump `checkout`, `setup-node`, `upload-artifact` to @v5. Unrelated to `node-version: '20'`. Cheap.
 **P219** `deploy-frontend.sh` names backups after the build. The name is true about what is live; the **contents** are the trap.
-**P224** Dev SSH has no IPv6 rule — see the job block.
+**P224** Dev SSH has no IPv6 rule — see STATE.
 **P225** Sweep `~/Downloads`. 11+ build artifacts back to S61. `promote.sh` deploys whatever zip you name, and S111 offered a superseded artifact for prod.
 **P227** Delete dev's `~/abletrace-lab-backend/node_modules.old-node18`, 303 MB.
 
@@ -156,15 +218,13 @@ Also here: `PackingSlips.js:267` and `:419` subtract `currentToDate - returnQty`
 **P222** Section 4, 635 lines, never edited since S79, held out of the project. ⚠ **The item starts from the wrong end:** it assumed Section 4's "MO production-status indicator ✅ BUILT" was false, but Section_5's J22 says the component *was* built at S49, commit 2228cda9. **Section 4 is probably right and the S46 backlog is the stale record.** Do not correct a true claim.
 **P229** Bible **Part 4** records the IP4 lot ratio as 0.04478498…. True figure is 41 ÷ 915.53 = 0.0447828…. Changed no result — 1.957 either way — but wrong where a future session would copy it.
 
-### Business questions — Minty's, not defects
+### Behaviour
 
 **P218** Over-release accepted silently. MO-0014 requires 916.471 Kg of Ginger Powder; the screen read 1016.471/916.471 and the app took it. Not a wrong row — the S106 clamshell ruling holds. **Should it warn?**
 **P200** Negative quantity accepted on add-sales-order. `.html:84` no `min`; `.ts:245` and `:249` no `Validators.min(0)`. Frontend build and deploy, known 20-minute path.
 **P201** `add-sales-order.component.ts:393` — `(quantity / batch_qty) × (batch_qty / wgt_kgs_per_unit)`. batch_qty cancels, so it divides a weight to make a unit count. Reachability unmeasured.
 
-### Units campaign — 38 green of 51, a deliberate stop
-
-Bible frozen as an archive; consulted per row.
+### Units
 
 **Row 41 is cheapest and most visible** — release details shows Kg with no unit count. All history reads 0 (the JR20/P170 trade); sooner is cheaper.
 **P196** Two intermediate blocks disagree by 0.011 Kg (0.004 on IP4). Display only.
@@ -179,13 +239,12 @@ P8 · P17 · P20/P22 · P64 · P65 · P84/P85 · P86 · P88 · P94 · P101/P109 
 
 ---
 
-## SETTLED — DO NOT RE-OPEN
+## SESSION HYGIENE — S126 finding
 
-Rulings that are **not** already in RULES:
+**Screenshots are the most expensive thing in a session** — a full-screen capture costs roughly what a couple of thousand words costs. S126 used about fifteen, comparable to every document read in the session combined.
 
-- **Section 5 is never cleaned.** Append-only forensic record; its value is that nothing was removed.
-- **A reboot is its own step.** Never mid-work, never both boxes at once. Dev first, standalone.
-- **The working GitHub PAT is not rotated.** Never exposed; the leaked one (`061cec73339d`) is dead, HTTP 401.
-- **The old GitLab-era app is being dismantled.** Do not spend time repairing or rotating its credentials.
-- **Release input stays kilograms.** The unit count is derived once at the write, rounded to three decimals, banked in the row and subtracted from stock. (S116 — now RULES §7 as the single exception to the units test.)
-- **Materials are Kg only;** anything carrying a `formula_id` carries units. (S112)
+- Prefer **CloudShell text** over console screenshots. `aws ec2 describe-volumes --query ... --output table` costs a fraction and is easier to read.
+- When a console screen is the only source, **crop to the panel**. The dock, menu bar, tab strip and wallpaper cost the same as the data.
+- **One job per session.** S126 ran three.
+- Do not paste back terminal scrollback already read earlier in the session.
+- The S126 sweep is the model: greps returning a dozen lines settled a question fifteen screenshots could not.
