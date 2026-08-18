@@ -127,6 +127,18 @@ A **database object** reaches neither box by deploying. Run it on each box separ
 
 ---
 
+### Before removing infrastructure
+
+Before deleting or releasing any AWS or hosting resource — instance, address, bucket, database, certificate, key, zone — ask **what still points at this?** and answer it by looking:
+
+**DNS records · credentials · other AWS settings · accounts outside AWS**
+
+**The pointer goes first, the resource second.** Never the reverse — in between, a name you own points at something you don't.
+
+⚠ **A code search cannot find these.** Nothing in the code names them; that is why they were left behind.
+
+---
+
 ## 3 · HEAL
 
 Code fixes the **future**. It never reaches rows already saved.

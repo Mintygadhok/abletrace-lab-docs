@@ -167,7 +167,7 @@ New items go at the **bottom** with the next free number. Claude never renumbers
 
 **P232 · `abletrace.ca` DNS zone to the new account.** Not an app dependency — proved S126 — but it holds the live Zoho mail records, so the account cannot close without it. Full record export from the Route 53 console first; `dig` only finds what you already know to ask for. Replicate, repoint GoDaddy's nameservers, verify, leave the old zone standing while resolvers drain. **Be surgical.**
 
-**P233 · Old app box.** Image to an AMI first — last copy of that server's configuration — then terminate and release `3.98.223.126`.
+**P233 · Old app box.** ⚠ **Order matters.** Delete the `prodapi.abletrace.ca` record from Route 53 **first**, then release `3.98.223.126`, then image the box to an AMI — last copy of that server's configuration — and terminate. Releasing the address while the record still points at it is how `devapi.abletrace.ca` was taken over hours after the S126 teardown.
 
 **P234 · Marketing site needs a new home** before the account closes.
 
@@ -182,6 +182,17 @@ New items go at the **bottom** with the next free number. Claude never renumbers
 **P240 · `email.js` send errors vanish.** `.then(→true).catch(→false)` on a floating promise nothing awaits. Caller gets no value, error object discarded unlogged. A failed invite is invisible everywhere. Fix while P231 has the file open.
 
 **P16 · JR source files are single-copy on prod.** Every `.sql` behind ~36 procs and 9 views lives only in `/home/ubuntu` on the prod box, which is not backed up off-instance; the Drive copy is unverified. Cited in 3B.3 and in no queue until now.
+
+**P241 · Periodic security audit.** Quarterly, scoped so it can be run rather than intended:
+
+- the DNS zone read end to end
+- IAM users and access keys, with last-used dates
+- security groups with `0.0.0.0/0` inbound
+- S3 buckets with public access
+- SSL certificate expiry on both boxes
+
+**First run after the old account is closed** — audit the estate being kept, not the one being dismantled. The last item is a real answer to **P74**, which has stood open with nothing watching cert renewal on either box.
+
 
 ### Standing
 
