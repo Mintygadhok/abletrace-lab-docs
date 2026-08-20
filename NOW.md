@@ -1,6 +1,6 @@
 # NOW
 
-Written at the S127 close. Rewritten whole — see RULES 6.
+Written at the S128 close. Rewritten whole — see RULES 6.
 
 ---
 
@@ -18,106 +18,91 @@ What no command returns. Everything measurable is in the open check.
 
 **Dev's ssh is fragile.** Dev's security group allows inbound 22 from **one IPv4 /32**, so the Mac drifting onto IPv6 locks you out of dev while prod still connects — that asymmetry is the tell. Always `ssh -4`; only `curl -4 ifconfig.me` gives the real source. → P224
 
-**Dev carries an S127 test fixture. Keep it.** User id **1332**, `info@abletrace.ca`, created by the invite that proved the SES migration. It is the proof; do not sweep it.
+**Dev carries an S127 test fixture. Keep it.** Company `info@`, user `info@abletrace.ca`, license status **Invited** — activation was never completed. It is the proof the SES migration delivers; do not sweep it. Its temporary password is collected from the inbox to complete activation, so an Invited row cannot sign in directly. That is the app working, not a defect.
 
-**Dev's `.env` has an S127 backup**, `~/abletrace-lab-backend/.env.bak-S127`. Holds the **old account's** SES credentials. Keep until prod is cut over and proven, then delete with P227.
+**Dev's `.env` has two backups**, both in `~/abletrace-lab-backend/`: `.env.bak-S127` (old account's SES credentials) and `.env.bak-S128b` (pre-`APP_BASE_URL` change). Keep until prod is cut over and proven, then delete with P227. A code backup also sits at `/tmp/development.js.bak-S128` — temp, sweeps itself on reboot.
 
 **The old AWS account is being wound down.** Minty's decision, S126.
 
----
-
-## THE JOB — S128
-
-### Finish the SES migration and close the last dependency
-
-Three parts, strict order. Each gates the next.
-
-**S127 proved the whole path on dev.** An invitation email sent through the new account's SES landed in `info@abletrace.ca` at 06:51. Credentials authenticate, the IAM policy permits the call nodemailer actually makes, delivery works. **The method below is proven, not proposed.**
+**P212 is closed.** RULES does not auto-load in the Abletrace project — the project's searchable knowledge holds TRAPS, UNITS-BIBLE, Section_2, Section_3A, Section_5 and NOW, and no RULES. **Keep pasting RULES at the open.**
 
 ---
 
-### ⚠ OPEN S128 WITH THIS. IT DECIDES THE SESSION.
+## WHAT S128 DID
+
+**Part 1 of the SES migration is done.** DKIM verification succeeded 23:33 Aug 18. The production-access case **178710371200148** was answered in the AWS Support Center at **11:00:01 PDT Aug 19** with a full response to AWS's four questions. AWS states a 24-hour initial response.
+
+⚠ **The API said DENIED while the email said "we need more information."** Both were true. The email is the softer face of the same decision. `get-account` is the arbiter; do not read the outcome off an email.
+
+**P241 is deployed, not proven.** Dev's invitation link now reads `APP_BASE_URL`. Screen proof is blocked — see below.
+
+**One finding.** The old dev bucket, absent from every teardown inventory — see below.
+
+⚠ **And one false alarm worth remembering.** Claude raised a high-priority security item from an unread email subject line and its proximity to S126's teardown, without checking the record. It was `devapi.abletrace.ca`, already found and fixed in S126. **Proximity is not evidence. Check the record before ranking anything above live work.**
+
+---
+
+## ⚠ OPEN S129 WITH THIS. IT DECIDES THE SESSION.
+
+**[CLOUDSHELL — NEW account]**, one command per block, Ctrl+U before each paste, Enter after.
 
 ```
 aws sts get-caller-identity --query Account --output text
+```
+
+```
 aws sesv2 get-account --region ca-central-1 --query "{Prod:ProductionAccessEnabled,Review:Details.ReviewDetails.Status,Max24:SendQuota.Max24HourSend}" --output table
-aws sesv2 get-email-identity --region ca-central-1 --email-identity abletrace.ca --query "{Verified:VerifiedForSendingStatus,Dkim:DkimAttributes.Status}" --output table
 ```
 
-**CloudShell must read `208073623096`.** The old account is `350466202408`.
+**Must read `208073623096`.** The old account is `350466202408`. Both accounts have `abletrace.ca` verified, so an identity check alone cannot tell you which account you are in.
 
-⚠ **THE TRAP THAT NEARLY LANDED IN S127.** Both accounts have `abletrace.ca` verified. The identity command returns `SUCCESS / True` from the old account and it looks exactly like the answer you want. **Read the account number first, every time.**
-
-**Branch on the result:**
-
-| Prod | Verified | do this |
-|---|---|---|
-| `True` | — | production access granted → **Part 2, the prod cutover** |
-| `False` | `True` | → **Part 1, re-file**, then Part 3's fallback while it sits |
-| `False` | `False` | ⚠ finding — see below |
+| Prod | do this |
+|---|---|
+| `True` | **THE JOB — prod cutover**, then P241's verify, then Part 3 |
+| `False`, Review `PENDING` | AWS still reviewing → **P245, QuickBooks** |
+| `False`, Review `DENIED` again | ⚠ finding. Read the case correspondence before re-filing anything, then → **P245** |
 
 ---
 
-## PART 1 — re-file production access
+## THE JOB — prod cutover, when access is granted
 
-**Only when the domain reads `Verified: True`.** The first request was **DENIED** — case **178710371200148** — filed when the account had zero verified identities. Re-filing while it still reads unverified invites a second denial on the same case, and a third ask after two rejections is a harder conversation.
+Everything here was measured S127–S128. No re-derivation needed.
 
-**The request text, as submitted S127 — reuse it, with the two additions marked:**
+### Material
 
-```
-aws sesv2 put-account-details --region ca-central-1 --production-access-enabled --mail-type TRANSACTIONAL --website-url https://trace.mintekfoodsafety.com --contact-language EN --use-case-description 'AbleTrace Lab is a food safety traceability SaaS used by food manufacturers in Canada. Emails are transactional only: account invitations, password resets and production notifications sent to named staff at customer companies who have been provisioned in the system by their own administrator. There is no marketing, no bulk sending and no purchased lists. Expected volume is under 100 messages per day. Recipients are known business users, so bounce and complaint rates are expected to be near zero. The sending domain abletrace.ca is verified with DKIM and is actively sending. This account is a migration of an existing SES production workload from another AWS account owned by the same business.'
-```
-
-Two sentences differ from S127's: the domain is now stated as verified **and actively sending**. Both are true and both were false at the first ask.
-
-Success prints nothing. Confirm with the `get-account` block above — expect `Review: PENDING`.
-
-⚠ **If `Verified` is still `False` after 24h+**, that is a finding, not a wait. The three CNAMEs resolve publicly — confirmed S127 — so a long delay means something is wrong with what was published. Re-read the zone before re-filing anything.
-
----
-
-## PART 2 — prod cutover
-
-**Blocked until `Prod: True`.** Prod invites real client staff at their own addresses. Sandbox delivers only to verified recipients, so this genuinely cannot run earlier. Prod stays on the old account's SES until then and is safe there — the old account is not closing.
-
-### Material — measured S127
-
-**Prod's `.env` carries eight variables**, read on the box:
+**Prod's `.env` carries eight variables:**
 
 ```
 DATABASE_URL · SMTP_USER · SMTP_PASSWORD · FROM_EMAIL
 S3_ACCESS_KEY · S3_SECRET · SESSION_SECRET · APP_BASE_URL
 ```
 
-⚠ **S126's NOW said "both boxes carry the same nine variables, dev has IS_DEV_BOX extra." That was wrong.** Prod has **eight**; dev has **nine** including `IS_DEV_BOX`. The `grep -c .` check below fails on the wrong number otherwise.
+Dev has **nine** — `IS_DEV_BOX` extra. The `grep -c .` check below fails on the wrong number.
 
-**Both target names are identical to dev's**, so the proven method transfers exactly.
+**The new credentials** are in Minty's Drive note. Key ID `AKIATA4RHQY4AXV44ISY` — IAM user `abletrace-ses`, account 208073623096, created 2026-08-19 06:22 UTC. The secret is in that note and nowhere else. Never to screen, never to chat.
 
-**The new credentials** are in Minty's Drive note.
-Key ID `AKIATA4RHQY4AXV44ISY` — IAM user `abletrace-ses`, account 208073623096, created 2026-08-19 06:22 UTC. The secret is in that note and nowhere else. Never to screen, never to chat.
-
-**Prod's invite link is clean — measured S127.** `config/env/production.js:24` reads
+**Prod needs no code change.** `config/env/production.js:24` reads
 `UI_Base_Url: (process.env.APP_BASE_URL || 'https://trace.mintekfoodsafety.com') + '/'`
-No old-account reference. Client emails are correct. **No code change is needed for this cutover.**
+Measured S127. Client invitation links are correct.
 
-### The action — every step proven on dev in S127
+### The action — every step proven on dev
 
 **[PROD]** — check the prompt is red.
 
 ```
-cd ~/abletrace-lab-backend && cp .env .env.bak-S128 && ls -la .env.bak-S128
+cd ~/abletrace-lab-backend && cp .env .env.bak-S129 && ls -la .env.bak-S129
 ```
 
 ```
 vi .env
 ```
 
-`vi` method, as it worked: arrow to `SMTP_USER=`, press **`A`** (capital) to append at end of line, backspace back to the `=`, paste the new value. `Esc`, arrow down to `SMTP_PASSWORD=`, `A`, backspace, paste. `Esc`, `:wq`, Enter.
+`vi` method as it worked: arrow to `SMTP_USER=`, press **`A`** (capital) to append at end of line, backspace back to the `=`, paste the new value. `Esc`, arrow down to `SMTP_PASSWORD=`, `A`, backspace, paste. `Esc`, `:wq`, Enter.
 Escape hatch: `Esc` `:q!` Enter — nothing saved.
 
-⚠ **If `vi` warns about a swap file**, press **`Q`**, then check whether the stranded editor still lives with `ps -p <PID>`. If dead, `rm -f .env.swp`. Cost several exchanges in S127. An abandoned `vi` holding unsaved edits can later overwrite correct work.
+⚠ **If `vi` warns about a swap file**, press **`Q`**, then check whether the stranded editor still lives with `ps -p <PID>`. If dead, `rm -f .env.swp`. An abandoned `vi` holding unsaved edits can later overwrite correct work.
 
-**Verify — the second check is the one that can fail informatively:**
+**Verify:**
 
 ```
 grep -c . .env && grep -o '^SMTP_USER=.\{0,20\}' .env
@@ -126,12 +111,12 @@ grep -c . .env && grep -o '^SMTP_USER=.\{0,20\}' .env
 Expect **8** and `SMTP_USER=AKIATA4RHQY4AXV44ISY`.
 
 ```
-[ "$(grep '^SMTP_PASSWORD=' .env)" = "$(grep '^SMTP_PASSWORD=' .env.bak-S128)" ] && echo "SAME - NOT CHANGED" || echo "CHANGED"
+[ "$(grep '^SMTP_PASSWORD=' .env)" = "$(grep '^SMTP_PASSWORD=' .env.bak-S129)" ] && echo "SAME - NOT CHANGED" || echo "CHANGED"
 ```
 
 Expect **CHANGED**.
 
-⚠ **Do not check the secret by length.** Old and new are both 40 characters — a length check passes either way and proves nothing. S127 wrote that check, it could not fail, and it had to be replaced.
+⚠ **Do not check the secret by length.** Old and new are both 40 characters — a length check cannot fail and proves nothing.
 
 **Restart:**
 
@@ -139,31 +124,27 @@ Expect **CHANGED**.
 pm2 restart abletrace-backend --update-env
 ```
 
-⚠ `--update-env` is load-bearing. Without it pm2 reuses the cached environment, the new credentials never load, and **the restart looks perfectly healthy**.
+⚠ `--update-env` is load-bearing. Without it pm2 reuses the cached environment, the new credentials never load, and **the restart looks perfectly healthy**. Confirmed on dev in S128: 18mb at restart, 252mb eight seconds later is a correct boot.
 
 ```
 sleep 15 && pm2 status && curl -s -o /dev/null -w "%{http_code}\n" localhost:1337
 ```
 
-Expect **200** and memory near **150mb**. Low memory with `000` is still booting — wait and repeat. Read the memory, not just the status.
+Expect **200** and memory near **150mb**. `000` with low memory is still booting.
 
 ### The verify — an email in an inbox
 
 **A 200 proves nothing about email.** P240: a failed send returns nothing, logs nothing, and the screen looks normal. Receipt is the only proof.
 
-**Proven trigger path, S127:** log in as super admin → **Add Company** → fill the form → **Send Invite**. Fires "You are invited to join Able Trace" from `info@abletrace.ca`.
+**Trigger path, proven S127:** log in as super admin → **Add Company** → fill the form → **Send Invite**. Fires "You are invited to join Able Trace" from `info@abletrace.ca`.
 
-Send to a real inbox and confirm arrival. Once production access is granted any address works; `info@abletrace.ca` is always safe.
-
-⚠ **This writes a company and a user row to the clients' database.** Scope it, name it obviously, and decide before sending whether it is removed afterwards. Minty's call — it is his data.
+⚠ **This writes a company and a user row to the clients' database.** Name it obviously, and decide before sending whether it is removed afterwards. Minty's call — it is his data.
 
 ---
 
 ## PART 3 — deactivate the old key
 
-**Only after prod is proven by a received email.**
-
-Deactivate, **not delete** — reversible in one click if anything surfaces.
+**Only after prod is proven by a received email.** Deactivate, **not delete** — reversible in one click.
 
 **[CLOUDSHELL — OLD account 350466202408]**
 
@@ -171,7 +152,7 @@ Deactivate, **not delete** — reversible in one click if anything surfaces.
 aws iam list-access-keys --user-name ses --query "AccessKeyMetadata[].[AccessKeyId,Status,CreateDate]" --output text
 ```
 
-Then, against the ID that matches the value in `.env.bak-S128`:
+Then, against the ID matching the value in prod's `.env.bak-S129`:
 
 ```
 aws iam update-access-key --user-name ses --access-key-id <ID> --status Inactive
@@ -183,53 +164,91 @@ This closes the second half of **P17** and ends the live app's last dependency o
 
 ---
 
-## IF PART 2 IS BLOCKED
+## P241 — deployed, not proven
 
-Likely. AWS review takes about a day and the re-file happens at the top of S128.
-
-**Fallback: P241.** Small, measured, and in the same file family.
-
-`config/env/development.js:7` reads:
+**The change, made and verified on the box S128.** `config/env/development.js:7` now reads:
 
 ```
-UI_Base_Url : 'http://abletrace-development1.s3-website.ca-central-1.amazonaws.com/',
+  UI_Base_Url: (process.env.APP_BASE_URL || 'https://dev.mintekfoodsafety.com') + '/',
 ```
 
-Hardcoded, and it **ignores `APP_BASE_URL` entirely** — which is why dev's invitation link pointed at an old-account S3 bucket even though dev's `APP_BASE_URL` reads `https://trace.mintekfoodsafety.com`.
+and dev's `.env` line 8 reads `APP_BASE_URL=https://dev.mintekfoodsafety.com`. `grep -c . .env` returns **9**. Restarted with `--update-env`, 200. Committed and pushed: dev backend `99852bf → 4095344`.
 
-**The fix is to match production.js's pattern**, which is correct:
+**What is not proven:** that an invitation email now carries the new link. Blocked because the new account's SES is in sandbox and delivers only to `info@abletrace.ca`; mailinator addresses bounce (`MAILER-DAEMON`, Aug 12). `info@abletrace.ca` is already consumed by the S127 fixture and the app will not take it for a second company.
 
-```
-UI_Base_Url: (process.env.APP_BASE_URL || 'https://dev.mintekfoodsafety.com') + '/',
-```
+⚠ **The backend log does not print the constructed URL.** Checked S128 — `pm2 logs` carries only Waterline `createdAt`/`updatedAt` warnings. There is no log route to the proof.
 
-Then set dev's `APP_BASE_URL` to `https://dev.mintekfoodsafety.com` — it currently reads prod's URL, harmlessly today only because nothing reads it.
+**So the verify rides on production access.** Once granted, send a dev invitation to any address and read the link. Expect `https://dev.mintekfoodsafety.com`. One minute's work, appended to the prod cutover session.
 
-`config/env/staging.js:2` has the same shape pointing at `stgapifrontend`. Staging is dead — leave it or strike it, Minty's call.
+**Related, unresolved:** `config/env/staging.js:2` has the same hardcoded shape pointing at `stgapifrontend`. Staging is dead — leave it or strike it, Minty's call.
 
-⚠ **This corrects S126's sweep.** The sweep concluded no old-account identifier was hardcoded anywhere. It searched for account IDs, key fragments and bucket names — never `s3-website`. The claim was narrower than it read.
+---
 
-Verify: re-send an invite on dev and read the link in the received email.
+## The old dev bucket — closed, for the record
+
+**`abletrace-development1` is a live old-account S3 website**, returning 200 and serving a **different build** from dev proper (md5 `19bf7a28…` against dev's `871ba2e4…`). Dev proper is nginx on `16.55.10.205` serving `/var/www/html`, proxying `/api/` to `localhost:1337`.
+
+**It has no link to the new account.** Its only pointer was the hardcoded URL in dev's `development.js`, which S128 fixed. It dies when the old account closes.
+
+⚠ **The finding worth keeping is that it was missing from every teardown inventory.** S126's sweep searched for account IDs, key fragments and bucket names and concluded the code was clean; the string in the code is a *website endpoint*, so the sweep's claim was narrower than it read. **Second time that sweep has been found narrow.**
+
+Add to the teardown checklist. No session required. Minty's ruling, S128.
+
+---
+
+## P245 — QuickBooks Online integration
+
+**Scoped S128 with Minty. Not started.** This is the substantial job available whenever SES is blocked.
+
+**Decided:** QuickBooks **Online**, not Desktop. Minty already holds a QuickBooks account and a sandbox.
+
+**The sandbox, measured S128:** company `Sandbox Company US 80fd`, **realm ID `9341457628433780`**, SKU **Plus**, features Accounting + Payments, created 30 Jul 2026. The realm ID is needed on every API call.
+
+⚠ **The sandbox region is US.** If the real books are Canadian, sales tax behaves differently — and tax is exactly where invoice generation gets fiddly. **Confirm before writing the shipping side**, not after.
+
+**The sandbox, measured S128:** company `Sandbox Company US 80fd`, **realm ID `9341457628433780`**, SKU **Plus**, features Accounting + Payments, created 30 Jul 2026. The realm ID is needed on every API call.
+
+⚠ **The sandbox region is US.** If the real books are Canadian, sales tax behaves differently — and tax is exactly where invoice generation gets fiddly. **Confirm before writing the shipping side**, not after.
+
+**Two integration points, shipping-side first by Minty's ruling:**
+
+1. **Shipping → invoice.** ⚠ **One packing slip, one invoice.** The warehouse person selects which DOs ride on one truck; **the selected DO lines move onto the packing slip whole, with all their information.** So the slip already carries everything the invoice needs — the invoice reads what is assembled there rather than gathering it back from the DOs. Minty's ruling, S128.
+2. **Receiving → bill.** Materials received against a PO push into QuickBooks for the payable. Second, and lower value.
+
+⚠ **RULES §7 governs the quantities.** A packing slip moves no stock — the movement already happened at the DO. The invoice reads quantities committed earlier, and reads them as **units**. Never derived from weight.
+
+**The step order, agreed:**
+
+1. Register a developer app at Intuit → client id and secret
+2. Build the OAuth connection — one-time authorisation, stored refresh token. **A credentials job**: new secrets, new rotation path, Section 4 grows
+3. Settle the product mapping — how an AbleTrace product finds its QuickBooks item, and who maintains it when a product is added. **This is the hard part, not the API**
+4. Build shipping → invoice
+5. Test in the QuickBooks sandbox before anything touches real books
+6. Receiving → bill, later
+
+**Open question, not yet decided:** push at the moment of shipping, or a nightly batch. Push is immediate and fails loudly; batch is re-runnable. ⚠ Weigh this against **P240** — the app currently cannot tell anyone when a send fails. Silent failure is tolerable for an email and is not tolerable for an invoice.
+
+**Sandbox credentials reach the dev box by file, never through chat.**
 
 ---
 
 ## OLD ACCOUNT — where the teardown stands
 
-**Done at S126.** Deleted: RDS `newinstance` (with final snapshot), EC2 `devapi_windows` and `stgapi_windows`, three Elastic IPs, two stale Route 53 A records. About **$215 of a $256/month forecast** removed.
+**Done S126.** Deleted: RDS `newinstance` (with final snapshot), EC2 `devapi_windows` and `stgapi_windows`, three Elastic IPs, two stale Route 53 A records. About **$215 of a $256/month forecast** removed.
 
-⚠ **The final snapshot of `newinstance` is the only copy of two years of departed-client traceability data.** Do not sweep it in a later tidy-up. Restoring it after 1 Aug 2026 puts that instance back on Extended Support pricing, so any restore is a short deliberate exercise.
+⚠ **The final snapshot of `newinstance` is the only copy of two years of departed-client traceability data.** Do not sweep it. Restoring it after 1 Aug 2026 puts that instance back on Extended Support pricing, so any restore is a short deliberate exercise.
 
-**Done at S127.** Three DKIM CNAMEs added to the `abletrace.ca` zone for the new account. Change `C047799518UT618CC0POM`, applied 05:54 UTC. Additive only — nothing existing was touched.
+**Done S127.** Three DKIM CNAMEs added to the `abletrace.ca` zone for the new account. Change `C047799518UT618CC0POM`. Additive only.
 
-**Still standing, and why:** old app EC2 + Elastic IP `3.98.223.126` (→ P233) · SES (→ P231, in progress) · Route 53 zone, holds the live Zoho mail records (→ P232) · CloudFront marketing site (→ P234) · old bucket `abletrace-fileuploads1` (→ P236).
+**Still standing:** old app EC2 + Elastic IP `3.98.223.126` (→ P233) · SES (→ P231) · Route 53 zone, holds the live Zoho mail records (→ P232) · CloudFront marketing site (→ P234) · bucket `abletrace-fileuploads1` (→ P236) · **bucket `abletrace-development1` (→ P243, newly found)**.
 
 ### The zone — measured S127, for P232
 
-**`abletrace.ca` is served by Route 53 in the old account.** Nameservers are `awsdns`; GoDaddy holds the registration and delegates. Zone **`Z0710124HPIPA4X553D7`**, 17 records before S127, 20 after.
+**`abletrace.ca` is served by Route 53 in the old account.** GoDaddy holds the registration and delegates. Zone **`Z0710124HPIPA4X553D7`**, 20 records.
 
-**What is in it:** Zoho mail (MX, apex TXT, `_dmarc`, `zmail._domainkey`) · old-account SES (`_amazonses` TXT + five `_domainkey` CNAMEs — five is more than SES issues at once, so some are stale) · two ACM validation CNAMEs · three A records: apex, `www`, and **`prodapi.abletrace.ca`**.
+**Contents:** Zoho mail (MX, apex TXT, `_dmarc`, `zmail._domainkey`) · old-account SES (`_amazonses` TXT + five `_domainkey` CNAMEs — five is more than SES issues at once, so some are stale) · two ACM validation CNAMEs · three A records: apex, `www`, and **`prodapi.abletrace.ca`**.
 
-⚠ **`prodapi.abletrace.ca` is a live A record almost certainly pointing at the old app box** — the one queued for teardown under P233. **The pointer goes first, the resource second.** P232 and P233 must be ordered against each other, and this record is why.
+⚠ **`prodapi.abletrace.ca` is a live A record almost certainly pointing at the old app box** — the one queued under P233. **The pointer goes first, the resource second.** P232 and P233 must be ordered against each other, and this record is why. P244 may reach this first.
 
 ---
 
@@ -237,49 +256,47 @@ Verify: re-send an invite on dev and read the link in the received email.
 
 Minty ranks. Claude never renumbers.
 
+**Minty's ranking, S128: QuickBooks first. The teardown items are parked and come after it.**
+
 | | |
 |---|---|
-| **P231** | SES migration — **dev done and proven S127**. Prod blocked on production access |
-| **P232** | DNS zone move. ⚠ order against P233 — see `prodapi` above |
+| **P231** | SES migration — dev done S127, prod blocked on production access |
+| **P241** | Dev invitation link — **deployed S128, not proven.** Verify rides on production access |
+| **P245** | **NEW S128.** QuickBooks Online integration, shipping side first. Scoped, not started. **The job to run whenever SES is blocked** |
+| **P232** | DNS zone move. ⚠ order against P233 |
 | **P233** | Old app box teardown |
 | **P234** | Marketing site |
-| **P236** | Old bucket retention decision |
+| **P236** | Old bucket `abletrace-fileuploads1` retention decision |
 | **P237** | Section_3B.md full rewrite, after reading 3B.1, 3B.2, 3B.4 |
 | **P230** | Fix `~/.my.cnf` |
 | **P239** | Dead nodemailer block with plaintext credentials in git history |
-| **P240** | `email.js` floating promise — failed sends invisible to app, logs and user |
+| **P240** | `email.js` floating promise — failed sends invisible to app, logs and user. ⚠ read before deciding P245's push-vs-batch |
 | **P224** | Dev SSH IPv6 rule |
 | **P225** | Sweep Mac Downloads |
-| **P227** | Delete `node_modules.old-node18` on dev |
-| **P241** | **NEW S127.** `development.js:7` hardcodes an old-account S3 website URL and ignores `APP_BASE_URL`. Dev-only; prod is clean |
-| **P212** | Does RULES auto-load in the Abletrace project? ⚠ **Test at the S128 open** — see below |
+| **P227** | Delete `node_modules.old-node18` and the `.env` backups on dev |
 
-**P235 — CLOSED.** Dev RDS engine version checked, S126.
-**P242 — dissolved before it was filed.** Dev's `APP_BASE_URL` pointing at prod is harmless because `development.js` does not read it. Folded into P241.
-
----
-
-## P212 — the test, at the S128 open
-
-**Open S128 with `start s128` and paste nothing.** If Claude can quote a RULES line unprompted, RULES auto-loads from the project and pasting stops. If Claude asks for it, keep pasting.
-
-Two seconds, and it closes a question open since S125.
-
-⚠ S127 answered this wrongly at first — RULES had been pasted as the session's first message and Claude reported it missing while looking at it. **A memory contradicting a measurement in front of you.**
+**P212 — CLOSED S128.** RULES does not auto-load. Keep pasting.
+**P235 — CLOSED S126.** Dev RDS engine version checked.
+**P243 — PARKED S128.** The old-account bucket has no link to the new account. Its only pointer was dev's code, now fixed. It dies when the account closes. Held on the teardown checklist, addressed after QuickBooks. Minty's ruling, S128.
+**P244 — CANCELLED S128.** The subdomain takeover was `devapi.abletrace.ca`, found and fixed in S126. Nothing left to return to. Claude raised it from an unread subject line without checking the record.
 
 ---
 
-## TRAPS EARNED S127 — for the TRAPS file, Minty's approval
+## TRAPS EARNED S127–S128 — for the TRAPS file, Minty's approval
 
-**1 · A command that never ran looks exactly like a zero result.** Pastes that arrive without a trailing newline sit on the prompt unexecuted; the next paste glues onto them, AWS rejects the joined string, and nothing runs. Happened three times. Twice the silence was nearly read as "no zones exist" and "no identities exist." **Ctrl+U before every paste, Enter after every paste, one command per block.**
+**1 · A command that never ran looks exactly like a zero result.** Pastes arriving without a trailing newline sit on the prompt unexecuted; the next paste glues onto them and AWS rejects the joined string. Happened three times in S127, twice nearly read as "no zones exist" and "no identities exist." **Ctrl+U before every paste, Enter after, one command per block.**
 
-**2 · The same command in two accounts returns the same answer for opposite reasons.** `get-email-identity abletrace.ca` returns `SUCCESS / True` in the old account and `PENDING / False` in the new. Read the account number before the measurement, not after.
+**2 · The same command in two accounts returns the same answer for opposite reasons.** `get-email-identity abletrace.ca` returns `SUCCESS / True` in both accounts. Read the account number before the measurement, not after.
 
-**3 · An abandoned `vi` holds unsaved edits that can overwrite correct work later.** S127 found one from 06:30 with `modified: YES` still holding the file. `diff` against the backup proved nothing had been written.
+**3 · An abandoned `vi` holds unsaved edits that can overwrite correct work later.**
 
-**4 · A check whose two branches cannot differ is not a check.** Comparing secret *lengths* — old and new are both 40 characters. Third instance of this family in the record.
+**4 · A check whose two branches cannot differ is not a check.** Comparing secret *lengths* — both 40 characters. Third instance of this family.
+
+**5 · `grep -r` silently skips symlinks. Capital `-R` follows them.** S128: `grep -rn server_name /etc/nginx/sites-enabled/` returned empty because the directory holds only a symlink. Read as "dev has no site config"; dev had one, active, correct. **An empty result needs a reason before it becomes a fact.** Same family as trap 1, different mechanism.
+
+**6 · An email about a decision is not the decision.** AWS emailed "we would like to gather more information" while the API read `DENIED`. Both from the same review. The API is the arbiter.
 
 ---
 
 **The test: can the next session open NOW and start meaningful work?**
-Yes. One command decides the branch, and both branches are fully specified.
+Yes. Two commands decide the branch. Both branches are fully specified, and the fallback branch has its own homework done.
