@@ -79,9 +79,16 @@ Make it happen on dev before reading anything. It tells you **what** happens, ne
 - When entered and stored disagree, read the **save code**, not the form. A form can send a hidden value instead of the one typed.
 - When a measurement and a memory conflict, find a **third measurement**. Never rebuild the measurement to fit the memory.
 
+### Design before writing
+
+Before writing a route or a screen, say **who calls it, what they send, and what comes back.** If Claude cannot answer all three, it is not ready to write. A route nobody can reach is not half-built — it is not built.
+
+Why this rule exists: S130 built a connect route behind a policy that reads a request header, to be reached by a browser navigation, which cannot send one. Two minutes of design would have caught it. It was found at the close instead, after the code was committed.
+
 ### Before you act
 
 - **A check must be able to fail.** Say what result would distinguish the two answers before running it. If no result could, it is not a check — and it must not match text the patch itself introduced, comments included.
+- **A passing guard proves nothing about the action behind it.** When a policy refuses a request, the controller never ran. Do not read a 400 or a 403 on a new route as evidence the route works.
 - **Before changing a number,** two greps: where is it used, and is the same mistake made elsewhere?
 - **Before undoing,** a revert is a trade, not a fix. Name both sides.
 
@@ -250,6 +257,7 @@ Minty's ruling, S125.
    - the **material** — everything *that job* needs, quoted in, in full. A pointer to another document is a re-derivation. **Job-scoped only** — anything not about this job is measured when needed.
    - the **analysis** — the thinking already done
    - the **verify** — what must be seen on screen to call it done
+   - the **proof** — each item in the material, with the command that measured it and what it returned, run this session. A quoted fact with no measurement beside it is a memory, not material. Minty's ruling, S130.
 4. **State is intent, not facts.** The open check measures commits, process, port, runtime and dirty trees. State carries only what no command returns: what is **deliberate**, and what is **half-done**.
 5. **Delete** what is finished, temporary or no longer relevant. Do not carry it forward and do not file it elsewhere.
 
@@ -257,12 +265,20 @@ Minty's ruling, S125.
 
 Optimise the close for the next session's **opening overhead**, not for a record of the system. NOW is a launchpad, not a database.
 
+### Filing NOW
+
+Five steps. Minty's wording, S130.
+
+1. **Write and download.** Claude produces NOW, Minty downloads it to Downloads.
+2. **Pull and check.** Bring the Mac's repo level with GitHub. Look at what actually landed in Downloads.
+3. **Replace and verify.** Overwrite the repo's NOW with the downloaded one. Read the byte count back.
+4. **Add, commit, push.** Mark it. Save it. Send it.
+5. **Tidy.** Delete the Downloads copy. Replace the panel copy.
+
 ### Also at the close
 
 - **Tidy here and only here** — temp files, patch scripts, stale downloads. Never at the start of a session.
-- **Clear the downloads.** Verify the stamp after copying, before committing.
 - **Commit messages: two or three sentences.** What changed and why, plus anything a future reader would get wrong without it. The detail belongs in the code comment and in NOW, not repeated in all three. Minty's ruling S99.
-- **Replace NOW in project knowledge.** It goes stale the moment it is rewritten, and a stale document that is *searchable* is worse than one that is absent. Minty's ruling, S124.
 - Do not start work that cannot be recorded.
 - Claude raises the close; **Minty decides.**
 
