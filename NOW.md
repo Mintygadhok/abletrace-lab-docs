@@ -55,6 +55,14 @@ Build the QuickBooks screen. This closes Phase 1.
 
 ⚠ **Do not start Phase 2 in S133.** Scope discipline.
 
+### 1a · Also in S133 — file the traps
+
+**Open `TRAPS.md` and move the accumulated entries into it, then cut them out of NOW.** Minty's ruling, S132.
+
+The traps section below has carried the S131 entries unfiled for two sessions and S132 added five more. It is roughly a third of this file. RULES permits this: *a document is cleaned by whichever session next opens it*, and *anything worth keeping must not live in NOW* — NOW is rewritten whole, so a trap left here is a trap waiting to be dropped.
+
+Do this **before** the frontend work, not at the close. It is small, it is bounded, and if it is left to the close it will be dropped again.
+
 ### 2 · How it is verified
 
 **`Sandbox Company CA 26d2` visible on an AbleTrace screen, under a QuickBooks tab in the left menu, logged in as super admin.**
@@ -236,9 +244,9 @@ Minty ranks. Claude never renumbers.
 
 ---
 
-## TRAPS RECORDED IN S132
+## TRAPS — FILE THESE INTO TRAPS.md IN S133
 
-For TRAPS.md when that file is next opened. The S131 entries below have still not been filed.
+⚠ **This whole section leaves NOW in S133.** Move it into `TRAPS.md`, then delete it here. See §1a. It is about a third of this file and it has already survived two rewrites it should not have.
 
 **From S132:**
 
