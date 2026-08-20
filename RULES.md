@@ -1,6 +1,6 @@
 # RULES
 
-Last revised: S126.
+Last revised: S131.
 
 **Two principles govern everything below.** Minty's ruling, S125.
 
