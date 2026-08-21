@@ -1,9 +1,10 @@
 # TRAPS
 
-Last rewritten: S96, 31 July 2026.
+Last rewritten whole: S96, 31 July 2026.
+Entry 12 added and nineteen candidates triaged: S134, 21 August 2026.
 
-⚠ REWRITTEN WHOLE THIS SESSION. The file went from ~40 entries to TEN.
-  This is the first rewrite — every previous edit was an append.
+⚠ REWRITTEN WHOLE IN S96. The file went from ~40 entries to TEN.
+  That was the first rewrite — every previous edit had been an append.
 
 MINTY, S96: "the documentation itself is turning into a trap. Cut down
 the non-critical ones. The critical part is the load-bearing part."
@@ -221,7 +222,7 @@ CRASH LOOP, NOT A SLOW BOOT. Read ↺ TWICE, eight seconds apart,
 before believing any pm2 line.
 
 THE ERROR IS ONLY IN THE LOG:
-  pm2 logs <name> --lines 40 --nostream --err
+  pm2 logs <n> --lines 40 --nostream --err
 Look for `EADDRINUSE: address already in use 0.0.0.0:1337`.
 
 ⚠ A foreground app does NOT stop when its folder is deleted. Kill
@@ -229,6 +230,46 @@ Look for `EADDRINUSE: address already in use 0.0.0.0:1337`.
   is actually running it.
 
 S119: cost ~15 minutes and looked far worse than it was.
+
+---
+
+## 12 · RE-AUTHORISING A QUICKBOOKS COMPANY DESTROYS THE STORED CONNECTION
+
+⚠ RETIRES WHEN P245 IS DONE. Kept only because it protects that job.
+
+Intuit issues ONE live refresh token per company. Any new authorisation
+of the same company INVALIDATES the stored one. The app keeps serving
+from its saved row until the next refresh falls due, so the break is
+invisible for up to an hour.
+
+TWO WAYS IN, AND NEITHER LOOKS DESTRUCTIVE:
+
+```
+1  Intuit's OAuth PLAYGROUND. It reads like a documentation viewer.
+   It is a LIVE authorisation flow. Opening it against your own app
+   re-authorises the company and kills the stored refresh token.
+
+2  Reconnecting "to fix it" when nothing is broken. See below.
+```
+
+⚠ WHAT TEMPTS THE SECOND ONE: Intuit rotates refresh tokens DAILY, NOT
+  PER CALL. Within 24 hours a refresh returns THE SAME token it was
+  given. A test asserting "the refresh token must change" reports a
+  FALSE FAILURE, and the unchanged token is still valid — it is not
+  stale, it is current. Cost a false alarm in S132, and the wrong
+  claim reached NOW as fact before it was caught.
+
+⚠ ON THE SANDBOX this is an annoyance — re-run the connect flow.
+  ON A CLIENT'S LIVE BOOKS (Phase 3, Glutenull and Hagensborg) it is a
+  broken integration with NO error at the moment of breaking. It
+  surfaces later as an invoice that never arrived.
+
+▶ TO PROVE THE MECHANISM, USE `quickbooksService.refreshNow(company)`.
+  It forces a refresh through the app's own path. NEVER re-authorise.
+
+▶ TO PROVE A CONNECTION IS ALIVE, call GET /api/quickbooks/status.
+  It reads the company name LIVE from Intuit. Measured S134:
+  `{"connected":true,"companyName":"Sandbox Company CA 26d2"}`
 
 ---
 
@@ -292,6 +333,71 @@ CUT ENTIRELY — nothing broken, fixed long ago, or a one-off nuisance
 
 ---
 
+## WHAT WAS CUT IN S134, AND WHY
+
+⚠ NINETEEN candidates had accumulated in NOW across S131 and S132,
+  unfiled through two rewrites. S133's brief said "move them in".
+  Read against the S96 test, ONE qualified. It became entry 12.
+  The other eighteen are recorded here so this is not re-argued.
+
+```
+ALREADY WRITTEN DOWN ELSEWHERE — free cut, no judgement
+  a dead Sails process reads "online"         IS entry 11
+  long pastes into the terminal garble        RULES §5
+  prod cannot ssh to dev                      RULES §2
+  a passing guard proves nothing              RULES §1
+  a route behind isAuth cannot redirect       RULES §1, and the
+                                              controller's doc comment
+  sandbox and production are different HOSTS  comment in the status
+                                              route, S134
+
+BELONGS NEXT TO THE CODE — TRAPS rule 3
+  isAuth requires lower-case `bearer`, while Intuit's API requires a
+  capital B. Two systems, opposite conventions, both correct. Already
+  commented at both call sites, which is three inches from the reader
+  instead of in another repo.
+
+COST TIME, TOUCHED NO DATA — the S96 test
+  sails.load() with the http hook disabled    fails LOUDLY
+  `sails version` exits 0, prints nothing     read .sailsrc
+  api/scripts/ is not Sails scripts           no data path
+  res.badRequest is 400, not 403              trivia
+  authorization codes are single-use ~10 min  fails loudly
+  pm2 shows mid-boot memory after a restart   nothing broken; the
+                                              real tell is ↺, entry 11
+  logging in again invalidates the old token  by design
+  allowNull cannot be used with ref or json   fails at lift
+  a browser download can silently not happen  a working method; RULES
+                                              §5 already governs
+                                              downloads
+
+⚠ WRONG, AND DELETED RATHER THAN FILED
+  "node -c is not a syntax check; the flag is --check"
+  MEASURED ON DEV, S134, Node v24.19.0: `-c` is an ALIAS for
+  `--check`. Both produced byte-identical output and both exited 1
+  on a deliberately broken file. The entry was written into NOW as
+  fact in S131 and never measured.
+
+⚠ NOT IN THIS FILE, DESPITE NOW SAYING IT WAS
+  NOW cited the nginx `grep -r` symlink trap as "TRAPS 10". Entry 10
+  is the CTE-alias entry and always has been. The nginx behaviour is
+  a search nuisance with no data path, so it is cut here rather than
+  added — but the mis-citation is the point: a pointer to this file
+  was trusted without anyone opening the file.
+```
+
+⚠ THE PATTERN IN THESE CUTS, AND IT IS NOT THE S96 PATTERN. S96 cut
+  entries that had merely cost time. S134 cut two things that were
+  simply UNTRUE and had been carried as fact — one measurable in a
+  single command. Both were written during sessions that recorded
+  findings without measuring them.
+
+⚠ THIS IS THE ARGUMENT FOR THE S130 PROOF RULE. Every item carried
+  forward needs the command that measured it sitting beside it. A
+  quoted fact with no measurement is a memory.
+
+---
+
 ## HOW THIS FILE STAYS SMALL
 
 ```
@@ -303,5 +409,7 @@ CUT ENTIRELY — nothing broken, fixed long ago, or a one-off nuisance
    sits in another repo the tidier is not reading. (→ P118)
 4  IF IT IS A CLIENT SYMPTOM, IT BELONGS IN THE CLIENT GUIDE.
 5  ⚠ AN ENTRY THAT PROTECTS A JOB RETIRES WHEN THE JOB IS DONE.
-   Entry 10 goes when P135 lands.
+   Entry 10 goes when P135 lands. Entry 12 goes when P245 lands.
+6  ⚠ A CANDIDATE IS MEASURED BEFORE IT IS FILED. S134 found one entry
+   that was false and one that pointed at the wrong entry number.
 ```
