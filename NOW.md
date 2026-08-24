@@ -11,7 +11,11 @@ Read RULES.md and this file. Nothing else at the open.
 
 What no command returns.
 
-**SES — parked, waiting on AWS.** Case `178710371200148` on account `208073623096`. Nothing to do until AWS answers. Does not block QuickBooks — nothing in Phase 1 or 2 sends email.
+**SES — AWS answered on 22 Aug and REFUSED.** Case `178710371200148` on the new account `208073623096`. Their words: they identified concerns they will not specify, citing security. **No production SES on the new account.**
+
+⚠ **Consequence: the old account 350466202408 cannot be torn down.** Production SES appears to exist only there, which makes it a permanent dependency rather than a parked one. **See the estate pending point in the queue.**
+
+⚠ **Still does not block QuickBooks.** Nothing in Phase 1, 2 or 3 sends email.
 
 **Prod untouched since before S130, on Node v18.** Both deliberate. No QuickBooks anything on prod until Phase 3.
 
@@ -254,7 +258,7 @@ Minty ranks. Claude never renumbers.
 | P227 | Dev backend `node_modules.old-node18/` — deliberate, untracked |
 | P240 | The app cannot tell anyone a send failed. **Phase 2 raises this from housekeeping to a prerequisite** |
 | P241 | Quarterly security audit, five named checks |
-| P245 | QuickBooks integration — **active. Phase 1 complete. S136 is the schema and the quoting fix; S137 is Send and Get invoice number.** Phase 3 is below |
+| P245 | QuickBooks integration — **active. Phase 1 complete. S136 is the schema and the quoting fix; Send and Get invoice number is the session after.** Phase 3 is below |
 | P246 | `User.creatSuperAdmin` hardcodes password `"12345678"`. `api/models/User.js:98`. Fold into P241 |
 | P247 | **App JWTs never expire.** `api/policies/generateJWT.js` calls `jwt.sign` with no `expiresIn`. Fold into P241 |
 | P248 | **OS updates.** Prod 59 pending / 12 security. Dev 22 pending. **Both boxes now report "system restart required."** Fold into P241 |
@@ -265,6 +269,25 @@ Minty ranks. Claude never renumbers.
 | — | **Materials may have the same quoting fault.** `Materials.js` uses `myCode` too; not checked in S135 |
 | — | Section_3B.md rewrite. Verdict: replace whole. ~430 lines unread across 3B.3, 3B.5–3B.7, 3B.9–3B.11 |
 | — | Pending, unranked: external ID duplicate guard on **products**. The customer side is item 7 |
+
+### PENDING — the estate. abletrace.ca, with the SES constraint. Unranked; Minty prioritises after S136.
+
+**Two jobs in one, because they are the same job: get everything onto abletrace.ca and reduce the old account to an email-only shell.**
+
+**The original direction was to disconnect from the old account completely.** `mintekfoodsafety.com` was always temporary; the platform lives at **abletrace.ca**, with AbleTrace as an app under it. **AWS's refusal makes full disconnection impossible**, so the plan changes shape rather than being abandoned.
+
+**Minty's ruling S135:** keep the old account **for SES and nothing else**. Strip out every other service. Issue **fresh credentials** so nothing carries over from the old system. The account becomes a single-purpose mail sender — as good as new — not "the old estate we never finished leaving."
+
+**Claude to produce a complete route before anything is touched:** what moves, in what order, what points at what, and what the rollback is at each step.
+
+**Three things must be measured first. None are known today:**
+1. **Can old-account SES send from `abletrace.ca`?** The domain is DKIM-verified on the **new** account. Verifying one domain on two accounts is normally allowed, but it needs proving, not assuming.
+2. **Route 53 is inside the old account** (RULES §4). If DNS stays there, the account is not email-only. Decide whether DNS moves or whether "email-only" means "email and DNS."
+3. **Is the refusal final?** Whether the request can be re-filed with a fuller use case, or the case is closed. If it can be re-filed, the whole plan may be unnecessary.
+
+⚠ **P17 belongs to this job.** Two old-account IAM keys are still valid and sit in git history. Under "as good as new" they must be rotated or revoked, not left.
+
+⚠ **RULES, before removing infrastructure:** ask **what still points at this?** — DNS records, credentials, other AWS settings, accounts outside AWS. **The pointer goes first, the resource second.** Never the reverse; in between, a name you own points at something you don't. ⚠ **A code search cannot find these.** Nothing in the code names them — that is why they get left behind.
 
 ### P245 Phase 3 — two clients, live books. Pending, not this session.
 
