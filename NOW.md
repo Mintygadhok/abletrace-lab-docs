@@ -1,6 +1,6 @@
 # NOW
 
-Rewritten whole at the close of S134.
+Rewritten whole at the close of S135.
 Read RULES.md and this file. Nothing else at the open.
 
 ---
@@ -27,266 +27,327 @@ aws sesv2 get-account --region ca-central-1 --query "Details.ReviewDetails" --ou
 
 **Prod's git checkout lags the served build.** Deliberate — P8.
 
-**Dev backend carries two untracked items.** `node_modules.old-node18/` is deliberate (P227). **`s133-status-route.py` is debris** — the patch script that wrote the status route, whose output is committed. Delete it at the S135 open:
+**Both boxes report "system restart required."** Noted S135, not acted on. Belongs with P248.
+
+**Dev backend carries one untracked item** — `node_modules.old-node18/`, deliberate (P227). The S133 patch script was deleted at the S135 open.
+
+**Dev frontend repo reads `c2a52d8e`, not the deployed sha.** Expected and permanent — frontend is edited on the Mac; dev's checkout is not the arbiter for it.
+
+**Mac frontend carries one untracked item** — `s135-qb-auth-header.py`, the patch script whose output is committed. Debris. Delete at the S136 open:
 
 ```
-rm ~/abletrace-lab-backend/s133-status-route.py
+rm ~/abletrace-lab-frontend/s135-qb-auth-header.py
 ```
 
 ---
 
-## P245 PHASE 1 — WHERE IT STANDS
+## P245 PHASE 1 — DONE
 
-**Backend complete and proven. Frontend built, deployed and rendering. One thing missing: a way to click through to the page.**
+**Verified on screen S135, logged in as `test260703`, reached by clicking:**
 
-### Proven in S134
+```
+Connected
+Sandbox Company CA 26d2
+Realm 9341457751382548
+```
 
-**Backend `7bdb711`** — connect, callback, refresh, status.
+Read live from Intuit on each page load, not from a stored row. That was the whole verification target.
 
+**Backend `7bdb711`. Frontend `a669d7ed`**, CI green, deployed `dev-a669d7edb884`.
+```
+/home/ubuntu/www-html.bak-dev-a669d7edb884     rollback, read off the box
+```
+
+### Two faults fixed to get there, both worth remembering
+
+**1 · A master role row created by SQL grants nothing.** S133 inserted `company_user_role` directly. The app's own creation path copies every `role_task` for that role into `company_user_task` — SQL runs no application code, so that copy never happened. The row looked perfect in every table.
+
+Proved side by side before the fix:
+```
+2041 | company_user 570 (SQL-made)  | is_master 1 | task_row NULL
+2043 | company_user 571 (app-made)  | is_master 1 | task_row 7507 QuickBooks
+```
+Fix was Remove then Add Master User + through the UI, which re-ran the app path. Result:
+```
+2045 | company_user 570 | is_master 1 | task_row 7509 QuickBooks
+```
+
+⚠ **Consequence for Phase 3: the role and task rows on prod must be created through the UI, not by SQL.**
+
+**2 · The QuickBooks service sent no authorization header.** Written in S134 with bare `http.get`. `isAuth` returned 400 `"No token provided"` before the controller ran — measured in the Network tab, Response body. This app has **no HttpInterceptor**; every service sets the header per call. Fixed to match `api.service.ts`. Affected connect as well as status.
+
+⚠ **A 400 on a guarded route proves nothing about the route.** `isAuth` returns 400 for four different reasons, all before the controller. The response body is what distinguishes them.
+
+---
+
+## THE JOB — S136
+
+**Prepare the ground for the round trip. Seven items, in order. No sending code this session.**
+
+### 1 · Stop the product form adding quote marks
+
+```
+src/app/Layouts/admin-dashboard/admin-formulation/add-new-formulation/add-new-formulation.component.ts:624
+  myCode: JSON.stringify(this.formulationForm.get('myCode').value),
+```
+Delete the `JSON.stringify`. The **edit** form at `edit-formulation.component.ts:1214` already sends it raw and is correct — that is why only products created through *Add New* are affected.
+
+⚠ **Do this before item 4.** The customer field is the same kind of field; if the cause is still live, the new column inherits it on day one.
+
+### 2 · Clean the 26 bad rows
+
+Measured S135:
+```
+4 rows   myCode starts with a quote mark
+22 rows  myCode holds the four-letter string 'null'
+```
+`JSON.stringify(null)` returns `"null"` — same line, same cause.
+
+⚠ **This is a live write.** Back up the rows, scope by `id` and `company_id`, say out loud it is a live write. Minty decides whether to heal.
+
+### 3 · Three new columns on `packingslips`
+
+Estimate number, invoice number, send status. Minty's ruling: the invoice number field sits **between Shipping Reference and Vehicle condition** on the packing slip screen. Shipping Reference stays as it is, for clients who do not use QuickBooks.
+
+⚠ **Send status is not optional even in a bare round trip.** Without it a failed send and an unsent slip both read blank.
+
+### 4 · One new column on `companycustomers`
+
+Holds the **QuickBooks customer display name**. Minty's ruling S135: internal ID and external ID, same convention for products and customers.
+
+| | internal ID | external ID |
+|---|---|---|
+| Product | `internalCode` — FO-0011 | `myCode` — the QuickBooks SKU |
+| Customer | `customer_no` — CUST-0009 | **new column** — the QuickBooks display name |
+
+### 5 · The field on the customer form
+
+So it can be typed. Manually entered by design, same as `myCode`.
+
+### 6 · Set the fixture value
+
+Type `Testcustomer` into it for AbleTrace customer **4778**.
+
+### 7 · Check the duplicate guard on the new field
+
+Within a company. See the pending item below.
+
+### How it is verified
+
+**The new field visible on the customer form, `Testcustomer` typed into it and read back from the row. The three new columns present on `packingslips`. A product saved through Add New whose `myCode` has no quote marks.**
+
+---
+
+## MATERIAL — measured in S135, do not re-derive
+
+### The fixture, ready and shipped
+
+**In AbleTrace, dev**
+```
+PS-0031   packingslips id 2416   shipped_flag 1   2026-08-24 13:20:23   company_id 464
+DO-0017   MO-0020   50 units (50.000 Kg)   ship to 10618, 240 St
+Product   formulations id 3714   title Testpdtqb260820   internalCode FO-0011   myCode "SB001"
+Customer  companycustomers id 4778   customer_no CUST-0009   customer_name Testcustomer
+          address 10518, 240 St
+Stock     formulations.inventory_units now 0
+```
+
+⚠ **PS-0031 is shipped and cannot be changed.** Minty's ruling S135: a PS or DO can be cancelled before shipping; once the Ship button is pressed neither can be altered. **So the Send button belongs on a shipped slip only.** A second test slip means a new MO, DO and PS.
+
+⚠ **The product is 1:1 — 50 units, 50 Kg.** TRAPS 9: a ratio of exactly 1 makes a division invisible. Phase 2 proves the pipe, not the arithmetic. Any quantity check needs `test1.39`.
+
+**In QuickBooks sandbox `Sandbox Company CA 26d2`, realm `9341457751382548`**
+```
+Product   Testpdtqb260820   SKU SB001   Inventory   price 25   qty on hand 0
+Customer  display name  Testcustomer          <- the match key
+          company name  Testcustomercompany   <- deliberately different
+          nameId 68 (from the URL, /app/customerdetail?nameId=68)
+          billing 10518, 240 St   tax 13%
+```
+
+⚠ **Display name and company name were made different on purpose, S135.** They were both `Testcustomer`; if the send matched the wrong field it would have worked by accident. Same principle as bill-10518 / ship-10618.
+
+⚠ **A stray `Testcustomer-1` could not be deleted** — QuickBooks makes customers inactive rather than deleting. Renamed to `abc` instead. Nothing named Testcustomer remains except the real one. **The list still counted 31, not 30 — worth one look before relying on it.**
+
+### The four quoting facts
+
+```
+mysql abletracelab_live -e "SELECT HEX(myCode), myCode FROM formulations WHERE id=3714;"
+  -> 22534230303122   "SB001"          22 is a quote mark at each end
+mysql abletracelab_live -e "SELECT COUNT(*) FROM formulations WHERE myCode='null';"
+  -> 22
+mysql abletracelab_live -e "SELECT COUNT(*) FROM formulations WHERE myCode LIKE '\"%';"
+  -> 4
+grep -rn "myCode" ~/abletrace-lab-backend/api/ | grep -v "//"
+  -> req.body.myCode straight through, no quoting anywhere in the backend
+```
+Cause found at `add-new-formulation.component.ts:624`.
+
+### The customer uniqueness facts
+
+```
+mysql abletracelab_live -e "SELECT company_id, customer_name, COUNT(*) n FROM companycustomers GROUP BY company_id, customer_name HAVING n > 1;"
+  -> empty.  1059 customers, no duplicate names within any company.
+```
+**AbleTrace's guard is real, measured, not assumed.**
+
+**QuickBooks refuses a duplicate display name** — tried in the sandbox S135, returned "Something's not quite right", and the record it did create was named `Testcustomer-1` while keeping the same company name. **So display name is unique on both sides. Company name is not a key** — `Oxon Insurance Agency` / `Oxon - Holiday Party` / `Oxon - Retreat` share a phone number.
+
+### What Intuit actually returns — measured, not remembered
+
+Query run on dev against the live sandbox:
+```
+TOK=$(mysql -N -B abletracelab_live -e "SELECT access_token FROM quickbooks_tokens WHERE company='sandbox260820';")
+curl -s -H "Authorization: Bearer $TOK" -H "Accept: application/json" "https://sandbox-quickbooks.api.intuit.com/v3/company/9341457751382548/query?query=select%20*%20from%20Estimate"
+```
+
+**A converted estimate carries a link to its invoice.** This was the single biggest unknown in Phase 2 and it is now answered:
+```
+Id 119   DocNumber 1002   "TxnStatus":"Closed"
+         "LinkedTxn":[{"TxnId":"123","TxnType":"Invoice"}]
+Id 121   DocNumber 1004   "TxnStatus":"Pending"    no LinkedTxn
+```
+So *Get invoice number* works as designed: read the estimate by Id, check `LinkedTxn`.
+
+**Four more facts from the same response:**
+```
+DocNumber            the estimate number -> goes on the slip
+CustomerRef.value    the QuickBooks customer id
+ItemRef.value        the QuickBooks item Id  -- NOT the SKU
+BillAddr / ShipAddr  separate fields, both present
+TxnTaxDetail         tax computed by QuickBooks, TaxCodeRef per line
+```
+
+⚠ **Estimate lines reference items by internal Id, not SKU.** `myCode` holds the SKU. **So the send must look the item up by SKU first, then use the Id.** Settled by looking at the sandbox screens: the Products list shows SKU as a proper column; **no internal Id is visible anywhere, not on screen and not in the URL.** A client can type a SKU. They cannot find an Id. Lookup is the only workable design.
+
+⚠ **The customer screen shows no id either** — hence matching on display name.
+
+⚠ **The token expires in hours.** Raw curl returns `401 Token expired`. Loading the QuickBooks page in AbleTrace refreshes it first; do that before any manual curl.
+
+### Guarded curl on dev
+Header `authorization: bearer $TOK`, **lower case**, or `isAuth` refuses.
 ```
 TOK=$(mysql -N -B abletracelab_live -e "SELECT webToken FROM user WHERE id=1;")
 curl -s -H "authorization: bearer $TOK" localhost:1337/api/quickbooks/status
 ```
-returned:
-```
-{"success":true,"connected":true,
- "companyName":"Sandbox Company CA 26d2",
- "realmId":"9341457751382548"}
-```
 
-⚠ That is Phase 1's headline string and it has already been produced. What has never been seen is that string **rendered on an AbleTrace screen**.
-
-**Frontend `c6ad2b0a`** — six files, CI green (#78, 8m 40s), promoted as `dev-c6ad2b0a17ca`.
-```
-/home/ubuntu/www-html.bak-dev-c6ad2b0a17ca     rollback, read off the box
-```
-
-**The QuickBooks tab appears in the left strip**, only for a user holding role 8. Seen on screen as `test260703`.
-
-### The one thing missing
-
-**Selecting the tab shows an empty page.** The Admin tab also shows no QuickBooks tile, despite `role_task` id 24 pointing `/quickbooks` at role 2.
-
-So `role_task` alone does not put a link on the home page. **There is a layer between a role and the tasks a user actually sees**, and `Add Feature +` on `Manage-Users` is almost certainly its UI. Finding it is S135.
-
-⚠ **The page cannot be reached by typing the URL** — P249. Clicking is the only door, which is why the tile is not cosmetic.
-
----
-
-## THE JOB — S135
-
-**Put a QuickBooks link on the screen and see the company name. This closes Phase 1.**
-
-### 1 · Find the layer that grants a task to a user
-
-Three facts measured; the fourth is the gap.
+### Frontend build and deploy
 
 ```
-roles              id 8   'QuickBooks Controller'
-role_task          id 23  QuickBooks  /quickbooks  role_id 8
-role_task          id 24  QuickBooks  /quickbooks  role_id 2   (Admin)
-company_user_role  id 2041  company_user_id 570  role_id 8  is_master 1
+npm run build-dev              # = ng build --configuration=dev --aot. No 'development' configuration exists.
+~/promote.sh ~/Downloads/dist-dev-<sha>.zip dev
 ```
-measured by:
-```
-mysql abletracelab_live -e "SELECT id, task_name, routing_path, role_id FROM role_task WHERE routing_path='/quickbooks';"
-mysql abletracelab_live -e "SELECT * FROM company_user_role WHERE role_id=8;"
-```
+⚠ **`promote.sh` lives in the home directory, not in the repo.** Cost a minute in S135.
+⚠ **A local build is not the CI artifact.** Push, let CI build, download the artifact, promote that. Then **Shift+Cmd+R**.
 
-⚠ **`company_user` does not exist.** Guessed at in S134, returned `ERROR 1146 (42S02)`. The table `company_user_role.company_user_id` points at is unknown and must be found, not assumed.
+⚠ **`src/app/Services` has a CAPITAL S.** macOS is case-insensitive, Angular's AOT compiler is not. Cost one build.
 
-```
-mysql abletracelab_live -e "SHOW TABLES LIKE '%task%';"
-mysql abletracelab_live -e "SHOW TABLES LIKE '%user%';"
-```
-
-**What the frontend reads** — `admin-dashboard.component.ts:77`:
-```
-this.userTasks = this.userRoleDetails.CompanyUser.company_user_role
-                   .map(role => role.role_data[0].tasks.map(task => task));
-```
-Tiles come from `role_data[0].tasks`; `home.component.html:15` iterates `userTasks`. **So: what populates `tasks` on a role for a given user?** If it were `role_task` alone, task 24 would already show a tile under Admin. It does not.
-
-⚠ **Rows 23 and 24 already exist. Do not insert them again.**
-
-### 2 · Grant it, then log out and back in
-
-⚠ **Role and task data is cached at login.** A database change will not appear in an open session however correct it is. This looks exactly like broken code.
-
-### 3 · How it is verified
-
-**`Sandbox Company CA 26d2` visible on an AbleTrace screen, reached by clicking, logged in as `test260703`.**
-
-Second verify: a user without role 8 does not see the tab. True by construction.
-
-⚠ **Click. Never type the address** — P249.
-
-### 4 · Two small checks at the close, if there is room
-
-- Does any controller filter by `company_id`? One list route settles the framing of P250 — see the queue note.
-- Is `external_id` constrained, and can two rows in one company share one? Feeds the pending duplicate-guard item.
-
----
-
-## MATERIAL — measured in S134, do not re-derive
-
-**Test account** — `test260703@mailinator.com`, holds roles 1–8 including QuickBooks Controller.
-
-**Guarded curl on dev** — header `authorization: bearer $TOK`, **lower case**, or `isAuth` returns 403.
-
-**Frontend files, committed at `c6ad2b0a`**
-```
-src/app/Layouts/admin-dashboard/quickbooks/quickbooks.component.ts
-                                          /quickbooks.component.html
-                                          /quickbooks.component.scss
-                                          /quickbooks.module.ts
-                                          /quickbooks-routing.module.ts
-src/app/Services/Quickbooks/quickbooks.service.ts
-src/app/app-routing.module.ts   (route added after food-safety-system)
-```
-
-⚠ **`src/app/Services` has a CAPITAL S.** macOS is case-insensitive so `ls` and `mkdir -p` both succeed against the wrong casing; Angular's AOT compiler is not, and fails with TS1261. Cost one build.
-
-**The API base is NOT `environment.apiUrl`**
-```
-environment.apiUrl = 'http://devapiw.abletrace.ca:1337/api/v1/'
-```
-QuickBooks routes sit **outside** `/api/v1/` to match the redirect URI registered at Intuit, so the service strips it:
+**The QuickBooks API base is NOT `environment.apiUrl`.** The service strips `/v1/`:
 ```
 private base = environment.apiUrl.replace(/\/api\/v1\/?$/, '/api/');
 ```
-⚠ Do not tidy the QuickBooks routes into v1. Intuit's registered copy is the arbiter.
+⚠ Do not tidy the QuickBooks routes into v1. Intuit's registered redirect URI is the arbiter.
 
-**Building** — the app's own script, which is what CI runs:
-```
-npm run build-dev          # = ng build --configuration=dev --aot
-```
-⚠ There is no `development` configuration.
+### The permission chain
 
-**Deploying** — from the Mac only:
 ```
-./promote.sh ~/Downloads/dist-dev-<sha>.zip dev
+company_users -> company_user_role -> company_user_task -> role_task
 ```
-Refuses a dev bundle aimed at prod and vice versa, backs up to `www-html.bak-dev-<sha>`, prints the rollback line. **A push builds dev but does not deploy it** — the artifact must be promoted by hand. Then **Shift+Cmd+R**.
+`role_task` is the catalogue of what a role **may** reach. `company_user_task` is what a user **does** have. A role alone puts the tab in the left strip; the task grant is what makes the page work.
 
-**Permissions at the server**
-```
-api/policies/   generateJWT.js  isAuth.js  rateLimitLogin.js
-config/policies.js:  '*': 'isAuth'   +  QuickbooksController.callback: true
-grep -rn "isAdmin\|role\|is_admin" api/policies/ config/policies.js   → nothing
-```
-`isAuth` proves only that someone is logged in. Minty's ruling S134: match the app, do not build a one-off lock for one route.
+⚠ **Role and task data is cached at login.** A database change will not appear in an open session however correct it is. Log out and back in.
 
 ---
 
 ## ANALYSIS ALREADY DONE
 
-**Why status reads the name live from Intuit.** A row can hold a revoked connection and still look fully populated. Every failure returns `connected:false` rather than a stale name, deliberately, with the real reason in `sails.log.error`.
+**Why status reads the name live from Intuit.** A row can hold a revoked connection and still look fully populated. Every failure returns `connected:false` rather than a stale name, with the real reason in `sails.log.error`.
 
 **Why connect returns JSON instead of redirecting.** It sits behind `isAuth`, which reads a header a browser navigation cannot send. Cost S130 a session.
 
-**Why the callback is public.** Intuit redirects back with no token. The guard is the single-use `state`, held in memory, deliberately not surviving a restart. Removing the exemption breaks the connection and the failure looks like Intuit's.
+**Why the callback is public.** Intuit redirects back with no token. The guard is the single-use `state`, held in memory, deliberately not surviving a restart.
 
-**Why the company column.** Minty's ruling S129. Phase 3 puts two clients on their own books; with the column that is two more rows. `company` is UNIQUE, which also stops a re-authorisation creating a second row.
+**Why the company column on the token store.** Minty's ruling S129. Phase 3 puts two clients on their own books; with the column that is two more rows.
 
-**Why a tab is a role, not a component.** The left strip is built from the user's own roles. Adding a tab is a **database insert**, which reaches neither box by deploying and must be run on prod separately at Phase 3.
+**Why a tab is a role, not a component.** The left strip is built from the user's own roles. Adding a tab is a database insert, which reaches neither box by deploying.
 
-⚠ **git cannot tell you what a session did.** S134 opened on `git status`, found one workflow commit, and concluded S133 had done nothing. S133 had created role 8 and both task rows. A session that touches the database leaves no trace in git.
+⚠ **git cannot tell you what a session did.** A session that touches the database leaves no trace in git.
 
 ---
 
 ## PHASE 2 — THE ROUND TRIP
 
-**Packing slip in AbleTrace → invoice in QuickBooks → invoice number back onto the slip.**
+**PS-0031 in AbleTrace becomes an invoice in QuickBooks, and its number comes back onto the slip.**
 
-### The fixture, built by Minty 21 Aug — ready and waiting
+### The flow, settled with Minty S135
 
-**In QuickBooks sandbox `Sandbox Company CA 26d2`**
-```
-Product   Testpdtqb260820   SKU SB001   Inventory   price 25   qty on hand 0
-Customer  Testcustomer      nameId 67
-          billing 10518, 240 St, Maple Ridge BC V2W1X1, Canada
-          tax 13%
-```
+1. **AbleTrace.** Slip is shipped. Press **Send to QuickBooks**.
+2. **QuickBooks.** An **estimate** appears. Its number comes back in the same response and shows on the slip immediately.
+3. **The admin, inside QuickBooks.** Opens the estimate, presses **Create invoice**. QuickBooks applies price and tax.
+4. **Back in AbleTrace.** A **Get invoice number** button reads the estimate, finds `LinkedTxn`, stores the invoice number. Pressed too early it says the estimate is still open.
 
-**In AbleTrace, dev, matched by External ID**
-```
-Product   Testpdtqb260820   External ID "SB001"   BS Pouch
-Customer  Testcustomer      External ID = the QuickBooks customer id
-MO-0020   Pdt-260821-1      50# (50 Kg)   complete
-SO-0015   Testcustomer      ship to 10618, 240 St
-```
+**The estimate number is the thread between the two systems.**
 
-⚠ **The two addresses differ deliberately.** Bill 10518, ship 10618. That is a feature of the fixture: if ship-to ever silently falls back to the billing address, it will be visible on the invoice.
+⚠ **Nobody is notified.** Someone in AbleTrace presses the button. No automatic alert either way.
 
-⚠ **The product is 1:1 — 50 units, 50 Kg.** TRAPS 9: a ratio of exactly 1 makes a division invisible. Minty's ruling: Phase 2 proves the pipe, not the arithmetic. **Any quantity check needs `test1.39`**, the standing non-round fixture.
+⚠ **Send only from a shipped slip.** Minty's ruling S135: shipped is final, and an estimate for goods that did not ship is a credit note and an awkward call.
 
-### Minty's rulings, 21 Aug — settled, do not re-open
+### Minty's rulings — settled, do not re-open
 
 | | |
 |---|---|
 | **Who creates the invoice** | QuickBooks. AbleTrace sends only what shipped |
-| **Price** | QuickBooks. One price list, one source of truth |
-| **Tax** | QuickBooks. Codes live against items and customers there |
-| **Ship-to address** | AbleTrace's, from the dispatch order — the record of where goods physically went |
+| **Price and tax** | QuickBooks. One price list, one source of truth |
+| **Ship-to address** | AbleTrace's, from the dispatch order |
 | **Bill-to address** | QuickBooks' own stored address |
 | **The invoice** | shows **both** bill-to and ship-to |
 | **Quantities** | unit counts, read across. Never derived from weight — RULES §7 |
-| **After it is sent** | the invoice number is the record. **Edits or voids in QuickBooks are outside AbleTrace's purview** |
-| **Matching** | `external_id` on both products and customers, **manually entered in AbleTrace by design** so it can carry the customer's own identifiers |
+| **After it is sent** | the invoice number is the record. Edits or voids in QuickBooks are outside AbleTrace's purview |
+| **Product matching** | by SKU held in `myCode`, then looked up to get the QuickBooks item Id |
+| **Customer matching** | by QuickBooks **display name**, held in the new external ID column |
+| **Both external IDs** | manually entered by design |
 
-**The trigger is a button on the packing slip.** Manual versus automatic is **not yet decided**. Claude's view: start manual — a wrong invoice reaching an accountant is harder to undo than a slow one.
+### Failure handling — agreed in principle, mostly deferred
 
-### What the button does, in order
+1. **A status on every slip, always visible.** Not sent / sending / sent + number / failed. **In scope for S136** — it is column three.
+2. **The reason, in plain words, on the slip.** Deferred.
+3. **A retry button.** Deferred.
+4. **A list of slips shipped with no invoice number.** Deferred.
 
-1. Read the slip — customer, products, unit counts, ship-to
-2. Translate through `external_id` on both sides
-3. Send to QuickBooks
-4. QuickBooks creates the invoice and returns its number
-5. Store that number on the slip
+⚠ **P240 applies with force.** A silent failed invoice is worse than a silent failed email. Under Minty's ownership ruling Mintek cannot look at a client's QuickBooks, so the slip has to say so itself.
 
-The stored number is both the audit link and the duplicate guard.
+### Pending, unranked
 
-### Failure handling — four things, agreed in principle
+**Neither external ID has a duplicate guard.** Both are typed by hand and they are the only link between the systems. A duplicate puts a line on the wrong customer's invoice — no error, plausible output. When built: scope uniqueness **per company**, enforce at the write and not only on the form, sweep existing data first.
 
-1. **A status on every slip, always visible.** Not sent / sending / sent + number / failed. Blank is not a status.
-2. **The reason, in plain words, on the slip** — customer not found, product not set up, connection dead, no price. Not buried in a log.
-3. **A retry button.** Most failures are fixed in QuickBooks, then re-sent.
-4. **A list of slips shipped with no invoice number.** The daily check, and where a silent failure would otherwise hide.
-
-⚠ **Silence is the fragile part, not the design.** A connection dies for reasons nobody controls — the client revokes it from QuickBooks' Apps screen, a token expires, someone re-authorises. Under any ownership model the failure is invisible unless the slip says so. **P240 is the thing that makes this safe.**
-
-⚠ **P240 applies with force here.** A silent failed invoice is worse than a silent failed email.
-
-### Pending, unranked, deliberately parked
-
-**`external_id` has no duplicate guard.** It is typed by hand and it is the only link between the two systems. A duplicate puts a line on the wrong customer's invoice — no error, plausible output. When it is built: scope uniqueness **per company** (two clients may legitimately reuse an id), enforce it at the write and not only on the form, and sweep the existing data first. Minty's call, 21 Aug: keep it pending, keep the focus on the integration.
+⚠ **Half the risk is already covered on the customer side** — `customer_name` is unique per company, measured. The new external column is not.
 
 ---
 
 ## PHASE 3 — TWO CLIENTS, LIVE BOOKS
 
-**Clients do not get sandboxes. They connect their real QuickBooks.** The sandbox is a development tool. Each client clicks Connect, signs in with their own QuickBooks credentials, approves, and gets their own row in `quickbooks_tokens` under their company name.
+**Clients do not get sandboxes. They connect their real QuickBooks.** Each client clicks Connect, signs in, approves, and gets their own row in `quickbooks_tokens` under their company name.
 
-⚠ **The company must come from the logged-in session, never from a parameter.** The status route currently falls back to a hardcoded `sandbox260820`. Harmless with one sandbox; wrong the moment there are two clients, because it means the caller names the company. **This must change before any real client connects.**
+⚠ **The company must come from the logged-in session, never from a parameter.** The status route currently falls back to a hardcoded `sandbox260820`. Harmless with one sandbox; wrong the moment there are two clients. **Must change before any real client connects.**
 
 **Also at Phase 3**
-- Intuit **production** keys. They reach live client books and never appear in chat, in any form.
+- Intuit **production** keys. They reach live client books and never appear in chat.
 - The API base **host** changes — production is `quickbooks.api.intuit.com`, which returns 403 to a sandbox token.
-- `CREATE TABLE`, the role row and the task rows all run on prod separately. Deploying does not carry them.
+- `CREATE TABLE` and the schema changes all run on prod separately. Deploying does not carry them.
+- **The role and task rows must be created through the UI on prod, not by SQL.** See Phase 1 above.
 - A **Reconnect URL** is a mandatory field in Intuit app settings as of Feb 2026. Refresh tokens cap at five years.
 
-**Minty's ruling on ownership, 21 Aug — wider than QuickBooks**
+**Minty's ruling on ownership — wider than QuickBooks**
 
 > The client's admin owns their data. Super admin runs the platform, not the tenants. Super admin has **no** access to a client's QuickBooks data, and none to their inventories either. Today Minty can see everything because it is early; that is a temporary state, not the design.
 
-**Direction, not to be built yet:** if access is ever needed for support, it is **break-glass** — closed by default, opened only with the client's consent, expiring on its own, and logged. Never a standing permission, and nothing added later may quietly create one.
+**Direction, not to be built yet:** support access is **break-glass** — closed by default, opened only with the client's consent, expiring on its own, and logged.
 
-⚠ **Consequence to accept:** under this ruling, when a client's connection breaks Mintek cannot look. Which is exactly why the four failure-handling items above are not optional, and why the reconnect flow must be usable by a non-technical person unaided.
+⚠ **Consequence to accept:** when a client's connection breaks Mintek cannot look. Which is why the four failure-handling items are not optional, and why the reconnect flow must be usable by a non-technical person unaided.
 
-**Later, its own phase** — material receipts → supplier bills. One PO can be received in three deliveries and billed in two invoices. The linking rule is a business decision.
+**Later, its own phase** — material receipts to supplier bills. One PO can be received in three deliveries and billed in two invoices. The linking rule is a business decision.
 
-⚠ **Canadian tax is not uniform.** Basic groceries are zero-rated for GST; other food is not. Every line carries a tax code and an accountant will see it. This is why the sandbox had to be Canadian.
+⚠ **Canadian tax is not uniform.** Basic groceries are zero-rated for GST; other food is not. Every line carries a tax code and an accountant will see it.
 
 ---
 
@@ -304,19 +365,21 @@ Minty ranks. Claude never renumbers.
 | P227 | Dev backend `node_modules.old-node18/` — deliberate, untracked |
 | P240 | The app cannot tell anyone a send failed. **Phase 2 raises this from housekeeping to a prerequisite** |
 | P241 | Quarterly security audit, five named checks |
-| P245 | QuickBooks integration — **active. Backend and screen done; the link to reach it is S135** |
+| P245 | QuickBooks integration — **active. Phase 1 complete and verified on screen S135. Phase 2 in S136/S137** |
 | P246 | `User.creatSuperAdmin` hardcodes password `"12345678"`. `api/models/User.js:98`. Fold into P241 |
 | P247 | **App JWTs never expire.** `api/policies/generateJWT.js` calls `jwt.sign` with no `expiresIn`. Fold into P241 |
-| P248 | **Prod OS updates.** 59 pending, 12 security, Ubuntu 26.04. Fold into P241 |
-| P249 | **Typing any URL logs the user out.** `auth.guard.ts` reads the NGRX store, which is memory only and empty after a page load, so it redirects to `/login` and runs `sessionStorage.clear()`. Affects every route. A client who bookmarks or refreshes a screen is thrown out. Found S134 |
-| P250 | **No role or company check in the policy layer.** `isAuth` proves only that someone is logged in. ⚠ **Scope corrected:** whether individual controllers filter by `company_id` was **not** measured — tenant separation is probably real and enforced per query. So the job is *verify every route filters, find the ones that don't*, not *build separation*. Sits with P247: a leaked token is permanent and unrestricted. Minty's ownership ruling above gives this its requirement |
-| P251 | GitHub warns Node.js 20 actions are deprecated. The CI builder was pinned to 20 on 15 Aug because Angular 18.2.12 refuses 18. Reachable only by an Angular major upgrade |
+| P248 | **OS updates.** Prod 59 pending / 12 security. Dev 22 pending. **Both boxes now report "system restart required."** Fold into P241 |
+| P249 | **Typing any URL logs the user out.** `auth.guard.ts` reads the NGRX store, which is memory only and empty after a page load. Affects every route. A client who bookmarks or refreshes a screen is thrown out. Found S134 |
+| P250 | **No role or company check in the policy layer.** `isAuth` proves only that someone is logged in. ⚠ Scope: whether individual controllers filter by `company_id` was **not** measured — the job is *verify every route filters*, not *build separation*. Sits with P247 |
+| P251 | GitHub warns Node.js 20 actions are deprecated. Reachable only by an Angular major upgrade |
+| — | **`role_task` id 24 — QuickBooks under the Admin role.** Minty's convention S135: admin reaches QuickBooks by holding the QuickBooks Controller role, so row 24 is the odd one out and probably goes. Also cross-check how Food Safety System was set up, since it sits under both Admin and its own controller |
 | — | Section_3B.md rewrite. Verdict: replace whole. ~430 lines unread across 3B.3, 3B.5–3B.7, 3B.9–3B.11 |
-| — | Pending, unranked: `external_id` duplicate guard. See Phase 2 above |
+| — | Pending, unranked: external ID duplicate guard, both sides. See Phase 2 above |
 
-**Closed in S134**
-- The connection status route. Written unproven in S133, proven and committed `7bdb711`.
-- The QuickBooks screen. Six files, built, committed `c6ad2b0a`, deployed `dev-c6ad2b0a17ca`.
-- The QuickBooks tab visible in the left menu, restricted to role 8.
-- TRAPS filed — entry 12 in, eighteen candidates cut, two of those false. Docs `8e17f41`.
-- Phase 2 designed and its fixture built. Phase 3 ownership ruled on.
+**Closed in S135**
+- **P245 Phase 1.** Company name visible on an AbleTrace screen, reached by clicking, as `test260703`.
+- The permission chain found and fixed — `company_user_task` is the layer, and a SQL-made master role grants nothing.
+- The missing authorization header on the QuickBooks service. Frontend `a669d7ed`, deployed `dev-a669d7edb884`.
+- Phase 2 fully specified: every open question measured, including Intuit's `LinkedTxn`.
+- The quoting fault traced to one line of code.
+- The fixture built, shipped and made unambiguous.
