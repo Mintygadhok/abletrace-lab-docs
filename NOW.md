@@ -1,9 +1,9 @@
 # NOW
 
-Rewritten whole at the close of S135.
+Rewritten whole at the close of S136.
 Read RULES.md and this file. Nothing else at the open.
 
-**P245 Phase 1 is done** — company name seen on an AbleTrace screen, reached by clicking, as `test260703`. S136 prepares the ground for the round trip. **No sending code this session.**
+**P245 Phase 2 groundwork is done.** The schema, the quoting fix and the fixture are all in place and proved on screen. **S137 is the round trip: send the estimate, get the invoice number.**
 
 ---
 
@@ -19,218 +19,229 @@ What no command returns.
 
 **Prod untouched since before S130, on Node v18.** Both deliberate. No QuickBooks anything on prod until Phase 3.
 
-**Both boxes report "system restart required."** Noted S135, not acted on — P248.
+**Both boxes report "system restart required."** Noted S135, still not acted on — P248.
 
 **Dev backend carries `node_modules.old-node18/`** untracked, deliberate — P227.
 
 **Dev frontend repo reads `c2a52d8e`, not the deployed sha.** Permanent and expected — frontend is edited on the Mac; dev's checkout is not the arbiter for it.
 
-**Deployed frontend is `a669d7ed`** as `dev-a669d7edb884`.
+**Deployed frontend is `82ae3c3c`.**
 ```
-/home/ubuntu/www-html.bak-dev-a669d7edb884     rollback, read off the box
+/home/ubuntu/www-html.bak-dev-82ae3c3c9df3     rollback, read off the box
 ```
+
+⚠ **The backup name points at the build going IN. Its contents are the build coming OUT.** Measured S136 by diffing the new backup against `dev-a669d7edb884` — they differed, which is what settled it. So the newest backup's *name* is the live commit and its *contents* are what you roll back to. RULES says read the rollback path off the box but does not say which way the name points. This is which way.
+
+**Nothing is half-done.** S136 item 7 was dropped deliberately, not left unfinished — see the queue.
 
 ---
 
-## THE JOB — S136
+## THE JOB — S137
 
-Seven items, in order. Items 1 and 2 must precede item 4.
+**Send the estimate to QuickBooks, then fetch the invoice number back.** The round trip, end to end, on one packing slip.
 
-### 1 · Stop the product form adding quote marks
+### The action, in order
 
-**One word deleted, one file, on the Mac.**
+1. Add the five `qb_*` columns to the `Packingslips` Sails model.
+2. Design the two routes on paper before writing either — who calls, what they send, what comes back.
+3. Build **Send estimate**: look up customer and item by their external identifiers, build the estimate, POST it, store what comes back, set the status.
+4. Verify on screen, then in QuickBooks.
+5. Convert the estimate to an invoice by hand inside the QuickBooks sandbox.
+6. Build **Get invoice number**: read the estimate by Id, follow `LinkedTxn`, read the invoice, store its DocNumber.
+7. Verify the invoice number on the AbleTrace screen.
 
+⚠ **Item 1 is not optional and it is the trap that bites first.** Sails only reads and writes attributes it knows about. The columns exist in MySQL, but until they are in the model the backend drops them **silently on save** — no error, the screen looks right, nothing is stored. This exact fault was hit and fixed for `CompanyCustomers` in S136; the packing slip half was deliberately deferred to here because nothing read the columns yet.
+
+### The material
+
+**The five columns on `packingslips`, added S136.**
 ```
-src/app/Layouts/admin-dashboard/admin-formulation/add-new-formulation/add-new-formulation.component.ts:624
-  myCode: JSON.stringify(this.formulationForm.get('myCode').value),
-```
-
-Remove the `JSON.stringify(...)` wrapper so the value goes through raw.
-
-**The edit form is already correct** and is the pattern to match:
-```
-edit-formulation.component.ts:1214
-  myCode: this.formulationForm.get('myCode').value,
-```
-
-**The backend does nothing to the value** — measured:
-```
-grep -rn "myCode" ~/abletrace-lab-backend/api/ | grep -v "//"
-  -> Formulations.js:825 and :949   myCode: req.body.myCode
-  -> no quoting, no stringify anywhere in the backend
-```
-
-⚠ **Materials use the same field name** (`Materials.js:380`, `:790`) but were not checked. Out of scope; note only.
-
-**Build and deploy** — frontend is edited on the Mac, and a local build is not the CI artifact:
-```
-npm run build-dev              # = ng build --configuration=dev --aot
-                               # there is no 'development' configuration
-```
-Push, let CI build, download the artifact, then:
-```
-~/promote.sh ~/Downloads/dist-dev-<sha>.zip dev
-```
-⚠ **`promote.sh` is in the home directory, not the repo.** Cost a minute in S135.
-⚠ Then **Shift+Cmd+R** in Chrome.
-⚠ **`src/app/Services` has a CAPITAL S.** macOS is case-insensitive, Angular's AOT compiler is not. Cost one build.
-
-### 2 · Clean the 26 bad rows
-
-**Measured S135:**
-```
-mysql abletracelab_live -e "SELECT COUNT(*) FROM formulations WHERE myCode LIKE '\"%';"
-  -> 4      rows whose myCode starts with a quote mark
-
-mysql abletracelab_live -e "SELECT COUNT(*) FROM formulations WHERE myCode='null';"
-  -> 22     rows holding the four-letter string 'null'
+mysql abletracelab_live -e "SHOW COLUMNS FROM packingslips WHERE Field LIKE 'qb_%';"
+  -> qb_estimate_id   varchar(64)   NULL
+     qb_estimate_no   varchar(64)   NULL
+     qb_invoice_id    varchar(64)   NULL
+     qb_invoice_no    varchar(64)   NULL
+     qb_send_status   varchar(32)   NOT NULL   DEFAULT 'not_sent'
 ```
 
-`JSON.stringify(null)` returns the string `"null"` — same line 624, same cause.
+**`_id` holds Intuit's internal handle. `_no` holds the DocNumber a human reads.** Not interchangeable. The API answers only to the Id; the DocNumber is what goes on screen. Minty's ruling S136: store both, because the alternative is S137 hunting for documents by number.
 
-**The fixture row, showing the quoting is real and not a display artefact:**
+**Every existing slip carries a real status, not a blank.**
 ```
-mysql abletracelab_live -e "SELECT HEX(myCode), myCode FROM formulations WHERE id=3714;"
-  -> 22534230303122   "SB001"
-```
-`22` is a quote mark at each end.
-
-⚠ **This is a live write.** Back up the rows first, scope by `id` and `company_id`, and say out loud that it is a live write. **Claude queries and reports; Minty decides whether to heal.**
-
-⚠ **The 22 `null` rows are not the same decision as the 4 quoted rows.** A quoted row has a recoverable true value — strip the quotes. A `null` row never had one; blanking it is the likely answer but it is Minty's call.
-
-### 3 · Three new columns on `packingslips`
-
-**The table, measured:**
-```
-mysql abletracelab_live -e "DESCRIBE packingslips;"
-```
-16 columns. No external references of any kind today. Relevant ones:
-```
-internalCode              varchar(255)   PS-0031
-shipping_reference_docs   longtext
-vehicle_no                varchar(255)
-vehicle_condition         int            ordinal position 15
-shipped_flag              tinyint(1)
-company_id                int
+mysql abletracelab_live -e "SELECT qb_send_status, COUNT(*) n FROM packingslips GROUP BY qb_send_status;"
+  -> not_sent   39
 ```
 
-**Add:** estimate number, invoice number, send status.
-
-**Minty's ruling S135 on placement:** on the packing slip **screen**, the invoice number field sits **between Shipping Reference and Vehicle condition**. Shipping Reference stays exactly as it is — it remains the free-text field for clients who do not use QuickBooks.
-
-⚠ **Send status is not optional even in a bare round trip.** Without it a failed send and a never-sent slip both read blank, and blank meaning two things is the silent failure P240 is about.
-
-⚠ **A database object reaches neither box by deploying.** Run it on dev now; prod is a separate run at Phase 3.
-
-### 4 · One new column on `companycustomers`
-
-**Holds the QuickBooks customer display name.**
-
-**Minty's ruling S135 — one convention, both objects:**
-
-| | internal ID | external ID |
-|---|---|---|
-| **Product** | `internalCode` — FO-0011 | `myCode` — the QuickBooks SKU |
-| **Customer** | `customer_no` — CUST-0009 | **new column** — the QuickBooks display name |
-
-Both external IDs are typed by hand and both mean the same thing: *this is the QuickBooks identifier.*
-
-**The table, measured:**
+**The customer column, added S136.**
 ```
-mysql abletracelab_live -e "DESCRIBE companycustomers;"
-```
-17 columns. `customer_no varchar(255)` is AbleTrace's own sequential number — **not** free to overwrite. `customer_name varchar(255)` holds the AbleTrace name. Nothing holds a QuickBooks identifier.
-
-⚠ **Do item 1 before this.** The new field is the same kind of field; if the quoting cause is still live, the new column inherits it on day one.
-
-### 5 · The field on the customer form
-
-So the value can be typed. Manually entered by design, same as `myCode`.
-
-⚠ **Design before writing, per RULES:** state who calls it, what they send, what comes back, before touching the form.
-
-### 6 · Set the fixture value
-
-Type `Testcustomer` into the new field for AbleTrace customer **4778**, then read the row back.
-
-### 7 · Check the duplicate guard on the new field
-
-**Within a company.** Two AbleTrace customers pointing at one QuickBooks customer puts a line on the wrong account — no error, plausible output.
-
-**AbleTrace's existing name guard is real** — measured, not assumed:
-```
-mysql abletracelab_live -e "SELECT company_id, customer_name, COUNT(*) n FROM companycustomers GROUP BY company_id, customer_name HAVING n > 1;"
-  -> empty.  1059 customers, no duplicate names within any company.
+mysql abletracelab_live -e "SHOW COLUMNS FROM companycustomers WHERE Field='external_id';"
+  -> external_id   varchar(255)   NULL
 ```
 
-**QuickBooks enforces unique display names too** — tried in the sandbox S135. It refused with "Something's not quite right" and the record it did create was named `Testcustomer-1` while keeping the same company name.
+**The fixture, all three parts, measured S136.**
 
-⚠ **So display name is unique on both sides. Company name is not a key** — the sandbox has `Oxon Insurance Agency`, `Oxon - Holiday Party` and `Oxon - Retreat` sharing one phone number.
+The packing slip to send:
+```
+mysql abletracelab_live -e "SELECT id, internalCode, company_id, shipped_flag, qb_send_status FROM packingslips WHERE company_id=464 ORDER BY id DESC LIMIT 5;"
+  -> 2416  PS-0031  464  shipped_flag 1  not_sent
+```
 
-⚠ **The new external column has no guard.** That is what item 7 is.
+The customer, external ID typed through the new field and confirmed clean:
+```
+mysql abletracelab_live -e "SELECT id, customer_no, customer_name, external_id, HEX(external_id) FROM companycustomers WHERE customer_name='Testcustomer';"
+  -> 4778  CUST-0009  Testcustomer  Testcustomer  54657374637573746F6D6572
+```
+No `22` at either end — no quote marks.
+
+The product, quotes stripped and now the only holder of that SKU:
+```
+mysql abletracelab_live -e "SELECT id, internalCode, title, myCode, HEX(myCode) FROM formulations WHERE id IN (3713,3714);"
+  -> 3713  FO-0010  Testpdt260820    (empty)
+     3714  FO-0011  Testpdtqb260820  SB001   5342303031
+
+mysql abletracelab_live -e "SELECT id, title FROM formulations WHERE myCode='SB001';"
+  -> 3714  Testpdtqb260820      exactly one row
+```
+
+**Backup of the two product rows before that write:**
+```
+/home/ubuntu/backup-mycode-s136-20260824-1951.txt
+```
+
+**The path from slip to SKU, measured S136. This is the estimate line.**
+```
+packingslips 2416  (PS-0031)
+  -> packingslipdos   PS_id = 2416        shipped_qty 50      row id 10419
+     -> dispatchorders 10937              formula_id -> formulations
+        -> formulations 3714              myCode 'SB001'
+```
+```
+mysql abletracelab_live -e "SELECT id, shipped_qty, PS_id, DO_id FROM packingslipdos WHERE PS_id=2416;"
+  -> 10419   50   2416   10937      exactly one line on this slip
+```
+
+⚠ **The join columns are `PS_id` and `DO_id` — capitals, not `packingslip_id`.** Guessing the lowercase form errors. Measured:
+```
+mysql abletracelab_live -e "SHOW COLUMNS FROM packingslipdos;"
+  -> createdAt  updatedAt  id  shipped_qty  company_id  PS_id  DO_id
+```
+
+⚠ **`shipped_qty` is already a unit count.** 50 units, matching MO-0020. It goes on the estimate line as-is. Nothing in this path derives a count from a weight — RULES §7 is satisfied without special handling.
+
+**`dispatchorders`, the columns that matter:**
+```
+mysql abletracelab_live -e "SHOW COLUMNS FROM dispatchorders;"
+  -> internalCode  qty_to_ship  qty_shipped  formula_id  SO_id  packing_id  packing_units
+```
+⚠ There is no `mo_no` or `so_no` column — `SO_id` is the sales order link.
+
+**Model filenames, measured. Both carry capitals that are easy to get wrong:**
+```
+ls ~/abletrace-lab-backend/api/models/ | grep -iE "packing|quickbook"
+  -> PackingSlips.js      capital S in Slips
+     PackingSlipDOs.js
+     QuickbooksToken.js   lower-case b in Quickbooks
+```
+
+**The token service already exists — S137 calls it, never touches tokens directly:**
+```
+grep -n "async" ~/abletrace-lab-backend/api/services/quickbooksService.js
+  -> readRow(company)   doRefresh(company)
+     getAccessToken(company)   refreshNow(company)
+```
+
+**The QuickBooks routes today — three, all GET, all Phase 1:**
+```
+grep -n "quickbooks" ~/abletrace-lab-backend/config/routes.js
+  -> GET /api/quickbooks/connect    QuickbooksController.connect
+     GET /api/quickbooks/callback   QuickbooksController.callback
+     GET /api/quickbooks/status     QuickbooksController.status
+```
+The two new routes are added here. **Send is a POST** — it changes something in QuickBooks. Get invoice number is a GET.
+
+### The analysis
+
+**The design, stated before writing — RULES §1.**
+
+**Send estimate**
+- **Who calls it** — the admin, from a button on the packing slip screen. Browser fetch, so it must carry `authorization: bearer <webToken>` explicitly. This app has no HttpInterceptor.
+- **What they send** — the packing slip id and the company from the logged-in session. **Never the company as a parameter.**
+- **What comes back** — the estimate's Id and DocNumber, and a status. On failure, a reason in plain words.
+
+**Get invoice number**
+- **Who calls it** — the admin, from a second button on the same screen, after converting the estimate by hand in QuickBooks.
+- **What they send** — the packing slip id.
+- **What comes back** — the invoice DocNumber, or "not converted yet" as a distinct answer from a failure.
+
+**The two lookups the send depends on.** Neither the customer nor the item can be referenced directly; both must be found first.
+- Customer — matched on QuickBooks display name, which is what `external_id` now holds.
+- Item — matched on SKU, which is what `myCode` holds. `ItemRef.value` wants the internal Id, so the SKU lookup comes first and its result feeds the estimate line.
+
+**Quantity comes from the packing slip in units. Never derived from a weight.** RULES §7. QuickBooks owns price and tax; AbleTrace sends only what shipped.
+
+⚠ **`company_id` is a `double` on `companycustomers` and on `dispatchorders`, but an `int` on `packingslips` and `packingslipdos`.** Measured S136. Not a fault today, but the S137 join crosses that boundary twice — a float compared to an integer. Worth knowing before it produces a mystery.
+
+### The verify
+
+Nothing is done until it is seen on the screen.
+
+1. The Send button on PS-0031 returns without error, and the slip shows a status of **sent** with an estimate number.
+2. The same estimate is visible in the QuickBooks sandbox, addressed to `Testcustomer`, with a line for `Testpdtqb260820`.
+3. After converting it by hand, the Get invoice number button puts a real invoice number on the AbleTrace screen.
+4. `SELECT` on row 2416 shows all four `qb_*` values populated and the status correct.
 
 ---
 
-## HOW S136 IS VERIFIED
+## WHAT S136 CHANGED
 
-**On the screen, not in the database:**
+**Frontend `82ae3c3c`** — the `JSON.stringify` wrapper removed from `myCode` on the Add Product form, and External ID added to both customer forms. Built locally, built by CI, deployed to dev, verified on screen.
 
-1. A product saved through **Add New** whose `myCode` reads back with **no quote marks**.
-2. The **new field visible on the customer form**, `Testcustomer` typed into it and read back from row 4778.
-3. The **three new columns present** on `packingslips`.
+**Backend `4e86e45`** — `external_id` added to the `CompanyCustomers` model attributes and to `createCustomer`. `editCustomer` needed no change; it passes `req.body.updates` straight through.
 
-⚠ **Nothing is done until it is verified on the screen.** Deployed is not proven. Say which it is, every time.
+**Database, dev only** — five columns on `packingslips`, one on `companycustomers`. ⚠ **None of this reaches prod by deploying.** Schema runs on each box separately, at Phase 3.
 
----
+**Two product rows healed**, backed up first, scoped by `id` and `company_id`.
 
-## THE FIXTURE — do not re-derive
-
-**In AbleTrace, dev**
-```
-PS-0031   packingslips id 2416   shipped_flag 1   2026-08-24 13:20:23   company_id 464
-DO-0017   MO-0020   50 units (50.000 Kg)   ship to 10618, 240 St
-Product   formulations id 3714   title Testpdtqb260820   internalCode FO-0011   myCode "SB001"
-Customer  companycustomers id 4778   customer_no CUST-0009   customer_name Testcustomer
-          address 10518, 240 St
-Stock     formulations.inventory_units now 0
-```
-
-**In QuickBooks sandbox `Sandbox Company CA 26d2`, realm `9341457751382548`**
-```
-Product   Testpdtqb260820   SKU SB001   Inventory   price 25   qty on hand 0
-Customer  display name  Testcustomer          <- the match key
-          company name  Testcustomercompany   <- deliberately different
-          nameId 68   billing 10518, 240 St   tax 13%
-```
-
-⚠ **PS-0031 is shipped and cannot be changed.** Minty's ruling S135: a PS or DO can be cancelled **before** shipping; once Ship is pressed neither can be altered. A second test slip means a new MO, DO and PS.
-
-⚠ **Display name and company name were made different on purpose.** They were both `Testcustomer`; if the send matched the wrong field it would have worked by accident. Same principle as bill-10518 / ship-10618.
-
-⚠ **The product is 1:1 — 50 units, 50 Kg.** TRAPS 9: a ratio of exactly 1 makes a division invisible. Any quantity check needs `test1.39`.
-
-⚠ **A stray `Testcustomer-1` could not be deleted** — QuickBooks makes customers inactive rather than deleting. Renamed to `abc`. **The list still counted 31, not 30 — worth one look before relying on the fixture.**
+**Dropped deliberately:** the 22 rows holding the string `null` and the two holding empty quotes. Minty's ruling S136 — they are test data in test companies `test260703@` and `test260805@`, they display as blank already, and there is nothing to recover in them. Not a pending item.
 
 ---
 
-## TWO FACTS BANKED FOR S137 — expensive to re-measure
+## THINGS THAT COST TIME IN S136 — all cheap to avoid next time
 
-**A converted Intuit estimate carries a link to its invoice.** This was the one unknown that could have invalidated the Phase 2 design. Measured on dev against the live sandbox:
+**`promote.sh` was not used.** The deploy was done by hand — backup, python3 unzip, `rm -rf`, `cp -a`. It worked and was verified with a `diff`, but `~/promote.sh` existed and would have been one line. **Use it in S137.**
+
+**`unzip` is not installed on dev.** Python is:
+```
+python3 -c "import zipfile; zipfile.ZipFile('<zip>').extractall('<dir>')"
+```
+
+**The dev artifact has no wrapper folder.** `index.html` sits at the top level, so contents copy straight into `/var/www/html`.
+
+**There are no SSH host aliases.** `~/.ssh/config` holds only a global keepalive block. Every `scp` and `ssh` needs the IP typed in full. Dev is `16.55.10.205`.
+
+**A check must be able to fail for the right reason.** A patch script counted occurrences of `external_id` and expected two, but the comment it inserted also contained the phrase — so it reported FAIL after writing correctly. The write was fine; the test was wrong. A test that can only fail is as useless as one that can only pass.
+
+---
+
+## TWO FACTS BANKED — expensive to re-measure, needed by S137
+
+**A converted Intuit estimate carries a link to its invoice.** Measured on dev against the live sandbox:
 ```
 Id 119   DocNumber 1002   "TxnStatus":"Closed"
          "LinkedTxn":[{"TxnId":"123","TxnType":"Invoice"}]
 Id 121   DocNumber 1004   "TxnStatus":"Pending"    no LinkedTxn
 ```
-So *Get invoice number* works as designed: read the estimate by Id, check `LinkedTxn`.
+⚠ **`LinkedTxn` returns the invoice's TxnId, not its number.** So *Get invoice number* is **two** calls: read the estimate by Id to get the invoice's Id, then read the invoice by Id to get its DocNumber.
 
 **Estimate lines reference items by internal Id, not SKU** — `ItemRef.value`. `myCode` holds the SKU, so the send must look the item up by SKU first. Settled by looking at the sandbox screens: the Products list shows SKU as a proper column; **no internal Id is visible anywhere, not on screen and not in the URL.** A client can type a SKU; they cannot find an Id. Lookup is the only workable design. The customer screen shows no id either — hence matching on display name.
 
 ⚠ **The Intuit token expires in hours.** Raw curl returns `401 Token expired`. **Loading the QuickBooks page in AbleTrace refreshes it first** — do that before any manual curl.
 
+⚠ **A stray `Testcustomer-1` could not be deleted** — QuickBooks makes customers inactive rather than deleting. Renamed to `abc`. The list counted 31, not 30 — worth one look before relying on the fixture.
+
 ---
 
-## TWO TRAPS FROM S135 — both looked like broken code
+## TRAPS CARRIED FORWARD — both look like broken code
 
 **A master role row created by SQL grants nothing.** The app's own creation path copies every `role_task` for that role into `company_user_task`. SQL runs no application code, so that copy never happens. The row is indistinguishable from a working one in every table.
 
@@ -241,6 +252,8 @@ So *Get invoice number* works as designed: read the estimate by Id, check `Linke
 ⚠ **This app has no HttpInterceptor.** Every service sets `authorization: bearer <webToken>` per call, lower case. A new service that omits it is unreachable from the browser while working perfectly from curl.
 
 ⚠ **Role and task data is cached at login.** A database change will not appear in an open session however correct it is.
+
+⚠ **`src/app/Services` has a CAPITAL S.** macOS is case-insensitive, Angular's AOT compiler is not.
 
 ---
 
@@ -258,19 +271,20 @@ Minty ranks. Claude never renumbers.
 | P227 | Dev backend `node_modules.old-node18/` — deliberate, untracked |
 | P240 | The app cannot tell anyone a send failed. **Phase 2 raises this from housekeeping to a prerequisite** |
 | P241 | Quarterly security audit, five named checks |
-| P245 | QuickBooks integration — **active. Phase 1 complete. S136 is the schema and the quoting fix; Send and Get invoice number is the session after.** Phase 3 is below |
+| P245 | QuickBooks integration — **active. Phase 1 and the Phase 2 groundwork complete. S137 is the round trip.** Phase 3 is below |
 | P246 | `User.creatSuperAdmin` hardcodes password `"12345678"`. `api/models/User.js:98`. Fold into P241 |
 | P247 | **App JWTs never expire.** `api/policies/generateJWT.js` calls `jwt.sign` with no `expiresIn`. Fold into P241 |
-| P248 | **OS updates.** Prod 59 pending / 12 security. Dev 22 pending. **Both boxes now report "system restart required."** Fold into P241 |
+| P248 | **OS updates.** Prod 59 pending / 12 security. Dev 22 pending. **Both boxes report "system restart required."** Fold into P241 |
 | P249 | **Typing any URL logs the user out.** `auth.guard.ts` reads the NGRX store, which is memory only and empty after a page load. Affects every route. A client who bookmarks or refreshes a screen is thrown out |
 | P250 | **No role or company check in the policy layer.** `isAuth` proves only that someone is logged in. ⚠ Whether individual controllers filter by `company_id` was **not** measured — the job is *verify every route filters*, not *build separation* |
 | P251 | GitHub warns Node.js 20 actions are deprecated. Reachable only by an Angular major upgrade |
+| P252 | **External ID duplicate guard, customers and products together.** Dropped from S136 deliberately — it guards a future mistake, and the fixture was measured clean today. ⚠ `createCustomer` already checks `company_id` + `customer_name` and returns `Duplicate`; that is the pattern to extend. ⚠ **`editCustomer` has no duplicate check at all** — measured S136 |
+| P253 | **No SSH host aliases.** Every `scp` needs the IP typed. Two lines in `~/.ssh/config` removes it permanently |
 | — | **`role_task` id 24 — QuickBooks under the Admin role.** Minty's convention S135: admin reaches QuickBooks by holding the QuickBooks Controller role, so row 24 is the odd one out and probably goes. Also cross-check how Food Safety System was set up, since it sits under both Admin and its own controller |
-| — | **Materials may have the same quoting fault.** `Materials.js` uses `myCode` too; not checked in S135 |
+| — | **Materials may have the same quoting fault.** `Materials.js:380` and `:790` use `myCode` too; still not checked |
 | — | Section_3B.md rewrite. Verdict: replace whole. ~430 lines unread across 3B.3, 3B.5–3B.7, 3B.9–3B.11 |
-| — | Pending, unranked: external ID duplicate guard on **products**. The customer side is item 7 |
 
-### PENDING — the estate. abletrace.ca, with the SES constraint. Unranked; Minty prioritises after S136.
+### PENDING — the estate. abletrace.ca, with the SES constraint. Unranked; Minty prioritises when Phase 2 lands.
 
 **Two jobs in one, because they are the same job: get everything onto abletrace.ca and reduce the old account to an email-only shell.**
 
@@ -291,7 +305,7 @@ Minty ranks. Claude never renumbers.
 
 ### P245 Phase 3 — two clients, live books. Pending, not this session.
 
-Kept here in full so it survives NOW being rewritten. **Nothing below is S136 or S137 work.**
+Kept here in full so it survives NOW being rewritten. **Nothing below is S137 work.**
 
 **Clients do not get sandboxes.** They connect their real QuickBooks. Each client clicks Connect, signs in with their own credentials, approves, and gets their own row in `quickbooks_tokens` under their company name. The company column was added from the start (Minty's ruling S129) so this is two more rows, not a rebuild.
 
@@ -300,8 +314,8 @@ Kept here in full so it survives NOW being rewritten. **Nothing below is S136 or
 **Also at Phase 3**
 - Intuit **production** keys. They reach live client books and never appear in chat, in any form.
 - The API base **host** changes — production is `quickbooks.api.intuit.com`, which returns 403 to a sandbox token.
-- `CREATE TABLE` and every schema change run on prod **separately**. Deploying does not carry them.
-- **The role and task rows must be created through the UI on prod, not by SQL** — see the S135 trap above.
+- `CREATE TABLE` and every schema change run on prod **separately**. Deploying does not carry them. ⚠ **This now includes the six columns added in S136.**
+- **The role and task rows must be created through the UI on prod, not by SQL** — see the trap above.
 - A **Reconnect URL** is a mandatory field in Intuit app settings as of Feb 2026. Refresh tokens cap at five years.
 
 **Minty's ruling on ownership, 21 Aug — wider than QuickBooks**
@@ -312,8 +326,8 @@ Kept here in full so it survives NOW being rewritten. **Nothing below is S136 or
 
 ⚠ **Consequence to accept:** under this ruling, when a client's connection breaks Mintek cannot look. Which is exactly why the four failure-handling items are not optional, and why the reconnect flow must be usable by a non-technical person unaided.
 
-**The four failure-handling items** — agreed in principle 21 Aug. Item 1 is in S136 as the send status column; the rest are pending.
-1. A status on every slip, always visible. Not sent / sending / sent + number / failed. Blank is not a status.
+**The four failure-handling items** — agreed in principle 21 Aug. Item 1 is now built as `qb_send_status`; the rest are pending.
+1. ~~A status on every slip, always visible.~~ **Column built S136, defaulting to `not_sent`.** Putting it on the screen is S137.
 2. The reason, in plain words, on the slip — customer not found, product not set up, connection dead, no price. Not buried in a log.
 3. A retry button. Most failures are fixed in QuickBooks, then re-sent.
 4. A list of slips shipped with no invoice number. The daily check, and where a silent failure would otherwise hide.
@@ -324,10 +338,9 @@ Kept here in full so it survives NOW being rewritten. **Nothing below is S136 or
 
 **Later, its own phase** — material receipts to supplier bills. One PO can be received in three deliveries and billed in two invoices. The linking rule is a business decision.
 
-**Closed in S135**
-- **P245 Phase 1.** Company name visible on an AbleTrace screen, reached by clicking, as `test260703`.
-- The permission chain found and fixed — `company_user_task` is the layer.
-- The missing authorization header on the QuickBooks service. Frontend `a669d7ed`, deployed `dev-a669d7edb884`.
-- Phase 2 specified end to end: every open question measured, including Intuit's `LinkedTxn`.
-- The quoting fault traced to one line of code.
-- The fixture built, shipped and made unambiguous.
+**Closed in S136**
+- The quoting fault fixed at source and verified on screen. Frontend `82ae3c3c`.
+- Five `qb_*` columns on `packingslips`, one `external_id` on `companycustomers`, dev.
+- `external_id` wired through the model, the create path and both customer forms. Backend `4e86e45`.
+- The fixture completed and proved clean by hex — one customer, one product, one SKU.
+- The backup naming convention settled by measurement.
