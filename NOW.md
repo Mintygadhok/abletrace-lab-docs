@@ -291,7 +291,7 @@ Minty ranks. Claude never renumbers.
 | P8 | Prod git checkout lags the served build — read rollback path off the box |
 | P210 | Prod to Node v24. Dev has run v24 cleanly for several sessions |
 | P224 | Dev SSH IPv6 rule |
-| P225 | Sweep Mac Downloads |
+| P225 | ~~Sweep Mac Downloads~~ — **done S137, Downloads is empty** |
 | P227 | Dev backend `node_modules.old-node18/` — deliberate, untracked |
 | P240 | The app cannot tell anyone a send failed. **Phase 2 raises this from housekeeping to a prerequisite** |
 | P241 | Quarterly security audit, five named checks |
@@ -304,6 +304,7 @@ Minty ranks. Claude never renumbers.
 | P251 | GitHub warns Node.js 20 actions are deprecated. Reachable only by an Angular major upgrade |
 | P252 | **External ID duplicate guard, customers and products together.** ⚠ `createCustomer` already checks `company_id` + `customer_name` and returns `Duplicate`; that is the pattern to extend. ⚠ **`editCustomer` has no duplicate check at all** — measured S136 |
 | P253 | **No SSH host aliases.** Every `scp` needs the IP typed. Two lines in `~/.ssh/config` removes it permanently |
+| P256 | **Dev home is full of dead build folders.** ~50 `dist-dev-*` and `www-html.bak-dev-*` going back to S63, plus two Node tarballs and their unpacked trees — listed S137. ⚠ **Keep `www-html.bak-dev-82ae3c3c9df3` (the live rollback) and one prior.** Check free disk before deciding it is worth doing |
 | P254 | **A sales order cannot be edited once created.** Found S137 when a PO number could not be added to SO-0015; a whole new SO, DO and PS had to be built instead. Whether this is deliberate or a gap is a business question |
 | — | **`role_task` id 24 — QuickBooks under the Admin role.** Minty's convention S135: admin reaches QuickBooks by holding the QuickBooks Controller role, so row 24 is the odd one out and probably goes. Also cross-check how Food Safety System was set up |
 | — | **Materials may have the same quoting fault.** `Materials.js:380` and `:790` use `myCode` too; still not checked |
