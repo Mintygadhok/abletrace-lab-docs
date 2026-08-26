@@ -1,9 +1,11 @@
 # NOW
 
-Rewritten whole at the close of S138.
+Rewritten whole at the close of S139.
 Read RULES.md and this file. Nothing else at the open.
 
-**S139 restores email.** Nothing can be onboarded until it works. The path the app uses to send is measured and quoted below; what the old AWS account can actually do is **not**, and that is step one rather than an assumption.
+**S139 restored email on both boxes and proved it on screen.** The business stop is cleared — clients can be onboarded.
+
+**S140 audits the old AWS account.** Delete nothing. The output is a written list of what is in that account and what still points at each thing. Minty's ruling, S139: keep SES and the DNS that SES depends on; everything else is a *candidate* to go, and a candidate only leaves once we know what points at it.
 
 ---
 
@@ -11,231 +13,316 @@ Read RULES.md and this file. Nothing else at the open.
 
 What no command returns.
 
-**Dev backend is `0948476`** — both QuickBooks transaction routes, committed and pushed. Nothing half-done.
+**Email works on dev and prod.** Both boxes send through the OLD account's SES using one IAM key created S139. Nothing half-done.
 
-**Dev frontend deployed and PROVEN ON SCREEN.** The QuickBooks block renders on PS-0032 showing status `invoiced`, estimate 1005, invoice 1017.
+**Both `.env` files were edited by hand and backed up.** Not in git, not carried by any deploy.
 ```
-/home/ubuntu/www-html.bak-dev-d770204085dbb138303ec6decbd3bd73a05c4a8b     rollback
+dev  ~/abletrace-lab-backend/.env.bak-s139   602 bytes
+prod ~/abletrace-lab-backend/.env.bak-s139   443 bytes
 ```
 
-⚠ **The backup convention is now proved from the script itself, not inferred.** `deploy-frontend.sh` copies live → backup **before** swapping, so the newest backup's *name* is the build going IN and its *contents* are the build coming OUT. Read the script if this is ever doubted again; it is eleven lines.
+**Prod was restarted for the first time since before S130.** Restart count read `1`. Code unchanged — only `.env`.
 
-**Dev frontend repo reads `d7702040`.** It matches the deployed build today, which is a coincidence of having just pushed — the Mac is the arbiter for frontend, not dev's checkout.
-
-**SES — AWS answered 22 Aug and REFUSED.** Case `178710371200148`, new account `208073623096`. Concerns they would not specify, citing security.
-
-⚠ **The old account 350466202408 cannot be torn down.** Production SES exists only there.
-
-⚠ **Minty's reading, S138: this is now a business stop.** New clients cannot be onboarded without account-invitation email. It outranks everything else on the queue.
-
-**Prod untouched since before S130, on Node v18.** Both deliberate. No QuickBooks anything on prod until Phase 3.
+**Dev backend is `0948476`, dev frontend deployed and proven.** QuickBooks Phase 2 core is done. Untouched in S139.
 ```
-/home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031
+/home/ubuntu/www-html.bak-dev-d770204085dbb138303ec6decbd3bd73a05c4a8b   dev rollback
+/home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031  prod rollback
 ```
+
+**Two test companies now exist and were not cleaned up.** `testses260825a` on dev, `testsesprod260825` on **prod**. Both walked the full invite → password → login path. ⚠ There is no delete path for a company, only Inactive. Deliberate — the full walk proved more than the email alone. → queue.
 
 **Both boxes report "system restart required."** Noted S135, still not acted on — P248.
 
 **Dev backend carries `node_modules.old-node18/`** untracked, deliberate — P227.
 
-**Stray QuickBooks estimate 183** sits in the sandbox with no number — the first send, made while Custom transaction numbers was on. Harmless. Delete in QuickBooks whenever.
+**Stray QuickBooks estimate 183** sits in the sandbox with no number. Harmless. Delete in QuickBooks whenever.
 
-**PS-0032 is a spent fixture.** It holds a real estimate and invoice and the route refuses a second send. To exercise the *button*, clear it first — the command is in the material.
+**PS-0032 is a spent fixture.** The route refuses a second send. To exercise the button, clear it first — command in the S138 material, not carried here.
 
 ---
 
-## THE JOB — S139
+## THE JOB — S140
 
-**Get email sending again, from the old AWS account, proven by a message arriving.**
+**Inventory the old AWS account 350466202408. Delete nothing. Produce the list.**
 
 ### The action, in order
 
-1. **Measure the old account's SES.** Which region, which verified identities, and is it out of the sandbox? ⚠ **Nothing below matters if the answer is no.** Console, not code.
-2. **Confirm which domain is verified there** — `mintekfoodsafety.com` or `abletrace.ca` or both. This decides what `FROM_EMAIL` may be.
-3. **Create a fresh IAM user** in the old account, `ses:SendRawEmail` only, nothing else. New keys. ⚠ **Not the old keys** — two of those are still valid and sit in git history (P17), and the point of this exercise is that nothing carries over.
-4. **Put the new key id and secret into dev's `.env`** as `SMTP_USER` and `SMTP_PASSWORD`. Restart, `sleep 8`, curl.
-5. **Send one real invitation** from the app to a mailinator address and watch it arrive. Deployed is not proven.
-6. **Then, and only then, the dependency audit** — what else in the old account is still load-bearing. Write findings; change nothing.
+1. **Start with the bill, not the console.** Cost Explorer, grouped by service, last 6 months. ⚠ **The bill is the only inventory that misses nothing chargeable.** Per-service screens are easy to miss; S139 proved the estate was not known.
+2. **Settle the open question below first** — which account holds the live dev and prod EC2s. Nothing else in the audit can be trusted until it is answered.
+3. **Route 53** — every hosted zone, every record. ⚠ **Record what each A/CNAME points at.** This is the list S141 acts on first.
+4. **EC2** — instance, Elastic IP, volumes, snapshots, key pairs, security groups. Note what each is attached to.
+5. **RDS** — the six manual snapshots, their sizes and their monthly cost.
+6. **S3, ACM certificates, CloudWatch, anything the bill surfaced.**
+7. **IAM** — all 8 users, their keys, key ages, last-used dates, console access.
+8. **Write the list.** For each item: what it is, what points at it, keep or candidate, and what must go first if it goes.
 
-⚠ **Prod's `.env` is a separate file on a separate box.** Deploying does not carry it. Dev first, prod deliberately, not in the same breath.
+⚠ **Nothing is deleted in S140.** S141 acts on the list, in the order the list dictates.
+
+---
+
+### THE OPEN QUESTION — answer this before anything else
+
+⚠ **We do not know which AWS account the live dev and prod boxes are in.**
+
+The reasoning that says "the new account" is an inference, not a measurement: the old account's EC2 console showed **one** instance in ca-central-1, so dev and prod cannot both be there.
+
+But the old account holds **1 Elastic IP**, and prod's public IP is `15.157.38.101`. If those are the same address, **prod is in the old account** and that Elastic IP must never be released.
+
+⚠ **Releasing an Elastic IP that prod uses would take the live app off the internet.** This is the single most expensive thing S141 could get wrong.
+
+Settle it on the boxes, not by reasoning:
+```
+curl -s -H "X-aws-ec2-metadata-token: $(curl -s -X PUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 60')" http://169.254.169.254/latest/meta-data/instance-id; echo
+```
+Run on **dev** and on **prod**. Compare each returned instance-id against the old account's EC2 list. ⚠ This command was written in S139 and **never run** — it is not a measurement yet.
 
 ---
 
 ### The material
 
-Measured in S138. The command and its return are beside each.
+Measured in S139. The command or screen is beside each.
 
-#### How the app actually sends
+#### The old account's SES — the thing being kept
 
-⚠ **`SMTP_USER` and `SMTP_PASSWORD` are NOT SMTP credentials.** They are an AWS IAM key id and secret. The app uses the AWS SDK, not an SMTP server. A rotation is an IAM key rotation.
+Console, old account 350466202408, SES → Account dashboard:
+```
+Daily sending quota   50,000 emails per 24-hour period
+Maximum send rate     14 emails per second
+Region                Canada (Central)
+Account health        Healthy
+```
+⚠ **This is production access, not sandbox.** Sandbox is capped at 200/day and 1/sec, and shows a persistent warning banner. None present.
 
+SES → Identities, 4 rows, all **Verified**:
 ```
-grep -rn "host\|region\|port\|secure\|service" ~/abletrace-lab-backend/api/services/email.js | grep -vi "pass\|secret\|user" | head -15
+abletrace.ca                    Domain
+info@abletrace.ca               Email address
+mintydev210706@yopmail.com      Email address
+mintydev210705@yopmail.com      Email address
 ```
-```
-7:  region: 'ca-central-1'
-47: exports.sendSESMail = (mailContent) => {
-83:  const transporter = nodemailer.createTransport({SES});
-101: exports.sendGroupMail = (mailContent) => {
-```
-⚠ **Region is hardcoded `ca-central-1`** at line 7 — not an environment variable. If the old account's verified identity lives in another region, this line is the change, and it is a code change requiring a commit.
+⚠ **`mintekfoodsafety.com` is NOT verified here.** `FROM_EMAIL` must stay an `@abletrace.ca` address on both boxes.
 
-⚠ Lines 13–31 are a **commented-out Zoho SMTP transport**, dead. Do not read it as the live path.
+⚠ The two yopmail rows are sandbox-era leftovers. `info@abletrace.ca` is redundant given the domain identity. Candidates, but they cost nothing.
 
-Two senders exist: `sendSESMail` (47) and `sendGroupMail` (101). Both need to work.
+#### What was built in S139 — the thing email now depends on
 
+Old account IAM:
 ```
-grep -rln "nodemailer\|createTransport\|SMTP_USER\|sendEmail" ~/abletrace-lab-backend/api ~/abletrace-lab-backend/config
+policy  abletrace260825-ses-send      ses:SendRawEmail + ses:SendEmail, Resource *
+user    abletrace260825-ses-sender    that policy only, no console access
+key     created S139, secret filed in Section H
 ```
-```
-api/services/email.js
-config/env/local.js
-config/env/development.js
-config/env/staging.js
-config/env/production.js
-```
+⚠ **One key serves both boxes.** Same value in dev's and prod's `.env`. → queue.
 
-#### What is in dev's .env — names only
-
-```
-cut -d= -f1 ~/abletrace-lab-backend/.env | grep -v '^$' | tr '\n' ' '; echo
-```
-```
-DATABASE_URL SMTP_USER SMTP_PASSWORD FROM_EMAIL S3_ACCESS_KEY S3_SECRET
-SESSION_SECRET APP_BASE_URL IS_DEV_BOX QUICKBOOKS_CLIENT_ID QUICKBOOKS_CLIENT_SECRET
-```
-⚠ **`FROM_EMAIL` must match a verified identity in whichever account is sending.** Its current value was deliberately not printed and is unmeasured.
-
-#### The deploy script — it is NOT called promote.sh
-
-⚠ **NOW carried the wrong name from S136 to S138.** There is no `promote.sh` on dev.
+#### Both boxes, measured S139
 
 ```
-~/deploy-frontend.sh <label>
+grep '^FROM_EMAIL' ~/abletrace-lab-backend/.env; awk -F= '/^SMTP_/ {print $1, "length:", length($2)}' ~/abletrace-lab-backend/.env
 ```
-Wants an **unpacked** folder at `~/dist-<label>`. ⚠ `unzip` is not installed:
+dev and prod both returned:
 ```
-cd ~ && python3 -c "import zipfile; zipfile.ZipFile('<zip>').extractall('<dir>')"
+FROM_EMAIL=info@abletrace.ca
+SMTP_USER length: 20
+SMTP_PASSWORD length: 40
 ```
-The dev artifact is flat — no wrapper folder. The label is the artifact name minus `dist-`, and the GitHub artifact carries the **full 40-character sha**, not the short one. Dev is `16.55.10.205`.
+⚠ **`SMTP_USER` and `SMTP_PASSWORD` are NOT SMTP credentials.** They are an AWS IAM key id and secret. The app uses the AWS SDK via nodemailer's SES transport. A rotation is an IAM key rotation.
 
-#### Clearing PS-0032 to re-test the buttons
+⚠ **Region is hardcoded `ca-central-1` at `api/services/email.js:7`** — not an environment variable. Measured S138. It matches the old account's region, so no code change was needed.
 
-⚠ Live write. Dev only. Scoped by id **and** company.
-```
-mysql abletracelab_live -e "UPDATE packingslips SET qb_estimate_id=NULL, qb_estimate_no=NULL, qb_invoice_id=NULL, qb_invoice_no=NULL, qb_send_status='not_sent' WHERE id=2417 AND company_id=464;"
-```
+#### The proof that email works — on screen, both boxes
 
-#### Reaching a guarded route from curl
+Mailinator, message headers read directly:
+```
+dev   to testses260825a@mailinator.com    from info@abletrace.ca  sending IP 23.249.208.5  18:24:31
+prod  to testsesprod260825@mailinator.com from info@abletrace.ca  sending IP 23.249.208.3  18:35:31
+```
+⚠ **Both sending IPs are Amazon SES addresses.** This is the independent confirmation that the app sends through SES and not through any other path. It closes the long-standing `info.abletrace@gmail.com` question — that address was never the sender.
 
-`isAuth` checks only that the bearer token matches a `user.webToken` — measured at `api/policies/isAuth.js:24`. No password needed, and the token never reaches the screen:
+Both invitations were walked end to end: email → temporary password → password set → logged in.
+
+#### The old account's EC2 — measured, and the reason the audit exists
+
+Console, ca-central-1:
 ```
-TK=$(mysql abletracelab_live -N -B -e "SELECT webToken FROM user WHERE id=1319;"); echo "token length: ${#TK}"
+Instances (running) 1     Elastic IPs 1     Volumes 1
+Key pairs 5               Security groups 7  Snapshots 7 (EBS)
+Load balancers 0          Auto Scaling Groups 0
+EC2 cost, past 6 months, Global: $145.51
 ```
-User 1319 is `test260703@mailinator.com`. ⚠ Lower case `bearer` for AbleTrace. The variable dies on disconnect.
+The one instance:
+```
+AbleTrace Prod N...   i-088b7969158c43bca   Running   t3.small   ca-central-1b   3/3 checks passed
+```
+⚠ **NOW.md never knew this instance existed.** It is why S140 is an audit and not a cleanup.
+
+#### The dead app in the old account
+
+Browser, S139:
+```
+abletrace.ca/login          serves a live login page
+prodapi.abletrace.ca        500 Internal Server Error on loginUser
+```
+A backend up with no database behind it. Minty deleted that RDS and took a final snapshot.
+
+⚠ **It cannot hold data or take a client.** But it is only a corpse if the open question above says prod lives elsewhere. **Confirm before touching it.**
+
+#### RDS snapshots in the old account — 6 manual, none automated
+
+Console, RDS → Snapshots → Manual:
+```
+abletrace-dev-snapshot          8.0.42   abletrace-dev    July 06, 2026
+abletrace-dev-snapshot260706    8.0.42   abletrace-dev    July 06, 2026
+abletrace-stg-snapshot          8.0.44   abletrace-stg    July 06, 2026
+abletrace-stg-snapshot260706    8.0.44   abletrace-stg    July 06, 2026
+newinstance-final-20260817      8.0.45   newinstance      August 17, 2026
+newinstance-snapshot260706      8.0.44   newinstance      July 06, 2026
+```
+⚠ **Three former instances**: `abletrace-dev`, `abletrace-stg`, `newinstance`. A three-tier estate, all gone, only snapshots left.
+
+⚠ **All are MySQL 8.0.x.** AWS bills extended support per vCPU-hour on 8.0 after end of standard support. Restoring any of these starts that meter. **Restore, read, delete in the same session — never leave one running.**
+
+⚠ **EBS snapshots are not RDS snapshots.** The "Snapshots 7" on the EC2 dashboard are volume images and a separate list.
+
+#### IAM in the old account — 8 users, three seen
+
+```
+abletrace260825-ses-sender    created S139, the live sender
+abletracelab-ses-smtp-s35     an older sender, 1 group
+Bobby1                        last activity 734 days, password age 1496 days, console access
+```
+⚠ **P17 lives here.** Two old-account IAM keys are still valid and sit in git history. That account is now load-bearing for email, so this is no longer untidiness.
 
 ---
 
 ### The analysis
 
-#### What is known about the SES problem
+#### Why SES stays in the old account
 
-**AWS refused production access on the new account.** The last reply we sent was already detailed. Re-sending the same case will not move them.
+Technically it causes no problem. Keys are account-scoped; the app just calls the API and cross-account is invisible to the code. Proven twice today.
 
-**Two things in that reply are the likely cause**, and both are fixable:
+Three consequences to hold:
+1. **The old account can never be closed.** It is permanent infrastructure — root credentials, MFA, billing, security surface, forever.
+2. **P17 rises.** Live keys in git history now sit in the account onboarding depends on.
+3. **DNS is the only real coupling.** Route 53 serves abletrace.ca; SES verification and DKIM are records in that zone.
 
-1. **"We do not currently have an automated process for handling bounces or complaints."** This is the criterion AWS weighs most heavily and the letter states plainly that it is not met. → **P257.**
-2. **The From domain and the link domain do not match.** Sent from `abletrace.ca`, link goes to `trace.mintekfoodsafety.com`. That pattern is a phishing signal to an automated reviewer. → fixed by the estate move.
+⚠ **Correction to the S135 "email-only" ruling.** Route 53 **stays** with SES. Separating the zone from the sender risks breaking DKIM, and ⚠ **DKIM failure is silent** — SES still accepts the message, the log says sent, and deliverability quietly rots. Read S135 as *"email, and the DNS email depends on."*
 
-**A third point needs correcting whenever we next write to AWS:** the earlier reply said the old account was being closed. That is no longer true.
+**The benefit worth naming:** the old account holds years of sending reputation, 50k/day and a clean record. A new account starts cold. Keeping SES there is the stronger position, not a compromise.
 
-⚠ **Consequence for the order of work.** The domain move is not cosmetic tidying — it is part of what makes the SES case winnable. But it does **not** block S139, which is about restoring service on the account that already works.
+#### Why rebuilding in the old account was rejected
 
-**An appeal was drafted in S138 offering the two changes as commitments.** Whether it was sent is unrecorded here — ask Minty.
+Minty raised it. Rejected S139: it would move the live app, two clients' books, the database, nginx, certs and the pipeline onto a different account — downtime and real risk — to gain nothing a client would notice. Moving the large fragile thing because the small stable thing cannot move is the wrong direction.
 
-#### What is NOT known, and must not be assumed
+#### Why the SES re-application does not gate anything
 
-- Whether the old account's SES is in **ca-central-1**. If not, `email.js:7` is a code change.
-- **Which identity is verified there**, and whether it is a domain or a single address.
-- Whether the old account is genuinely **out of the SES sandbox**. It sent before, so probably — but "probably" is not a measurement, and a sandbox account fails only on unverified recipients, which a mailinator test would expose immediately.
-- The current value of `FROM_EMAIL`.
+Both things AWS objected to are needed anyway:
+- **From-domain and link-domain mismatch** → fixed by the abletrace.ca move, which is wanted regardless.
+- **No automated bounce/complaint handling** → P257, which real clients need regardless.
 
-#### The permission to grant the new IAM user
+Do both and a re-application is winnable. Granted, the old account closes. Refused, the split stands — it works, costs little, and keeps the reputation. **The decision answers itself at the end instead of gating the start.**
 
-`ses:SendRawEmail` is what nodemailer's SES transport calls. Grant that and nothing else. ⚠ **Resist granting `ses:*`** — the whole point of Minty's S135 ruling is that the old account becomes single-purpose with nothing carried over.
+⚠ **The S138 appeal WAS sent.** Confirmed by Minty, S139. Case `178710371200148`, new account `208073623096`, refused 22 Aug.
+
+#### The order that must not be reversed
+
+⚠ **RULES, before removing infrastructure:** ask what still points at this — DNS records, credentials, other AWS settings, accounts outside AWS. **The pointer goes first, the resource second.** ⚠ **A code search cannot find these.**
+
+The most likely place S141 goes wrong: the abletrace.ca DNS records pointing at the dead EC2. Those must be removed **before** the Elastic IP is released. Reversed, a name you own points at somebody else's server.
 
 ---
 
 ### The verify
 
-1. The old account's SES console shows a verified identity and **not** "sandbox".
-2. `pm2 restart abletrace-dev`, `sleep 8`, curl returns 200 with the new keys in place.
-3. **An invitation email actually arrives** at a mailinator address, sent from the app, opened and read.
-4. The link in it works.
+S140 is done when:
 
-⚠ Item 3 is the job. Items 1 and 2 are only the route to it.
+1. The instance-id command has been run on **both** boxes and the old account's EC2 list has been compared against both. The open question is answered in writing.
+2. Cost Explorer has been read by service, and every chargeable line has a matching entry in the list.
+3. Every Route 53 record in the old account is written down with what it points at.
+4. The list exists as a document, with keep/candidate marked and removal order stated for each candidate.
+5. **Nothing has been deleted.**
 
----
-
-## WHAT S138 CHANGED
-
-**Backend `0948476`** — `POST /api/quickbooks/send-estimate` and `GET /api/quickbooks/invoice-number/:id`, plus two lines in `config/routes.js`.
-
-**Frontend `d7702040`, deployed and proven** — the QuickBooks block on the packing slip screen, plus two calls on `QuickbooksService`.
-
-**The round trip, measured end to end on PS-0032:** estimate **1005** created → converted by hand in QuickBooks → invoice **1017** fetched back → row 2417 holds all five values, status `invoiced`.
-
-**Three unknowns closed:**
-- **Intuit requires `Line.Amount`.** Fault 2020. Sending no price at all is not available to us.
-- **QuickBooks Canada requires a tax code on every line.** Fault 6000. ⚠ **The QuickBooks screen fills this in from the item automatically; the API does not.** The interface is more forgiving than the connection.
-- **The line description survives estimate → invoice conversion.** S137's open question. Proved by reading the invoice back: `PS-0032 · QB PO-001 — Testpdtqb260820`.
-
-**The design principle held.** Price and tax are both read off the client's own QuickBooks *item* and relayed unchanged. AbleTrace holds neither.
-
-**A settings trap found and fixed.** `CustomTxnNumbers: true` makes QuickBooks return an estimate with **no number and no error**. Turned off in the sandbox; verified `false` by reading preferences back.
-
-**Sandbox settings changed:** Custom transaction numbers → off.
-
-**Nothing on prod.**
+⚠ Item 1 is the gate. Items 2–4 are the job. Item 5 is the discipline.
 
 ---
 
-## THINGS THAT COST TIME IN S138
+## WHAT S139 CHANGED
 
-**`promote.sh` does not exist.** NOW said it did, for three sessions. It is `deploy-frontend.sh` and takes a label argument. ⚠ **A name carried in a document is not a measurement.**
+**Email restored on dev and prod**, proven on screen at 18:24 and 18:35. New IAM user and key in the old account; two `.env` files edited by hand; both boxes restarted; both returned 200.
 
-**A patch script was written with a nonsense line** — a ternary whose branches were identical. Caught on re-reading before it left the container, not by any check. ⚠ **`node --check` proves a file parses, never that it is correct.**
+**No code changed. No commit. Nothing in git.** The entire fix was two lines in two files that are deliberately not in the repo.
 
-**An `scp` stalled at 1%** on the 14MB artifact. Retrying worked. Not a fault.
+**Four unknowns closed:**
+- The old account's SES is in **production**, not sandbox — 50k/day.
+- The verified identity is **abletrace.ca**, not mintekfoodsafety.com.
+- The region **matches** the hardcoded `ca-central-1`.
+- The app sends through **SES**, proven by the sending IPs. `info.abletrace@gmail.com` was never the sender — it is the Super Admin login (user id 1, per Section_5 J51), a receiving address, not a sending one.
 
-**The first `scp` of a patch was skipped**, and the failure surfaced one step later as "no such file". ⚠ Run the Mac block before the dev block that depends on it.
+**The archive database is alive on prod's RDS.** `abletrace` answers queries today, alongside `abletracelab_live`. ⚠ **This is why no RDS restore was needed** and why the MySQL 8.0 surcharge question never arose. `newinstance-final-20260817` was left untouched.
+
+**Mava Foods, partially measured.** `mavatrial2@mailinator.com` = user 220, company 184. Company 184's last activity: dispatch orders and packing slips 2024-12-19, MOs and recipes 2025-01-29, one stray materials row 2026-01-28.
+
+⚠ **But 184 is a trial company.** Six Mava-named companies exist in the archive, all licence_status_id 6 (Inactive):
+```
+164  Mava Foods       2020-12-06
+174  Mavadummy1Co     2021-01-04
+181  Mava Trial       2021-01-22
+183  mavatrial1       2021-01-22
+184  mavatrial2       2021-01-22
+279  dummymava2101@mailinator.com  2021-09-10
+```
+**164 is the likely real account and is unmeasured.** Minty's call S139: not required now. → queue.
+
+---
+
+## THINGS THAT COST TIME IN S139
+
+**A memory was argued against a measurement and the memory lost — twice.** `info.abletrace@gmail.com` felt like the sender; it was not. Then the reverse: Minty said the old account was for client passwords, and Claude wrongly inferred the domain must be mintekfoodsafety.com. ⚠ **Both were settled by looking. Neither was settled by reasoning.**
+
+**NOW.md did not know a whole prod EC2 existed** in the old account. Found by screenshot, not by any document. ⚠ **The estate was never inventoried — that is now S140.**
+
+**An IAM policy was created but the checkbox was not ticked** on the attach screen. Caught on the screen before Next. ⚠ A user with no policy fails later as a bare AccessDenied that reads as a broken key.
 
 ---
 
 ## TRAPS CARRIED FORWARD — all look like broken code
 
-**QuickBooks Canada refuses any transaction with no tax code on a line**, and refuses any line with no Amount. Both faults are ValidationFaults with useful text in the response *body*, never in the error message. ⚠ **Always log `err.response.data`, truncated. The `message` alone says nothing.**
+⚠ **DKIM failure is silent.** SES accepts the message, the log says sent, deliverability quietly drops. Never assume a successful send means a delivered one.
 
-**`CustomTxnNumbers: true` returns a blank document number with no error at all.** ⚠ Per-client setting — a client with it on behaves the same way. Phase 3 support case, not a sandbox quirk.
+⚠ **`.env` is one file per box and is not in git.** A deploy, a promote, a pull and a restart all fail to carry it. Fixing dev fixes only dev.
 
-**The QuickBooks access token expires in hours.** A hand-run script reading it from the table hits 401 mid-session. **Load `dev.mintekfoodsafety.com/quickbooks` in Chrome first** — that page refreshes and writes back. The real routes call the service and do not have this problem.
+⚠ **`pm2 restart` prints "Use --update-env to update environment variables".** That refers to PM2's own env. `dotenv` reads the file at boot, so a plain restart is enough. Not a warning being ignored.
+
+⚠ **An RDS snapshot cannot be queried.** Restoring is the only read path, and it starts an 8.0 extended-support meter. Restore, read, delete in one session.
+
+⚠ **Automated RDS backups die with the instance.** Only a manual or final snapshot survives a deletion.
+
+**QuickBooks Canada refuses any transaction with no tax code on a line**, and refuses any line with no Amount. Both are ValidationFaults with useful text in the response *body*, never in the message. ⚠ **Always log `err.response.data`, truncated.**
+
+**`CustomTxnNumbers: true` returns a blank document number with no error at all.** Per-client setting. Phase 3 support case.
+
+**The QuickBooks access token expires in hours.** A hand-run script hits 401 mid-session. **Load `dev.mintekfoodsafety.com/quickbooks` in Chrome first** — that page refreshes and writes back. ⚠ That page has no buttons by design; it is a status page, and the name shown is read live from QuickBooks on every load.
 
 ⚠ **`mysql2` is not a dependency.** `require('mysql2/promise')` fails. Use a shell variable.
 
-**A master role row created by SQL grants nothing.** The app's creation path copies every `role_task` into `company_user_task`; SQL runs no application code. The row is indistinguishable from a working one. ⚠ **Phase 3: role and task rows on prod must be created through the UI.**
+⚠ **`mysql abletracelab_live` — name the DB explicitly.** A bare `mysql` on prod lands in the dormant ARCHIVE `abletrace`. Useful today; dangerous when writing.
 
-**A 400 on a guarded route proves nothing about the route.** `isAuth` returns 400 for four reasons, all before the controller runs. Only the body distinguishes them.
+**A master role row created by SQL grants nothing.** The app's creation path copies every `role_task` into `company_user_task`; SQL runs no application code. ⚠ **Phase 3: role and task rows on prod must be created through the UI.**
+
+**A 400 on a guarded route proves nothing about the route.** `isAuth` returns 400 for four reasons, all before the controller runs.
 
 ⚠ **No HttpInterceptor.** Every service sets `authorization: bearer <webToken>` per call, lower case.
 
-⚠ **Role and task data is cached at login.** A database change will not appear in an open session however correct it is.
+⚠ **Role and task data is cached at login.** A database change will not appear in an open session.
 
 ⚠ **`src/app/Services` has a CAPITAL S.** macOS is case-insensitive; Angular's AOT compiler is not.
 
 **`formulations` has no `name` column — it is `title`.**
 
-**`shipped_flag` is the ship gate, not `status_id`.** Measured S138: an unshipped slip carries `status_id` 1 too.
+**`shipped_flag` is the ship gate, not `status_id`.**
 
 ⚠ **`company_id` is a DOUBLE on `companycustomers` and `dispatchorders`, an INT on `packingslips` and `packingslipdos`.**
+
+**Licence statuses:** 1 Invited · 2 Trial · 3 Active · 4 Expired · 6 Inactive. ⚠ **Only Inactive blocks login. Expired keeps access.**
 
 ---
 
@@ -245,49 +332,46 @@ Minty ranks. Claude never renumbers.
 
 | # | item |
 |---|---|
-| P17 | Two old-account IAM keys still valid and in git history, deliberately. **Belongs to the estate job** |
+| P17 | **Two old-account IAM keys still valid and in git history.** ⚠ **Raised S139** — the old account is now load-bearing for email, so this is a live credential in the account onboarding depends on |
 | P8 | Prod git checkout lags the served build — read rollback path off the box |
 | P210 | Prod to Node v24. Dev has run v24 cleanly for several sessions |
 | P224 | Dev SSH IPv6 rule |
 | P227 | Dev backend `node_modules.old-node18/` — deliberate, untracked |
-| P240 | The app cannot tell anyone a send failed. **Phase 2 prerequisite.** Overlaps P257 |
+| P240 | The app cannot tell anyone a send failed. Overlaps P257 |
 | P241 | Quarterly security audit, five named checks |
-| P245 | QuickBooks integration — **Phase 2 core is DONE and proven.** What remains is the four failure-handling items below. Phase 3 detail kept at the foot |
+| P245 | QuickBooks integration — **Phase 2 core DONE and proven.** Four failure-handling items remain, at the foot |
 | P246 | `User.creatSuperAdmin` hardcodes password `"12345678"`. `api/models/User.js:98`. Fold into P241 |
 | P247 | **App JWTs never expire.** `api/policies/generateJWT.js` calls `jwt.sign` with no `expiresIn`. Fold into P241 |
-| P248 | **OS updates.** Prod 59 pending / 12 security. Dev 22 pending. Both report "system restart required." Fold into P241 |
-| P249 | **Typing any URL logs the user out.** `auth.guard.ts` reads the NGRX store, memory only and empty after a page load. Affects every route |
-| P250 | **Authorization is enforced by the screen, not the server. BLOCKER FOR PHASE 3.** `PackingSlips.js` lines 74, 148, 250, 354 take `company_id` straight from `req.body`. The browser says which company; the server believes it. Menu, tabs and roles are sound, but the rule lives in the browser. Harmless today; unacceptable with two real clients on one server. The job is *make the server derive the company from the session and filter every route by it* |
+| P248 | **OS updates.** Prod 59 pending / 12 security. Dev 22+ pending. Both report "system restart required." Fold into P241 |
+| P249 | **Typing any URL logs the user out.** `auth.guard.ts` reads the NGRX store, memory only |
+| P250 | **Authorization is enforced by the screen, not the server. BLOCKER FOR PHASE 3.** `PackingSlips.js` lines 74, 148, 250, 354 take `company_id` straight from `req.body`. Harmless today; unacceptable with two real clients on one server |
 | P251 | GitHub warns Node.js 20 actions are deprecated. Reachable only by an Angular major upgrade |
-| P252 | **External ID duplicate guard, customers and products together.** `createCustomer` already checks `company_id` + `customer_name`; that is the pattern to extend. ⚠ `editCustomer` has no duplicate check at all |
-| P253 | **No SSH host aliases.** Every `scp` needs the IP typed. Two lines in `~/.ssh/config` |
-| P254 | **A sales order cannot be edited once created.** Whether deliberate or a gap is a business question |
-| P256 | **Dev home is full of dead build folders.** ~50 going back to S63. ⚠ **Keep `www-html.bak-dev-d770204085dbb138303ec6decbd3bd73a05c4a8b` (the live rollback) and one prior.** Also the S138 patch scripts and `.bak-s138*` files on both Mac and dev |
-| P257 | **Automated bounce and complaint handling.** SNS topic on SES bounce/complaint, permanent suppression of hard bounces and complaints, alerting on rate. ⚠ **Required for any SES re-application to succeed** — its absence is stated in writing in our last reply to AWS. Overlaps P240 |
+| P252 | **External ID duplicate guard, customers and products.** ⚠ `editCustomer` has no duplicate check at all |
+| P253 | **No SSH host aliases.** Two lines in `~/.ssh/config`. dev `16.55.10.205`, prod `15.157.38.101` |
+| P254 | **A sales order cannot be edited once created.** Business question |
+| P256 | **Dev home is full of dead build folders**, ~50 back to S63. ⚠ **Keep the live rollback and one prior.** ⚠ **Add: `.env.bak-s139` on BOTH boxes — do not delete until the S139 keys are proven stable** |
+| P257 | **Automated bounce and complaint handling.** SNS topic on SES bounce/complaint, suppression of hard bounces, alerting on rate. ⚠ **Required for any SES re-application** — its absence is stated in writing in our reply to AWS. Overlaps P240 |
+| P258 | **Two test companies exist and cannot be deleted.** `testses260825a` on dev, `testsesprod260825` on **prod**. ⚠ **Minty's ruling S139: set them Inactive.** Inactive is the only status that blocks login. ⚠ **Through the app, Super Admin → License and Billing — NOT by SQL.** SQL runs no application code and a licence change writes `licensehistory` rows the UI handles |
+| P259 | **One IAM key serves both boxes.** Same `SMTP_USER`/`SMTP_PASSWORD` pair in dev's and prod's `.env`. If it leaks it can only be revoked for both at once. ⚠ **Minty's ruling S139: separate them eventually, not now.** Email has worked for hours after weeks broken — do not swap a proven state for an unproven one. Fold into a session that is editing `.env` anyway. ⚠ **Dev first, prove a send, leave prod on the working key** — a mistake then costs dev, not onboarding |
+| P260 | **Old-account IAM users that should not exist.** ⚠ **Minty's ruling S139: nobody but Minty needs an account — if a user is not required, it goes.** `Bobby1` — console access, 734 days idle, 1496-day password. `abletracelab-ses-smtp-s35` — an older sender, plausibly still wired into something. ⚠ **This is a delete, so it is S141, not S140.** Ask the audit question of each first: *what still points at this?* ⚠ **Deactivate a key before deleting it** — deactivation is reversible, deletion is not. Deactivate, wait, see what breaks, then delete |
+| P261 | **Mava Foods, company 164, unmeasured.** 184 was a trial. Six Mava-named companies exist in the archive, all Inactive. Run before any conversation with them |
 | — | **`role_task` id 24 — QuickBooks under the Admin role.** Minty's convention S135: admin reaches QuickBooks by holding the QuickBooks Controller role, so row 24 is the odd one out |
 | — | **Materials may have the same quoting fault.** `Materials.js:380` and `:790` use `myCode`; still not checked |
 | — | Section_3B.md rewrite. Verdict: replace whole. ~430 lines unread |
 
-### PENDING — the estate. Unranked; sequenced behind S139.
+### THE ESTATE — sequenced
 
-**Minty's ruling S138: the order is (1) restore email, (2) audit dependencies, (3) move to abletrace.ca.** Two sessions minimum after S139.
+**Minty's ruling S138, still standing:** (1) restore email — **done S139**, (2) audit dependencies — **S140**, (3) move to abletrace.ca.
 
-**Minty's ruling S135 stands:** keep the old account **for SES and nothing else**. Strip every other service. Fresh credentials so nothing carries over. A single-purpose mail sender, not "the old estate we never finished leaving."
+**Minty's ruling S139:** keep SES **and Route 53** in the old account. Everything else is a candidate. **S140 audits and deletes nothing. S141 acts on the list.**
 
-⚠ **The abletrace.ca move now has a second reason.** Sending domain and link domain must match, or the phishing pattern remains in any future SES application.
+⚠ **The abletrace.ca move has two reasons.** One app rather than two, and sending domain matching link domain — without which the phishing pattern remains in any future SES application.
 
-**Three things must be measured. None are known:**
-1. **What can old-account SES actually do?** Region, verified identities, sandbox or production. **S139 step 1.**
-2. **Route 53 is inside the old account** (RULES §4). If DNS stays there, the account is not email-only.
-3. **Is the refusal final?** An appeal was drafted S138 offering bounce handling and domain alignment as commitments.
+### P245 Phase 3 — two clients, live books. Not S140 work.
 
-⚠ **RULES, before removing infrastructure:** ask **what still points at this?** — DNS records, credentials, other AWS settings, accounts outside AWS. **The pointer goes first, the resource second.** ⚠ **A code search cannot find these.**
+**Clients do not get sandboxes.** Each client clicks Connect, signs in, approves, and gets a row in `quickbooks_tokens` under their company name. The company column was added S129, so this is two more rows, not a rebuild.
 
-### P245 Phase 3 — two clients, live books. Not S139 work.
-
-**Clients do not get sandboxes.** Each client clicks Connect, signs in, approves, and gets a row in `quickbooks_tokens` under their company name. The company column was added from the start (S129), so this is two more rows, not a rebuild.
-
-⚠ **The company must come from the logged-in session, never a parameter.** Both new routes and the status route currently use a hardcoded `sandbox260820`. ⚠ **Not possible until P250 is done** — there is no session company anywhere in the app. **P250 is a hard blocker.**
+⚠ **The company must come from the logged-in session, never a parameter.** Both transaction routes and the status route currently use a hardcoded `sandbox260820`. ⚠ **P250 is a hard blocker** — there is no session company anywhere in the app.
 
 **Also at Phase 3**
 - Intuit **production** keys. They reach live client books and never appear in chat.
@@ -295,7 +379,7 @@ Minty ranks. Claude never renumbers.
 - Schema changes run on prod **separately**. ⚠ **Including the five `qb_*` columns and `companycustomers.external_id`, which exist on dev only.**
 - **Role and task rows through the UI on prod, not by SQL.**
 - A **Reconnect URL** is mandatory in Intuit app settings as of Feb 2026. Refresh tokens cap at five years.
-- ⚠ **Custom transaction numbers is per-client.** A client with it on gets estimates with no number and no error. Check it at onboarding, or handle it as a named failure reason.
+- ⚠ **Custom transaction numbers is per-client.**
 
 **Minty's ruling on ownership, 21 Aug — wider than QuickBooks**
 
@@ -307,12 +391,10 @@ Minty ranks. Claude never renumbers.
 
 **The four failure-handling items** — what remains of Phase 2.
 1. ~~A status on every slip, always visible.~~ **Done S136–S138, on screen.**
-2. The reason, in plain words, on the slip — customer not found, product not set up, no price, no tax code, connection dead. ⚠ **The route already returns exactly these reasons; they are shown only transiently and are not stored.** Storing the last reason is the work.
-3. A retry button. Most failures are fixed in QuickBooks, then re-sent. ⚠ **Send is currently blocked once `qb_estimate_id` is set — deliberate. A retry must clear a failed attempt without permitting a duplicate send.**
-4. A list of slips shipped with no invoice number. The daily check, and where a silent failure would otherwise hide.
+2. The reason, in plain words, on the slip. ⚠ **The route already returns exactly these reasons; they are shown transiently and not stored.** Storing the last reason is the work.
+3. A retry button. ⚠ **Send is blocked once `qb_estimate_id` is set — deliberate. A retry must clear a failed attempt without permitting a duplicate send.**
+4. A list of slips shipped with no invoice number. ⚠ **This belongs on the QuickBooks tab** — the daily check, and where a silent failure would otherwise hide.
 
-⚠ **Silence is the fragile part.** A connection dies for reasons nobody controls. Under any ownership model the failure is invisible unless the slip says so.
-
-⚠ **Canadian tax is not uniform.** Basic groceries are zero-rated, other food is not. The sandbox's codes: 2 Exempt, 3 Zero-rated, 5 HST ON, 6 Out of Scope.
+⚠ **Canadian tax is not uniform.** Basic groceries are zero-rated, other food is not. Sandbox codes: 2 Exempt, 3 Zero-rated, 5 HST ON, 6 Out of Scope.
 
 **Later, its own phase** — material receipts to supplier bills. One PO can be received in three deliveries and billed in two invoices. The linking rule is a business decision.
