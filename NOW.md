@@ -1,187 +1,209 @@
 # NOW
 
-Rewritten whole at the close of S140.
+Rewritten whole at the close of S141.
 Read RULES.md and this file. Nothing else at the open.
 
-**S140 exported Mava's master data and found the client onboarding importer.** P261 is done. The exercise turned into the onboarding design, and the onboarding design surfaced P250 as the thing that must come first.
+**S141 fixed P250.** The server now decides which company a request may touch. Written, tested, proven on screen, committed, pushed, and live on prod with its database prepared. **Done, both boxes.**
 
-**S141 fixes P250.** Server-side company scoping. ⚠ **Minty's ruling S140: this goes ahead of the importer and ahead of any client.** The platform is empty today, which is the only cheap moment to fix it.
+**S142 audits the old AWS account and disconnects it, one dependency at a time.** ⚠ **Minty's ruling S141: the audit comes FIRST, before the domain move, because Route 53 lives in the old account and the move stands on it.** Keep SES and Route 53 untouched. Everything else is checked and test-disconnected.
 
-**S142 builds the client onboarding importer. S143 audits the old AWS account.** Both are specified below with their homework intact. ⚠ **Do not reopen S139 or S140 to recover either — everything needed is in this file.**
+**S143 moves the app to `abletrace.ca`**, on ground that is by then understood.
+
+**S144 is the QuickBooks production approval.** Its brief is a separate file Minty holds, `QB-PRODUCTION-BRIEF.md`, updated by S141's decisions below.
+
+⚠ **The importer (P262) is specified below with its homework intact and has NOT been dropped — only outranked.**
 
 ---
 
 ## STATE
 
-What no command returns.
+What no command returns. Everything a command returns is measured by the open check.
 
-**Email works on dev and prod.** Both boxes send through the OLD account's SES using one IAM key created S139. Nothing half-done. Untouched in S140.
+**P250 is complete on both boxes.** Not partial, nothing half-applied, nothing awaiting a follow-up.
 
-**Dev backend is `0948476`, dev frontend deployed and proven.** QuickBooks Phase 2 core is done. Untouched in S140.
-```
-/home/ubuntu/www-html.bak-dev-d770204085dbb138303ec6decbd3bd73a05c4a8b   dev rollback
-/home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031  prod rollback
-```
+**The QuickBooks backend chain is on prod and deliberately dormant.** Prod pulled `99852bf..cf7722d`, which carried the whole QuickBooks chain along with P250 — there was no way to take one without the other. The routes are live but unreachable: no prod company is connected, `quickbooks_tokens` is empty, and prod's **frontend was not deployed**, so the QuickBooks tile does not exist on prod. **This is intended. Do not "fix" the missing tile.**
 
-**Prod backend and frontend are unchanged since before S130.** S139 restarted prod for `.env` only. S140 wrote no code at all.
+**Prod's frontend is deliberately behind.** Prod serves `9bce0238`. Dev is `c2a52d8e`. No frontend deploy was made in S141 because none was needed.
 
-**S140 wrote nothing to any database.** Every statement was a SELECT against the dormant archive on prod. Two scripts and one output folder were left on prod:
-```
-/home/ubuntu/mava-export.sh
-/home/ubuntu/mava-export-2.sh
-/home/ubuntu/mava-export-260826/          9 tsv files
-```
-⚠ **Delete these in S141.** They are spent. → P256.
+**Three spent Mava export items on prod are still there** — `mava-export.sh`, `mava-export-2.sh`, `mava-export-260826/`. S141 did not reach them. Part of P256.
 
-**Both `.env` files carry `.env.bak-s139`.** Not in git, not carried by any deploy.
-
-**Two test companies still exist and are still not Inactive.** `testses260825a` on dev, `testsesprod260825` on **prod**. → P258.
-
-**Both boxes report "system restart required."** Noted S135, still not acted on — P248.
-
-**Dev backend carries `node_modules.old-node18/`** untracked, deliberate — P227.
-
-**Stray QuickBooks estimate 183** sits in the sandbox with no number. Harmless.
+**`node_modules.old-node18/` untracked on dev backend is deliberate.** P227.
 
 ---
 
-## THE JOB — S141
+## THE JOB — S142: AUDIT AND DISCONNECT THE OLD AWS ACCOUNT
 
-**P250. Make the server decide which company's data a request may touch. Stop trusting the browser.**
+**Old account `350466202408`.** New account `208073623096`.
 
-⚠ **Read this before anything else.** A logged-in user at client A can change one number in what their browser sends and read or write client B's data. Recipes, customers, suppliers, stock. It needs Chrome's developer tools and nothing else. It leaves no trace that looks unusual, because to the server it is an ordinary request from a valid login.
+⚠ **THE FIRST ACT OF S142 IS TO WRITE THE SCAN, NOT TO RUN ONE.** S141 closed under RESERVE and deliberately did NOT write an exhaustive scan, because a thin one would give false confidence. **Minty's ruling S141.** The requirements are below; the command set is built at the top of S142 with fresh capacity.
 
-⚠ **Minty's ruling S140: this is a complete rebuild of the login and scoping path, not a patch.** No constraint to preserve what exists.
+⚠ **Nobody has ever listed every resource in this account.** What follows from S139/S140 is a handful of findings, not an inventory. **Do not treat it as coverage.**
 
----
+### The target
 
-### ⚠ THE HOMEWORK WAS NOT DONE
+Every element in the old account examined, and every one except SES and Route 53 **test-disconnected** — so that S143 can move the domain without standing on unmeasured ground.
 
-⚠ **S140 took no P250 measurements.** The session went to P261 and the onboarding design. Everything below about the app's current behaviour is **memory from S135–S139, not measured this session.**
+### The hard keep-list
 
-Per RULES: a quoted fact with no measurement beside it is a memory, not material. **Treat the section below as a list of things to confirm, not as facts.** The discovery block exists so that confirming them costs minutes, not a session.
+⚠ **SES and Route 53 are NOT touched.** Minty's ruling S139, restated S141.
 
----
+- **SES** — the app's only working email path. Old account, domain `abletrace.ca`, sender `info@abletrace.ca`, IAM user `abletrace260825-ses-sender`, send-only. Restored S139.
+- **Route 53** — zone `Z0710124HPIPA4X553D7` for `abletrace.ca`. ⚠ **S143's domain move depends on this. Breaking it blocks the next two sessions.**
 
-### The action, in order
+**The old account is being TRIMMED, not torn down.**
 
-1. **Run the discovery block below.** It is written and ready. Do not start designing before it returns.
-2. **Answer the one question that sizes the whole job** — can the fix go in one shared layer, or must every route be edited? See below.
-3. **Build the session company lookup.** At login, read the user's company from the database once and hold it in the session.
-4. **Make routes read the session, never the body.** Shape depends on step 2.
-5. **Write the attack test.** Log in as company A, ask for company B, confirm refusal. Run it against every route.
-6. **Prove it on the screen on dev**, then prod.
+### What the scan must cover
 
----
+Exhaustive means every service, not the remembered ones. At minimum:
 
-### THE QUESTION THAT SIZES THE JOB — answer it first
+- **IAM** — users, roles, groups, policies (managed and inline), access keys **with last-used dates**, console access, MFA
+- **EC2** — instances, volumes, snapshots, AMIs, security groups, key pairs, **Elastic IPs**
+- **S3** — buckets, bucket policies, public access settings, static website hosting
+- **RDS** — instances, snapshots (manual and automated), parameter groups
+- **Route 53** — zones and **every record in each** ⚠ read-only in this session
+- **ACM** — certificates and what they are attached to
+- **CloudFront, Lambda, SNS, SQS, CloudWatch** — alarms, log groups, rules, schedules
+- **SES** — identities, sending config, suppression list ⚠ read-only
+- **Billing / Cost Explorer** — ⚠ **do not skip.** It is the only view that lists what is alive without needing to know it exists, and it catches services nobody remembers enabling.
 
-⚠ **Is there one layer every request passes through before it reaches a controller?**
+### The question asked of every resource
 
-**If yes** — the fix is small. Strip `company_id` out of the incoming request at that layer and inject the session's value. Every controller carries on reading `company_id` from the request exactly as it does today, except the value is now the server's and cannot be influenced from the browser. **One change, plus a check that nothing bypasses it.**
+⚠ **RULES §2.** Before disconnecting or releasing anything, ask **what still points at this?** and answer it by looking, in four places:
 
-**If no** — every route must be edited individually. Mechanical, low-risk per route, but there are many and missing one leaves the hole open. It then needs a way to prove none were missed, not a careful pass.
+**DNS records · credentials · other AWS settings · accounts outside AWS**
 
-⚠ **This is measurable, not a matter of opinion.** Sails has a policy layer and a hooks layer. Whether either can rewrite a request body before the controller runs is what decides it. The discovery block answers it.
+⚠ **A code search cannot find these.** Nothing in the code names an Elastic IP, a bucket or a policy. That is exactly why they were left behind, and why this is console work.
 
-⚠ **A passing guard proves nothing about the action behind it.** RULES: when a policy refuses a request the controller never ran. Do not read a 400 or 403 as evidence the scoping works. **The proof is a request that succeeds and returns the right company's rows, plus one that succeeds and returns nothing because it asked for someone else's.**
+### The order
 
----
+1. **Scan everything first.** Change nothing.
+2. **Sort into three piles** — keep (SES, Route 53), disconnect, and **unknown**. ⚠ **Unknown means scan again, never guess.**
+3. **One dependency at a time.** Pointer first, resource second. Prove each before starting the next.
+4. **Deactivate before deleting** where the service allows it — deactivation is reversible, deletion is not. Applies to IAM keys especially.
+5. **Nothing released that something still points at.**
 
-### The discovery block — run this at the open, on DEV
+### What is already known — partial, NOT an inventory
 
-Each command is written to distinguish two answers. Run one box at a time.
+Each with its source session. ⚠ **Treat as a starting list, not coverage.**
 
-**1 — How many routes take `company_id` from the body?** This is the size of the job if there is no shared layer.
-```
-grep -rn "req.body.company_id\|body.company_id" ~/abletrace-lab-backend/api --include=*.js | wc -l
-```
+- **`Bobby1`** — IAM user, console access, 734 days idle. S139. → P260
+- **`abletracelab-ses-smtp-s35`** — IAM user, plausibly still wired into something. S139. ⚠ **Ask what points at it first.** → P260
+- **Two old-account IAM keys still valid and in git history**, deliberately. S138. → P17
+- **`abletrace260825-ses-sender`** — the live SES sender. **KEEP.** S139.
+- **Route 53 zone `Z0710124HPIPA4X553D7`** — `abletrace.ca`. **KEEP.** S139.
 
-**2 — Which files, and how concentrated?** A few big files is a different job from fifty small ones.
-```
-grep -rln "req.body.company_id\|body.company_id" ~/abletrace-lab-backend/api --include=*.js | sed 's|.*/||' | sort | uniq -c | sort -rn | head -30
-```
+### Verify
 
-**3 — What policies exist, and what runs globally?** The `'*'` entry is the shared layer if there is one.
-```
-cat ~/abletrace-lab-backend/config/policies.js
-```
+- A written inventory of every service in the old account exists, produced this session.
+- Every resource is in exactly one of the three piles, with no resource unaccounted for.
+- Everything outside the keep-list is test-disconnected, each proven separately.
+- SES still sends and Route 53 still resolves, checked on screen at the close.
 
-**4 — What does the auth policy actually read?** Memory says it reads only the super-admin `User` table, which would mean there is no company lookup anywhere yet.
-```
-cat ~/abletrace-lab-backend/api/policies/isAuth.js
-```
+### The lesson this job exists to honour
 
-**5 — Is there a hooks directory?** A Sails hook can rewrite a request before any policy or controller runs.
-```
-ls -la ~/abletrace-lab-backend/api/hooks/ 2>/dev/null; ls -1 ~/abletrace-lab-backend/config/ | head -40
-```
-
-**6 — What is in the JWT already?** If the company is in the token, the lookup may be cheaper than expected. ⚠ Memory says the token never expires — P247.
-```
-cat ~/abletrace-lab-backend/api/policies/generateJWT.js
-```
-
-**7 — Which table maps a user to a company?** The lookup needs a source of truth.
-```
-mysql -N -B -e "SELECT GROUP_CONCAT(COLUMN_NAME ORDER BY ORDINAL_POSITION SEPARATOR ', ') FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='abletracelab_live' AND TABLE_NAME='company_users';"
-```
-
-⚠ **Name the database explicitly.** A bare `mysql` on prod lands in the dormant ARCHIVE `abletrace`.
+⚠ **The subdomain takeover.** IPs were released before DNS was audited, and for a period a name Mintek owned pointed at something Mintek did not. **The pointer goes first, the resource second. Never the reverse.**
 
 ---
 
-### The material — ⚠ ALL MEMORY, CONFIRM WITH THE BLOCK ABOVE
+## CARRIED — S143: MOVE THE APP TO `abletrace.ca`
 
-Measured S135–S138, **not re-measured in S140.**
+⚠ **Waits on S142.** Route 53 is in the old account, so the move stands on the audit being done.
 
-**Four known sites, from S138:**
+### The action
+
+1. **Discovery** — the block below, read-only, one paste.
+2. **Design in prose** before touching anything: which names point where now, which must move, in what order.
+3. **Dev first.** DNS, certificate, Nginx, the frontend's API base. Prove on screen.
+4. **Prod second, same session.**
+5. **Terms and privacy served from the new domain** — their URLs go to Intuit and must be stable before S144.
+
+### The discovery block
+
+Read-only.
+
 ```
-api/controllers/PackingSlips.js   lines 74, 148, 250, 354
+dig +short abletrace.ca
+dig +short www.abletrace.ca
+dig +short trace.mintekfoodsafety.com
+dig +short dev.mintekfoodsafety.com
 ```
-Each takes `company_id` straight from `req.body`. ⚠ **These are the four that were looked at. The grep in step 1 is what says how many there really are.**
 
-**`isAuth.js` reads only the super-admin `User` table.** If true, there is no "which company does this user belong to" lookup anywhere in the app, and step 3 of the action is building it from nothing rather than wiring up something that exists.
+```
+ls -1 /etc/nginx/sites-enabled/
+```
 
-**App JWTs never expire.** `api/policies/generateJWT.js` calls `jwt.sign` with no `expiresIn`. → P247.
+```
+grep -rn "server_name\|ssl_certificate\|proxy_pass" /etc/nginx/sites-enabled/ /etc/nginx/sites-available/ 2>/dev/null
+```
 
-**No HttpInterceptor on the frontend.** Every Angular service sets `authorization: bearer <webToken>` per call, lower case. ⚠ **Relevant** — if the fix changes what the server expects, there is no single frontend place to change in step.
+⚠ **`grep -r` on nginx skips symlinks.** An empty result does not mean no config exists — TRAPS.
 
-**Role and task data is cached at login.** A database change will not appear in an open session. ⚠ **This will make testing confusing** — log out and back in between attempts.
+```
+sudo certbot certificates 2>/dev/null || ls -1 /etc/letsencrypt/live/ 2>/dev/null || echo NO_CERTBOT
+```
 
-**`company_id` is a DOUBLE on `companycustomers` and `dispatchorders`, an INT on `packingslips` and `packingslipdos`.** ⚠ A strict comparison across the two can fail silently.
+```
+grep -rn "mintekfoodsafety\|abletrace.ca" ~/abletrace-lab-frontend/src/environments/ 2>/dev/null
+```
 
----
+```
+grep -rn "UI_Base_Url\|APP_BASE_URL" ~/abletrace-lab-backend/config/ 2>/dev/null
+```
 
-### The analysis
+### Material measured in S141
 
-**Why this goes before the importer.** The importer creates client companies. Creating several companies on a platform that cannot keep them apart builds the problem at scale rather than fixing it. Fixing it now costs a session on an empty platform; fixing it later means changing authorization underneath live client data, where any mistake is visible to customers.
+**`config/env/development.js` already reads its base URL from the environment.** Measured by:
+```
+git -C ~/abletrace-lab-backend diff 99852bf..cf7722d -- config/env/development.js
+```
+which returned the line becoming `(process.env.APP_BASE_URL || 'https://dev.mintekfoodsafety.com') + '/'`. ⚠ **Whether prod's `production.js` does the same is UNMEASURED.**
 
-**Why this goes before any client.** A recipe is a client's trade secret. A food manufacturer seeing a competitor's formulations through the platform is not a bug report — it ends that relationship and probably the others. There is no version of that recovered by patching afterwards.
+**Email already sends from `info@abletrace.ca`** — same diff, `fromEmail` line. The sending domain is already the target; the serving domain lags.
 
-**The pattern already exists in the codebase and is proven.** QuickBooks: Intuit's token is bound to one realm, and the caller cannot ask for a different one. Identity and scope travel together, and the caller never states the scope. ⚠ **P245 Phase 3 needs exactly this too** — both transaction routes and the status route currently use a hardcoded `sandbox260820`, and NOW has recorded since S129 that the company must come from the session. **P250 unblocks that at the same time.**
-
-**Why "harmless today" was the right call and is no longer.** With one client's data the flaw has nothing to reach. Minty's decision S140 to take several clients is what changes it.
-
-**What Claude got wrong in S140, worth carrying.** Claude applied the rule 7 unit discipline to a seed value the client edits on day one. ⚠ **Minty's ruling S140: rule 7 governs figures the running app computes, not data being loaded in.** Do not over-apply it in the importer either.
-
----
-
-### The verify
-
-S141 is done when:
-
-1. The discovery block has been run and the one-layer question is answered **in writing**.
-2. A user's company is read from the database at login and held in the session.
-3. A request that carries a different `company_id` in its body returns **that user's own company's data, or nothing** — not the requested company's.
-4. The attack test exists, runs against every route, and passes.
-5. Proven **on the screen** on dev, then prod. ⚠ **Deployed is not proven.**
-
-⚠ Item 3 is the whole point. Items 1–2 are the build. Item 4 is what makes it something you can tell a client.
+**Addresses** — dev `16.55.10.205` (`172.31.1.196` internal), prod `15.157.38.101` (`172.31.3.156` internal). Read from every S141 command block.
 
 ---
 
-## CARRIED — S142: THE CLIENT ONBOARDING IMPORTER
+## CARRIED — S144: THE QUICKBOOKS TOKEN AND TILE DESIGN
+
+**Minty's ruling S141.** Settles a question that has been open since the tile was built.
+
+### Why the token expires — it is Intuit's design, not ours
+
+The **access token lives about an hour**. Short by design: a stolen one is useless quickly. It cannot be held open.
+
+Alongside it sits a **refresh token**, good for roughly a hundred days, whose only job is to obtain a fresh access token. ⚠ **It rotates — each use issues a new one and kills the old.** That is why it lives in a database row and not in `.env`, and why `quickbooksService` has two race guards.
+
+### The ruling
+
+**Refresh on demand, server-side, invisible.** The send route refreshes if the token is stale, immediately before calling Intuit. No timer, no cron entry, no screen visit.
+
+⚠ **Rejected: a scheduled refresh.** A timer is a moving part that can stop silently. On-demand cannot drift, because nothing else uses the token.
+
+⚠ **This replaces the manual workaround in TRAPS** — "load the QuickBooks page in Chrome first, that page refreshes and writes back." **That trap is retired the moment this is built.**
+
+### The tile
+
+**Kept, and client-facing.** It answers the client's own question: is my accounting linked?
+
+- **Connected / not connected status**, read **live from Intuit**, never from our own row. ⚠ **A row can hold a revoked connection and look fully populated.** The S134 status route already does this.
+- **Connect** and **Disconnect**. ⚠ **Intuit requires a disconnect URL regardless of the App Store question.**
+- **Reconnect** where the connection is dead, going through Intuit properly.
+
+⚠ **No refresh button.** It implies the client keeps the connection alive, and they do not — the server does. A button that usually does nothing teaches people to press it when something else is wrong.
+
+### S141's decisions on the approval, carried
+
+1. **No QuickBooks App Store listing.** ⚠ **Conditional on reading Intuit's own current wording first.** If production keys turn out to require a listing, re-scope.
+2. **Minty is the named privacy officer.**
+3. **Minty drafts the privacy policy from a skeleton, then a lawyer finalises it.** The Terms of Service were drafted by a lawyer and are sound. ⚠ **Write facts, not law** — who receives the data, where it lives, what happens on a breach, who is accountable, and the difference between Mintek's own users and data held for a client.
+4. **The skeleton is the first deliverable**, and it runs in parallel with everything else because the lawyer's turnaround is the long pole.
+
+---
+
+## CARRIED — THE CLIENT ONBOARDING IMPORTER (P262)
+
+⚠ **Outranked by the domain move, not dropped. Homework intact.**
 
 ⚠ **Do not reopen S140 to recover this.** Everything measured is below.
 
@@ -303,7 +325,9 @@ mysql -N -B -e "SELECT COUNT(DISTINCT title), COUNT(DISTINCT internalCode), COUN
 
 ---
 
-## CARRIED — S143: AUDIT THE OLD AWS ACCOUNT
+## CARRIED — OLD AWS ACCOUNT: THE S139 MATERIAL
+
+⚠ **Supporting material for S142 above. Partial — NOT an inventory. Do not mistake it for coverage.**
 
 ⚠ **Carried whole from the S139 close. Do not reopen S139 or S140 to recover it.**
 
@@ -445,33 +469,95 @@ The most likely place the cleanup goes wrong: abletrace.ca DNS records pointing 
 
 ---
 
-## WHAT S140 CHANGED
+## WHAT S141 CHANGED
 
-**P261 done.** Mava's master data exported and delivered as `Mava-Foods-master-data.xlsx`, checked on screen by Minty.
+**P250 done, dev and prod.** `api/policies/isAuth.js`, commit `cf7722d`. The policy looks the user up in `company_users` and rewrites `req.body.company_id`, which covers 165 controller sites without editing one of them. Url and query values are compared and refused rather than rewritten. Super admin is exempt.
 
-**Nothing written to any database. No code changed. No deploy. Neither box restarted.**
+**Six columns added to prod by hand** — `companycustomers.external_id`, and five `qb_*` on `packingslips`. Definitions read off dev, read back on prod, identical.
 
-**The queue was reordered by Minty:** P250 to the front, importer second, AWS audit third.
+**`quickbooks_tokens` created on prod by hand.** Empty, and should stay empty until Phase 3.
 
-**Rule 7's scope was clarified by Minty** — it governs figures the running app computes, not seed data being loaded.
+**Prod backend moved `99852bf` → `cf7722d`**, carrying the whole QuickBooks chain with P250.
+
+**The first automated test exists** — `attack-test-s141.sh`, eight checks, 8/8 on dev. ⚠ **It has NOT been run against prod.** Running it needs two prod companies with different row counts, which was never measured.
 
 ---
 
-## THINGS THAT COST TIME IN S140
+## WHAT S141 MEASURED — the app's authorization shape
 
-**Claude accepted an absence instead of looking.** No table matched `%uppl%` or `%endor%`, and Claude was one step from concluding suppliers were never tracked. A full table list found `companyagents` immediately. ⚠ **An absence is a weaker finding than a presence — check it a second way.**
+Each with the command that measured it.
 
-**Claude guessed `uom` was text.** It is a foreign key to a per-company table, so the first export printed `642` and `635` where Kg and Ea belonged. Caught only because Minty read the file on screen. ⚠ **Deployed is not proven; exported is not correct.**
+**One shared layer.** `config/policies.js` has `'*': 'isAuth'`. Public actions are login and password reset only, plus `QuickbooksController.callback`.
+```
+cat ~/abletrace-lab-backend/config/policies.js
+```
 
-**Claude added six columns to an agreed format without saying so.** Minty approved five columns and got eleven. ⚠ **Additions need saying out loud, even good ones.**
+**165 body sites, 16 `params.company_id`, 1 `query.company_id`, 43 `companyId`.**
+```
+grep -rn "body.company_id" ~/abletrace-lab-backend/api --include=*.js | wc -l
+grep -rno "query.company_id\|params.company_id\|companyId\|company_Id" ~/abletrace-lab-backend/api --include=*.js | sed 's|.*:||' | sort | uniq -c
+```
 
-**Two counts disagreed and the discrepancy was real information.** 139 distinct recipe names against 170 products with recipes looked like a dropped join; it was duplicate titles. ⚠ **RULES: when a measurement and a memory conflict, find a third measurement.**
+**13 routes carry a company in the URL** — 10 spelled `:company_id`, 3 `:companyId`, all Traceability.
+```
+grep -n "company_id" ~/abletrace-lab-backend/config/routes.js
+grep -n "companyId" ~/abletrace-lab-backend/config/routes.js
+```
+
+**One token mint.** `generateJWT` has exactly one caller, `api/models/User.js:9`. Login is `POST /api/v1/User/loginUser`, fields `username` and `password` (`User.js:430-431`).
+```
+grep -rn "jwt.sign" ~/abletrace-lab-backend/api ~/abletrace-lab-backend/config --include=*.js
+```
+
+**Super admin is `user_id 1`, `info.abletrace@gmail.com`, with zero rows in `company_users`.** No user belongs to more than one company.
+```
+mysql -N -B -e "SELECT s.user_id, u.email, (SELECT COUNT(*) FROM abletracelab_live.company_users c WHERE c.user_id=s.user_id) FROM abletracelab_live.super_admin s JOIN abletracelab_live.user u ON u.id=s.user_id;"
+```
+
+**Dev's app database is `abletracelab_live`**, not `abletrace-dev`.
+```
+grep DATABASE_URL ~/abletrace-lab-backend/.env | sed 's|.*/||'
+```
+
+**Test identities for the attack test, dev:**
+| | user | company | materials |
+|---|---|---|---|
+| A | `test_glutenull_260701@mailinator.com` | 466 | 63 |
+| B | `test_truffle260719c@mailinator.com` | 473 | 47 |
+```
+mysql -N -B -e "SELECT company_id, COUNT(*) FROM abletracelab_live.materials GROUP BY company_id ORDER BY 2 DESC;"
+```
+
+**No route passes `req.body` wholesale into a query**, so injecting a key cannot add a filter.
+```
+grep -rn "find(req.body)\|findOne(req.body)\|create(req.body)\|update(req.body)\|\.where(req.body)" ~/abletrace-lab-backend/api --include=*.js
+```
+
+---
+
+## THINGS THAT COST TIME IN S141
+
+**Claude wrote a check that could not fail.** A `grep -l` piped to `uniq -c` was meant to show how concentrated the 165 hits were; `-l` lists each file once, so every count was 1. It reported nothing and looked like an answer. ⚠ **RULES: say what result would distinguish the two answers before running it.**
+
+**Claude designed a fix that leaned on an untested assumption.** The first design overwrote `req.body`, `req.params` and `req.query` alike. Express rebuilds `req.params` between routing layers, so that half could have failed silently. The design was changed to compare-and-refuse for the URL, leaving one load-bearing assumption instead of two — and the attack test was written so that assumption's failure would show as a 200 instead of a 403.
+
+**Claude nearly wrote a column definition from memory.** The six QuickBooks columns were added by hand on dev in an earlier session. They were read off dev before being written to prod. ⚠ **RULES: never rebuild a measurement to fit a memory.**
+
+**A grep for a table looked for the wrong name.** `quickbookstoken` was inferred from the model filename; the table is `quickbooks_tokens`. The model file named it correctly and was read before creating anything.
 
 ---
 
 ## TRAPS CARRIED FORWARD — all look like broken code
 
-⚠ **`company_id` comes from `req.body` on every route.** Until P250 lands, any logged-in user can read or write another company's data with Chrome's developer tools.
+⚠ **`isAuth` now rewrites `req.body.company_id` on every authenticated request.** A controller reading it is reading the SERVER's value, not the client's. **Sending a different one has no effect and is not a bug.**
+
+⚠ **A URL or query carrying another company returns 403 "Company mismatch".** That is P250 working, not a broken route.
+
+⚠ **Eleven `Object.keys(req.body).length > 0` guards are now always true**, because `company_id` is always injected. Harmless today — the frontend never sends an empty body. → P266
+
+⚠ **The QuickBooks tile does not exist on prod.** Prod's frontend was not deployed and the routes are dormant on purpose. **Not a fault.**
+
+⚠ **A 400 on a guarded route proves nothing about the route.** `isAuth` returns 400 for four reasons, all before the controller runs.
 
 ⚠ **A 400 on a guarded route proves nothing about the route.** `isAuth` returns 400 for four reasons, all before the controller runs.
 
@@ -505,7 +591,7 @@ The most likely place the cleanup goes wrong: abletrace.ca DNS records pointing 
 
 **`CustomTxnNumbers: true` returns a blank document number with no error at all.**
 
-**The QuickBooks access token expires in hours.** Load `dev.mintekfoodsafety.com/quickbooks` in Chrome first — that page refreshes and writes back.
+**The QuickBooks access token expires in hours.** Load `dev.mintekfoodsafety.com/quickbooks` in Chrome first — that page refreshes and writes back. ⚠ **Retired the moment on-demand refresh is built — see the S144 section.**
 
 ⚠ **`mysql2` is not a dependency.** `require('mysql2/promise')` fails. Use a shell variable.
 
@@ -529,9 +615,10 @@ Minty ranks. Claude never renumbers.
 
 | # | item |
 |---|---|
-| P250 | **S141. Authorization is enforced by the screen, not the server.** ⚠ **Minty's ruling S140: complete rebuild, ahead of the importer and ahead of any client.** Full spec above |
-| P262 | **S142. Client onboarding importer — complete rebuild.** ⚠ **Minty's ruling S140: several clients coming, must be robust, no constraint to preserve the existing template.** Mava is the pilot. Full spec above |
-| P263 | **S143. Audit the old AWS account.** Carried whole from S139 with its material intact. Full spec above |
+| P263 | **S142. Audit and disconnect the old AWS account, one dependency at a time.** ⚠ **Minty's ruling S141: FIRST, ahead of the domain move.** Keep SES and Route 53. ⚠ **Write the exhaustive scan at the top of the session — S141 deliberately did not.** Full spec above |
+| P265 | **S143. Move the app to `abletrace.ca`.** ⚠ **Waits on P263 — Route 53 is in the old account.** Full spec above |
+| P262 | **Client onboarding importer — complete rebuild.** ⚠ **Minty's ruling S140: several clients coming, must be robust, no constraint to preserve the existing template.** Mava is the pilot. Full spec above |
+| P267 | **S144. QuickBooks production approval.** Brief is a separate file Minty holds. ⚠ **No App Store listing, conditional on step 1.** First deliverable is the privacy policy skeleton. **Token refreshes on demand server-side; tile keeps status, Connect and Disconnect; no refresh button** |
 | P17 | **Two old-account IAM keys still valid and in git history.** The old account is load-bearing for email |
 | P8 | Prod git checkout lags the served build — read rollback path off the box |
 | P210 | Prod to Node v24. Dev has run v24 cleanly for several sessions |
@@ -539,21 +626,24 @@ Minty ranks. Claude never renumbers.
 | P227 | Dev backend `node_modules.old-node18/` — deliberate, untracked |
 | P240 | The app cannot tell anyone a send failed. Overlaps P257 |
 | P241 | Quarterly security audit, five named checks |
-| P245 | QuickBooks — **Phase 2 core DONE and proven.** Four failure-handling items remain. ⚠ **Phase 3 is blocked on P250** |
+| P245 | QuickBooks — **Phase 2 core DONE and proven.** Four failure-handling items remain. ⚠ **P250 is done, so Phase 3 is UNBLOCKED.** The hardcoded `sandbox260820` can now become `req.companyId` |
 | P246 | `User.creatSuperAdmin` hardcodes password `"12345678"`. `api/models/User.js:98`. Fold into P241 |
-| P247 | **App JWTs never expire.** `api/policies/generateJWT.js`, no `expiresIn`. ⚠ **Touch it in S141 — the same file is being rebuilt** |
+| P247 | **App JWTs never expire.** `api/policies/generateJWT.js`, no `expiresIn`. ⚠ **NOT done in S141 — `generateJWT.js` was never touched. Still open** |
 | P248 | **OS updates.** Prod 59 pending / 12 security. Dev 22+. Both report "system restart required" |
 | P249 | **Typing any URL logs the user out.** `auth.guard.ts` reads the NGRX store, memory only |
 | P251 | GitHub warns Node.js 20 actions are deprecated |
 | P252 | **External ID duplicate guard, customers and products.** ⚠ `editCustomer` has no duplicate check at all |
 | P253 | **No SSH host aliases.** Two lines in `~/.ssh/config`. dev `16.55.10.205`, prod `15.157.38.101` |
 | P254 | **A sales order cannot be edited once created.** Business question |
-| P256 | **Dev home is full of dead build folders**, ~50 back to S63. ⚠ **Keep the live rollback and one prior.** ⚠ **Add: `.env.bak-s139` on BOTH boxes — do not delete until the S139 keys are proven stable.** ⚠ **Add: prod `mava-export.sh`, `mava-export-2.sh`, `mava-export-260826/` — spent, delete in S141** |
+| P256 | **Dev home is full of dead build folders**, ~50 back to S63. ⚠ **Keep the live rollback and one prior.** ⚠ **Add: `.env.bak-s139` on BOTH boxes — do not delete until the S139 keys are proven stable.** ⚠ **Add: prod `mava-export.sh`, `mava-export-2.sh`, `mava-export-260826/` — spent, NOT deleted in S141, still there** |
 | P257 | **Automated bounce and complaint handling.** ⚠ **Required for any SES re-application.** Overlaps P240 |
 | P258 | **Two test companies exist and cannot be deleted.** `testses260825a` dev, `testsesprod260825` **prod**. ⚠ **Set Inactive through the app, Super Admin → License and Billing — NOT by SQL** |
 | P259 | **One IAM key serves both boxes.** ⚠ **Minty's ruling S139: separate eventually, not now.** Fold into a session already editing `.env`. **Dev first, prove a send, leave prod on the working key** |
 | P260 | **Old-account IAM users that should not exist.** `Bobby1` — console access, 734 days idle. `abletracelab-ses-smtp-s35` — plausibly still wired into something. ⚠ **Ask what still points at this, first.** ⚠ **Deactivate a key before deleting it** — deactivation is reversible |
-| P264 | **No automated tests anywhere.** Raised S140 while sizing P250. The attack test built in S141 is the first one; it should not be the last |
+| P266 | **Eleven dead `Object.keys(req.body)` guards**, always true since P250 injects `company_id`. Harmless; do not touch casually |
+| P268 | **The QuickBooks tile's visibility gate is not in `src/app/Layouts`.** A grep there returned nothing. Matters when the screen must work for real clients |
+| P269 | **Two stored procedures are built by string interpolation.** `Materials.js:137` and `Hazards.js:224`. Found S141, not fixed |
+| P264 | **No automated tests anywhere.** Raised S140 while sizing P250. The attack test built in S141 is the first one; it should not be the last. ⚠ **It has never been run against prod** |
 | — | **`role_task` id 24 — QuickBooks under the Admin role.** Minty's convention S135: admin reaches QuickBooks by holding the QuickBooks Controller role |
 | — | **Materials may have the same quoting fault.** `Materials.js:380` and `:790` use `myCode`; still not checked |
 | — | Section_3B.md rewrite. Verdict: replace whole. ~430 lines unread |
@@ -564,7 +654,7 @@ Minty ranks. Claude never renumbers.
 
 **Minty's ruling S139:** keep SES **and Route 53** in the old account. Everything else is a candidate.
 
-**Minty's ruling S140:** P250 and the importer come before the estate work. **Client readiness outranks tidiness.**
+**Minty's ruling S141:** P250 is done. The order is now **audit and disconnect the old account (S142), then the domain move (S143), then QuickBooks (S144)**. The audit comes first because Route 53 lives in the old account and the move stands on it.
 
 ⚠ **The abletrace.ca move has two reasons.** One app rather than two, and sending domain matching link domain.
 
@@ -572,12 +662,12 @@ Minty ranks. Claude never renumbers.
 
 **Clients do not get sandboxes.** Each client clicks Connect, signs in, approves, and gets a row in `quickbooks_tokens` under their company name. The company column was added S129.
 
-⚠ **The company must come from the logged-in session, never a parameter.** Both transaction routes and the status route use a hardcoded `sandbox260820`. ⚠ **P250 unblocks this.**
+⚠ **The company must come from the logged-in session, never a parameter.** Both transaction routes and the status route use a hardcoded `sandbox260820`. ⚠ **P250 is DONE — `req.companyId` now exists on every authenticated request. This is a small change, not a campaign.**
 
 **Also at Phase 3**
 - Intuit **production** keys. They never appear in chat.
 - The API base **host** changes — production is `quickbooks.api.intuit.com`, which returns 403 to a sandbox token.
-- Schema changes run on prod **separately**. ⚠ **Including the five `qb_*` columns and `companycustomers.external_id`, dev only.**
+- ~~Schema changes run on prod separately.~~ **DONE S141.** All six columns and `quickbooks_tokens` exist on prod, read back and verified.
 - **Role and task rows through the UI on prod, not by SQL.**
 - A **Reconnect URL** is mandatory in Intuit app settings as of Feb 2026.
 - ⚠ **Custom transaction numbers is per-client.**
