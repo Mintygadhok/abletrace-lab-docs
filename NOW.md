@@ -1,169 +1,197 @@
 # NOW
 
-Rewritten whole at the close of S141.
-Read RULES.md and this file. Nothing else at the open.
+Rewritten whole at the close of **S142**.
 
-**S141 fixed P250.** The server now decides which company a request may touch. Written, tested, proven on screen, committed, pushed, and live on prod with its database prepared. **Done, both boxes.**
-
-**S142 audits the old AWS account and disconnects it, one dependency at a time.** ⚠ **Minty's ruling S141: the audit comes FIRST, before the domain move, because Route 53 lives in the old account and the move stands on it.** Keep SES and Route 53 untouched. Everything else is checked and test-disconnected.
-
-**S143 moves the app to `abletrace.ca`**, on ground that is by then understood.
-
-**S144 is the QuickBooks production approval.** Its brief is a separate file Minty holds, `QB-PRODUCTION-BRIEF.md`, updated by S141's decisions below.
-
-⚠ **The importer (P262) is specified below with its homework intact and has NOT been dropped — only outranked.**
+The open check measures commits, process, port, runtime and dirty trees. Nothing here repeats it. This carries only what no command returns.
 
 ---
 
 ## STATE
 
-What no command returns. Everything a command returns is measured by the open check.
+**S142 was the old-account audit (P263). It is complete as an audit and partially complete as a disconnection.**
 
-**P250 is complete on both boxes.** Not partial, nothing half-applied, nothing awaiting a follow-up.
+An exhaustive read-only scan of old account `350466202408` was written, uploaded to CloudShell and run across all 17 opted-in regions. Two files were produced and downloaded: `abletrace260828-oldacct-FULL.txt` (4,813 lines) and `abletrace260828-oldacct-SUMMARY.txt` (237 lines). Every finding below was measured this session from inside the account.
 
-**The QuickBooks backend chain is on prod and deliberately dormant.** Prod pulled `99852bf..cf7722d`, which carried the whole QuickBooks chain along with P250 — there was no way to take one without the other. The routes are live but unreachable: no prod company is connected, `quickbooks_tokens` is empty, and prod's **frontend was not deployed**, so the QuickBooks tile does not exist on prod. **This is intended. Do not "fix" the missing tile.**
+**Deliberate, done, verified:** six IAM console passwords deleted, each confirmed `NoSuchEntity` immediately after. Two of them held `AdministratorAccess`. **The only way into the old account is now root, which has MFA (`AccountMFAEnabled = 1`).**
 
-**Prod's frontend is deliberately behind.** Prod serves `9bce0238`. Dev is `c2a52d8e`. No frontend deploy was made in S141 because none was needed.
+**Deliberate, NOT done:** no key was touched, no data-bearing resource was touched, SES and Route 53 were not touched. All five access keys confirmed `Active` after the password work.
 
-**Three spent Mava export items on prod are still there** — `mava-export.sh`, `mava-export-2.sh`, `mava-export-260826/`. S141 did not reach them. Part of P256.
+**Nothing is half-applied.** No resource was deleted this session.
 
-**`node_modules.old-node18/` untracked on dev backend is deliberate.** P227.
-
----
-
-## THE JOB — S142: AUDIT AND DISCONNECT THE OLD AWS ACCOUNT
-
-**Old account `350466202408`.** New account `208073623096`.
-
-⚠ **THE FIRST ACT OF S142 IS TO WRITE THE SCAN, NOT TO RUN ONE.** S141 closed under RESERVE and deliberately did NOT write an exhaustive scan, because a thin one would give false confidence. **Minty's ruling S141.** The requirements are below; the command set is built at the top of S142 with fresh capacity.
-
-⚠ **Nobody has ever listed every resource in this account.** What follows from S139/S140 is a handful of findings, not an inventory. **Do not treat it as coverage.**
-
-### The target
-
-Every element in the old account examined, and every one except SES and Route 53 **test-disconnected** — so that S143 can move the domain without standing on unmeasured ground.
-
-### The hard keep-list
-
-⚠ **SES and Route 53 are NOT touched.** Minty's ruling S139, restated S141.
-
-- **SES** — the app's only working email path. Old account, domain `abletrace.ca`, sender `info@abletrace.ca`, IAM user `abletrace260825-ses-sender`, send-only. Restored S139.
-- **Route 53** — zone `Z0710124HPIPA4X553D7` for `abletrace.ca`. ⚠ **S143's domain move depends on this. Breaking it blocks the next two sessions.**
-
-**The old account is being TRIMMED, not torn down.**
-
-### What the scan must cover
-
-Exhaustive means every service, not the remembered ones. At minimum:
-
-- **IAM** — users, roles, groups, policies (managed and inline), access keys **with last-used dates**, console access, MFA
-- **EC2** — instances, volumes, snapshots, AMIs, security groups, key pairs, **Elastic IPs**
-- **S3** — buckets, bucket policies, public access settings, static website hosting
-- **RDS** — instances, snapshots (manual and automated), parameter groups
-- **Route 53** — zones and **every record in each** ⚠ read-only in this session
-- **ACM** — certificates and what they are attached to
-- **CloudFront, Lambda, SNS, SQS, CloudWatch** — alarms, log groups, rules, schedules
-- **SES** — identities, sending config, suppression list ⚠ read-only
-- **Billing / Cost Explorer** — ⚠ **do not skip.** It is the only view that lists what is alive without needing to know it exists, and it catches services nobody remembers enabling.
-
-### The question asked of every resource
-
-⚠ **RULES §2.** Before disconnecting or releasing anything, ask **what still points at this?** and answer it by looking, in four places:
-
-**DNS records · credentials · other AWS settings · accounts outside AWS**
-
-⚠ **A code search cannot find these.** Nothing in the code names an Elastic IP, a bucket or a policy. That is exactly why they were left behind, and why this is console work.
-
-### The order
-
-1. **Scan everything first.** Change nothing.
-2. **Sort into three piles** — keep (SES, Route 53), disconnect, and **unknown**. ⚠ **Unknown means scan again, never guess.**
-3. **One dependency at a time.** Pointer first, resource second. Prove each before starting the next.
-4. **Deactivate before deleting** where the service allows it — deactivation is reversible, deletion is not. Applies to IAM keys especially.
-5. **Nothing released that something still points at.**
-
-### What is already known — partial, NOT an inventory
-
-Each with its source session. ⚠ **Treat as a starting list, not coverage.**
-
-- **`Bobby1`** — IAM user, console access, 734 days idle. S139. → P260
-- **`abletracelab-ses-smtp-s35`** — IAM user, plausibly still wired into something. S139. ⚠ **Ask what points at it first.** → P260
-- **Two old-account IAM keys still valid and in git history**, deliberately. S138. → P17
-- **`abletrace260825-ses-sender`** — the live SES sender. **KEEP.** S139.
-- **Route 53 zone `Z0710124HPIPA4X553D7`** — `abletrace.ca`. **KEEP.** S139.
-
-### Verify
-
-- A written inventory of every service in the old account exists, produced this session.
-- Every resource is in exactly one of the three piles, with no resource unaccounted for.
-- Everything outside the keep-list is test-disconnected, each proven separately.
-- SES still sends and Route 53 still resolves, checked on screen at the close.
-
-### The lesson this job exists to honour
-
-⚠ **The subdomain takeover.** IPs were released before DNS was audited, and for a period a name Mintek owned pointed at something Mintek did not. **The pointer goes first, the resource second. Never the reverse.**
+⚠ **Minty's ruling S142: protect the data of the four old clients for some time yet.** Every data-bearing resource in the old account stays until he says otherwise. The account is being reduced by removing *access* and *pointers*, not storage.
 
 ---
 
-## CARRIED — S143: MOVE THE APP TO `abletrace.ca`
+## THE JOB — S143: PREPARE AND PROVE `abletrace.ca` ON THE NEW SERVER
 
-⚠ **Waits on S142.** Route 53 is in the old account, so the move stands on the audit being done.
+**Nothing public changes in S143.** At its close the new server is fully ready to answer for `abletrace.ca` and the old site is still live. The DNS switch is S144.
 
-### The action
+### The action, in order
 
-1. **Discovery** — the block below, read-only, one paste.
-2. **Design in prose** before touching anything: which names point where now, which must move, in what order.
-3. **Dev first.** DNS, certificate, Nginx, the frontend's API base. Prove on screen.
-4. **Prod second, same session.**
-5. **Terms and privacy served from the new domain** — their URLs go to Intuit and must be stable before S144.
+1. **Add the names to nginx on prod.** Add `abletrace.ca` and `www.abletrace.ca` to `server_name`, **keeping** `trace.mintekfoodsafety.com` and `mintekfoodsafety.com`. Reload nginx.
+2. **Test privately.** Add `15.157.38.101 abletrace.ca` to `/etc/hosts` on the Mac. The browser then reaches the new server by the real name while the public still sees the old site. Test login, dashboard, uploads, email send.
+3. **Check the frontend API URL and backend CORS.** If either is hardcoded to `mintekfoodsafety.com`, the page loads at the new name and every API call fails. ⚠ **This is the item most likely to turn into a frontend rebuild and deploy — size it early.**
+4. **Issue the certificate by DNS-01.** Certbot writing a TXT record into the Route 53 zone in the **old** account.
+5. **Lower the TTL** on `abletrace.ca` and `www.abletrace.ca` to 60 seconds. This is the rollback speed for S144.
 
-### The discovery block
+### ⚠ The certificate trap — the one thing that would have bitten on the day
 
-Read-only.
+Certbot's ordinary method proves ownership by serving a file at `http://abletrace.ca/.well-known/...`. **That name resolves to CloudFront today, not to `.101`, so the check fails until DNS has already changed.** The certificate cannot be pre-issued that way.
 
-```
-dig +short abletrace.ca
-dig +short www.abletrace.ca
-dig +short trace.mintekfoodsafety.com
-dig +short dev.mintekfoodsafety.com
-```
+**Use DNS-01 instead** — Certbot writes a TXT record into the Route 53 zone and never needs the name to point anywhere. It works before cutover. The alternative is to change DNS first and issue the cert immediately after, accepting a window of HTTP-only service; that is worse.
 
-```
-ls -1 /etc/nginx/sites-enabled/
-```
+### Material — measured S142
 
-```
-grep -rn "server_name\|ssl_certificate\|proxy_pass" /etc/nginx/sites-enabled/ /etc/nginx/sites-available/ 2>/dev/null
-```
+| fact | measured by | returned |
+|---|---|---|
+| Zone id | `aws route53 list-hosted-zones` | `/hostedzone/Z0710124HPIPA4X553D7`, `abletrace.ca.`, 20 records |
+| Site records | `aws route53 list-resource-record-sets --hosted-zone-id /hostedzone/Z0710124HPIPA4X553D7` | `abletrace.ca. A` → alias `d1gnzid0cfbv78.cloudfront.net.`; `www.abletrace.ca. A` → same alias |
+| Old API record | same command | `prodapi.abletrace.ca. A → 3.98.223.126` |
+| CloudFront | `aws cloudfront list-distributions` | `E311W5PD650CXV`, `d1gnzid0cfbv78.cloudfront.net`, origin `abletrace-prod1.s3.amazonaws.com`, aliases `abletrace.ca` + `www.abletrace.ca`, **Enabled** |
+| What `3.98.223.126` is | `aws ec2 describe-addresses --region ca-central-1` | Elastic IP `eipalloc-0c92c5288b99c278c`, assoc `eipassoc-01988cbd8041a381e`, eni `eni-084ab74cc3169b555`, attached to `i-088b7969158c43bca` |
+| The old instance | `aws ec2 describe-instances --region ca-central-1` | `i-088b7969158c43bca`, t3.small, **running**, launched 2026-07-07 |
+| Old site contents | `aws s3 ls s3://abletrace-prod1 --recursive --summarize` | 227 objects, 20,169,545 bytes — hashed Angular chunks + `assets/` |
+| New app serves the marketing site | Chrome, `https://trace.mintekfoodsafety.com` and `https://dev.mintekfoodsafety.com` | **Both show Home / Features / Testimonials / Contact Us / Login** — identical to `abletrace.ca` |
+| Why it does | `grep -rn "path: ''" ~/abletrace-lab-frontend/src/app/app-routing.module.ts` then `sed -n '1,50p'` | first `path: ''` loads `./home/home.module` → `HomeModule`, ahead of the dashboard shells |
+| nginx names on `.101` | Minty's ChatGPT audit note 1, not re-measured | `trace.mintekfoodsafety.com`, `mintekfoodsafety.com` — **`abletrace.ca` absent**. Docroot `/var/www/html`, proxies to `localhost:1337` |
+| **No SPF record exists** | the 20-record dump above | apex TXT is the Zoho verification string only. No `v=spf1` anywhere in the zone |
 
-⚠ **`grep -r` on nginx skips symlinks.** An empty result does not mean no config exists — TRAPS.
+### The eighteen records that must not be touched
 
-```
-sudo certbot certificates 2>/dev/null || ls -1 /etc/letsencrypt/live/ 2>/dev/null || echo NO_CERTBOT
-```
+Zoho `MX 10 mx.zoho.com` · apex TXT `zoho-verification=zb15310048...` · `zmail._domainkey` TXT · **8 SES DKIM CNAMEs** (`*._domainkey.abletrace.ca` → `*.dkim.amazonses.com`) · `_amazonses.abletrace.ca` TXT · `_dmarc` TXT (`p=none`, `adkim=r`, `aspf=r`) · two ACM validation CNAMEs · NS · SOA.
 
-```
-grep -rn "mintekfoodsafety\|abletrace.ca" ~/abletrace-lab-frontend/src/environments/ 2>/dev/null
-```
+⚠ **Only the two site records change, ever.** Email breaks silently if the others are disturbed.
 
-```
-grep -rn "UI_Base_Url\|APP_BASE_URL" ~/abletrace-lab-backend/config/ 2>/dev/null
-```
+### Analysis — what S142 settled so S143 does not reopen it
 
-### Material measured in S141
+**`abletrace.ca` is not a parked domain and not a brochure site.** It is the old AbleTrace Angular app, whose root route is the marketing site (Home, Features, Testimonial, Contact Us, Login). Proven on screen.
 
-**`config/env/development.js` already reads its base URL from the environment.** Measured by:
-```
-git -C ~/abletrace-lab-backend diff 99852bf..cf7722d -- config/env/development.js
-```
-which returned the line becoming `(process.env.APP_BASE_URL || 'https://dev.mintekfoodsafety.com') + '/'`. ⚠ **Whether prod's `production.js` does the same is UNMEASURED.**
+**The new app has exactly the same shape** — same marketing pages at the root, login at `/login`, dashboards behind `AuthGuard`. Proven on screen at both `trace.` and `dev.mintekfoodsafety.com`, and in `app-routing.module.ts`.
 
-**Email already sends from `info@abletrace.ca`** — same diff, `fromEmail` line. The sending domain is already the target; the serving domain lags.
+**Therefore the cutover loses nothing and needs nothing built.** S143 is a domain move, not a cutover of function. This was the open question at the start of S142 and it is closed.
 
-**Addresses** — dev `16.55.10.205` (`172.31.1.196` internal), prod `15.157.38.101` (`172.31.3.156` internal). Read from every S141 command block.
+⚠ **AbleTrace still has no page explaining itself to a stranger beyond those four tabs.** That is a marketing gap, not an infrastructure one, and it does not block anything.
+
+**There is no SPF record for the domain.** Mail works because DMARC is `p=none` with relaxed alignment and both senders publish DKIM — Zoho at `zmail._domainkey`, SES via the 8 CNAMEs. ⚠ **Adding SPF is an improvement, not a repair, and belongs in its own session.** Minty's ChatGPT note 3 assumes an SPF record exists and asks for it to be preserved; there is nothing to preserve, and inventing one during a cutover could break mail that currently works.
+
+**The zone is not moving.** Notes 1 and 3 both plan around reproducing records at a replacement DNS provider. Route 53 in the old account is on the permanent keep-list, so that sequence is not needed.
+
+### Verify — S143 is done when
+
+- `curl -I https://trace.mintekfoodsafety.com` still returns 200 — **the existing site was not broken**
+- With the `/etc/hosts` line in place, `https://abletrace.ca` in Chrome loads the new app, login works, an email sends
+- `certbot certificates` on prod lists a certificate covering `abletrace.ca` and `www.abletrace.ca`
+- The two site records show TTL 60 in Route 53
+- **`dig abletrace.ca` from a machine without the hosts entry still returns the CloudFront alias** — the public has not moved
 
 ---
 
+## THE THREE-SESSION SHAPE
+
+**S143 — prepare and prove.** Steps 1–5 above. Nothing public changes.
+**S144 — cut over.** Change the two records to A → `15.157.38.101`. Verify on screen. Short session, high stakes, no second job in it. ⚠ **Update the QuickBooks redirect URI in the Intuit developer app in the same session — the OAuth callback breaks otherwise, even in sandbox.**
+**S145 — retire.** A week after the new name is stable: CloudFront, the instance, the Elastic IP, the volume, `abletrace-prod1`, the `prodapi` record. Pointer first, resource second.
+
+⚠ **The TTL wait is why S143 and S144 cannot merge.** The old TTL must expire before a 60-second TTL means anything.
+
+**QuickBooks production approval (P267) comes after the domain move.** The launch URL and privacy policy URL are declared to Intuit; declaring `mintekfoodsafety.com` and then moving means going back mid-review.
+
+---
+
+## THE OLD ACCOUNT — DISPOSITION
+
+Measured S142. ⚠ **Nothing on this list has been deleted.**
+
+### Goes safely — nothing points at these
+
+`abletrace-development1` · `stgapifrontend` · `abletrace-frontend1` · `ftp-transfer-abletrace` (empty) · 3 Lambda functions · 1 API Gateway REST API · 6 CloudWatch log groups · 5 EC2 key pairs · IAM user `abletracelab-ses-smtp-s35` and its key (**`ACCESSKEYLASTUSED = N/A` — never used, ever**).
+
+Worth about $2/month. The value is tidiness, not saving.
+
+### Stays — permanently, or until replaced
+
+- **SES `ca-central-1`** — production access, 4 identities. The only working email path. New account 208073623096 was **denied**.
+- **IAM user `abletrace260825-ses-sender` + key `AKIAVDGLJ3MUJM62YWFZ`** — what the app sends with. Last used 2026-08-27.
+- **Route 53 zone `abletrace.ca`** — all 20 records.
+- **`abletrace-fileuploads1`** — client documents and photos, filed by company id, from 2021. ⚠ **The only copy. The archive holds the rows that reference these files, not the files.**
+- **Root + MFA** — now the only way in.
+
+### Goes after a recheck
+
+**After S144 proves the new site works** — about $58/month:
+instance `i-088b7969158c43bca` · its volume and ENI · Elastic IP `3.98.223.126` (⚠ **the DNS record goes first, never the IP first** — the S138 subdomain-takeover lesson) · CloudFront `E311W5PD650CXV` · `abletrace-prod1` · the `prodapi.abletrace.ca` record.
+
+**After Minty is comfortable** — $25.76/month: **the 6 manual RDS snapshots.** See the ruling below.
+
+**Needs a question answered first:**
+- **`s3_cloudfront` key `AKIAVDGLJ3MUH7IPS3W7` — last used 2026-07-08.** Something used it. It carries EC2 + S3 + SES + CloudFront + SSM + CodeDeploy full access. ⚠ **Ask what still points at this before disabling. Deactivate before deleting — deactivation is reversible.**
+- **`ses` keys `AKIAVDGLJ3MUDCJBHJXH` (used 2026-08-12) and `AKIAVDGLJ3MUILD4K76I` (used 2026-06-11).** Almost certainly the P17 pair in git history.
+- `s3` key `AKIAVDGLJ3MUIEVY5IWC` — idle since 2025-05-06.
+- 7 EBS snapshots · 3 AMIs · CloudTrail bucket · **VPC at $20.03/month, unexplained at this size** — low urgency.
+
+### Cost, July 2026, measured by `aws ce get-cost-and-usage`
+
+`EC2 - Other 39.97` · `RDS 25.76` · `VPC 20.03` · `EC2-Compute 17.53` · `Tax 12.51` · S3 0.31 · Route 53 0.51 · SES 0.004 · CloudFront 0.0004. **About $116/month total; everything on the permanent keep-list costs under a dollar.**
+
+---
+
+## ⚠ THE RDS SNAPSHOTS — SETTLED, DO NOT RELITIGATE
+
+The question was whether the 6 manual snapshots can go. **They can, but not yet.**
+
+**Master data for all four old clients is duplicated in schema `abletrace` on the new account's prod RDS**, which is backed up with it. Measured S142:
+
+```
+mysql -e "SELECT c.id, c.company_name,
+ (SELECT COUNT(*) FROM abletrace.materials m WHERE m.company_id=c.id) AS materials,
+ (SELECT COUNT(*) FROM abletrace.formulations f WHERE f.company_id=c.id) AS recipes,
+ (SELECT COUNT(*) FROM abletrace.companyagents a WHERE a.company_id=c.id) AS suppliers,
+ (SELECT COUNT(*) FROM abletrace.companycustomers cu WHERE cu.company_id=c.id) AS customers
+ FROM abletrace.company c WHERE c.id IN (164,181,183,184,213,240,366,378,418,419);"
+```
+
+| id | company | materials | recipes | suppliers | customers |
+|---|---|---|---|---|---|
+| 164 | Mava Foods | 0 | 0 | 0 | 0 |
+| 181 | Mava Trial | 204 | 167 | 18 | 0 |
+| 183 | mavatrial1 | 204 | 0 | 18 | 0 |
+| **184** | **mavatrial2** | **310** | **171** | **25** | **13** |
+| **213** | **Kans Gourmet Foods Trial** | **79** | **101** | **25** | **21** |
+| 240 | Kans Gourmet Foods | 75 | 31 | 22 | 0 |
+| 366 | Truffle | 43 | 14 | 9 | 172 |
+| 378 | Truffle Pig | 26 | 14 | 9 | 172 |
+| 418 | Truffle | 28 | 19 | 9 | 175 |
+| **419** | **hagensborg** | **34** | **84** | **10** | **175** |
+
+⚠ **`164 Mava Foods` is an abandoned registration — empty.** Mava's real record is **184 mavatrial2**. Anyone reading "Mava Foods, 0 materials" and concluding the data is missing will reach the wrong answer.
+
+**Kiron was part of Kans Gourmet** — Minty, S142. The `kiron04@` / `kiron05@` rows are mailinator tests, not a client.
+
+**Schema sizes:** `abletrace` 78 tables / ~291,958 rows · `abletrace-dev` 66 / ~57,441 · `abletracelab_live` 77 / ~9,260.
+
+⚠ **Master data is database data.** Materials, suppliers, customers and recipes are rows, not files. `abletrace-fileuploads1` holds PDFs and JPEGs whose filenames name no company — the rows that give them meaning are in the database. **The bucket and the snapshots are not copies of each other, and neither substitutes for the other.**
+
+**A snapshot cannot be inspected without restoring it**, which restarts the extended-support cost that removing the instance escaped. Read identifiers, sizes and dates — never restore to look.
+
+**Recommendation, not yet a ruling: wait a few weeks, then delete.** Nothing is lost by waiting; the whole $25.76 is available whenever Minty says.
+
+---
+
+## WHAT S142 CHANGED
+
+**Six IAM console passwords deleted in old account `350466202408`**, each verified `NoSuchEntity` straight after:
+
+`Bobby1` (**AdministratorAccess**, password since 2022-07-21, no keys) · `Brijesh` (**AdministratorAccess** + Route 53, since 2022-01-26, no keys) · `sudhirv` (since 2024-06-17, no keys) — **all three past developers, Minty's ruling S142** · `s3` · `s3_cloudfront` · `ses` — three service accounts that had browser logins they never needed.
+
+**All five access keys confirmed Active afterwards**, including the live SES sender. **`AccountMFAEnabled = 1`.**
+
+**P260 is therefore partly done** — `Bobby1`'s login is gone; the user, its policies and `abletracelab-ses-smtp-s35` remain.
+
+**P263 is done as an audit.** The disconnection half is now sequenced into S143–S145 above.
+
+⚠ **A console review by eye missed the running EC2 instance, the 6 RDS snapshots, the 7 EBS snapshots, the 3 AMIs, the Lambdas, the API Gateway and the whole IAM position.** The scan found them in twenty minutes. **Scan, do not click** — and the scan script is worth keeping for the next account audit.
+
+---
 ## CARRIED — S144: THE QUICKBOOKS TOKEN AND TILE DESIGN
 
 **Minty's ruling S141.** Settles a question that has been open since the tile was built.
@@ -198,6 +226,9 @@ Alongside it sits a **refresh token**, good for roughly a hundred days, whose on
 2. **Minty is the named privacy officer.**
 3. **Minty drafts the privacy policy from a skeleton, then a lawyer finalises it.** The Terms of Service were drafted by a lawyer and are sound. ⚠ **Write facts, not law** — who receives the data, where it lives, what happens on a breach, who is accountable, and the difference between Mintek's own users and data held for a client.
 4. **The skeleton is the first deliverable**, and it runs in parallel with everything else because the lawyer's turnaround is the long pole.
+
+---
+
 
 ---
 
@@ -325,225 +356,6 @@ mysql -N -B -e "SELECT COUNT(DISTINCT title), COUNT(DISTINCT internalCode), COUN
 
 ---
 
-## CARRIED — OLD AWS ACCOUNT: THE S139 MATERIAL
-
-⚠ **Supporting material for S142 above. Partial — NOT an inventory. Do not mistake it for coverage.**
-
-⚠ **Carried whole from the S139 close. Do not reopen S139 or S140 to recover it.**
-
-**Inventory the old AWS account 350466202408. Delete nothing. Produce the list.**
-
-### The action, in order
-
-1. **Start with the bill, not the console.** Cost Explorer, grouped by service, last 6 months. ⚠ **The bill is the only inventory that misses nothing chargeable.**
-2. **Settle the open question below first.** Nothing else can be trusted until it is answered.
-3. **Route 53** — every hosted zone, every record. ⚠ **Record what each A/CNAME points at.** This is the list the cleanup acts on first.
-4. **EC2** — instance, Elastic IP, volumes, snapshots, key pairs, security groups. Note what each is attached to.
-5. **RDS** — the six manual snapshots, their sizes and their monthly cost.
-6. **S3, ACM certificates, CloudWatch, anything the bill surfaced.**
-7. **IAM** — all 8 users, keys, key ages, last-used dates, console access.
-8. **Write the list.** For each item: what it is, what points at it, keep or candidate, and what must go first if it goes.
-
-⚠ **Nothing is deleted in the audit session.** The next one acts on the list, in the order the list dictates.
-
-### ⚠ THE OPEN QUESTION — answer this before anything else
-
-⚠ **We do not know which AWS account the live dev and prod boxes are in.**
-
-The reasoning that says "the new account" is an inference, not a measurement: the old account's EC2 console showed **one** instance in ca-central-1, so dev and prod cannot both be there.
-
-But the old account holds **1 Elastic IP**, and prod's public IP is `15.157.38.101`. If those are the same address, **prod is in the old account** and that Elastic IP must never be released.
-
-⚠ **Releasing an Elastic IP that prod uses would take the live app off the internet.** The single most expensive thing the cleanup could get wrong.
-
-Settle it on the boxes, not by reasoning:
-```
-curl -s -H "X-aws-ec2-metadata-token: $(curl -s -X PUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 60')" http://169.254.169.254/latest/meta-data/instance-id; echo
-```
-Run on **dev** and on **prod**. Compare each returned instance-id against the old account's EC2 list. ⚠ **Written in S139, still never run — it is not a measurement yet.**
-
-### The material — measured S139
-
-**SES, old account, the thing being kept.** Console → Account dashboard:
-```
-Daily sending quota   50,000 emails per 24-hour period
-Maximum send rate     14 emails per second
-Region                Canada (Central)
-Account health        Healthy
-```
-⚠ **This is production access, not sandbox.** Sandbox is capped at 200/day and 1/sec with a persistent banner. None present.
-
-SES → Identities, 4 rows, all **Verified**:
-```
-abletrace.ca                    Domain
-info@abletrace.ca               Email address
-mintydev210706@yopmail.com      Email address
-mintydev210705@yopmail.com      Email address
-```
-⚠ **`mintekfoodsafety.com` is NOT verified here.** `FROM_EMAIL` must stay an `@abletrace.ca` address on both boxes.
-
-**What S139 built, which email now depends on.** Old account IAM:
-```
-policy  abletrace260825-ses-send      ses:SendRawEmail + ses:SendEmail, Resource *
-user    abletrace260825-ses-sender    that policy only, no console access
-key     created S139, secret filed in Section H
-```
-⚠ **One key serves both boxes.** → P259.
-
-**Both boxes, measured S139:**
-```
-FROM_EMAIL=info@abletrace.ca
-SMTP_USER length: 20        SMTP_PASSWORD length: 40
-```
-⚠ **These are NOT SMTP credentials.** An AWS IAM key id and secret; the app uses the AWS SDK via nodemailer's SES transport. A rotation is an IAM key rotation.
-
-⚠ **Region is hardcoded `ca-central-1` at `api/services/email.js:7`** — not an environment variable.
-
-**Old account EC2, console, ca-central-1:**
-```
-Instances (running) 1     Elastic IPs 1      Volumes 1
-Key pairs 5               Security groups 7  Snapshots 7 (EBS)
-Load balancers 0          Auto Scaling Groups 0
-EC2 cost, past 6 months, Global: $145.51
-```
-The one instance:
-```
-AbleTrace Prod N...   i-088b7969158c43bca   Running   t3.small   ca-central-1b
-```
-⚠ **NOW.md never knew this instance existed.** It is why this is an audit and not a cleanup.
-
-**The dead app in the old account:**
-```
-abletrace.ca/login          serves a live login page
-prodapi.abletrace.ca        500 Internal Server Error on loginUser
-```
-A backend up with no database behind it. ⚠ **Only a corpse if the open question says prod lives elsewhere. Confirm before touching it.**
-
-**RDS snapshots, old account, 6 manual, none automated:**
-```
-abletrace-dev-snapshot          8.0.42   abletrace-dev    July 06, 2026
-abletrace-dev-snapshot260706    8.0.42   abletrace-dev    July 06, 2026
-abletrace-stg-snapshot          8.0.44   abletrace-stg    July 06, 2026
-abletrace-stg-snapshot260706    8.0.44   abletrace-stg    July 06, 2026
-newinstance-final-20260817      8.0.45   newinstance      August 17, 2026
-newinstance-snapshot260706      8.0.44   newinstance      July 06, 2026
-```
-⚠ **Three former instances** — a three-tier estate, all gone, only snapshots left.
-⚠ **All MySQL 8.0.x.** Restoring starts the extended-support meter. **Restore, read, delete in the same session.**
-⚠ **EBS snapshots are not RDS snapshots.** The "Snapshots 7" on the EC2 dashboard is a separate list.
-
-**IAM, old account, 8 users, three seen:**
-```
-abletrace260825-ses-sender    created S139, the live sender
-abletracelab-ses-smtp-s35     an older sender, 1 group
-Bobby1                        last activity 734 days, password age 1496 days, console access
-```
-⚠ **P17 lives here.** → P260 for the deletes.
-
-### The analysis
-
-**Why SES stays in the old account.** Keys are account-scoped; cross-account is invisible to the code. Three consequences:
-1. **The old account can never be closed.** Permanent infrastructure — root credentials, MFA, billing, security surface, forever.
-2. **P17 rises.** Live keys in git history now sit in the account onboarding depends on.
-3. **DNS is the only real coupling.** Route 53 serves abletrace.ca; SES verification and DKIM are records in that zone.
-
-⚠ **Correction to the S135 "email-only" ruling.** Route 53 **stays** with SES. ⚠ **DKIM failure is silent** — SES still accepts the message, the log says sent, deliverability quietly rots. Read S135 as *"email, and the DNS email depends on."*
-
-**The benefit worth naming:** the old account holds years of sending reputation, 50k/day, clean record. A new account starts cold.
-
-**Why rebuilding in the old account was rejected, S139.** It would move the live app, two clients' books, the database, nginx, certs and the pipeline onto a different account — downtime and real risk — to gain nothing a client would notice.
-
-**Why the SES re-application does not gate anything.** Both AWS objections are needed anyway: from-domain/link-domain mismatch is fixed by the abletrace.ca move, and bounce/complaint handling is P257. ⚠ **The S138 appeal WAS sent.** Case `178710371200148`, refused 22 Aug.
-
-**⚠ The order that must not be reversed.** RULES: ask what still points at this — DNS records, credentials, other AWS settings, accounts outside AWS. **The pointer goes first, the resource second.** ⚠ **A code search cannot find these.**
-
-The most likely place the cleanup goes wrong: abletrace.ca DNS records pointing at the dead EC2. Those must be removed **before** the Elastic IP is released.
-
-### The verify
-
-1. The instance-id command run on **both** boxes, compared against the old account's EC2 list, answered in writing.
-2. Cost Explorer read by service, every chargeable line matched to an entry.
-3. Every Route 53 record written down with what it points at.
-4. The list exists as a document, keep/candidate marked, removal order stated.
-5. **Nothing deleted.**
-
----
-
-## WHAT S141 CHANGED
-
-**P250 done, dev and prod.** `api/policies/isAuth.js`, commit `cf7722d`. The policy looks the user up in `company_users` and rewrites `req.body.company_id`, which covers 165 controller sites without editing one of them. Url and query values are compared and refused rather than rewritten. Super admin is exempt.
-
-**Six columns added to prod by hand** — `companycustomers.external_id`, and five `qb_*` on `packingslips`. Definitions read off dev, read back on prod, identical.
-
-**`quickbooks_tokens` created on prod by hand.** Empty, and should stay empty until Phase 3.
-
-**Prod backend moved `99852bf` → `cf7722d`**, carrying the whole QuickBooks chain with P250.
-
-**The first automated test exists** — `attack-test-s141.sh`, eight checks, 8/8 on dev. ⚠ **It has NOT been run against prod.** Running it needs two prod companies with different row counts, which was never measured.
-
----
-
-## WHAT S141 MEASURED — the app's authorization shape
-
-Each with the command that measured it.
-
-**One shared layer.** `config/policies.js` has `'*': 'isAuth'`. Public actions are login and password reset only, plus `QuickbooksController.callback`.
-```
-cat ~/abletrace-lab-backend/config/policies.js
-```
-
-**165 body sites, 16 `params.company_id`, 1 `query.company_id`, 43 `companyId`.**
-```
-grep -rn "body.company_id" ~/abletrace-lab-backend/api --include=*.js | wc -l
-grep -rno "query.company_id\|params.company_id\|companyId\|company_Id" ~/abletrace-lab-backend/api --include=*.js | sed 's|.*:||' | sort | uniq -c
-```
-
-**13 routes carry a company in the URL** — 10 spelled `:company_id`, 3 `:companyId`, all Traceability.
-```
-grep -n "company_id" ~/abletrace-lab-backend/config/routes.js
-grep -n "companyId" ~/abletrace-lab-backend/config/routes.js
-```
-
-**One token mint.** `generateJWT` has exactly one caller, `api/models/User.js:9`. Login is `POST /api/v1/User/loginUser`, fields `username` and `password` (`User.js:430-431`).
-```
-grep -rn "jwt.sign" ~/abletrace-lab-backend/api ~/abletrace-lab-backend/config --include=*.js
-```
-
-**Super admin is `user_id 1`, `info.abletrace@gmail.com`, with zero rows in `company_users`.** No user belongs to more than one company.
-```
-mysql -N -B -e "SELECT s.user_id, u.email, (SELECT COUNT(*) FROM abletracelab_live.company_users c WHERE c.user_id=s.user_id) FROM abletracelab_live.super_admin s JOIN abletracelab_live.user u ON u.id=s.user_id;"
-```
-
-**Dev's app database is `abletracelab_live`**, not `abletrace-dev`.
-```
-grep DATABASE_URL ~/abletrace-lab-backend/.env | sed 's|.*/||'
-```
-
-**Test identities for the attack test, dev:**
-| | user | company | materials |
-|---|---|---|---|
-| A | `test_glutenull_260701@mailinator.com` | 466 | 63 |
-| B | `test_truffle260719c@mailinator.com` | 473 | 47 |
-```
-mysql -N -B -e "SELECT company_id, COUNT(*) FROM abletracelab_live.materials GROUP BY company_id ORDER BY 2 DESC;"
-```
-
-**No route passes `req.body` wholesale into a query**, so injecting a key cannot add a filter.
-```
-grep -rn "find(req.body)\|findOne(req.body)\|create(req.body)\|update(req.body)\|\.where(req.body)" ~/abletrace-lab-backend/api --include=*.js
-```
-
----
-
-## THINGS THAT COST TIME IN S141
-
-**Claude wrote a check that could not fail.** A `grep -l` piped to `uniq -c` was meant to show how concentrated the 165 hits were; `-l` lists each file once, so every count was 1. It reported nothing and looked like an answer. ⚠ **RULES: say what result would distinguish the two answers before running it.**
-
-**Claude designed a fix that leaned on an untested assumption.** The first design overwrote `req.body`, `req.params` and `req.query` alike. Express rebuilds `req.params` between routing layers, so that half could have failed silently. The design was changed to compare-and-refuse for the URL, leaving one load-bearing assumption instead of two — and the attack test was written so that assumption's failure would show as a 200 instead of a 403.
-
-**Claude nearly wrote a column definition from memory.** The six QuickBooks columns were added by hand on dev in an earlier session. They were read off dev before being written to prod. ⚠ **RULES: never rebuild a measurement to fit a memory.**
-
-**A grep for a table looked for the wrong name.** `quickbookstoken` was inferred from the model filename; the table is `quickbooks_tokens`. The model file named it correctly and was read before creating anything.
 
 ---
 
@@ -606,6 +418,9 @@ grep -rn "find(req.body)\|findOne(req.body)\|create(req.body)\|update(req.body)\
 ⚠ **`company_id` is a DOUBLE on `companycustomers` and `dispatchorders`, an INT on `packingslips` and `packingslipdos`.**
 
 **Licence statuses:** 1 Invited · 2 Trial · 3 Active · 4 Expired · 6 Inactive. ⚠ **Only Inactive blocks login. Expired keeps access.**
+
+---
+
 
 ---
 
