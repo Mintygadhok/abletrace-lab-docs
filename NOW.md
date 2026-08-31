@@ -1,6 +1,6 @@
 # NOW
 
-Rewritten whole at the close of **S143**.
+Rewritten whole at the close of **S144**.
 
 The open check measures commits, process, port, runtime and dirty trees. Nothing here repeats it. This carries only what no command returns.
 
@@ -8,159 +8,191 @@ The open check measures commits, process, port, runtime and dirty trees. Nothing
 
 ## STATE
 
-**S143 prepared and proved the domain move. Nothing public changed.**
+**S144 did the first half of the cutover and was stopped by GitHub, not by anything in the app. No DNS record was changed. Nothing public moved.**
 
-Everything below was measured or seen on screen this session. The live site was 200 at the start and 200 at the end.
+The live site was 200 at the start and 200 at the end.
 
 **Deliberate, done, verified:**
 
-- **Three certificates on prod**, each its own renewal config, mutually independent. `trace.mintekfoodsafety.com` was never touched — same serial at close as at open.
-- **nginx on prod carries a second 443 block** for `abletrace.ca` / `www.abletrace.ca`, own certificate, same docroot, same `/api/` proxy. The original block is byte-for-byte unchanged. The port-80 redirect now uses `$host` instead of a hardcoded name.
-- **The whole app proved working under a new name** in Chrome via a Mac `/etc/hosts` entry: login, AdminHome, materials list, material edit, **file upload to S3**, **file download and render**, invite email delivered, password reset, second login.
+- **The Mac's `/etc/hosts` override is GONE.** S143's line `15.157.38.101 abletrace.ca www.abletrace.ca` was removed. The Mac now resolves `abletrace.ca` to CloudFront exactly as the public does. Backup at `/etc/hosts.bak-s144`.
+- **nginx on prod now carries a THIRD 443 block**, for `app.abletrace.ca`, its own certificate, same docroot, same `/api/` proxy. The two existing 443 blocks are untouched. `app.abletrace.ca` added to the port-80 redirect. Backup at **`/root/nginx-abletrace.bak-s144-20260830-204516`**.
+- **`environment.prod.ts:3` now reads `https://app.abletrace.ca/api/v1/`.** Committed and pushed as **`2a576cb8`**. Mac backup of the old file at `~/environment.prod.ts.bak-s144`.
 
-**Deliberate, NOT done:** no DNS record was changed. The public still resolves `abletrace.ca` to CloudFront, verified at close against `8.8.8.8`.
+**Deliberate, NOT done:** no DNS record changed. No frontend deployed anywhere. Prod still serves the old build.
 
-**Half-done — must be undone at the top of S144:**
-
-⚠ **The Mac's `/etc/hosts` still contains `15.157.38.101 abletrace.ca www.abletrace.ca`.** Left in place, Minty's Mac sees the new server no matter what DNS says, so he would be the last person to know if a cutover failed. **Remove it before touching DNS.**
-
-⚠ **Three `_acme-challenge` TXT records remain in the zone** (`_acme-challenge`, `_acme-challenge.www`, `_acme-challenge.app`). Spent, harmless, delete when convenient.
+**Half-done — nothing on any box is in a broken or partial state.** The commit is on `main` and deployed nowhere.
 
 ---
 
-## ⚠ THE DESTINATION CHANGED — MINTY'S RULING S143
+## ⚠ THE ONE THING THAT MUST NOT BE GOT WRONG
 
-**This supersedes the S142 plan.** S142 planned to move the app to bare `abletrace.ca`. That is no longer the destination.
+**`2a576cb8` MUST NOT REACH PROD BEFORE `app.abletrace.ca` RESOLVES.**
 
-| name | what it serves |
-|---|---|
-| **`abletrace.ca`** / `www.` | a **static marketing page**. S144 puts a minimal holding page there; it grows in place afterwards |
-| **`app.abletrace.ca`** | **the application**. One login, one session |
+That build calls `https://app.abletrace.ca/api/v1/` for every piece of data. Deploy it while the name still points nowhere and the live site loads a page whose every data call fails — a white app for two live clients.
 
-**Everything else is a MODULE inside the app, never a new subdomain.** Invoicing, extra food safety, FDA guidance ingestion — all become tiles, opened per client by `company_user_role` / `company_user_task` / `role_task` rows. Minty's ruling S143, after working through the alternative.
-
-⚠ **One database, one backend, one front door.** The reasoning: master data lives once; business rules live once; a second place for invoice logic drifts from the first and the client finds out before you do.
-
-⚠ **Modules are database rows created THROUGH THE UI, never by SQL.** The app's creation path copies `role_task` into `company_user_task`. SQL runs no application code.
-
-**Why the marketing page must be a real static page, not the old CloudFront site:** the old site is the old Angular app, and its Login button works — pointing at the old backend and the old database. Left as the placeholder it is a wrong door that looks right, *and* it keeps CloudFront, the old instance and `abletrace-prod1` alive, blocking the old-account retirement.
+**Order is: DNS record first, prove it resolves, then deploy.** This inverts S143's plan, which had the deploy first. ⚠ **The inversion is safe because the record is NEW.** Creating `app.abletrace.ca` breaks nothing — no name changes meaning, no traffic moves. It simply starts resolving to a host that already answers 200 on it. Nothing reaches it until someone types it.
 
 ---
 
-## THE JOB — S144: CUT OVER TO `app.abletrace.ca`
+## ⚠ THE BLOCKER — GITHUB ARTIFACT STORAGE QUOTA
 
-**Sunday evening, after 5pm.** Minty's ruling S143: two live clients, neither works Sunday.
+**GitHub will not hand over a build. Two attempts, both failed identically.**
 
-**All three names move this session.** `app.abletrace.ca` → the app. `abletrace.ca` + `www.` → a minimal holding page. The old CloudFront site goes dark, which closes the wrong-door login and unblocks the old-account retirement.
+```
+Failed to CreateArtifact: Artifact storage quota has been hit.
+Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
+```
+
+⚠ **The compile SUCCEEDS.** Run #82 ran 7m37s, the dispatch run 6m26s, both compiled cleanly and both died at the *Upload dist artifact* step. **There is nothing wrong with the code.** Reading this as a build failure is the wrong answer.
+
+**What was already tried:** Minty deleted the old artifacts around 14:10. The dispatch run at 21:46 — over seven hours later, inside the stated 6–12 hour window — failed the same way.
+
+⚠ **So the deletions may not have freed enough.** The window has nearly elapsed and the gate is still shut. **Do not assume the morning fixes it.** Try once, and if it fails again the quota is not the whole story.
+
+**First action of S145 is one dispatch.** Actions → Build Frontend → Run workflow → `main` → target **prod**. Green with an artifact means carry on. Red at upload means go to the Mac path below.
+
+### The Mac fallback — homework done, not executed
+
+The Mac can build this. Measured S144: `node_modules` present, `npm ci` completed successfully.
+
+⚠ **`npm ci` HAS ALREADY BEEN RUN.** `~/abletrace-lab-frontend/node_modules` is a fresh lockfile install as of S144. Do not run it again unless something suggests it is stale.
+
+⚠ **The Mac is on Node v24.13.1. `package.json` declares `node: '^20'` and the pipeline pins Node 20.** npm printed `EBADENGINE ... required: { node: '^20' }, current: { node: 'v24.13.1' }`. It warns, it does not refuse.
+
+**`nvm` is NOT installed** — measured, `NO nvm`. So the Mac path forks:
+
+- **Install nvm, build on Node 20** — matches the pipeline exactly, removes the version objection. Preferred.
+- **Build on Node 24** — off-spec, nobody has tested this configuration.
+
+**The build command is `npm run build-prod`**, read off the workflow file. The runner does exactly `npm ci` then `npm run build-prod`, nothing else.
+
+**Then:** zip `dist/`, `scp` it to prod, unzip to `~/dist-prod-<full sha>`, and run the deploy script exactly as with a downloaded artifact. ⚠ **The deploy script does not care where the folder came from.**
+
+---
+
+## THE JOB — S145: FINISH THE CUTOVER
+
+**All three names still to move.** `app.abletrace.ca` → the app. `abletrace.ca` + `www.` → a minimal holding page.
+
+⚠ **Sunday evening was S143's ruling. Minty overrode it in S144 on the grounds that no client works Sunday.** Two live clients — if S145 lands on a weekday, the timing question is open again and it is Minty's to answer.
 
 ### The action, in order
 
-1. **Remove the `/etc/hosts` line on the Mac.** Verify with `dig` that `abletrace.ca` resolves to CloudFront again from the Mac's own resolver.
-2. **Add the `app.abletrace.ca` server block to nginx on prod.** Certificate already exists. Reload, then `curl -I https://trace.mintekfoodsafety.com` to prove the live site survived.
-3. **Edit `environment.prod.ts:3`** on the Mac — `apiUrl` to `https://app.abletrace.ca/api/v1/`. Commit, push, **manual dispatch on GitHub for prod**, then `~/deploy-frontend.sh`. Shift+Cmd+R after.
-4. **Change the DNS — three records.** ⚠ **Minty's ruling S143: all three move in S144.**
-   - **Create** `app.abletrace.ca` — type A, **Alias OFF**, value `15.157.38.101`, TTL 60.
-   - **Edit** `abletrace.ca` A — turn **Alias OFF**, replace the CloudFront alias with value `15.157.38.101`. A TTL box appears once Alias is off; set 60.
-   - **Edit** `www.abletrace.ca` A — identical change.
-   ⚠ **Do the `app.` record FIRST and prove the app works before touching the other two.** If `app.` fails you still have the old site up while you fix it.
-5. **Change `APP_BASE_URL` in prod `.env`** to `https://app.abletrace.ca`, then `pm2 restart abletrace-backend`, `sleep 8`, curl.
-6. **Put a minimal holding page at `abletrace.ca`.** Write it to **`/var/www/marketing`** — ⚠ **never `/var/www/html`**, which every frontend deploy overwrites whole. Logo, one or two sentences, a Login button to `https://app.abletrace.ca`. Then change the `root` in the existing `abletrace.ca` 443 block from `/var/www/html` to `/var/www/marketing`, drop its `/api/` proxy (marketing needs no backend), reload.
-7. **Verify on screen** — see below.
+0. **File the two new traps into TRAPS.md.** Marked **→ to TRAPS** at the foot of this document. ⚠ **Doc edits are replacements** — pull, read the live file, replace whole, diff, commit, push. Five minutes at the open. Delete them from NOW once filed.
+1. **Get a prod build.** One GitHub dispatch. If it fails at upload, go to the Mac path above.
+2. **Create the `app.abletrace.ca` DNS record** — Route 53, **old account `350466202408`**, zone `abletrace.ca`. Type **A**, **Alias OFF**, value **`15.157.38.101`**, TTL **60**. ⚠ **Creating this breaks nothing.** Prove it resolves before going on.
+3. **Deploy the build to prod.** `scp` the zip, unzip to `~/dist-prod-2a576cb8e64f8ddcd28368cd0696b11f0912ee0d`, then `~/deploy-frontend.sh prod-2a576cb8e64f8ddcd28368cd0696b11f0912ee0d`. Shift+Cmd+R in Chrome after.
+4. **Change `APP_BASE_URL` in prod `.env`** to `https://app.abletrace.ca`, then `pm2 restart abletrace-backend`, `sleep 8`, curl.
+5. **Prove the app on `app.abletrace.ca`** — login, a data screen, a file up and down, an invite email whose link says `app.abletrace.ca`. ⚠ **Do not touch the other two records until this passes.** Until this point the old site is still up and nothing has been taken away.
+6. **Write the holding page to `/var/www/marketing`.** ⚠ **NEVER `/var/www/html`** — every frontend deploy overwrites that whole. Logo, a sentence or two, a Login button to `https://app.abletrace.ca`.
+   - ⚠ **The folder does not exist and `/var/www/` is root-owned.** `sudo mkdir /var/www/marketing` then `sudo chown ubuntu:ubuntu /var/www/marketing`, matching `/var/www/html`. Without the chown, every future edit needs sudo and "grow it in place" becomes a chore.
+   - **The images already exist** in `/var/www/html/assets/images/` — the old marketing site's assets, still riding inside the app build. `AbleTraceLogo.png` · `home-bg.jpg` · `about.jpg` · `contact-img.jpg` · six feature images (`abletrace-food-safety`, `-traceablity`, `-production`, `-rceipe`, `-supplier`, `-order-fulfillment`). ⚠ **COPY them into `/var/www/marketing/`, never reference them where they sit** — the next frontend deploy wipes `/var/www/html` whole and the page would lose its images.
+7. **Point `abletrace.ca` and `www.` at the holding page** — change the `root` in the existing `abletrace.ca` 443 block from `/var/www/html` to `/var/www/marketing`, drop its `/api/` proxy, `nginx -t`, reload.
+8. **Edit the two DNS records** — `abletrace.ca` A and `www.abletrace.ca` A. Turn **Alias OFF**, value `15.157.38.101`. A TTL box appears once Alias is off; set 60.
+9. **Verify on screen** — see below.
 
-⚠ **Step 6 is a holding page, not a marketing project.** It grows in place later — more sections, pricing, whatever — with no DNS, no certificate and no deploy pipeline involved. That is the whole payoff of the split. **Do not let it expand inside S144.**
+⚠ **Step 6 is a holding page, not a marketing project.** It grows in place later, with no DNS, no certificate and no deploy pipeline involved. That is the whole payoff of the split. **Do not let it expand inside the session.**
 
-⚠ **Order matters.** Step 3 must land before step 4, or the first visitor to `app.abletrace.ca` gets a page whose API calls go to the old name. Both names work throughout, so there is no outage window — but the build must be out first.
-
-### ⚠ The one that would have bitten — found S143
-
-**`apiUrl` is hardcoded and baked into the build.**
-
-```
-/Users/mintym1/abletrace-lab-frontend/src/environments/environment.prod.ts:3
-  apiUrl : 'https://trace.mintekfoodsafety.com/api/v1/',
-```
-
-Measured by `grep -rn "mintekfoodsafety" ~/abletrace-lab-frontend/src --include="*.ts"` — **exactly two hits**, prod and dev, nothing else anywhere in `src`.
-
-**S143's whole browser test ran with the page calling back to `trace.mintekfoodsafety.com` for data.** It worked because that name still works. **This is why S144 is not two record edits — it is a frontend rebuild and deploy.**
-
-### Material — all measured S143
+### Material — measured S144 unless stated
 
 | fact | measured by | returned |
 |---|---|---|
-| `abletrace.ca` A record | Route 53 console, old acct `350466202408`, Edit record, not saved | **Alias ON** · Alias to CloudFront distribution · US East (N. Virginia) · `d1gnzid0cfbv78.cloudfront.net` · Simple · **TTL field absent, shows "-"** |
-| `www.abletrace.ca` A record | same | **identical in every field** |
-| What the public resolves | `dig +short A abletrace.ca @8.8.8.8` and same for `www.` | `18.172.185.12 / .5 / .55 / .104` — both names, same four |
-| Certificates on prod | `sudo certbot certificates` | `abletrace.ca` + `www` (exp 2026-11-27) · **`app.abletrace.ca` (exp 2026-11-28)** · `trace.mintekfoodsafety.com` (exp 2026-10-17, **serial unchanged all session**) |
-| Renewal configs | `sudo ls /etc/letsencrypt/renewal/` | three separate `.conf` files |
-| nginx before | `sudo cat -n /etc/nginx/sites-enabled/abletrace` | one file, 984 bytes, not a symlink. One 443 block, one 80 block |
-| nginx after | patch script output | 2149 bytes. Backup at **`/root/nginx-abletrace.bak-s143-20260830-012152`** |
-| nginx syntax + live site | `sudo nginx -t` then `curl -I https://trace.mintekfoodsafety.com` | ok, test successful · **HTTP/1.1 200 OK** |
-| New block answers | `curl -I -H "Host: abletrace.ca" --resolve abletrace.ca:443:127.0.0.1 https://abletrace.ca` | **200** — and curl validated the certificate to get there |
-| Email link source | `grep -rn "mintekfoodsafety" ~/abletrace-lab-backend/ --exclude-dir=node_modules --exclude-dir=.git` | `.env:8 APP_BASE_URL` · `config/env/production.js` lines 24, 151, 250 use `process.env.APP_BASE_URL \|\| '<old name>'` — **fallback only, not hardcoded** |
-| Frontend API URL | `grep -rn "mintekfoodsafety" ~/abletrace-lab-frontend/src --include="*.ts"` | **2 hits only** — `environment.prod.ts:3`, `environment.dev.ts:3` |
-| Docroot | `ls -1 /var/www/html` · `du -sh` | hashed Angular chunks, **20M** — ⚠ **overwritten whole by every frontend deploy** |
-| Rollback builds on prod | `ls -1dt /home/ubuntu/www-html.bak-*` | `...4910b46d` (live) · `...e1a82e02` · `...2968c591` |
+| Frontend commit to deploy | `git push` | **`2a576cb8`** (`d7702040..2a576cb8`) |
+| What changed in it | `cat -n .../environment.prod.ts` before and after | line 3 `trace.mintekfoodsafety.com` → **`app.abletrace.ca`**, one line, `decimalPlaces: 3` intact |
+| Scope of that string | `grep -rn "mintekfoodsafety" ~/abletrace-lab-frontend/src --include="*.ts"`, S143 | **2 hits only** — prod and dev environment files. ⚠ **`environment.dev.ts` deliberately untouched** |
+| nginx after the S144 patch | patch script output | 2149 → **3286 bytes**. Backup `/root/nginx-abletrace.bak-s144-20260830-204516` |
+| nginx syntax | `sudo nginx -t` | ok, test successful |
+| Live site survived the reload | `curl -s -I https://trace.mintekfoodsafety.com \| head -1` | **HTTP/1.1 200 OK** |
+| `app.` block answers | `curl -s -I -H "Host: app.abletrace.ca" --resolve app.abletrace.ca:443:127.0.0.1 https://app.abletrace.ca \| head -1` | **HTTP/1.1 200 OK** — curl validated the certificate to get there |
+| Mac sees public DNS again | `grep -n abletrace /etc/hosts; dscacheutil -q host -a name abletrace.ca` | grep empty · `18.172.185.5 / .55 / .12 / .104` — CloudFront |
+| The build pipeline | `cat -n .../.github/workflows/build-frontend.yml` | `npm ci` → `npm run build-prod` · **Node pinned to 20** · dispatch input `target`, choice prod/dev, **default prod** · a **push** builds **dev** · `retention-days: 14` |
+| Deploy script | `cat -n ~/deploy-frontend.sh` on prod | takes a **label**, copies `~/dist-<label>` → `/var/www/html`. **Backs up to `~/www-html.bak-<label>`, named after the NEW label — so it does NOT overwrite the existing rollback** |
+| Builds on prod | `ls -1dt /home/ubuntu/dist-*` | `dist-prod-4910b46d…` + `.zip` · `…e1a82e02` + `.zip` · `…2968c591` |
+| Rollback builds on prod | `ls -1dt /home/ubuntu/www-html.bak-*` | **`/home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031`** (live) |
+| Mac build capability | `node -v; npm -v`, `ls -d …/node_modules` | v24.13.1 · npm 11.8.0 · `node_modules` present, freshly `npm ci`'d |
+| nvm on the Mac | `command -v nvm \|\| ls -d ~/.nvm` | **NO nvm** |
+| **Full SHA — the deploy label** | `git -C ~/abletrace-lab-frontend rev-parse HEAD` | **`2a576cb8e64f8ddcd28368cd0696b11f0912ee0d`**. ⚠ **The label is the FULL sha, not the short one** |
+| Docroot ownership | `ls -ld /var/www/ /var/www/html /var/www/marketing` | `/var/www/` **root:root** · `/var/www/html` **ubuntu:ubuntu** · **`/var/www/marketing` does not exist** |
+| Marketing images available | `ls -1 /var/www/html/assets/images/` | logo, background, about, contact and **six named feature images** — a whole marketing site's assets |
+| Downloads | `ls -1t ~/Downloads` | one file, `patch-nginx-app-s144.py`, spent. **No numbered duplicates** |
+| Dev, untouched | dev open check | frontend `c2a52d8e`, backend `cf7722d` **matching prod**, clean but for `node_modules.old-node18/` (P227), `abletrace-dev` online, 200, v24.19.0 |
 
-### ⚠ Rollback — the only thing that must be right on the night
+### ⚠ Rollback
 
-**To undo step 4, per record:**
-- `app.abletrace.ca` — delete it. Nothing else points at it.
-- `abletrace.ca` and `www.abletrace.ca` — turn **Alias back ON**, `Alias to CloudFront distribution`, region **US East (N. Virginia)**, target **`d1gnzid0cfbv78.cloudfront.net`**, Simple routing. ⚠ **That target string is the rollback.** The four IP addresses are CloudFront's and rotate on their own — never roll back to those.
+**To undo step 2:** delete the `app.abletrace.ca` record. Nothing else points at it.
 
-⚠ **Because all three move, the old site is no longer a safety net.** Do `app.` first, prove it, then the other two.
+**To undo step 3:** `sudo rm -rf /var/www/html/* && sudo cp -r /home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031/* /var/www/html/`. ⚠ **Read the rollback path off the box first, never from a build label.**
 
-**There is no TTL to lower.** Alias records have no TTL field — AWS manages it. This was measured, not assumed. It is why the evening timing carries the whole risk reduction.
+**To undo step 4:** `APP_BASE_URL` back to `https://trace.mintekfoodsafety.com`, restart.
 
-**To undo step 3:** the previous build is at `/home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031`. ⚠ **Read the rollback path off the box, never from a build label.**
+**To undo step 8, per record:** turn **Alias back ON**, `Alias to CloudFront distribution`, region **US East (N. Virginia)**, target **`d1gnzid0cfbv78.cloudfront.net`**, Simple routing. ⚠ **That target string is the rollback.** The four `18.172.185.x` addresses are CloudFront's own and rotate — **never roll back to those.**
 
-**To undo step 5:** `APP_BASE_URL` back to `https://trace.mintekfoodsafety.com`, restart.
+**There is no TTL to lower.** Alias records have no TTL field; AWS manages it. Measured S143, not assumed.
+
+**To undo the S144 nginx change:** the backup is at `/root/nginx-abletrace.bak-s144-20260830-204516`. ⚠ **`sudo` changes HOME** — that is why it is in `/root/`, not `/home/ubuntu/`.
 
 ### The records that must not be touched
 
 Zoho `MX` · apex TXT (**two values: zoho-verification AND `v=spf1 include:zohomail.co...`**) · `zmail._domainkey` · 8 SES DKIM CNAMEs · `_amazonses` · `_dmarc` · two ACM validation CNAMEs · NS · SOA.
 
-⚠ **CORRECTION TO S142: an SPF record DOES exist.** S142's NOW stated flatly that there is none. Seen on screen S143 — the apex TXT row holds two values and the second is `v=spf1 include:zohomail.co...`. It names Zoho only; SES is not in it. **Do not "add" SPF and do not disturb the apex TXT.** Mail works today on DKIM plus relaxed DMARC.
+⚠ **An SPF record DOES exist** — the apex TXT row holds two values and the second is SPF, naming Zoho only. **Do not "add" SPF and do not disturb the apex TXT.** Mail works today on DKIM plus relaxed DMARC.
 
-### Verify — S144 is done when
+⚠ **Three spent `_acme-challenge` TXT records remain** (`_acme-challenge`, `_acme-challenge.www`, `_acme-challenge.app`). Harmless, delete when convenient.
+
+### Verify — S145 is done when
 
 - `https://app.abletrace.ca` loads in a browser **with no hosts entry**, padlock clean
 - Login works, a data screen draws, a file uploads and downloads
 - An invite email arrives and **the link inside says `app.abletrace.ca`**
 - `curl -I https://trace.mintekfoodsafety.com` still returns 200
-- **`https://abletrace.ca` shows the holding page**, padlock clean, and its Login button lands on the working app
+- **`https://abletrace.ca` shows the holding page**, padlock clean, Login button lands on the working app
 - **`https://www.abletrace.ca` does the same**
-- ⚠ **Nothing anywhere still shows the OLD site.** That is the point of moving all three
+- ⚠ **Nothing anywhere still shows the OLD CloudFront site**
+
+---
+
+## ⚠ THE DESTINATION — MINTY'S RULING S143
+
+| name | what it serves |
+|---|---|
+| **`abletrace.ca`** / `www.` | a **static marketing page**, grown in place |
+| **`app.abletrace.ca`** | **the application**. One login, one session |
+
+**Everything else is a MODULE inside the app, never a new subdomain.** Invoicing, extra food safety, FDA guidance ingestion — all tiles, opened per client by `company_user_role` / `company_user_task` / `role_task` rows.
+
+⚠ **One database, one backend, one front door.** Master data lives once; business rules live once; a second place for invoice logic drifts from the first and the client finds out before you do.
+
+⚠ **Modules are database rows created THROUGH THE UI, never by SQL.**
+
+**Why the marketing page must be a real static page:** the old CloudFront site is the old Angular app and **its Login button works**, pointing at the old backend and the old database. A wrong door that looks right — *and* it keeps CloudFront, the old instance and `abletrace-prod1` alive, blocking the old-account retirement.
 
 ---
 
 ## THEN
 
-**S145 — old-account retirement.** ⚠ **Minty's ruling S143: ONE ITEM AT A TIME. Claude shows what points at each resource, Minty says go, then it goes.** Never a batch. The S138 subdomain takeover happened exactly this way.
+**Old-account retirement.** ⚠ **ONE ITEM AT A TIME. Claude shows what points at each resource, Minty says go, then it goes.** Never a batch. The S138 subdomain takeover happened exactly this way.
 
-**Then QuickBooks production (P267).** ⚠ **`app.abletrace.ca` is the domain to declare to Intuit**, and the OAuth redirect URI becomes `https://app.abletrace.ca/api/quickbooks/callback`. Declaring before the move means going back mid-review.
+**Then QuickBooks production (P267).** ⚠ **`app.abletrace.ca` is the domain to declare to Intuit**, and the OAuth redirect becomes `https://app.abletrace.ca/api/quickbooks/callback`.
 
-**Certificate renewal, before 27 November.** All three `abletrace.ca` certificates are `--manual` and will not auto-renew. ⚠ **Once DNS points at this box, re-issue them the ordinary webroot way and renewal becomes automatic.** Fold into S145.
+**Certificate renewal, before 27 November.** All three `abletrace.ca` certificates are `--manual` and will not auto-renew. ⚠ **Once DNS points at this box, re-issue them the ordinary webroot way and renewal becomes automatic.**
 
 ---
 
 ## ⚠ SECRET EXPOSED S143 — ROTATE
 
-**Dev's `DATABASE_URL`, including the password, was printed to the screen and into chat.** Claude's grep pattern matched it. Dev only; prod untouched; the RDS instance is not publicly reachable.
-
-**Not an emergency, but it must be rotated.** → **P272**. ⚠ **Method is 3B.8 — read it first.** A fumble on a live DB password locks the app out.
+**Dev's `DATABASE_URL`, including the password, was printed to screen and chat.** Dev only; prod untouched; the RDS instance is not publicly reachable. → **P272**. ⚠ **Method is 3B.8 — read it first.**
 
 ---
 
 ## OLD ACCOUNT — DISPOSITION
 
-Measured S142. ⚠ **Nothing on this list has been deleted.** ⚠ **Minty's ruling S142 stands: the four old clients' data stays until he says otherwise.**
+Measured S142. ⚠ **Nothing on this list has been deleted.** ⚠ **The four old clients' data stays until Minty says otherwise.**
 
-**Goes safely — nothing points at these:** `abletrace-development1` · `stgapifrontend` · `abletrace-frontend1` · `ftp-transfer-abletrace` (empty) · 3 Lambdas · 1 API Gateway · 6 CloudWatch log groups · 5 EC2 key pairs · IAM user `abletracelab-ses-smtp-s35` and its key (**never used, ever**). ~$2/month.
+**Goes safely — nothing points at these:** `abletrace-development1` · `stgapifrontend` · `abletrace-frontend1` · `ftp-transfer-abletrace` (empty) · 3 Lambdas · 1 API Gateway · 6 CloudWatch log groups · 5 EC2 key pairs · IAM user `abletracelab-ses-smtp-s35` and its key (**never used**). ~$2/month.
 
 **Stays permanently:** SES `ca-central-1` (only working email path; new account was **denied**) · IAM user `abletrace260825-ses-sender` + key `AKIAVDGLJ3MUJM62YWFZ` · Route 53 zone `abletrace.ca` · **`abletrace-fileuploads1` — the only copy of client documents** · root + MFA.
 
-**Goes after S144 proves out** — ~$58/month: instance `i-088b7969158c43bca` · its volume and ENI · Elastic IP `3.98.223.126` · CloudFront `E311W5PD650CXV` · `abletrace-prod1` · the `prodapi.abletrace.ca` record. ⚠ **The DNS record goes first, never the IP first.**
+**Goes after the cutover proves out** — ~$58/month: instance `i-088b7969158c43bca` · its volume and ENI · Elastic IP `3.98.223.126` · CloudFront `E311W5PD650CXV` · `abletrace-prod1` · the `prodapi.abletrace.ca` record. ⚠ **The DNS record goes first, never the IP first.**
 
 **Needs a question answered first:** `s3_cloudfront` key `AKIAVDGLJ3MUH7IPS3W7`, last used 2026-07-08, carries EC2+S3+SES+CloudFront+SSM+CodeDeploy full access. ⚠ **Ask what still points at this. Deactivate before deleting — deactivation is reversible.**
 
@@ -170,7 +202,7 @@ Measured S142. ⚠ **Nothing on this list has been deleted.** ⚠ **Minty's ruli
 
 ## ⚠ THE RDS SNAPSHOTS — SETTLED, DO NOT RELITIGATE
 
-**They can go, but not yet.** Master data for all four old clients is duplicated in schema `abletrace` on the new account's prod RDS, which is backed up with it. Measured S142:
+**They can go, but not yet.** Master data for all four old clients is duplicated in schema `abletrace` on the new account's prod RDS, backed up with it. Measured S142:
 
 | id | company | materials | recipes | suppliers | customers |
 |---|---|---|---|---|---|
@@ -179,9 +211,9 @@ Measured S142. ⚠ **Nothing on this list has been deleted.** ⚠ **Minty's ruli
 | 366/378/418 | Truffle / Truffle Pig | 43/26/28 | 14/14/19 | 9 | 172–175 |
 | **419** | **hagensborg** | **34** | **84** | **10** | **175** |
 
-⚠ **`164 Mava Foods` is an abandoned empty registration.** Mava's real record is **184 mavatrial2**. Reading "Mava Foods, 0 materials" and concluding the data is missing is the wrong answer.
+⚠ **`164 Mava Foods` is an abandoned empty registration.** Mava's real record is **184 mavatrial2**.
 
-⚠ **Master data is database data.** `abletrace-fileuploads1` holds PDFs and JPEGs whose filenames name no company. **The bucket and the snapshots are not copies of each other, and neither substitutes for the other.**
+⚠ **Master data is database data.** `abletrace-fileuploads1` holds PDFs and JPEGs whose filenames name no company. **The bucket and the snapshots are not copies of each other.**
 
 ⚠ **A snapshot cannot be inspected without restoring it**, which restarts the extended-support meter. Read identifiers and dates — never restore to look.
 
@@ -193,35 +225,37 @@ Minty ranks. Claude never renumbers.
 
 | # | item |
 |---|---|
-| P265 | **S144. Cut over to `app.abletrace.ca`.** Full spec above. ⚠ **Sunday evening** |
-| — | **S145. Old-account retirement, ONE ITEM AT A TIME.** Minty's ruling S143 |
-| — | **Grow the holding page into the real marketing site.** No session needed — it is files in `/var/www/marketing`. No DNS, no certificate, no deploy pipeline. ⚠ **Never `/var/www/html`** |
-| P267 | **QuickBooks production approval.** ⚠ **Declare `app.abletrace.ca`.** Privacy policy skeleton first. Brief is a separate file Minty holds |
-| P262 | **Client onboarding importer — complete rebuild.** Mava is the pilot. Full spec was in S142's NOW; re-derive from Section 3A when it comes up |
-| P272 | **Rotate dev's DATABASE_URL password.** Exposed to screen and chat S143. ⚠ **Method 3B.8, read it first** |
-| P270 | **Material certificate icon shows red "Certificate Unavailable" when a certificate IS uploaded, saved, and in date.** Proven S143: MAT-5 BBQ Sauce Bulk, `White Rice Label. copy.pdf`, expiry 2026-09-30, downloads and renders. **Display fault only** — file and date are correct in the row |
-| P271 | **`[object Object]` alert on SO-Management.** An error path that fails to render its own message, so the user is told nothing. Seen S143 |
+| P265 | **S145. Finish the cutover to `app.abletrace.ca`.** Full spec above. ⚠ **Blocked on a GitHub build** |
+| P273 | **GitHub artifact storage quota is full and blocks EVERY frontend build.** Old artifacts deleted S144; still blocked seven hours later. ⚠ **This blocks all frontend work, not just the cutover.** Options: wait longer · delete more · `retention-days` below 14 · a paid plan · build on the Mac |
+| P274 | **No local build path exists.** ⚠ **`nvm` is not installed and the Mac is on Node 24 against a project that declares `^20`.** Worth having regardless of P273 — it is the only route when GitHub is unavailable |
+| P275 | **192 npm vulnerabilities (6 critical, 79 high)** reported by `npm ci` S144. ⚠ **Do NOT run `npm audit fix`** — it rewrites dependency versions. Needs a deliberate session |
+| — | **Grow the holding page into the real marketing site.** No session needed — files in `/var/www/marketing`. ⚠ **Never `/var/www/html`** |
+| P267 | **QuickBooks production approval.** ⚠ **Declare `app.abletrace.ca`.** Privacy policy skeleton first |
+| P262 | **Client onboarding importer — complete rebuild.** Mava is the pilot. Re-derive the spec from Section 3A |
+| P272 | **Rotate dev's DATABASE_URL password.** ⚠ **Method 3B.8, read it first** |
+| P270 | **Material certificate icon shows red "Certificate Unavailable" when a certificate IS uploaded and in date.** Proven S143. **Display fault only** |
+| P271 | **`[object Object]` alert on SO-Management.** An error path that fails to render its own message |
 | P17 | Two old-account IAM keys still valid and in git history. The old account is load-bearing for email |
-| P8 | Prod git checkout lags the served build — read rollback path off the box |
+| P8 | **Prod git checkout lags the served build.** ⚠ After S145's deploy, prod's checkout will still read `9bce0238` while `/var/www/html` serves `2a576cb8`. **Not a failed deploy** |
 | P210 | Prod to Node v24. Dev has run v24 cleanly for several sessions |
 | P224 | Dev SSH IPv6 rule |
 | P227 | Dev backend `node_modules.old-node18/` — deliberate, untracked |
 | P240 | The app cannot tell anyone a send failed. Overlaps P257 |
 | P241 | Quarterly security audit, five named checks |
-| P245 | QuickBooks — **Phase 2 core DONE and proven.** Four failure-handling items remain. **Phase 3 UNBLOCKED** — hardcoded `sandbox260820` can become `req.companyId` |
+| P245 | QuickBooks — **Phase 2 core DONE and proven.** Four failure-handling items remain. **Phase 3 UNBLOCKED** |
 | P246 | `User.creatSuperAdmin` hardcodes password `"12345678"`. `api/models/User.js:98`. Fold into P241 |
 | P247 | **App JWTs never expire.** `api/policies/generateJWT.js`, no `expiresIn` |
 | P248 | **OS updates.** Both boxes report "system restart required". Prod 59 pending / 12 security |
 | P249 | **Typing any URL logs the user out.** `auth.guard.ts` reads the NGRX store, memory only |
-| P251 | GitHub warns Node.js 20 actions are deprecated |
+| P251 | GitHub warns Node.js 20 actions are deprecated. ⚠ **Seen again S144** — `actions/checkout@v4` forced onto Node 24 |
 | P252 | **External ID duplicate guard, customers and products.** ⚠ `editCustomer` has no duplicate check at all |
 | P253 | **No SSH host aliases.** Two lines in `~/.ssh/config`. dev `16.55.10.205`, prod `15.157.38.101` |
 | P254 | **A sales order cannot be edited once created.** Business question |
-| P256 | **Dev home is full of dead build folders**, ~50 back to S63. ⚠ Keep the live rollback and one prior. ⚠ Also: `.env.bak-s139` on both boxes · prod `mava-export.sh`, `mava-export-2.sh`, `mava-export-260826/` · **prod `~/patch-nginx-abletrace-s143.py`, spent** |
+| P256 | **Dev home is full of dead build folders**, ~50 back to S63. ⚠ Keep the live rollback and one prior. ⚠ Also: `.env.bak-s139` both boxes · prod `mava-export.sh`, `mava-export-2.sh`, `mava-export-260826/` · **prod `~/patch-nginx-abletrace-s143.py` and `~/patch-nginx-app-s144.py`, both spent** · Mac `~/environment.prod.ts.bak-s144`, `/etc/hosts.bak-s144` |
 | P257 | **Automated bounce and complaint handling.** ⚠ Required for any SES re-application |
 | P258 | **Two test companies exist and cannot be deleted.** `testses260825a` dev, `testsesprod260825` prod. ⚠ Set Inactive through the app, not by SQL |
-| P259 | **One IAM key serves both boxes.** Minty's ruling S139: separate eventually. Dev first, prove a send |
-| P260 | **Old-account IAM users that should not exist.** `Bobby1` (console access removed S142; user remains) · `abletracelab-ses-smtp-s35` |
+| P259 | **One IAM key serves both boxes.** Separate eventually. Dev first, prove a send |
+| P260 | **Old-account IAM users that should not exist.** `Bobby1` · `abletracelab-ses-smtp-s35` |
 | P264 | **No automated tests anywhere.** The S141 attack test is the only one. ⚠ Never run against prod |
 | P266 | **Eleven dead `Object.keys(req.body)` guards**, always true since P250 injects `company_id`. Harmless |
 | P268 | **The QuickBooks tile's visibility gate is not in `src/app/Layouts`** |
@@ -233,13 +267,17 @@ Minty ranks. Claude never renumbers.
 
 ## TRAPS CARRIED FORWARD — all look like broken code
 
-⚠ **A blank page with the correct tab title means the JavaScript threw, not that the server failed.** Open the console. Seen S143 — it was only a missing refresh.
+⚠ **A GitHub run can COMPILE and still fail.** The upload step is separate. **Read which step went red before touching the code.** Cost most of S144. → **to TRAPS**
 
-⚠ **A local `dig` can return EMPTY while Route 53 already holds the new value.** Ask the authoritative server: `dig +short TXT <name> @ns-1320.awsdns-37.org`. Cost twenty minutes in S143.
+⚠ **`dig` ignores `/etc/hosts` entirely.** To prove a hosts override is gone, use `dscacheutil -q host -a name <n>` — `dig` would answer the same either way and cannot fail. → **to TRAPS**
 
-⚠ **Route 53 truncates record names in the list.** `_acme-challenge`, `_acme-challenge.www` and `_acme-challenge.app` all display as `_acme-ch...`. **Read the Record details panel, never the row.**
+⚠ **A blank page with the correct tab title means the JavaScript threw, not that the server failed.** Open the console.
 
-⚠ **AWS phrases a wrong-account resource as an authorization error.** "root is not authorized to perform route53:GetHostedZone" meant the zone belongs to the other account. **Read the account number before the measurement.**
+⚠ **A local `dig` can return EMPTY while Route 53 already holds the new value.** Ask the authoritative server: `dig +short TXT <n> @ns-1320.awsdns-37.org`.
+
+⚠ **Route 53 truncates record names in the list.** `_acme-challenge`, `.www` and `.app` all display as `_acme-ch...`. **Read the Record details panel, never the row.**
+
+⚠ **AWS phrases a wrong-account resource as an authorization error.** **Read the account number before the measurement.**
 
 ⚠ **`isAuth` rewrites `req.body.company_id` on every authenticated request.** Sending a different one has no effect and is not a bug.
 
@@ -263,7 +301,7 @@ Minty ranks. Claude never renumbers.
 
 ⚠ **`shipped_flag` is the ship gate, not `status_id`.**
 
-⚠ **Licence statuses:** 1 Invited · 2 Trial · 3 Active · 4 Expired · 6 Inactive. **Only Inactive blocks login. Expired keeps access.** Seen S143 — "Your licence has expired" on a working account is not a fault.
+⚠ **Licence statuses:** 1 Invited · 2 Trial · 3 Active · 4 Expired · 6 Inactive. **Only Inactive blocks login. Expired keeps access.**
 
 ⚠ **`SELECT ... INTO OUTFILE` does not work on RDS.** Use `mysql -B`.
 
@@ -275,11 +313,11 @@ Minty ranks. Claude never renumbers.
 
 ⚠ **An RDS snapshot cannot be queried.** Restoring is the only read path and it starts an extended-support meter.
 
-⚠ **`sudo` changes HOME.** The S143 nginx backup landed in `/root/`, not `/home/ubuntu/`.
+⚠ **`sudo` changes HOME.** nginx backups land in `/root/`, not `/home/ubuntu/`.
 
 ⚠ **nginx `grep -r` silently skips symlinks.** Use `nginx -T`.
 
-⚠ **A server block loads exactly one certificate.** Two names needing different certificates need two blocks.
+⚠ **A server block loads exactly one certificate.** Two names needing different certificates need two blocks. Prod now has three.
 
 **QuickBooks Canada refuses any transaction with no tax code on a line**, and any line with no Amount. ⚠ **Always log `err.response.data`, truncated.**
 
@@ -291,6 +329,6 @@ Minty ranks. Claude never renumbers.
 
 ⚠ **No HttpInterceptor.** Every service sets `authorization: bearer <webToken>` per call, **lower case**.
 
-⚠ **`src/app/Services` has a CAPITAL S.** macOS is case-insensitive; Angular's AOT compiler is not.
+⚠ **`src/app/Services` has a CAPITAL S.** macOS is case-insensitive; Angular's AOT compiler is not. ⚠ **This is the trap a Mac-built bundle would hit.**
 
 **`formulations` has no `name` column — it is `title`.**
