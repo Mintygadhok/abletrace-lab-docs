@@ -1,6 +1,6 @@
 # NOW
 
-Rewritten whole at the close of **S144**.
+Rewritten whole at the close of **S145**.
 
 The open check measures commits, process, port, runtime and dirty trees. Nothing here repeats it. This carries only what no command returns.
 
@@ -8,173 +8,198 @@ The open check measures commits, process, port, runtime and dirty trees. Nothing
 
 ## STATE
 
-**S144 did the first half of the cutover and was stopped by GitHub, not by anything in the app. No DNS record was changed. Nothing public moved.**
+**The domain cutover is COMPLETE and proven on the screen.** All four names serve from `15.157.38.101`.
 
-The live site was 200 at the start and 200 at the end.
+| name | serves | proven by |
+|---|---|---|
+| **`app.abletrace.ca`** | the application | login, data screens, file up **and** down, SES email received |
+| **`abletrace.ca`** | the same build — marketing pages + Login | incognito, clean padlock |
+| **`www.abletrace.ca`** | the same | `curl -s -I` 200, certificate validated |
+| `trace.mintekfoodsafety.com` | still up, unchanged | 200 |
 
-**Deliberate, done, verified:**
+**Deliberate, done:**
 
-- **The Mac's `/etc/hosts` override is GONE.** S143's line `15.157.38.101 abletrace.ca www.abletrace.ca` was removed. The Mac now resolves `abletrace.ca` to CloudFront exactly as the public does. Backup at `/etc/hosts.bak-s144`.
-- **nginx on prod now carries a THIRD 443 block**, for `app.abletrace.ca`, its own certificate, same docroot, same `/api/` proxy. The two existing 443 blocks are untouched. `app.abletrace.ca` added to the port-80 redirect. Backup at **`/root/nginx-abletrace.bak-s144-20260830-204516`**.
-- **`environment.prod.ts:3` now reads `https://app.abletrace.ca/api/v1/`.** Committed and pushed as **`2a576cb8`**. Mac backup of the old file at `~/environment.prod.ts.bak-s144`.
+- Prod frontend is **`2a576cb8`** — `apiUrl` = `https://app.abletrace.ca/api/v1/`. Deployed with label `prod-2a576cb8e64f8ddcd28368cd0696b11f0912ee0d`.
+- Prod `.env` line 8 `APP_BASE_URL=https://app.abletrace.ca`. Backend restarted, 200.
+- nginx carries **three 443 blocks**; the `app.` block was added S144.
+- Three Route 53 A records → `15.157.38.101`, TTL 60, Alias OFF.
+- ⚠ **A column was added to the PROD database**: `companycustomers.external_id VARCHAR(255) NULL`. It was missing and was breaking the live Customers screen.
+- **GitHub Actions was paid for.** The artifact quota blocker is gone. → **P273 closed.**
+- **Clients were told the new address by WhatsApp S145.** The old name still works; no deadline was given.
 
-**Deliberate, NOT done:** no DNS record changed. No frontend deployed anywhere. Prod still serves the old build.
+⚠ **`abletrace.ca` and `app.abletrace.ca` serve the SAME BUILD.** The marketing pages live inside the Angular app and render to anonymous visitors. **No holding page was built and no nginx change was needed** — S144's steps 6 and 7 disappeared. Splitting them later is the same size job as doing it now. → **P280**
 
-**Half-done — nothing on any box is in a broken or partial state.** The commit is on `main` and deployed nowhere.
-
----
-
-## ⚠ THE ONE THING THAT MUST NOT BE GOT WRONG
-
-**`2a576cb8` MUST NOT REACH PROD BEFORE `app.abletrace.ca` RESOLVES.**
-
-That build calls `https://app.abletrace.ca/api/v1/` for every piece of data. Deploy it while the name still points nowhere and the live site loads a page whose every data call fails — a white app for two live clients.
-
-**Order is: DNS record first, prove it resolves, then deploy.** This inverts S143's plan, which had the deploy first. ⚠ **The inversion is safe because the record is NEW.** Creating `app.abletrace.ca` breaks nothing — no name changes meaning, no traffic moves. It simply starts resolving to a host that already answers 200 on it. Nothing reaches it until someone types it.
-
----
-
-## ⚠ THE BLOCKER — GITHUB ARTIFACT STORAGE QUOTA
-
-**GitHub will not hand over a build. Two attempts, both failed identically.**
-
-```
-Failed to CreateArtifact: Artifact storage quota has been hit.
-Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.
-```
-
-⚠ **The compile SUCCEEDS.** Run #82 ran 7m37s, the dispatch run 6m26s, both compiled cleanly and both died at the *Upload dist artifact* step. **There is nothing wrong with the code.** Reading this as a build failure is the wrong answer.
-
-**What was already tried:** Minty deleted the old artifacts around 14:10. The dispatch run at 21:46 — over seven hours later, inside the stated 6–12 hour window — failed the same way.
-
-⚠ **So the deletions may not have freed enough.** The window has nearly elapsed and the gate is still shut. **Do not assume the morning fixes it.** Try once, and if it fails again the quota is not the whole story.
-
-**First action of S145 is one dispatch.** Actions → Build Frontend → Run workflow → `main` → target **prod**. Green with an artifact means carry on. Red at upload means go to the Mac path below.
-
-### The Mac fallback — homework done, not executed
-
-The Mac can build this. Measured S144: `node_modules` present, `npm ci` completed successfully.
-
-⚠ **`npm ci` HAS ALREADY BEEN RUN.** `~/abletrace-lab-frontend/node_modules` is a fresh lockfile install as of S144. Do not run it again unless something suggests it is stale.
-
-⚠ **The Mac is on Node v24.13.1. `package.json` declares `node: '^20'` and the pipeline pins Node 20.** npm printed `EBADENGINE ... required: { node: '^20' }, current: { node: 'v24.13.1' }`. It warns, it does not refuse.
-
-**`nvm` is NOT installed** — measured, `NO nvm`. So the Mac path forks:
-
-- **Install nvm, build on Node 20** — matches the pipeline exactly, removes the version objection. Preferred.
-- **Build on Node 24** — off-spec, nobody has tested this configuration.
-
-**The build command is `npm run build-prod`**, read off the workflow file. The runner does exactly `npm ci` then `npm run build-prod`, nothing else.
-
-**Then:** zip `dist/`, `scp` it to prod, unzip to `~/dist-prod-<full sha>`, and run the deploy script exactly as with a downloaded artifact. ⚠ **The deploy script does not care where the folder came from.**
+**Half-done: nothing.** No rollback is pending, no file is partly written, no record is partly changed.
 
 ---
 
-## THE JOB — S145: FINISH THE CUTOVER
+## ⚠ THE FINDING — THE QUICKBOOKS SCHEMA NEVER REACHED PROD
 
-**All three names still to move.** `app.abletrace.ca` → the app. `abletrace.ca` + `www.` → a minimal holding page.
+**Measured S145. This is the whole of next session.**
 
-⚠ **Sunday evening was S143's ruling. Minty overrode it in S144 on the grounds that no client works Sunday.** Two live clients — if S145 lands on a weekday, the timing question is open again and it is Minty's to answer.
+| object | dev | prod |
+|---|---|---|
+| `companycustomers.external_id` | present | **WAS MISSING — added S145** |
+| five `qb_*` columns on `packingslips` | present | **ALL FIVE MISSING** |
+| table `quickbooks_tokens` | present | **MISSING** |
+
+⚠ **NOW previously claimed all of these existed on both boxes. That was wrong on every one.** A quoted fact with no measurement beside it is a memory, not material.
+
+⚠ **It is not scattered drift. It is one body of work that stopped at dev.** `external_id` only surfaced because it sits on a table the Customers screen reads — **that screen was throwing a 500 for two live clients and nobody knew** until a domain cutover made someone click it.
+
+⚠ **The QuickBooks screen on prod would fail the moment anyone opened it.**
+
+**RULES already covers this:** *a database object reaches neither box by deploying; run it on each box separately, gate each box separately.* The rule exists. It was not followed. **Why that happened matters more than the columns.**
+
+---
+
+## THE JOB — S146: SCHEMA DRIFT, DEV vs PROD
 
 ### The action, in order
 
-0. **File the two new traps into TRAPS.md.** Marked **→ to TRAPS** at the foot of this document. ⚠ **Doc edits are replacements** — pull, read the live file, replace whole, diff, commit, push. Five minutes at the open. Delete them from NOW once filed.
-1. **Get a prod build.** One GitHub dispatch. If it fails at upload, go to the Mac path above.
-2. **Create the `app.abletrace.ca` DNS record** — Route 53, **old account `350466202408`**, zone `abletrace.ca`. Type **A**, **Alias OFF**, value **`15.157.38.101`**, TTL **60**. ⚠ **Creating this breaks nothing.** Prove it resolves before going on.
-3. **Deploy the build to prod.** `scp` the zip, unzip to `~/dist-prod-2a576cb8e64f8ddcd28368cd0696b11f0912ee0d`, then `~/deploy-frontend.sh prod-2a576cb8e64f8ddcd28368cd0696b11f0912ee0d`. Shift+Cmd+R in Chrome after.
-4. **Change `APP_BASE_URL` in prod `.env`** to `https://app.abletrace.ca`, then `pm2 restart abletrace-backend`, `sleep 8`, curl.
-5. **Prove the app on `app.abletrace.ca`** — login, a data screen, a file up and down, an invite email whose link says `app.abletrace.ca`. ⚠ **Do not touch the other two records until this passes.** Until this point the old site is still up and nothing has been taken away.
-6. **Write the holding page to `/var/www/marketing`.** ⚠ **NEVER `/var/www/html`** — every frontend deploy overwrites that whole. Logo, a sentence or two, a Login button to `https://app.abletrace.ca`.
-   - ⚠ **The folder does not exist and `/var/www/` is root-owned.** `sudo mkdir /var/www/marketing` then `sudo chown ubuntu:ubuntu /var/www/marketing`, matching `/var/www/html`. Without the chown, every future edit needs sudo and "grow it in place" becomes a chore.
-   - **The images already exist** in `/var/www/html/assets/images/` — the old marketing site's assets, still riding inside the app build. `AbleTraceLogo.png` · `home-bg.jpg` · `about.jpg` · `contact-img.jpg` · six feature images (`abletrace-food-safety`, `-traceablity`, `-production`, `-rceipe`, `-supplier`, `-order-fulfillment`). ⚠ **COPY them into `/var/www/marketing/`, never reference them where they sit** — the next frontend deploy wipes `/var/www/html` whole and the page would lose its images.
-7. **Point `abletrace.ca` and `www.` at the holding page** — change the `root` in the existing `abletrace.ca` 443 block from `/var/www/html` to `/var/www/marketing`, drop its `/api/` proxy, `nginx -t`, reload.
-8. **Edit the two DNS records** — `abletrace.ca` A and `www.abletrace.ca` A. Turn **Alias OFF**, value `15.157.38.101`. A TTL box appears once Alias is off; set 60.
-9. **Verify on screen** — see below.
+1. **File the two traps** marked **→ to TRAPS** at the foot of this document. ⚠ Doc edits are replacements — pull, read the live file, replace whole, diff, commit, push. Delete them from NOW once filed.
+2. **Column-level comparison across all 77 tables.** The table-level check found one gap; the column check found six. ⚠ **Spot checks are what let this survive.** Compare every column of every table, both boxes, and produce one list.
+3. **Decide what to apply to prod.** ⚠ **Not automatic** — see the QuickBooks question below.
+4. **Establish how a schema change gets to both boxes.** Without this it recurs.
 
-⚠ **Step 6 is a holding page, not a marketing project.** It grows in place later, with no DNS, no certificate and no deploy pipeline involved. That is the whole payoff of the split. **Do not let it expand inside the session.**
-
-### Material — measured S144 unless stated
+### Material — measured S145
 
 | fact | measured by | returned |
 |---|---|---|
-| Frontend commit to deploy | `git push` | **`2a576cb8`** (`d7702040..2a576cb8`) |
-| What changed in it | `cat -n .../environment.prod.ts` before and after | line 3 `trace.mintekfoodsafety.com` → **`app.abletrace.ca`**, one line, `decimalPlaces: 3` intact |
-| Scope of that string | `grep -rn "mintekfoodsafety" ~/abletrace-lab-frontend/src --include="*.ts"`, S143 | **2 hits only** — prod and dev environment files. ⚠ **`environment.dev.ts` deliberately untouched** |
-| nginx after the S144 patch | patch script output | 2149 → **3286 bytes**. Backup `/root/nginx-abletrace.bak-s144-20260830-204516` |
-| nginx syntax | `sudo nginx -t` | ok, test successful |
-| Live site survived the reload | `curl -s -I https://trace.mintekfoodsafety.com \| head -1` | **HTTP/1.1 200 OK** |
-| `app.` block answers | `curl -s -I -H "Host: app.abletrace.ca" --resolve app.abletrace.ca:443:127.0.0.1 https://app.abletrace.ca \| head -1` | **HTTP/1.1 200 OK** — curl validated the certificate to get there |
-| Mac sees public DNS again | `grep -n abletrace /etc/hosts; dscacheutil -q host -a name abletrace.ca` | grep empty · `18.172.185.5 / .55 / .12 / .104` — CloudFront |
-| The build pipeline | `cat -n .../.github/workflows/build-frontend.yml` | `npm ci` → `npm run build-prod` · **Node pinned to 20** · dispatch input `target`, choice prod/dev, **default prod** · a **push** builds **dev** · `retention-days: 14` |
-| Deploy script | `cat -n ~/deploy-frontend.sh` on prod | takes a **label**, copies `~/dist-<label>` → `/var/www/html`. **Backs up to `~/www-html.bak-<label>`, named after the NEW label — so it does NOT overwrite the existing rollback** |
-| Builds on prod | `ls -1dt /home/ubuntu/dist-*` | `dist-prod-4910b46d…` + `.zip` · `…e1a82e02` + `.zip` · `…2968c591` |
-| Rollback builds on prod | `ls -1dt /home/ubuntu/www-html.bak-*` | **`/home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031`** (live) |
-| Mac build capability | `node -v; npm -v`, `ls -d …/node_modules` | v24.13.1 · npm 11.8.0 · `node_modules` present, freshly `npm ci`'d |
-| nvm on the Mac | `command -v nvm \|\| ls -d ~/.nvm` | **NO nvm** |
-| **Full SHA — the deploy label** | `git -C ~/abletrace-lab-frontend rev-parse HEAD` | **`2a576cb8e64f8ddcd28368cd0696b11f0912ee0d`**. ⚠ **The label is the FULL sha, not the short one** |
-| Docroot ownership | `ls -ld /var/www/ /var/www/html /var/www/marketing` | `/var/www/` **root:root** · `/var/www/html` **ubuntu:ubuntu** · **`/var/www/marketing` does not exist** |
-| Marketing images available | `ls -1 /var/www/html/assets/images/` | logo, background, about, contact and **six named feature images** — a whole marketing site's assets |
-| Downloads | `ls -1t ~/Downloads` | one file, `patch-nginx-app-s144.py`, spent. **No numbered duplicates** |
-| Dev, untouched | dev open check | frontend `c2a52d8e`, backend `cf7722d` **matching prod**, clean but for `node_modules.old-node18/` (P227), `abletrace-dev` online, 200, v24.19.0 |
+| Table counts | `SELECT ... information_schema.tables` both boxes | prod **77**, dev **78** (78/79 lines incl. header) |
+| The one extra table | `diff /tmp/prod-tables.txt /tmp/dev-tables.txt` | `58a59 > quickbooks_tokens` — **dev only** |
+| `qb_*` on prod | `SHOW COLUMNS FROM packingslips LIKE 'qb_%'` on `abletracelab_live` | **empty — none of the five exist** |
+| `external_id` before the fix | `SHOW COLUMNS FROM companycustomers LIKE 'external_id'` | empty on prod, present on dev |
+| The definition applied | dev's `SHOW COLUMNS` | `varchar(255)`, `YES` null, no key, no default |
+| The 500 itself | `pm2 logs abletrace-backend --lines 50 --nostream` | `ER_BAD_FIELD_ERROR: Unknown column 'companycustomers.external_id' in 'field list'` |
 
-### ⚠ Rollback
+### ⚠ The two databases are NOT shared — settled S145
 
-**To undo step 2:** delete the `app.abletrace.ca` record. Nothing else points at it.
+| box | RDS instance | schema |
+|---|---|---|
+| **prod** | `abletrace-lab-prod.czwsy0m0axvx.ca-central-1.rds.amazonaws.com` | `abletracelab_live` |
+| **dev** | `abletrace-lab-dev-s62-dev.czwsy0m0axvx.ca-central-1.rds.amazonaws.com` | `abletracelab_live` |
 
-**To undo step 3:** `sudo rm -rf /var/www/html/* && sudo cp -r /home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031/* /var/www/html/`. ⚠ **Read the rollback path off the box first, never from a build label.**
+Measured with `grep "^DATABASE_URL" .env | sed 's|://[^@]*@|://***:***@|'` — masks the credential, shows host and schema.
 
-**To undo step 4:** `APP_BASE_URL` back to `https://trace.mintekfoodsafety.com`, restart.
+⚠ **Two separate servers. The schema NAME is identical on both**, which is why `SHOW DATABASES` looks the same on each box and why a wrong-box query would not announce itself. → **P276**
 
-**To undo step 8, per record:** turn **Alias back ON**, `Alias to CloudFront distribution`, region **US East (N. Virginia)**, target **`d1gnzid0cfbv78.cloudfront.net`**, Simple routing. ⚠ **That target string is the rollback.** The four `18.172.185.x` addresses are CloudFront's own and rotate — **never roll back to those.**
+⚠ **Each instance carries three schemas**: `abletrace` (78 prod / 77 dev), `abletrace-dev` (66 both), `abletracelab_live` (the live one). **`abletrace-dev` on the PROD instance is not the dev box's database.**
 
-**There is no TTL to lower.** Alias records have no TTL field; AWS manages it. Measured S143, not assumed.
+### ⚠ The QuickBooks question that must be answered first
 
-**To undo the S144 nginx change:** the backup is at `/root/nginx-abletrace.bak-s144-20260830-204516`. ⚠ **`sudo` changes HOME** — that is why it is in `/root/`, not `/home/ubuntu/`.
+**Do not apply the QuickBooks schema to prod reflexively.** Minty's S145 ruling on **P279** moves invoicing into AbleTrace, and QuickBooks integration off the critical path. Applying a schema for a feature that may not ship is work for nothing.
 
-### The records that must not be touched
+**Business question:** does the QuickBooks schema go to prod now, or wait until P279 is settled? The `external_id` column is already applied and stays regardless — it was breaking a live screen.
 
-Zoho `MX` · apex TXT (**two values: zoho-verification AND `v=spf1 include:zohomail.co...`**) · `zmail._domainkey` · 8 SES DKIM CNAMEs · `_amazonses` · `_dmarc` · two ACM validation CNAMEs · NS · SOA.
+### Verify — S146 is done when
 
-⚠ **An SPF record DOES exist** — the apex TXT row holds two values and the second is SPF, naming Zoho only. **Do not "add" SPF and do not disturb the apex TXT.** Mail works today on DKIM plus relaxed DMARC.
-
-⚠ **Three spent `_acme-challenge` TXT records remain** (`_acme-challenge`, `_acme-challenge.www`, `_acme-challenge.app`). Harmless, delete when convenient.
-
-### Verify — S145 is done when
-
-- `https://app.abletrace.ca` loads in a browser **with no hosts entry**, padlock clean
-- Login works, a data screen draws, a file uploads and downloads
-- An invite email arrives and **the link inside says `app.abletrace.ca`**
-- `curl -I https://trace.mintekfoodsafety.com` still returns 200
-- **`https://abletrace.ca` shows the holding page**, padlock clean, Login button lands on the working app
-- **`https://www.abletrace.ca` does the same**
-- ⚠ **Nothing anywhere still shows the OLD CloudFront site**
+- One list exists of **every** column difference between the two `abletracelab_live` schemas
+- Each difference has a decision beside it: apply, don't apply, or investigate
+- Anything applied is verified with `SHOW COLUMNS` on prod
+- ⚠ **A screen that uses each changed table has been opened on prod and draws** — a column added is not a screen proven
+- A written answer to how the next schema change reaches both boxes
 
 ---
 
-## ⚠ THE DESTINATION — MINTY'S RULING S143
+## ⚠ ROLLBACK — the cutover, should it ever be needed
+
+**The three DNS records:** turn **Alias back ON** → `Alias to CloudFront distribution` → region **US East (N. Virginia)** → target **`d1gnzid0cfbv78.cloudfront.net`** → Simple routing. ⚠ **Never roll back to the four `18.172.185.x` addresses** — those are CloudFront's own and they rotate.
+
+**The frontend:** `sudo rm -rf /var/www/html/* && sudo cp -r /home/ubuntu/www-html.bak-prod-4910b46d76a4c49eee431e1a9b435a0116fc9031/* /var/www/html/` ⚠ **Read the rollback path off the box first.** The deploy script prints a rollback line to the build it just replaced — that is not the pre-cutover one.
+
+**The `.env`:** backup at `/home/ubuntu/.env.bak-s145`. **nginx:** `/root/nginx-abletrace.bak-s144-20260830-204516`. **Mac hosts:** `/etc/hosts.bak-s144`. **Mac `environment.prod.ts`:** `~/environment.prod.ts.bak-s144`.
+
+**The added column:** `ALTER TABLE companycustomers DROP COLUMN external_id;` ⚠ Would re-break the Customers screen.
+
+---
+
+## ⚠ THE OLD ACCOUNT IS NOW UNBLOCKED
+
+**Nothing you own points at CloudFront any more.** That was the blocker on retiring the old account's instance, distribution and bucket.
+
+⚠ **Nothing has been deleted. ONE ITEM AT A TIME.** Claude shows what points at each resource, Minty says go, then it goes. Never a batch — the S138 subdomain takeover happened exactly this way.
+
+⚠ **`prodapi.abletrace.ca` A → `3.98.223.126`** — seen in the console S145. That is the old account's Elastic IP. **The DNS record goes first, never the IP first.**
+
+**Goes safely — nothing points at these:** `abletrace-development1` · `stgapifrontend` · `abletrace-frontend1` · `ftp-transfer-abletrace` (empty) · 3 Lambdas · 1 API Gateway · 6 CloudWatch log groups · 5 EC2 key pairs · IAM user `abletracelab-ses-smtp-s35` and its key (**never used**). ~$2/month.
+
+**Stays permanently:** SES `ca-central-1` (only working email path; the new account was **denied**) · IAM user `abletrace260825-ses-sender` + key `AKIAVDGLJ3MUJM62YWFZ` · Route 53 zone `abletrace.ca` · **`abletrace-fileuploads1` — the only copy of client documents** · root + MFA.
+
+**Goes now the cutover has proven out** — ~$58/month: instance `i-088b7969158c43bca` · its volume and ENI · Elastic IP `3.98.223.126` · CloudFront `E311W5PD650CXV` · `abletrace-prod1` · the `prodapi.abletrace.ca` record.
+
+**Needs a question answered first:** `s3_cloudfront` key `AKIAVDGLJ3MUH7IPS3W7`, last used 2026-07-08, carries EC2+S3+SES+CloudFront+SSM+CodeDeploy full access. ⚠ **Ask what still points at this. Deactivate before deleting — deactivation is reversible.**
+
+**After Minty is comfortable** — $25.76/month: the 6 manual RDS snapshots.
+
+⚠ **Three spent `_acme-challenge` TXT records** remain in the zone. Harmless, delete when convenient.
+
+---
+
+## ⚠ THE ARCHIVE SCHEMA IS RICHER THAN PREVIOUSLY RECORDED
+
+Measured S145. Schema **`abletrace`** on the **prod** RDS instance, new account. **Backed up with prod. Does NOT depend on the old AWS account.**
+
+**Client procedures survive with their full text.** `documents.editorContent` holds the written procedure, 500–4,500 characters each. `documents` and `docDriveLink` are NULL on the text-bearing rows — **there is no file dependency.**
+
+| id | company | licence | docs with text | evidence |
+|---|---|---|---|---|
+| 366 | Truffle | 6 Inactive | **0** | Oct 2025, 21 docs all empty. First attempt |
+| **378** | **Truffle Pig** | 6 Inactive | **36** | ⚠ all v1, **all created in one second** 2026-04-24. A template suite loaded, not authored |
+| 418 | Truffle | 6 Inactive | 0 | empty shell, no documents at all |
+| **419** | **hagensborg** | 6 Inactive | **24** | ⚠ **authored 27–28 Mar 2026, six revised to v2 minutes apart.** The record that was worked in |
+
+⚠ **A version 2 is a NEW ROW, not an edit.** That is why `createdAt` and `updatedAt` match on every v2.
+
+⚠ **`haccpplan` has NO `company_id`** — it joins through `hazards.hazardId`. 210 rows spanning **2020 to 2026**, so it holds clients older than these four. **Only 366 has a HACCP plan** — one row. 378 and 419 have none.
+
+**Extracted S145:** `hagensborg-procedures.txt`, 18 procedures, 23,884 bytes, on the Mac. ⚠ **'Process flowchart' excluded** — 294,872 characters because it is a base64 image, not text. Extract as a picture if wanted.
+
+⚠ **Column names in this schema are not what you would guess.** `documenttype.name` not `title`. `company.company_name` not `name`. **Read the structure before writing the query.**
+
+---
+
+## ⚠ TWO LIVE CLIENTS SEE "Your licence has expired."
+
+Seen S145 on Shelly (Hagensborg) and Javier (Designer Cookies). ⚠ **Licence status 4 Expired still permits login — only 6 Inactive blocks it.** So it works as designed, but it is the first thing both clients read every time.
+
+**Business question, and it is now urgent:** the WhatsApp message pointing clients at `app.abletrace.ca` was sent S145. **That banner is what greets them at the new address.**
+
+---
+
+## THE DESTINATION — MINTY'S RULING S143, UNCHANGED
 
 | name | what it serves |
 |---|---|
-| **`abletrace.ca`** / `www.` | a **static marketing page**, grown in place |
+| **`abletrace.ca`** / `www.` | the **marketing site** |
 | **`app.abletrace.ca`** | **the application**. One login, one session |
 
-**Everything else is a MODULE inside the app, never a new subdomain.** Invoicing, extra food safety, FDA guidance ingestion — all tiles, opened per client by `company_user_role` / `company_user_task` / `role_task` rows.
+**Everything else is a MODULE inside the app, never a new subdomain.** ⚠ **One database, one backend, one front door.** ⚠ **Modules are database rows created THROUGH THE UI, never by SQL.**
 
-⚠ **One database, one backend, one front door.** Master data lives once; business rules live once; a second place for invoice logic drifts from the first and the client finds out before you do.
+---
 
-⚠ **Modules are database rows created THROUGH THE UI, never by SQL.**
+## ⚠ PRIVACY POLICY — MINTY'S RULINGS S145
 
-**Why the marketing page must be a real static page:** the old CloudFront site is the old Angular app and **its Login button works**, pointing at the old backend and the old database. A wrong door that looks right — *and* it keeps CloudFront, the old instance and `abletrace-prod1` alive, blocking the old-account retirement.
+**The skeleton is settled. It goes to a lawyer.**
+
+- **Collected:** names, emails, company affiliation for logins; business records including clients' own customer details
+- **Purpose:** operating the traceability platform
+- **Third parties:** AWS · Amazon SES · Zoho · Intuit ⚠ **check whether any client data sits in Google Drive**
+- **Location:** **Canada, `ca-central-1`** — databases, files and email. ⚠ A genuine strength for Canadian producers; state it plainly
+- **Retention:** as long as the account is live
+- **Deletion:** ⚠ **on request** — Minty's ruling. From the live system; backups age out thereafter
+- **Breach:** clients informed, ⚠ **AND the Privacy Commissioner where required** — the law obliges both, and requires a record of all breaches whether reported or not
+- **Privacy officer:** **Minty**, `info@abletrace.ca`. ⚠ An accountability role, not an IT one
+
+⚠ **Deactivation does NOT delete anything** — proven S145 by the four Inactive companies whose data is fully intact. **Any policy wording that says otherwise would be untrue about our own system.**
+
+⚠ **Neither legal document currently names AbleTrace.** That alone would fail review.
 
 ---
 
 ## THEN
 
-**Old-account retirement.** ⚠ **ONE ITEM AT A TIME. Claude shows what points at each resource, Minty says go, then it goes.** Never a batch. The S138 subdomain takeover happened exactly this way.
-
-**Then QuickBooks production (P267).** ⚠ **`app.abletrace.ca` is the domain to declare to Intuit**, and the OAuth redirect becomes `https://app.abletrace.ca/api/quickbooks/callback`.
-
-**Certificate renewal, before 27 November.** All three `abletrace.ca` certificates are `--manual` and will not auto-renew. ⚠ **Once DNS points at this box, re-issue them the ordinary webroot way and renewal becomes automatic.**
+**Certificate renewal, before 27 November.** All three `abletrace.ca` certificates are `--manual` and will not auto-renew. ⚠ **Now DNS points at this box, re-issue them the ordinary webroot way and renewal becomes automatic.** Cheap, and it removes a hard deadline.
 
 ---
 
@@ -184,25 +209,58 @@ Zoho `MX` · apex TXT (**two values: zoho-verification AND `v=spf1 include:zohom
 
 ---
 
-## OLD ACCOUNT — DISPOSITION
+## QUEUE
 
-Measured S142. ⚠ **Nothing on this list has been deleted.** ⚠ **The four old clients' data stays until Minty says otherwise.**
+Minty ranks. Claude never renumbers.
 
-**Goes safely — nothing points at these:** `abletrace-development1` · `stgapifrontend` · `abletrace-frontend1` · `ftp-transfer-abletrace` (empty) · 3 Lambdas · 1 API Gateway · 6 CloudWatch log groups · 5 EC2 key pairs · IAM user `abletracelab-ses-smtp-s35` and its key (**never used**). ~$2/month.
-
-**Stays permanently:** SES `ca-central-1` (only working email path; new account was **denied**) · IAM user `abletrace260825-ses-sender` + key `AKIAVDGLJ3MUJM62YWFZ` · Route 53 zone `abletrace.ca` · **`abletrace-fileuploads1` — the only copy of client documents** · root + MFA.
-
-**Goes after the cutover proves out** — ~$58/month: instance `i-088b7969158c43bca` · its volume and ENI · Elastic IP `3.98.223.126` · CloudFront `E311W5PD650CXV` · `abletrace-prod1` · the `prodapi.abletrace.ca` record. ⚠ **The DNS record goes first, never the IP first.**
-
-**Needs a question answered first:** `s3_cloudfront` key `AKIAVDGLJ3MUH7IPS3W7`, last used 2026-07-08, carries EC2+S3+SES+CloudFront+SSM+CodeDeploy full access. ⚠ **Ask what still points at this. Deactivate before deleting — deactivation is reversible.**
-
-**After Minty is comfortable** — $25.76/month: the 6 manual RDS snapshots.
+| # | item |
+|---|---|
+| — | **S146. Schema drift, dev vs prod.** Full spec above |
+| P279 | **Invoicing inside AbleTrace.** Minty's design, S145: a **default price on the product master, editable per invoice line**; a **default tax treatment per product, overridable per line**, plus a manual option. ⚠ **Store the values USED on the invoice — never re-derive from the master later**, or changing a price rewrites last month's invoices (the S106 principle). ⚠ **Tax must be per line, not per invoice** — basic groceries are zero-rated, prepared foods are not, and one order can carry both. QuickBooks transfer becomes **optional and manual**: the client keys an invoice number and total. ⚠ **This takes P267 off the critical path** |
+| P278 | **Terms and privacy policy INSIDE the app, with versioned acceptance.** Both currently live only in Google Drive. Record **who accepted, when, and WHICH VERSION**. ⚠ On a change, ask again — an old acceptance does not carry forward. ⚠ Acceptance rows are never edited or deleted. ⚠ **`company.terms_condition` is a yes/no flag with no version and no timestamp — replace it, don't extend it** |
+| P277 | **Client data deletion routine.** Deletion on request is now a published commitment with no tooling. ⚠ Manual today: many related tables in FK order, **plus the `abletrace-fileuploads1` bucket whose filenames name no company**. Needs a documented procedure at minimum |
+| P276 | **Naming audit across all environments.** ⚠ Both RDS instances hold a schema called `abletracelab_live` and one called `abletrace-dev`; `SHOW DATABASES` is identical on both boxes. Audit instances, schemas, EC2s, PM2 processes, buckets, IAM users, repos. List what is ambiguous, then decide what is worth renaming and what is too load-bearing to touch |
+| P280 | **Split the marketing site out of the Angular app.** Today a visitor downloads the whole application to read three paragraphs, every marketing tweak needs a full rebuild and deploy, and the app serves more than a login door to anonymous visitors. ⚠ **No harder later than now** — the content is HTML and images. Assets already on the box: `AbleTraceLogo.png` · `home-bg.jpg` · `about.jpg` · `contact-img.jpg` · six feature images. ⚠ **Copy them to `/var/www/marketing`, never reference them in `/var/www/html`** — every deploy wipes that whole. ⚠ `/var/www/` is root-owned: `sudo mkdir` then `sudo chown ubuntu:ubuntu` |
+| — | **Old-account retirement.** Unblocked S145. Full disposition above. ⚠ **One item at a time** |
+| P262 | **Client onboarding importer — complete rebuild.** Mava is the pilot. ⚠ **Verify Section 3A actually holds the spec before starting** — the detail was in S142's NOW and has been dropped. If 3A does not have it, it exists only in git history |
+| P272 | **Rotate dev's DATABASE_URL password.** ⚠ **Method 3B.8, read it first** |
+| P267 | **QuickBooks production approval.** ⚠ **Off the critical path per P279.** Gaps if resumed: disconnect URL, `intuit_tid` capture, both legal documents naming AbleTrace, and the redirect becomes `https://app.abletrace.ca/api/quickbooks/callback` with `app.abletrace.ca` declared |
+| P270 | **Material certificate icon shows red "Certificate Unavailable" when a valid in-date certificate exists.** Seen again S145 on prod. **Display fault only** — the file downloads and opens |
+| P274 | **No local build path.** ⚠ `nvm` is not installed; the Mac is Node v24 against a project declaring `^20`. Lower priority now the quota is paid, but it is the only route when GitHub is unavailable. ⚠ `npm ci` was run on the Mac S144 — `node_modules` is a fresh lockfile install |
+| P275 | **192 npm vulnerabilities (6 critical, 79 high).** ⚠ **Do NOT run `npm audit fix`** — it rewrites dependency versions |
+| P271 | `[object Object]` alert on SO-Management. An error path that fails to render its own message |
+| P17 | Two old-account IAM keys still valid and in git history. The old account is load-bearing for email |
+| P8 | **Prod git checkout lags the served build.** ⚠ Prod's checkout reads `9bce0238`; `/var/www/html` serves `2a576cb8`. **Not a failed deploy** |
+| P210 | Prod to Node v24. Dev has run v24 cleanly for several sessions |
+| P248 | **OS updates.** ⚠ **Both boxes now say "System restart required" on every login.** Prod 59 pending / 12 security; dev 56 / 25 |
+| P224 | Dev SSH IPv6 rule |
+| P227 | Dev backend `node_modules.old-node18/` — deliberate, untracked |
+| P240 | The app cannot tell anyone a send failed. Overlaps P257 |
+| P241 | Quarterly security audit, five named checks |
+| P245 | QuickBooks — Phase 2 core done and proven **on dev**. ⚠ **The schema is not on prod at all.** Four failure-handling items remain |
+| P246 | `User.creatSuperAdmin` hardcodes password `"12345678"`. `api/models/User.js:98`. Fold into P241 |
+| P247 | **App JWTs never expire.** `api/policies/generateJWT.js`, no `expiresIn` |
+| P249 | **Typing any URL logs the user out.** `auth.guard.ts` reads the NGRX store, memory only |
+| P251 | GitHub warns Node.js 20 actions are deprecated. Seen on every run |
+| P252 | **External ID duplicate guard, customers and products.** ⚠ `editCustomer` has no duplicate check at all |
+| P253 | **No SSH host aliases.** Two lines in `~/.ssh/config`. dev `16.55.10.205`, prod `15.157.38.101` |
+| P254 | **A sales order cannot be edited once created.** Business question |
+| P256 | **Dead build folders and spent scripts.** Dev home ~50 folders back to S63. ⚠ Keep the live rollback and one prior. Also: `.env.bak-s139` both boxes · prod `mava-export.sh`, `mava-export-2.sh`, `mava-export-260826/` · **prod `~/patch-nginx-abletrace-s143.py`, `~/patch-nginx-app-s144.py`, `~/extract-hagensborg-procedures.py`, `~/dist-prod-2a576cb8….zip`, `/tmp/*-tables.txt`, `~/hagensborg-procedures.txt`** · Mac `~/environment.prod.ts.bak-s144`, `/etc/hosts.bak-s144`, `~/Downloads/dev-tables.txt` |
+| P257 | **Automated bounce and complaint handling.** ⚠ Required for any SES re-application |
+| P258 | **Two test companies exist and cannot be deleted.** `testses260825a` dev, `testsesprod260825` prod. ⚠ Set Inactive through the app, not by SQL |
+| P259 | **One IAM key serves both boxes.** Separate eventually. Dev first, prove a send |
+| P260 | **Old-account IAM users that should not exist.** `Bobby1` · `abletracelab-ses-smtp-s35` |
+| P264 | **No automated tests anywhere.** ⚠ Never run the S141 attack test against prod |
+| P266 | **Eleven dead `Object.keys(req.body)` guards**, always true since P250 injects `company_id`. Harmless |
+| P268 | **The QuickBooks tile's visibility gate is not in `src/app/Layouts`** |
+| P269 | **Two stored procedures built by string interpolation.** `Materials.js:137`, `Hazards.js:224`. ⚠ `Materials.js:380` and `:790` use `myCode` and were never checked |
+| — | Section_3B.md rewrite. Verdict: replace whole. ~430 lines unread |
 
 ---
 
 ## ⚠ THE RDS SNAPSHOTS — SETTLED, DO NOT RELITIGATE
 
-**They can go, but not yet.** Master data for all four old clients is duplicated in schema `abletrace` on the new account's prod RDS, backed up with it. Measured S142:
+**They can go, but not yet.** Master data for all four old clients is in schema `abletrace` on the new account's prod RDS, backed up with it — **and S145 proved the procedure TEXT is there too**.
 
 | id | company | materials | recipes | suppliers | customers |
 |---|---|---|---|---|---|
@@ -213,69 +271,35 @@ Measured S142. ⚠ **Nothing on this list has been deleted.** ⚠ **The four old
 
 ⚠ **`164 Mava Foods` is an abandoned empty registration.** Mava's real record is **184 mavatrial2**.
 
-⚠ **Master data is database data.** `abletrace-fileuploads1` holds PDFs and JPEGs whose filenames name no company. **The bucket and the snapshots are not copies of each other.**
+⚠ **`abletrace-fileuploads1` holds PDFs and JPEGs whose filenames name no company.** The bucket and the snapshots are not copies of each other.
 
 ⚠ **A snapshot cannot be inspected without restoring it**, which restarts the extended-support meter. Read identifiers and dates — never restore to look.
 
 ---
 
-## QUEUE
-
-Minty ranks. Claude never renumbers.
-
-| # | item |
-|---|---|
-| P265 | **S145. Finish the cutover to `app.abletrace.ca`.** Full spec above. ⚠ **Blocked on a GitHub build** |
-| P273 | **GitHub artifact storage quota is full and blocks EVERY frontend build.** Old artifacts deleted S144; still blocked seven hours later. ⚠ **This blocks all frontend work, not just the cutover.** Options: wait longer · delete more · `retention-days` below 14 · a paid plan · build on the Mac |
-| P274 | **No local build path exists.** ⚠ **`nvm` is not installed and the Mac is on Node 24 against a project that declares `^20`.** Worth having regardless of P273 — it is the only route when GitHub is unavailable |
-| P275 | **192 npm vulnerabilities (6 critical, 79 high)** reported by `npm ci` S144. ⚠ **Do NOT run `npm audit fix`** — it rewrites dependency versions. Needs a deliberate session |
-| — | **Grow the holding page into the real marketing site.** No session needed — files in `/var/www/marketing`. ⚠ **Never `/var/www/html`** |
-| P267 | **QuickBooks production approval.** ⚠ **Declare `app.abletrace.ca`.** Privacy policy skeleton first |
-| P262 | **Client onboarding importer — complete rebuild.** Mava is the pilot. Re-derive the spec from Section 3A |
-| P272 | **Rotate dev's DATABASE_URL password.** ⚠ **Method 3B.8, read it first** |
-| P270 | **Material certificate icon shows red "Certificate Unavailable" when a certificate IS uploaded and in date.** Proven S143. **Display fault only** |
-| P271 | **`[object Object]` alert on SO-Management.** An error path that fails to render its own message |
-| P17 | Two old-account IAM keys still valid and in git history. The old account is load-bearing for email |
-| P8 | **Prod git checkout lags the served build.** ⚠ After S145's deploy, prod's checkout will still read `9bce0238` while `/var/www/html` serves `2a576cb8`. **Not a failed deploy** |
-| P210 | Prod to Node v24. Dev has run v24 cleanly for several sessions |
-| P224 | Dev SSH IPv6 rule |
-| P227 | Dev backend `node_modules.old-node18/` — deliberate, untracked |
-| P240 | The app cannot tell anyone a send failed. Overlaps P257 |
-| P241 | Quarterly security audit, five named checks |
-| P245 | QuickBooks — **Phase 2 core DONE and proven.** Four failure-handling items remain. **Phase 3 UNBLOCKED** |
-| P246 | `User.creatSuperAdmin` hardcodes password `"12345678"`. `api/models/User.js:98`. Fold into P241 |
-| P247 | **App JWTs never expire.** `api/policies/generateJWT.js`, no `expiresIn` |
-| P248 | **OS updates.** Both boxes report "system restart required". Prod 59 pending / 12 security |
-| P249 | **Typing any URL logs the user out.** `auth.guard.ts` reads the NGRX store, memory only |
-| P251 | GitHub warns Node.js 20 actions are deprecated. ⚠ **Seen again S144** — `actions/checkout@v4` forced onto Node 24 |
-| P252 | **External ID duplicate guard, customers and products.** ⚠ `editCustomer` has no duplicate check at all |
-| P253 | **No SSH host aliases.** Two lines in `~/.ssh/config`. dev `16.55.10.205`, prod `15.157.38.101` |
-| P254 | **A sales order cannot be edited once created.** Business question |
-| P256 | **Dev home is full of dead build folders**, ~50 back to S63. ⚠ Keep the live rollback and one prior. ⚠ Also: `.env.bak-s139` both boxes · prod `mava-export.sh`, `mava-export-2.sh`, `mava-export-260826/` · **prod `~/patch-nginx-abletrace-s143.py` and `~/patch-nginx-app-s144.py`, both spent** · Mac `~/environment.prod.ts.bak-s144`, `/etc/hosts.bak-s144` |
-| P257 | **Automated bounce and complaint handling.** ⚠ Required for any SES re-application |
-| P258 | **Two test companies exist and cannot be deleted.** `testses260825a` dev, `testsesprod260825` prod. ⚠ Set Inactive through the app, not by SQL |
-| P259 | **One IAM key serves both boxes.** Separate eventually. Dev first, prove a send |
-| P260 | **Old-account IAM users that should not exist.** `Bobby1` · `abletracelab-ses-smtp-s35` |
-| P264 | **No automated tests anywhere.** The S141 attack test is the only one. ⚠ Never run against prod |
-| P266 | **Eleven dead `Object.keys(req.body)` guards**, always true since P250 injects `company_id`. Harmless |
-| P268 | **The QuickBooks tile's visibility gate is not in `src/app/Layouts`** |
-| P269 | **Two stored procedures built by string interpolation.** `Materials.js:137`, `Hazards.js:224` |
-| — | **Materials may have the same quoting fault.** `Materials.js:380` and `:790` use `myCode`; not checked |
-| — | Section_3B.md rewrite. Verdict: replace whole. ~430 lines unread |
-
----
-
 ## TRAPS CARRIED FORWARD — all look like broken code
 
-⚠ **A GitHub run can COMPILE and still fail.** The upload step is separate. **Read which step went red before touching the code.** Cost most of S144. → **to TRAPS**
+⚠ **A GitHub run can COMPILE and still fail.** The upload step is separate. **Read which step went red before touching the code.** → **to TRAPS**
 
-⚠ **`dig` ignores `/etc/hosts` entirely.** To prove a hosts override is gone, use `dscacheutil -q host -a name <n>` — `dig` would answer the same either way and cannot fail. → **to TRAPS**
+⚠ **`dig` ignores `/etc/hosts` entirely.** To prove a hosts override is gone use `dscacheutil -q host -a name <n>` — `dig` answers the same either way and cannot fail. → **to TRAPS**
 
-⚠ **A blank page with the correct tab title means the JavaScript threw, not that the server failed.** Open the console.
+⚠ **Chrome serves the OLD site from cache after a DNS change.** `abletrace.ca` showed blank while `curl` from the box returned 200. **Prove the server with curl, then use a fresh incognito window** — a normal hard refresh was not enough.
+
+⚠ **A blank page with the correct tab title means the JavaScript threw**, not that the server failed.
+
+⚠ **The deploy script prints a rollback line to the build it just replaced.** That is not the pre-cutover backup. **Read the path off the box.**
+
+⚠ **Check `index.html` is at the top level of an unzipped artifact** before deploying — the script copies `$SRC/*`.
+
+⚠ **`curl -I ... 2>&1 | head -1` returns the PROGRESS METER.** Use `curl -s -I`.
+
+⚠ **Column names are not guessable.** `documenttype.name` not `title`; `company.company_name` not `name`. **`SHOW COLUMNS` first.**
+
+⚠ **`haccpplan` has no `company_id`.** Join through `hazards`.
 
 ⚠ **A local `dig` can return EMPTY while Route 53 already holds the new value.** Ask the authoritative server: `dig +short TXT <n> @ns-1320.awsdns-37.org`.
 
-⚠ **Route 53 truncates record names in the list.** `_acme-challenge`, `.www` and `.app` all display as `_acme-ch...`. **Read the Record details panel, never the row.**
+⚠ **Route 53 truncates record names in the list.** **Read the Record details panel, never the row.**
 
 ⚠ **AWS phrases a wrong-account resource as an authorization error.** **Read the account number before the measurement.**
 
@@ -289,19 +313,19 @@ Minty ranks. Claude never renumbers.
 
 ⚠ **A master role row created by SQL grants nothing.** Companies, roles and tasks on prod must be created through the UI.
 
-⚠ **`mysql abletracelab_live` — name the DB explicitly.** A bare `mysql` on prod lands in the dormant archive `abletrace`.
+⚠ **`mysql abletracelab_live` — name the DB explicitly.** A bare `mysql` on prod lands in the archive `abletrace`.
 
 ⚠ **`formulation_id` means PARENT in `fosubrecipe`, CHILD in `subrecipeformulation`.**
 
-⚠ **`unitmeasurement` is per-company.** A `uom` value is an id, and the same id means different things to different companies.
+⚠ **`unitmeasurement` is per-company.** A `uom` value is an id and means different things to different companies.
 
-⚠ **Product titles are not unique.** 171 products, 139 distinct titles. **Match on `internalCode`, never on name.**
+⚠ **Product titles are not unique.** 171 products, 139 distinct titles. **Match on `internalCode`.**
 
 ⚠ **`company_id` is a DOUBLE on `companycustomers` and `dispatchorders`, an INT on `packingslips` and `packingslipdos`.**
 
 ⚠ **`shipped_flag` is the ship gate, not `status_id`.**
 
-⚠ **Licence statuses:** 1 Invited · 2 Trial · 3 Active · 4 Expired · 6 Inactive. **Only Inactive blocks login. Expired keeps access.**
+⚠ **Licence statuses:** 1 Invited · 2 Trial · 3 Active · 4 Expired · 6 Inactive. **Only Inactive blocks login. Expired keeps access and shows a banner.**
 
 ⚠ **`SELECT ... INTO OUTFILE` does not work on RDS.** Use `mysql -B`.
 
@@ -309,26 +333,28 @@ Minty ranks. Claude never renumbers.
 
 ⚠ **`.env` is one file per box and is not in git.** A deploy, a promote, a pull and a restart all fail to carry it.
 
-⚠ **`pm2 restart` prints "Use --update-env"** — that is PM2's own env. `dotenv` reads the file at boot.
+⚠ **`pm2 restart` prints "Use --update-env"** — that is PM2's own env. `dotenv` reads the file at boot. **A restart IS needed after editing `.env`.**
+
+⚠ **Sails reads the SCHEMA per query.** A column added to the database needs no restart — only a browser reload.
 
 ⚠ **An RDS snapshot cannot be queried.** Restoring is the only read path and it starts an extended-support meter.
 
-⚠ **`sudo` changes HOME.** nginx backups land in `/root/`, not `/home/ubuntu/`.
+⚠ **`sudo` changes HOME.** nginx backups land in `/root/`.
 
 ⚠ **nginx `grep -r` silently skips symlinks.** Use `nginx -T`.
 
-⚠ **A server block loads exactly one certificate.** Two names needing different certificates need two blocks. Prod now has three.
+⚠ **A server block loads exactly one certificate.** Prod now has three 443 blocks.
 
 **QuickBooks Canada refuses any transaction with no tax code on a line**, and any line with no Amount. ⚠ **Always log `err.response.data`, truncated.**
 
 **`CustomTxnNumbers: true` returns a blank document number with no error at all.**
 
-**The QuickBooks access token expires in hours.** Load the QuickBooks page in Chrome first — that page refreshes and writes back. ⚠ **Retired the moment on-demand refresh is built.**
+**The QuickBooks access token expires in hours.** Load the QuickBooks page in Chrome first — that page refreshes and writes back.
 
 ⚠ **`mysql2` is not a dependency.** `require('mysql2/promise')` fails.
 
 ⚠ **No HttpInterceptor.** Every service sets `authorization: bearer <webToken>` per call, **lower case**.
 
-⚠ **`src/app/Services` has a CAPITAL S.** macOS is case-insensitive; Angular's AOT compiler is not. ⚠ **This is the trap a Mac-built bundle would hit.**
+⚠ **`src/app/Services` has a CAPITAL S.** macOS is case-insensitive; Angular's AOT compiler is not. **The trap a Mac-built bundle would hit.**
 
 **`formulations` has no `name` column — it is `title`.**
