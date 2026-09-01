@@ -216,6 +216,7 @@ Minty ranks. Claude never renumbers.
 | # | item |
 |---|---|
 | — | **S146. Schema drift, dev vs prod.** Full spec above |
+| P281 | **Stale `mintekfoodsafety.com` fallbacks in the backend config.** Measured S145: `config/env/production.js` lines **24, 151, 250** and `config/env/development.js` line **7** all read `process.env.APP_BASE_URL \|\| 'https://...mintekfoodsafety.com'`. Plus a stale comment at `QuickbooksController.js:97`. ⚠ **Nothing is hardcoded and nothing is broken** — prod's `.env` supplies `https://app.abletrace.ca` and the variable wins. ⚠ **But if that variable ever goes missing** — a rebuilt box, a bad copy — **prod silently reverts to the old domain and nobody would notice until an email link pointed at the wrong name.** Production's fallbacks should read `https://app.abletrace.ca`. ⚠ **`development.js` stays as it is — dev is not moving.** Natural companion to S146; both are dev-vs-prod hygiene |
 | P279 | **Invoicing inside AbleTrace.** Minty's design, S145: a **default price on the product master, editable per invoice line**; a **default tax treatment per product, overridable per line**, plus a manual option. ⚠ **Store the values USED on the invoice — never re-derive from the master later**, or changing a price rewrites last month's invoices (the S106 principle). ⚠ **Tax must be per line, not per invoice** — basic groceries are zero-rated, prepared foods are not, and one order can carry both. QuickBooks transfer becomes **optional and manual**: the client keys an invoice number and total. ⚠ **This takes P267 off the critical path** |
 | P278 | **Terms and privacy policy INSIDE the app, with versioned acceptance.** Both currently live only in Google Drive. Record **who accepted, when, and WHICH VERSION**. ⚠ On a change, ask again — an old acceptance does not carry forward. ⚠ Acceptance rows are never edited or deleted. ⚠ **`company.terms_condition` is a yes/no flag with no version and no timestamp — replace it, don't extend it** |
 | P277 | **Client data deletion routine.** Deletion on request is now a published commitment with no tooling. ⚠ Manual today: many related tables in FK order, **plus the `abletrace-fileuploads1` bucket whose filenames name no company**. Needs a documented procedure at minimum |
@@ -332,6 +333,8 @@ Minty ranks. Claude never renumbers.
 ⚠ **DKIM failure is silent.** SES accepts the message, the log says sent, deliverability quietly drops.
 
 ⚠ **`.env` is one file per box and is not in git.** A deploy, a promote, a pull and a restart all fail to carry it.
+
+⚠ **The backend falls back to `mintekfoodsafety.com` if `APP_BASE_URL` is missing.** `process.env.APP_BASE_URL || 'https://trace.mintekfoodsafety.com'` in three places in `production.js`. **A wrong default that looks like it works.** → P281
 
 ⚠ **`pm2 restart` prints "Use --update-env"** — that is PM2's own env. `dotenv` reads the file at boot. **A restart IS needed after editing `.env`.**
 
