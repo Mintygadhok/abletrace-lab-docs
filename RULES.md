@@ -1,6 +1,6 @@
 # RULES
 
-Last revised: S147.
+Last revised: S148.
 
 **Two principles govern everything below.** Minty's ruling, S125.
 
@@ -239,6 +239,19 @@ Nothing goes into any document without Minty's approval. Claude proposes in plai
 ### Queue
 
 New items at the **bottom** with the next free number. Claude never renumbers. Ranking is Minty's.
+
+**Length carries meaning.** A one-liner is an item whose homework has not been done. A paragraph is one whose homework has.
+
+**Paragraphs get priority.** Otherwise the homework never gets done, and the queue fills with items nobody can pick up without first spending a session finding out what they involve.
+
+⚠ **A paragraph must earn its extra lines** — only what a session would otherwise have to measure: file paths, line numbers, decisions already made, the trap that will bite. **Not the item restated at length.** If it could be re-measured in a minute, it stays out.
+
+⚠ **This makes the shape of the queue readable:** which items are ready to start, and which still need a discovery pass first.
+
+The queue lives in NOW so it is read every session.
+
+Minty's ruling, S147.
+
 
 ---
 
