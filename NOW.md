@@ -14,7 +14,19 @@ Every discovery S149 needs is written out below, in full, measured on 1 Septembe
 2. Say what — if anything — is missing, and ask Minty. He answers faster than a measurement.
 3. Start writing code.
 
-⚠ **The filled workbook already exists.** `AbleTrace-Client-Onboarding-test260901.xlsx`, on Minty's Mac. It is the file that gets uploaded. It is not built in S149.
+⚠ **The filled workbook already exists** and is not built in S149:
+
+```
+/Users/mintym1/Desktop/Old AWS Docs/AbleTrace-Client-Onboarding-test260901.xlsx
+```
+
+**17,464 bytes.** ⚠ Two superseded copies sit beside it, both prefixed `SUPERSEDED-s148-`. ⚠ **The filename alone does NOT identify the right file** — the live one contains the header `Level_1_Weight_Kg`, the old ones do not:
+
+```
+unzip -p <file> "xl/sharedStrings.xml" "xl/worksheets/*.xml" 2>/dev/null | grep -c "Level_1_Weight_Kg"
+```
+
+**1 or more is the live file. 0 is a superseded one.**
 
 ---
 
@@ -211,9 +223,9 @@ customershippingadresses  shipping_contact_person, shipping_contact_person_no (d
 ⚠ **Phone numbers are typed `double`.** A dash, a leading zero, brackets or an extension cannot be stored. → P285. **Strip to digits or write null; do not let the import fail on it.**
 ⚠ `CompanyCustomers.compareShipAdress` treats two addresses as duplicates if **ANY ONE** of contact person, number, address or email matches. An OR where an AND was meant.
 
-### The workbook — eleven tabs, filled, on Minty's Mac
+### The workbook — eleven tabs, filled
 
-`AbleTrace-Client-Onboarding-test260901.xlsx`
+`~/Desktop/Old AWS Docs/AbleTrace-Client-Onboarding-test260901.xlsx`
 
 | tab | one row per | notes |
 |---|---|---|
@@ -373,8 +385,6 @@ All three `abletrace.ca` certificates are `--manual` and will not auto-renew. �
 
 Minty ranks. Claude never renumbers. **Length is readiness** — a paragraph means the homework is done, a one-liner means it is not.
 
-⚠ **Three retirements proposed S148, awaiting Minty's ruling: P266, P227, P8.** Marked below. Not deleted without his word.
-
 | # | item |
 |---|---|
 | P262 | **S149. Upload the Excel data into company 479 on dev.** Deliverable, material, analysis, verify and proof are all in THE JOB above |
@@ -391,11 +401,9 @@ Minty ranks. Claude never renumbers. **Length is readiness** — a paragraph mea
 | P275 | 192 npm vulnerabilities (6 critical, 79 high). ⚠ **Do NOT run `npm audit fix`** |
 | P271 | `[object Object]` alert on SO-Management |
 | P17 | Two old-account IAM keys still valid and in git history |
-| P8 | ⚠ **RETIREMENT PROPOSED S148.** Prod git checkout lags the served build. Already stated in RULES' OPEN block; its stored commits are S144-stale |
 | P210 | Prod to Node v18 → v24. Dev has run v24 cleanly for several sessions. ⚠ Dev keeps `node_modules.old-node18/` as the fallback — deliberate, untracked |
 | P248 | OS updates. ⚠ Both boxes say "System restart required" on every login. Prod 59 pending / 12 security; dev 56 / 25 |
 | P224 | Dev SSH IPv6 rule |
-| P227 | ⚠ **RETIREMENT PROPOSED S148** — folded into P210 |
 | P240 | The app cannot tell anyone a send failed. Overlaps P257 |
 | P241 | Quarterly security audit, five named checks |
 | P245 | QuickBooks Phase 2 — four failure-handling items remain. Schema is on prod too, S146 |
@@ -412,7 +420,6 @@ Minty ranks. Claude never renumbers. **Length is readiness** — a paragraph mea
 | P259 | One IAM key serves both boxes. Dev first, prove a send |
 | P260 | Old-account IAM users that should not exist: `Bobby1` · `abletracelab-ses-smtp-s35` |
 | P264 | No automated tests anywhere. ⚠ Never run the S141 attack test against prod |
-| P266 | ⚠ **RETIREMENT PROPOSED S148.** Eleven dead `Object.keys(req.body)` guards, always true since P250. Recorded as harmless |
 | P268 | **QuickBooks tile visibility gate is not in `src/app/Layouts`.** ⚠ Confirmed S146: the tile does NOT appear for a company created without the role rows. **Half its homework is done** |
 | P269 | **Two stored procedures built by string interpolation.** `Materials.js:137`, `Hazards.js:224`. ⚠ `Materials.js:380` and `:790` use `myCode` and were never checked |
 | P282 | **External supplier code on `companyagents`.** ⚠ The table has **no code column of any kind** — products and customers have `External_ID`, suppliers do not. Needs: a column on **both boxes** · the Add Supplier form and the supplier list screen · a template column. ⚠ **Minty's ruling S147: not in P262. Names work as the join key.** Worth doing once POs are in regular use — a PO is raised per supplier and the client reconciles against their own purchasing system |
