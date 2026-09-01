@@ -1,6 +1,6 @@
 # RULES
 
-Last revised: S131.
+Last revised: S147.
 
 **Two principles govern everything below.** Minty's ruling, S125.
 
@@ -246,6 +246,18 @@ New items at the **bottom** with the next free number. Claude never renumbers. R
 
 Nothing is closed until it is **committed and pushed**.
 
+### Order of work inside a session
+
+Minty's ruling, S146.
+
+> **Load-bearing work goes first.** Design, judgement and change go in the fresh part of a session. Discovery — measurements, paths, dependencies — comes after, because it degrades gracefully and a wrong measurement shows itself.
+>
+> **The close is proposed before it is written.** Claude states the next job as a plain list, the discovery it needs, and which of that discovery has been done — then stops and waits for Minty. Missing discovery is done before the close, not after.
+
+⚠ **The third part must be allowed to say NO.** "Which of that discovery has been done" is a report that must be able to come back *none*. A confirmation that can only return yes is not a check — the same fault as a test that cannot fail.
+
+⚠ **This constrains Claude, not Minty.** Do not open a session with a long measuring pass before the real work. Push back if a session drifts into discovery while Claude is still sharp.
+
 ### The close produces the launchpad
 
 Minty's ruling, S125.
@@ -276,6 +288,14 @@ Five steps. Minty's wording, S130.
 5. **Tidy.** Delete the Downloads copy. Replace the panel copy.
 
 ### Also at the close
+
+- **Diff the schemas at every close.** Run `operations/dump-columns.sh` on **both boxes** and diff the two files. A difference is either applied to both boxes before the close, or written into NOW as deliberate. Never left unexplained.
+
+  ⚠ **This aligns STRUCTURE ONLY — tables, columns, types, defaults. It NEVER touches DATA.** Prod's rows are clients' records; dev's are test junk. Keeping the two sets of rows apart is the entire reason there are two boxes. **Nothing in this rule ever copies, compares or moves a row.**
+
+  ⚠ **The label argument names the output file only. It does not select a box.** Both scripts print `hostname -s` first — read it before trusting the file.
+
+- **Run `operations/dump-objects.sh` when a session has touched a procedure, or every few sessions.** It compares routine and trigger **body text**, so a routine that exists on both boxes with different logic inside is caught. A name-and-count comparison would pass it.
 
 - **Tidy here and only here** — temp files, patch scripts, stale downloads. Never at the start of a session.
 - **Commit messages: two or three sentences.** What changed and why, plus anything a future reader would get wrong without it. The detail belongs in the code comment and in NOW, not repeated in all three. Minty's ruling S99.
@@ -416,3 +436,26 @@ Minty's rulings, S108. This supersedes the S105 ruling that the ingredient round
 - **No dedicated tidy-up session.** A document is cleaned by whichever session next opens it. Minty's ruling, S117.
 - Anything worth keeping must **not** live in NOW. It is rewritten whole.
 - **Doc edits are replacements.** Pull first, replace the file whole, diff, commit, push.
+
+### `operations/`
+
+A folder in `abletrace-lab-docs`. Minty's ruling, S146.
+
+> **`operations/` holds only scripts a rule tells you to run.** One-off scripts are written, run, and deleted at the tidy. What a one-off did is recorded in its **commit message** — not in NOW, which is rewritten whole.
+
+**The entry test, and it is strict** — or the folder becomes the same trap the documents were:
+
+1. **A rule in this file names the script**, in the section that tells you when to run it. No rule, no entry.
+2. **It is operational, not application, code.** Minty's distinction, S146: application code runs the product, ships to clients, and breaks AbleTrace if it breaks. Operational code runs *us* — it measures and reports, never reaches a client, and announces its own failure.
+3. **It is re-run.** A script that runs once is a one-off, however useful it was.
+
+**Failing any one of the three keeps it out.** Nothing is added on the grounds that it might be handy later.
+
+**Contents today — two, both named in rule 6:**
+
+| | |
+|---|---|
+| `dump-columns.sh` | every column of every table and view. Required at **every** close, both boxes, then diff |
+| `dump-objects.sh` | routines and triggers with **body text**, and foreign keys with their rules. Run after touching a procedure, or every few sessions |
+
+⚠ **Both take a label and an optional schema. The label names the OUTPUT FILE ONLY — it does not select a box.** Both print `hostname -s` before anything else. Read it.
