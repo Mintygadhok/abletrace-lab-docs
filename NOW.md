@@ -193,10 +193,14 @@ The workbook is on the Mac at `~/Desktop/Old AWS Docs/AbleTrace-Client-Onboardin
 
 ---
 
-## TRAPS — proposed for TRAPS.md, Minty's approval needed
+## TRAPS — considered and rejected, S150
 
-**A one-character defect cannot be read out of pasted terminal output.** S150 reported two bugs that did not exist — `creatEach` for `createEach`, and `awaitMaterialsagents` for `await Materialsagents` — both from characters lost in transit between the terminal and the chat. `awk 'NR==n{print NR": ["$0"]"}` printed the lines inside brackets and disagreed with both. **If a fault comes down to one character, print the line inside brackets and read it again before believing it.**
+Three entries were proposed at the close and **rejected, Minty's decision after Claude's recommendation.**
 
-**A failed MySQL query looks like an empty result.** `select ... where` naming a column that does not exist returns `ERROR 1054` and no rows. S150 read that as "479 has no allergens", built two hypotheses on it, and was wrong. 479 had eleven all along. **Read the error line, not just the absence of rows.**
+They were: a one-character defect cannot be read out of pasted terminal output; a failed MySQL query looks like an empty result; a case-sensitive grep cannot prove absence.
 
-**A case-sensitive grep cannot prove absence.** `grep -r "materialsagents"` returned only reads, so S150 concluded nothing writes that table. The code writes `Materialsagents` with a capital M, at line 484. **Use `-i` before concluding a thing does not exist.**
+**Why they were rejected.** TRAPS.md's own entry rule says a new entry must fail silently and touch data or a client-facing number, and that something which merely cost time does not go in. All three merely cost time. Two of them are already on the S96 cut list, deliberately removed — *"an absent console log proves nothing"* and *"a check that passes for the wrong reason"*.
+
+**What they actually were.** All three are the same failure: Claude accepted a check that could not have failed. RULES §1 already says *"A check must be able to fail."* The rule exists and was broken three times in one session. That is a discipline problem, not a gap in the documentation.
+
+**Nothing was added to TRAPS.md. Do not re-propose these.**
