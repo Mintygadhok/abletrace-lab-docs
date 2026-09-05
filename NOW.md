@@ -1,167 +1,166 @@
 # NOW
 
-Written at the close of **S150**. The launchpad for **S151**.
+Written at the close of **S151**. The launchpad for **S152**.
 
 ---
 
-## ⚠ HOW S151 OPENS
+## ⚠ HOW S152 OPENS
 
 1. Run the open check.
-2. Reproduce the symptom: log in to dev as `test260901@mailinator.com`, open **Products**, click the **Details arrow** on Baked Chicken. Expect a blank form.
-3. Then THE JOB, first thing. It is one measurement, then a decision.
+2. Then THE JOB. It is a build, not an investigation. The design is settled — see THE MATERIAL.
 
-⚠ **The super admin token was retired at the S150 close.** `webToken` on user 1 is NULL, so any old token fails. Log in again to get a fresh one if S151 needs to post to the importer.
+⚠ **The super admin token is live in `~/.s151tok` on dev.** 115 bytes, three JWT parts (36/34/43). Not retired at this close, deliberately — S152 will need it to test the upload screen against the same route. Retire it at the S152 close.
 
-⚠ **RULES.md in the Claude project panel was stale for a third session running** — the panel held S131 while the repo held S148. The panel copy was replaced at the S150 close. **Still check the header line against the repo before trusting it.**
+⚠ **The schema diff was NOT run at this close.** `dump-columns.sh` is not on the dev box — the docs repo is not cloned there at all. Measured: `find /home/ubuntu -maxdepth 3 -name "dump-columns.sh"` returned nothing. **No model files were touched this session** — one line of service code, no migrations. S150 diffed both boxes identical at 778 columns. Low risk, but it is a skip and S152 should know.
+
+**RULES requires that script at every close and the box it runs on does not have it.** Either the repo gets cloned to dev, or the rule needs to say where it runs from. Minty's call.
 
 ---
 
 ## STATE
 
-**Deliberate, done — S150:**
+**Deliberate, done — S151:**
 
-- `api/services/importSheet.js` rewritten whole. 1,181 lines, committed `ed7f0cb`, pushed.
-- `api/models/CompanyAgents.js` line 124 fixed — `remarks` fallback changed from `null` to `''`. Committed `3cd80d3`, pushed. **On dev only. Not on prod.** → P289
-- The importer is **proven on dev**: one POST of the workbook loads company 479 end to end with **zero skips**.
-- Schemas diffed dev against prod at the close: **identical**, 778 columns each. The importer needs no schema change to reach prod.
-- `~/CompanyAgents.js.bak-s150` kept on dev — backup of the live model change, keep until the fix reaches prod.
+- `api/services/importSheet.js:1028` fixed — `allergen: JSON.stringify([])` → `allergen: []`. Committed `dfee5aa`, pushed. **Dev only. Not on prod.**
+- **P288 closed. Verified on screen**, not merely deployed. Baked Chicken opens complete after a full reload of 479 through the patched importer.
+- The importer re-proven end to end after the patch: `created: 4 suppliers, 11 materials, 2 products, 1 customer, 2 addresses`, `skipped: []`, `errors: []`.
+- `~/importSheet.js.bak-s151` on dev — backup taken before the patch. Keep until the fix reaches prod.
+- `~/s151-onboarding.xlsx` on dev, 17,464 bytes — the workbook, verified against the Mac copy's size.
 
-**Half-done:** nothing. The importer is finished and proven. The blank Product Details screen is a **new finding**, not unfinished work.
+**Half-done:** nothing.
 
-**Standing:** dev on `dev.mintekfoodsafety.com`, 200. Company 479 currently holds a full load from the workbook — 4 suppliers, 11 materials, 2 products, 1 customer, 2 addresses.
+**Standing:** dev on `dev.mintekfoodsafety.com`, 200. Company 479 holds a clean full load from the workbook, made *after* the fix.
 
-**Open check, S150 close:** frontend `c2a52d8e`, backend `3cd80d3`, trees clean apart from the deliberate `node_modules.old-node18/`, `abletrace-dev` online, 200, Node v24.19.0.
+**Open check, S151 close:** frontend `c2a52d8e`, backend `dfee5aa`, dev tree clean apart from the deliberate `node_modules.old-node18/`, `abletrace-dev` online, 200, Node v24.19.0.
 
 ---
 
-# THE JOB — S151: THE PRODUCT DETAILS SCREEN LOADS BLANK
+# THE JOB — S152: THE SUPER ADMIN UPLOAD SCREEN
 
-**Find out why clicking Details on a product opens an empty form, and whether it affects products created through the UI as well as imported ones.**
+**Build the screen that posts the onboarding workbook to the importer, so onboarding does not require a terminal.**
 
-⚠ **Frontend investigation. Not the importer.** The importer is done.
+⚠ **Frontend build. The route already works and is proven twice.**
 
 ---
 
 ## THE MATERIAL
 
-### The symptom, exactly
+### Minty's rulings, S151 — these settle the design
 
-Log in as the 479 client user → **Products** → click the **arrow under "Details"** on Baked Chicken.
+1. **Super admin onboards every client.** Not client-facing. One role, no permission work.
+2. **The company is created first, on the existing screen.** The importer never creates a company. It loads into one that already exists.
+3. **The importer's scope is four data sets:** suppliers (agents), materials, products, customers. That is what it does today.
+4. **Opening stock comes straight from the sheet.** No PO, no receipt, no lot. **P290 is closed by decision, not deferred.**
+5. **After the first load, all additions are manual and normal.** The importer is a one-time load per client.
 
-The URL becomes `dev.mintekfoodsafety.com/Edit-Formulation`. The page renders **"Product Details"** with every field empty: Internal Code, External ID, Name, Units of Measurement, Shipping Units per Batch, Product Type, Storage Temperature. Sub Recipes shows an empty Total Materials box.
+### Design before writing — RULES §1
 
-**No request reaches the server.** Measured: `pm2 flush abletrace-dev`, then the click, then `pm2 logs abletrace-dev --lines 40 --nostream` — **both out and error logs completely empty**.
+- **Who calls it:** super admin, user 1, from a screen in the admin area.
+- **What they send:** `POST /api/v1/Sheet/importSheet`, multipart, three parts — `files` (the .xlsx), `company_id`, `user_id`. Header `authorization: bearer <token>`, **lowercase bearer** or `isAuth` returns 403.
+- **What comes back:** `{ success, created: {suppliers, materials, products, customers, addresses}, skipped: [], errors: [] }`. The report is the screen's whole output — show `created` as counts and `skipped` as a list, because a partial load with skips is the normal case, not an error case.
 
-### The second symptom, probably the same cause
+### What already exists to copy
 
-On the **Products list**, the **Allergen column is blank for both products**. It should not be. Baked Chicken's recipe contains Yogurt, Yogurt carries Milk, and the roll-up is computed live from the recipe. The **Materials** list shows allergens correctly — Milk on Yogurt, Soy on BBQ Sauce Bulk — so the data is right and it is the product side that is not showing them.
+There is an **upload icon on the Products and Materials list screens** — the Sync Client / HACCP import flow. Model the new screen on it rather than inventing a pattern.
 
-### What is ruled out
+### The one thing noticed and not chased
 
-| ruled out | how |
-|---|---|
-| stale browser state / P249 | fresh logout, fresh login, straight to the list, one click. Same result. |
-| bad data from the importer | rows verified in the database, and the **list** screen renders both products correctly |
-| a backend error | pm2 logs empty — the controller never ran |
-| a schema difference | dev and prod schemas diffed identical at the close |
+**The route returns 200 to a POST with no file attached.** Measured at S151 while validating the token. Probably harmless — likely reports zero created — but a UI on that route makes it visible. **Check it inside this job**, not as a separate item.
 
-### The one thing not yet measured
+### Rebuilding 479
 
-**Does this happen to a product created through the UI?**
+Unchanged from S150 and used successfully at S151. The delete block and the curl are in THE PROOF below. The workbook is on dev at `~/s151-onboarding.xlsx` and on the Mac at `~/Desktop/Old AWS Docs/AbleTrace-Client-Onboarding-test260901.xlsx`. Ignore the two `SUPERSEDED-s148-` copies beside it.
 
-That single test splits the diagnosis in two:
-
-- **Blank for a UI-created product too** → pre-existing app fault, nothing to do with the importer. Queue it, size it, fix it on its own merits.
-- **Fine for a UI-created product, blank only for imported ones** → the importer omits something the detail screen needs, and the importer is not finished after all.
-
-Create a product by hand in 479 through the Add Product screen, then click its Details arrow.
-
-### The frontend, what is known
-
-- Screen route: `/Edit-Formulation`. List route: `/Formulation`.
-- Backend route exists and works — the list is served fine.
-- `Formulations.getFormulaById` is the method the detail screen would call, at `api/models/Formulations.js:396`.
-- The allergen roll-up is **computed, not stored** — confirmed at `Formulations.js` lines 260–267 and 503–510, which collect `item.allergen` off each material in the recipe and de-duplicate. `getAllergenFromSP` at line 114 walks child formulations through a stored procedure. The product's own `allergen` column plays no part.
-- Products in 479 correctly hold `allergen = "[]"` — the importer writes nothing there, which is right.
-
-### Company 479 as it stands
-
-| | |
-|---|---|
-| company | **479**, `test260901@mailinator.com`, its admin is user **1335** |
-| super admin | user **1**, `info.abletrace@gmail.com`, exempt from the P250 rewrite |
-| schema | **`abletracelab_live`** ⚠ prod uses the same name |
-| suppliers | 4 — Twin Poultry, Saputo, Snowcap, Premier Packaging |
-| materials | 11, MAT-1 to MAT-11, all with 10000 opening stock |
-| allergens | Milk on Yogurt, Soy on BBQ Sauce Bulk |
-| products | 2 — Baked Chicken `FO-0002`, Seasoning Mix `FO-0001` |
-| recipe | Baked Chicken ← Seasoning Mix, `ship_qty` 5, `qty` 1 Kg |
-| packaging | Baked Chicken: BC Tray L1 0.4 Kg, Case L2 ×10 = 4.0 Kg, `whd_flag` on L2. Seasoning Mix: Internal Container L1 0.2 Kg, `whd_flag` on L1 |
-| customer | A Loving Spoonful, 2 addresses |
-
-To rebuild 479 from scratch, the delete-then-reload commands are in THE PROOF below.
+⚠ **The workbook's opening stock figures are all 10000, identical on all eleven materials.** A bug writing the same value to every row would pass unnoticed. Vary them whenever the workbook is next opened. Not a blocker — Minty's ruling folds this into ruling 4 above.
 
 ---
 
 ## THE ANALYSIS
 
-**The importer is done.** It loads an entire company from one POST with zero skips. Suppliers, materials with their supplier links and allergens and opening stock, products with packaging cascades and derived recipe quantities, customers with their addresses. Verified in the database and on the Materials screen. Minty's no-update rule verified on a real re-upload.
+### P288, start to finish
 
-**Four passes, not seven.** S149 planned seven. Three collapsed because the app's own model methods already do the work:
+The importer wrote `allergen` as the **string** `"[]"` instead of an empty array. `edit-formulation.component.ts:265` calls `.filter` on that value with no parse and no guard. A string has no `.filter`, so it threw, and Angular abandoned the form build — every field below that line stayed empty.
 
-- `Materials.createMaterials` writes the supplier links itself (`Materialsagents.createEach`, line 484), so Material-Suppliers folds in.
-- Allergens are a field on the material row, so Material-Allergens folds in.
-- `CompanyCustomers.createCustomer` writes the addresses itself, so Customer-Addresses folds in.
+The data was never missing. `getFormulaById` returned 200 with 9.7 kB containing the whole product.
 
-**Five design rulings, Minty, S150:**
+**Why the importer did it, and why it was not carelessness.** Trap 5 in the importer's own header: `allergen`, `agents` and `manufacturers` are `JSON.parse`d off `req.body` by the model methods, so those must be **strings**. That is true for **materials** — `importSheet.js:639` keeps its `JSON.stringify` and is correct. It is **not** true for products: `Formulations.js:830` files `req.body.allergen` straight into a `type: "json"` column with no parse, and the importer passes `FORMULAOBJ` as the **fourth argument** to `methodForCreateFormula`, bypassing `req.body` entirely.
 
-1. **Existing rows are never updated on a re-upload.** Skip and report, always, even if the sheet now says something different. Correcting a loaded row is done on the screen.
-2. **A record with a bad cell is not created at all**, and everything else in the file still loads. For a product that includes its packaging and its recipe, because the app creates all three in one call and a half-loaded product could never be repaired.
-3. **Material opening stock is written by the importer as a separate step**, not by changing `createMaterials`. The screen's guard stays shut so nobody can type stock into a material by hand. Stated cost, accepted: an opening balance has no lot and no receipt behind it.
-4. **Allergens belong to the material, never to the product.** The product's allergens are computed from its recipe every time, so changing an ingredient's allergen changes every product containing it, automatically. The importer writes an empty allergen list on products deliberately.
-5. **Opening stock via a purchase order is the right long-term answer** — create a PO, receive against it, book a dummy lot code. Deferred, and it **replaces** the simple stock write rather than sitting beside it. → P290
+Two conventions in one codebase. The file's own header warns about exactly this and it caught us anyway.
 
-**Five traps in `importSheet.js`, documented in the file's own header.** Do not remove the guards without reading why:
+**Blast radius measured:** `grep -rn "allergen: JSON.stringify" api/` returns two sites, both in `importSheet.js`. 639 correct, 1028 wrong. Nothing else in the API writes that column this way.
 
-1. Header is on row 2 — `range: 1`. Row 1 is guidance prose.
-2. `sheet_to_json` drops empty cells entirely — `defval: ''`, not optional.
-3. Internal code generators count existing rows and add one, so every record must be created and awaited singly. A `createEach` gives every row the same code, silently.
-4. The model methods answer the browser themselves on failure. A stub `res` captures the message into the report instead; without it the first bad row closes the response and everything after writes into a request already answered.
-5. Two conventions in one codebase: `allergen`, `agents`, `manufacturers` are `JSON.parse`d so must be **strings**; `Refer_SubRecipe` and `Refer_packaging` are used as live **arrays**.
+### Three corrections to NOW as written at S150
 
-**The workbook is correct as it stands.** S148 built it right. The Lists tab holds the ten Health Canada priority allergens; the Material-Allergens tab attaches them to materials; its own guidance already says allergens are never recorded against a product. **No workbook change was needed or made.**
+1. **"No request reaches the server."** False. `getFormulaById` returns 200 with 9.7 kB. The S150 check — `pm2 flush` then empty logs — **could not have failed**, because Sails does not log ordinary successful requests at dev's level. RULES §1 broken again.
+2. **"The product's own allergen column plays no part."** Substantially right, and Claude wrongly doubted it mid-session on the strength of five rows. `Formulations.js:604` calls `getAllergenFromSP(allIds)` and merges the result with the stored value at 605-607 — the roll-up is **computed live on read, server-side**. The stored column is a supplement the browser fills in on Add Product. Design ruling 4 stands.
+3. **"The Allergen column is blank for both products, it should not be."** False — **the premise was wrong.** Baked Chicken's recipe does not contain Yogurt. Measured: the four materials across both recipes are Ginger Powder, Salt, Raw Chicken, Salt, all carrying `[]`. Yogurt exists in 479 with `["Milk"]` but nothing consumes it. **An empty Allergen List is the correct answer.** There was never a second symptom.
+
+### The finding of the session — 137 fields, not two
+
+Discovered by accident: Add Product returned **500** with External ID left blank, and saved instantly with `123` typed in. The stack named `myCode` — Waterline refuses an explicit `null` on a `type: 'string'` attribute with no `defaultsTo`.
+
+**That is P289's exact mechanism on a different screen.** P289 was recorded at S150 as a one-word fix on one line. It is not an incident, it is a class.
+
+Measured across `api/models/`:
+
+```
+for f in *.js; do awk '/type: *.string./ { if ($0 !~ /defaultsTo/ && $0 !~ /allowNull/) print }' "$f"; done | wc -l
+→ 137
+```
+
+**137 string attributes with neither `defaultsTo` nor `allowNull`.** Every one will reject a blank optional box. Among them: `Formulations.myCode`, `Formulations.remarks`, `CompanyAgents.email`, `CompanyCustomers.remarks`, `CustomerShippingAdresses.email_address`.
+
+**This is the upper bound, not the confirmed count.** A field only fails when a screen actually sends a blank into it. But establishing which screens do that costs more than fixing the class.
+
+**Why it matters:** the app marks these fields optional — no asterisk — then refuses to save without them. The client's first independent action after onboarding hits a 500 with no explanation. It cannot be trained around.
+
+**Why it does not block onboarding:** the importer has `stripNulls` and handles blanks correctly. This bites hand-entry only, the day after.
+
+**Minty's ruling, S151:** fix it **after** onboarding is finished, as its own session. Until then, type a dash in the box, and warn any client onboarded before the fix.
 
 ---
 
 ## THE VERIFY
 
-S151 is done when:
+S152 is done when:
 
-1. A product created through the **UI** has been opened via the Details arrow, and the result recorded — blank or not blank.
-2. The cause of the blank screen is named, with the measurement that proves it.
-3. Either the fix is on screen and verified, or the job is sized and queued with what was learnt.
+1. A workbook has been uploaded through the new screen — no terminal — and the created counts appear on screen.
+2. The resulting company has been opened in the app and a product's Details screen verified.
+3. Behaviour with no file attached is recorded — the route's 200 explained or fixed.
 
 ---
 
 ## THE PROOF
 
-Every fact above, with the command that measured it and what it returned, run in S150.
+Every fact above, with the command that measured it and what it returned. Run in S151.
 
 | fact | command | returned |
 |---|---|---|
-| importer loads with zero skips | POST to `/api/v1/Sheet/importSheet`, company 479, user 1 | `created: 4 suppliers, 11 materials, 2 products, 1 customer, 2 addresses`, `skipped: []` |
-| database agrees | `select count(*)` per table where `company_id=479` | 4, 11, 2, 1, 2 |
-| recipe quantity derived correctly | `select ship_qty, qty from subrecipeformulation ...` | Baked Chicken ← Seasoning Mix, ship_qty 5, qty 1 — that is 5 × 0.2 |
-| packaging cascade cumulative | `select pack_level, quantity, wgt_kgs_per_unit, whd_flag from fopackaging ...` | L1 BC Tray 0.4; L2 Case ×10 = 4.0, whd_flag 1. Seasoning Mix L1 0.2, whd_flag 1 |
-| allergens on materials, not products | `select title, allergen from materials / formulations where company_id=479` | Yogurt `["Milk"]`, BBQ Sauce Bulk `["Soy"]`; both products `"[]"` |
-| material stock written | `select title, inventory, uom from materials where company_id=479` | 10000 on all 11; uom 2990 Kg / 2997 Ea |
-| sheet says 10000 too | node + xlsx read of the Materials tab | 10000 for all eleven — **the test is weak because every value is identical. Vary them next time.** |
-| 479 has its allergens | `select count(*) from companyallergens where company_id=479` | 11, same as every other company. Seeded at company creation, `User.js:238` |
-| no request on Details click | `pm2 flush`, click, `pm2 logs --lines 40 --nostream` | both logs completely empty |
-| not stale state | fresh logout, fresh login, straight to list, one click | same blank form |
-| schemas identical | `dump-columns.sh` on both boxes, then `diff` | `SCHEMAS IDENTICAL`, 778 columns each |
-| both commits pushed | `git push` on dev backend | `cf7722d..3cd80d3 main -> main` |
-| token retired | `update user set webToken = NULL where id = 1` | `webToken` NULL on user 1 |
+| request does reach the server | DevTools Network, Fetch/XHR, on the Details click | `getFormulaById` 200, xhr, 9.7 kB, initiator `edit-formulation` |
+| the value arrives as a string | DevTools Preview on that response | `allergen: "[]"` in red quotes; `allChildAllergen: []` as a real array beside it |
+| the line that throws | DevTools Console | `TypeError: this.data.allergen.filter is not a function` at `edit-formulation.component.ts:265:49`, thrice |
+| the code has no parse and no guard | `sed -n '248,268p'` on the component | 264 `this.data = result[0];` 265 `.filter(...)` directly |
+| app-created products hold a real roll-up | `select id, company_id, title, allergen from formulations where allergen <> '' and company_id <> 479 limit 5` | 3712 `["Milk","Soy"]`, 3710 `["Milk"]` — **query excluded empty values, so it could not show what the app writes for no allergens** |
+| the roll-up is computed live on read | `sed -n '590,615p'` on `Formulations.js` | 604 `getAllergenFromSP(allIds)`, 605-607 merge with the stored value |
+| the write site | `grep -n "allergen" api/services/importSheet.js` | 639 materials (correct), 1028 products (the defect) |
+| blast radius | `grep -rn "allergen: JSON.stringify" api/` | two hits, both in `importSheet.js` |
+| `stripNulls` will not drop an empty array | `grep -A 12 "function stripNulls"` | `if (obj[k] === null \|\| obj[k] === undefined) delete obj[k];` — strict |
+| patch applied, anchored | python anchor script, refuses unless exactly 1 match | `PATCHED` |
+| the right line moved | `grep -n "allergen: " api/services/importSheet.js` | 639 unchanged with `JSON.stringify`; 1028 now `allergen: [],` |
+| restart clean | `pm2 restart abletrace-dev`, `sleep 8`, curl | restart 65, 200 |
+| token valid | `awk` part-length split; POST with no file | `parts: 3`, 36/34/43; **200 — not 403, so isAuth passed** |
+| workbook intact on dev | `ls -l /home/ubuntu/s151-onboarding.xlsx` | 17464 bytes |
+| 479 cleared | delete block, then three counts | 0, 0, 0 |
+| reload clean through the patch | POST the workbook | `created: 4, 11, 2, 1, 2`, `skipped: []`, `errors: []` |
+| the column now holds a real array | `select title, allergen from formulations where company_id=479` | `[]` on both, **no quote marks** |
+| **the screen works** | log in as 479 client, Products, Details arrow, Baked Chicken | **opens complete** — FO-0002, FP-202, Ea, 50 units, 200 Kg, -18 °C, Sub Recipe1, Raw Chicken 22Kg, Salt 0.125Kg, Seasoning Mix 5# (1 Ea), both packaging levels, shelf life 180 |
+| UI-created products were never affected | Add Product by hand, then Details arrow | FO-0003 opened complete — **answers NOW's S151 opening question** |
+| no allergen is the correct answer | `select m.title, m.allergen` joined through both recipes, company 479 | Ginger Powder, Salt, Raw Chicken, Salt — all `[]`. **Yogurt is in no recipe** |
+| blank External ID fails | Add Product, External ID empty, Save | `500`, `Invalid new record ... myCode ... null is not valid vs type 'string'` |
+| the same save succeeds with a value | External ID `123`, Save | `Formulation created Successfully` |
+| the null fault is systemic | awk over `api/models/*.js` for `type: 'string'` without `defaultsTo` or `allowNull` | **137** |
+| commit pushed | `git push` on dev backend | `3cd80d3..dfee5aa main -> main` |
+| schema diff not run | `find /home/ubuntu -maxdepth 3 -name "dump-columns.sh"` | nothing — docs repo not on dev |
 
 ### Rebuilding 479
 
@@ -171,36 +170,88 @@ Clear it:
 mysql -e "delete p from fopackaging p join formulations f on p.formulation_id=f.id where f.company_id=479; delete sm from subrecipematerials sm join fosubrecipe fs on sm.sub_recipe_id=fs.id join formulations f on fs.formulation_id=f.id where f.company_id=479; delete sf from subrecipeformulation sf join fosubrecipe fs on sf.sub_recipe_id=fs.id join formulations f on fs.formulation_id=f.id where f.company_id=479; delete fs from fosubrecipe fs join formulations f on fs.formulation_id=f.id where f.company_id=479; delete from formulations where company_id=479; delete ma from materialsagents ma join materials m on ma.material_id=m.id where m.company_id=479; delete from materials where company_id=479; delete a from customershippingadresses a join companycustomers c on a.customer_id=c.id where c.company_id=479; delete from companycustomers where company_id=479; delete from companyagents where company_id=479;" abletracelab_live
 ```
 
-Reload it — needs the workbook back on dev and a fresh token in `~/.s150tok`:
+Reload it:
 
 ```
-curl -s -X POST https://dev.mintekfoodsafety.com/api/v1/Sheet/importSheet -H "authorization: bearer $(cat ~/.s150tok)" -F "files=@/home/ubuntu/s150-onboarding.xlsx" -F "company_id=479" -F "user_id=1" | python3 -m json.tool
+curl -s -X POST https://dev.mintekfoodsafety.com/api/v1/Sheet/importSheet -H "authorization: bearer $(cat ~/.s151tok)" -F "files=@/home/ubuntu/s151-onboarding.xlsx" -F "company_id=479" -F "user_id=1" | python3 -m json.tool
 ```
 
-The workbook is on the Mac at `~/Desktop/Old AWS Docs/AbleTrace-Client-Onboarding-test260901.xlsx`, 17,464 bytes. Ignore the two `SUPERSEDED-s148-` copies beside it.
+If the token has been retired, mint a fresh one: log in to dev as `info.abletrace@gmail.com` in the browser, then on dev —
+
+```
+mysql -N -B -e "select webToken from user where id = 1;" abletracelab_live | tr -d '\n' > ~/.s152tok && wc -c ~/.s152tok
+```
+
+Reads the row straight into the file. **The token never touches the clipboard.** Expect 115 bytes.
+
+### Company 479 as it stands
+
+| | |
+|---|---|
+| company | **479**, `test260901@mailinator.com`, admin is user **1335** |
+| super admin | user **1**, `info.abletrace@gmail.com`, exempt from the P250 rewrite |
+| schema | **`abletracelab_live`** ⚠ prod uses the same name |
+| suppliers | 4 — Twin Poultry, Saputo, Snowcap, Premier Packaging |
+| materials | 11, MAT-1 to MAT-11, all with 10000 opening stock |
+| products | 2 — Baked Chicken `FO-0002`, Seasoning Mix `FO-0001`, both `allergen = []` |
+| recipes | Baked Chicken ← Raw Chicken, Salt, Seasoning Mix. Seasoning Mix ← Ginger Powder, Salt. **No Yogurt in either** |
+| customer | A Loving Spoonful, 2 addresses |
 
 ---
 
-## THE QUEUE — new at the close of S150
+## THE QUEUE
 
-**P288 — Product Details screen loads blank.** Clicking the Details arrow on a product opens an empty edit form and sends no request to the server. The product Allergen column on the list is also blank when it should show the roll-up from the recipe. Frontend. This is S151's job.
+**P291 — Super admin upload screen for the importer.** *S152's job.* Re-scoped by Minty's rulings at S151: super admin only, not client-facing; the company is created first on the existing screen; the importer loads four data sets into it. Model on the existing Sync Client / HACCP upload flow. Route is proven twice.
 
-**P289 — Deploy the supplier Remarks fix to prod.** `CompanyAgents.js:124` wrote an explicit `null` into `remarks`, which Waterline refuses on a string column with no `defaultsTo`, so the whole record was rejected. **This means adding a supplier with the Remarks box blank fails on the live Add Supplier screen today.** Fixed and committed on dev, `3cd80d3`. One-word change, no schema change needed. Backup at `~/CompanyAgents.js.bak-s150` on dev.
+**P293 — Optional string fields reject a blank box. 137 sites.** *S153.* Waterline refuses an explicit `null` on `type: 'string'` with no `defaultsTo`. Fields marked optional on screen cannot be saved empty; the client gets a 500 with no explanation and no workaround beyond typing a dash. **Absorbs P289 and P292**, which are the two proven instances:
 
-**P290 — Opening stock via purchase order and receipt.** Material opening stock is currently written straight onto the material row by the importer, with no lot and no receipt behind it. Minty's design: create a PO, receive against it, book a dummy lot code, so opening balances are traceable like everything else. Needs the receiving path measured and may need extra columns on the workbook's Materials tab — a supplier, a date, a lot code. **Replaces** the simple stock write in `importSheet.js`, which is marked in the file as scaffolding.
+- **P289** — `CompanyAgents.js:124`, `remarks`. **Fix already written, committed `3cd80d3`, on dev only. Still needs prod.** Backup at `~/CompanyAgents.js.bak-s150`. ⚠ Do not lose this in the merge — it is the one piece of P293 that already exists.
+- **P292** — `Formulations.js:825` and `949`, `myCode`. Backend passes `req.body.myCode` straight through, so the `null` originates in the browser. Proven at S151: blank → 500, `123` → saves.
 
-**P291 — Client-facing upload screen for the importer.** The route is driven by curl today. Nobody can onboard a client without a terminal. There is already an upload icon on the Products and Materials list screens. Small and safe once P288 is understood.
+Two approaches, decide before writing: **one change at the door** (strip nulls on incoming requests before they reach any model — the pattern already exists as `stripNulls` in `importSheet.js`), or **137 scripted model edits** adding `allowNull: true`. Claude leans to the first — one change instead of a hundred, and new fields are covered automatically. It touches every write in the app, so it needs care.
+
+**P290 — CLOSED by Minty's ruling, S151.** Opening stock comes straight from the workbook with no PO, receipt or lot. Not deferred — decided. The current simple stock write in `importSheet.js` is the answer, not scaffolding. **Remove the scaffolding comment from the file when convenient.**
+
+**P287 — Address duplicate-check OR-instead-of-AND fault** on the hand-entry screen.
+
+**P285 — Phone numbers stored as `double`** on the customer table.
+
+**P286 — Retire `mintekfoodsafety.com`** (three named dependencies). ⚠ Dev still runs on `dev.mintekfoodsafety.com`.
+
+**P269 — Stored-procedure string interpolation vulnerabilities** (`Materials.js:137`, `Hazards.js:224`).
+
+**P283 — Hardcoded `localhost:1338`** in `admin-formulation.component.ts:70`.
+
+**P282 — External supplier code** on `companyagents`.
+
+**P249 — Typing any URL logs the user out.** AuthGuard reads the NGRX store, memory only.
+
+**P210 — Prod Node upgrade.** Prod on Node 18, dev on Node 24.
 
 ---
 
-## TRAPS — considered and rejected, S150
+## TRAPS — one candidate, Claude's recommendation
 
-Three entries were proposed at the close and **rejected, Minty's decision after Claude's recommendation.**
+**Proposed for TRAPS.md: two conventions for the same field name in one codebase.**
 
-They were: a one-character defect cannot be read out of pasted terminal output; a failed MySQL query looks like an empty result; a case-sensitive grep cannot prove absence.
+`allergen` must be a JSON string when written through `Materials.createMaterials` (which parses it) and a real array when written to `Formulations` (which does not). Both columns are `type: "json"`. **Waterline stores either without complaint**, so the wrong one is accepted silently and surfaces later as a frontend crash on an unrelated screen.
 
-**Why they were rejected.** TRAPS.md's own entry rule says a new entry must fail silently and touch data or a client-facing number, and that something which merely cost time does not go in. All three merely cost time. Two of them are already on the S96 cut list, deliberately removed — *"an absent console log proves nothing"* and *"a check that passes for the wrong reason"*.
+It meets the entry rule: it fails **silently**, and it reached a client-facing screen. It is not merely something that cost time.
 
-**What they actually were.** All three are the same failure: Claude accepted a check that could not have failed. RULES §1 already says *"A check must be able to fail."* The rule exists and was broken three times in one session. That is a discipline problem, not a gap in the documentation.
+**Claude recommends adding it. Minty decides.**
 
-**Nothing was added to TRAPS.md. Do not re-propose these.**
+Note the importer's own header already documents this as trap 5 and it still caught us — which is an argument for the entry, not against it: the warning existed in the file that was being edited and was not enough.
+
+---
+
+## WHAT S151 GOT WRONG
+
+Recorded because RULES §1 keeps being the rule that breaks.
+
+1. **Claude predicted the screen never called the server.** The Network tab disproved it in one click.
+2. **Claude doubted design ruling 4** on the strength of a query that had excluded the rows which would have answered it.
+3. **Claude predicted the live roll-up would supply Milk** to the Details screen. It did not — because there was no Milk to supply.
+4. **Claude offered to close with the fix unproven** on a one-line change ten minutes from proof. Minty pushed back. That was hedging, not caution — RULES §6 exists to stop Claude stretching past its grip on a long job, not to hand Minty a decision Claude should have made.
+5. **Claude issued a command with a placeholder in it** (`<your-pem>`), which failed on the Mac. Ask for the value first.
+
+All five were caught the same way: by measuring instead of arguing.
